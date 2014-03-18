@@ -1512,7 +1512,7 @@ Optional Packages:
   --with-minixml          Use Mini-XML instead of XERCES-C
   --with-xml-include=PATH Specify path to Mini-XML/XERCES-C include files
                           (without a trailing '/xercesc')
-  --with-xml-lib=PATH     Specify path to XERCES-C library files
+  --with-xml-lib=PATH     Specify path to Mini-XML/XERCES-C library files
 
 Some influential environment variables:
   CC          C compiler command
@@ -18197,13 +18197,9 @@ if test -z "$found_xmldir"; then
 	as_fn_error $? "Mini-XML/Xerces-C includes NOT found - please use --with-xml-include" "$LINENO" 5
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libxerces-c" >&5
-$as_echo_n "checking for libxerces-c... " >&6; }
 saved_LIBS="$LIBS"
 saved_LDFLAGS="$LDFLAGS"
-
 tryxmllibdir="/usr/local/lib /usr/lib"
-
 
 # Check whether --with-xml-lib was given.
 if test "${with_xml_lib+set}" = set; then :
@@ -18215,21 +18211,59 @@ if test "${with_xml_lib+set}" = set; then :
 
 fi
 
-
 if test "x$prefix" != "xNONE" ; then
 	tryxmllibdir="$tryxmllibdir $prefix"
 fi
-LIBS="-lxerces-c $saved_LIBS"
-for xmllibdir in "" $tryxmllibdir ; do
-	LDFLAGS="$saved_LDFLAGS -L$xmllibdir"
-	cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+
+if test "x$useminixml" == "xtrue" ; then
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libminixml" >&5
+$as_echo_n "checking for libminixml... " >&6; }
+	LIBS="-lmxml $saved_LIBS"
+	for xmllibdir in "" $tryxmllibdir ; do
+		LDFLAGS="$saved_LDFLAGS -L$xmllibdir"
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
-		#include "util/XercesDefs.hpp"
-		#include "util/PlatformUtils.hpp"
-		#if (_XERCES_VERSION >= 20200)
-		   XERCES_CPP_NAMESPACE_USE
-		#endif
+			#include <mxml.h>
+
+int
+main ()
+{
+mxmlDelete(NULL)
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmllibdir" >&5
+$as_echo "found in $xmllibdir" >&6; }
+	found_xmllib=1 break;
+
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+	done
+
+else
+
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libxerces-c" >&5
+$as_echo_n "checking for libxerces-c... " >&6; }
+
+
+
+		LIBS="-lxerces-c $saved_LIBS"
+	for xmllibdir in "" $tryxmllibdir ; do
+		LDFLAGS="$saved_LDFLAGS -L$xmllibdir"
+		cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+			#include "util/XercesDefs.hpp"
+			#include "util/PlatformUtils.hpp"
+			#if (_XERCES_VERSION >= 20200)
+			   XERCES_CPP_NAMESPACE_USE
+			#endif
 
 int
 main ()
@@ -18242,16 +18276,17 @@ XMLPlatformUtils::Initialize()
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmllibdir" >&5
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmllibdir" >&5
 $as_echo "found in $xmllibdir" >&6; }
-found_xmllib=1 break;
+	found_xmllib=1 break;
 
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-done
+	done
+fi
 if test -z "$found_xmllib"; then
-	as_fn_error $? "Xerces-C libs NOT found - please use --with-xml-lib" "$LINENO" 5
+	as_fn_error $? "Mini-XML/Xerces-C libs NOT found - please use --with-xml-lib" "$LINENO" 5
 fi
 
 
