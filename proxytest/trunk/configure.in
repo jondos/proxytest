@@ -49,11 +49,8 @@ case "$host" in
 *-*-solaris*)
 		DEFAULTLIBS="$LIBS -lnsl -lsocket -lposix4"
 		;;
-*-*-*-android*)
-	DEFAULTLIBS="$LIBS -pthread"
-	;;
 *-*-linux*)
-	DEFAULTLIBS="$LIBS -lpthread"
+		DEFAULTLIBS="$LIBS -lpthread"
 	;;
 *-*-irix*)
 		CFLAGS="$CFLAGS "
@@ -71,6 +68,10 @@ case "$host" in
 	DEFAULTLIBS="$LIBS -L/usr/pkg/lib -liconv -lpthread"
 	;;
 *-*-drops*)
+	CFLAGS="$CFLAGS -DOS_TUDOS"
+	CXXFLAGS="$CXXFLAGS -DOS_TUDOS";
+	;;
+*-*-android*)
 	CFLAGS="$CFLAGS -DOS_TUDOS"
 	CXXFLAGS="$CXXFLAGS -DOS_TUDOS";
 	;;
@@ -485,16 +486,32 @@ LIBS="-lcrypto -lssl $saved_LIBS"
 		], [EC_KEY_free(0);])],[AC_DEFINE([ECC],[],[Elliptic curve cryptography supported])],
 		[AC_MSG_WARN([Elliptic curve cryptography disabled])],[AC_MSG_RESULT([skip ECC test because of cross compiling])])
 
-AC_MSG_NOTICE([Xerces-C tests])
 
-dnl Check for Xerces-C
+		
+useminixml="false"
+USE_MINIXML=""
+AC_ARG_WITH(minixml,
+	AS_HELP_STRING([--with-minixxml],
+			[Use Mini-XML instead of XERCES-C]),
+	[
+		if test "x$withval" != "xno" ; then
+			useminixml="true"
+			USE_MINIXML="-DMXML_DOM"
+		fi
+	]
+)
+
+		
+AC_MSG_NOTICE([Mini-XML/Xerces-C tests])
+
+dnl Check for Mini-XML/Xerces-C
 AC_LANG_PUSH(C++)
 dnl Check for XML includes.
 tryxmlincludedir="/usr/local/include /usr/include"
 
 AC_ARG_WITH(xml-include,
 	AS_HELP_STRING([--with-xml-include=PATH],
-			[Specify path to XERCES-C include files (without a trailing '/xercesc')]),
+			[Specify path to Mini-XML/XERCES-C include files (without a trailing '/xercesc')]),
 	[
 		if test "x$withval" != "xno" ; then
 			tryxmlincludedir=$withval
@@ -508,31 +525,57 @@ if test "x$prefix" != "xNONE" ; then
 	tryxmlincludedir="$tryxmlincludedir $prefix"
 fi
 
-AC_MSG_CHECKING([for xerces-c includes])
+if test "x$useminixml" == "xtrue" ; then
+	AC_MSG_CHECKING([for Mini-XML includes])
 
-for xmldir in "" $tryxmlincludedir ; do
-	CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
-	CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
-	AC_RUN_IFELSE([AC_LANG_SOURCE([[
-				#include <dom/DOM.hpp>
-				int main(void) 
-				{
-					return 0;
-				}
-				]])],
-				[
-				AC_MSG_RESULT([found in $xmldir])
-				found_xmldir=1
-				break;
-			],[if test -f "$xmldir/xercesc/util/XMLString.hpp"; then
-				AC_MSG_RESULT([found in $xmldir])
-				found_xmldir=1
-				break;
-			  fi
-			],[])
-done
+	for xmldir in "" $tryxmlincludedir ; do
+		CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
+		CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
+		AC_RUN_IFELSE([AC_LANG_SOURCE([[
+					#include <mxml.h>
+					int main(void) 
+					{
+						return 0;
+					}
+					]])],
+					[
+					AC_MSG_RESULT([found in $xmldir])
+					found_xmldir=1
+					break;
+				],[if test -f "$xmldir/mxml.h"; then
+					AC_MSG_RESULT([found in $xmldir])
+					found_xmldir=1
+					break;
+				  fi
+				],[])
+	done
+else
+	AC_MSG_CHECKING([for xerces-c includes])
+
+	for xmldir in "" $tryxmlincludedir ; do
+		CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
+		CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
+		AC_RUN_IFELSE([AC_LANG_SOURCE([[
+					#include <dom/DOM.hpp>
+					int main(void) 
+					{
+						return 0;
+					}
+					]])],
+					[
+					AC_MSG_RESULT([found in $xmldir])
+					found_xmldir=1
+					break;
+				],[if test -f "$xmldir/xercesc/util/XMLString.hpp"; then
+					AC_MSG_RESULT([found in $xmldir])
+					found_xmldir=1
+					break;
+				  fi
+				],[])
+	done
+fi	
 if test -z "$found_xmldir"; then
-	AC_MSG_ERROR([Xerces-C includes NOT found - please use --with-xml-include])
+	AC_MSG_ERROR([Mini-XML/Xerces-C includes NOT found - please use --with-xml-include])
 fi
 
 dnl Check for XML libs
@@ -811,8 +854,8 @@ AS_IF([test "x$DOWITHWIRESHARK" = "xyes"], [
    CFLAGS="$savedCFLAGS"
 ])
 
-CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS $WIRESHARK_CFLAGS"
-CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $OFLAGS $WIRESHARK_CFLAGS"
+CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS"
+CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS"
 LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB"
 
 AM_CONDITIONAL([DOTESTS], [test x$DOTHETESTS = xyes])
