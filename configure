@@ -18122,10 +18122,13 @@ $as_echo_n "checking for Mini-XML includes... " >&6; }
 		CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
 		CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
 		if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
+  if test -f "$xmldir/mxml.h"; then
+					{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmldir" >&5
+$as_echo "found in $xmldir" >&6; }
+					found_xmldir=1
+					break;
+				  fi
+
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -18144,14 +18147,6 @@ $as_echo "found in $xmldir" >&6; }
 					found_xmldir=1
 					break;
 
-else
-  if test -f "$xmldir/mxml.h"; then
-					{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmldir" >&5
-$as_echo "found in $xmldir" >&6; }
-					found_xmldir=1
-					break;
-				  fi
-
 fi
 rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
   conftest.$ac_objext conftest.beam conftest.$ac_ext
@@ -18166,10 +18161,13 @@ $as_echo_n "checking for xerces-c includes... " >&6; }
 		CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
 		CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
 		if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
+  if test -f "$xmldir/xercesc/util/XMLString.hpp"; then
+					{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmldir" >&5
+$as_echo "found in $xmldir" >&6; }
+					found_xmldir=1
+					break;
+				  fi
+
 else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -18187,14 +18185,6 @@ if ac_fn_cxx_try_run "$LINENO"; then :
 $as_echo "found in $xmldir" >&6; }
 					found_xmldir=1
 					break;
-
-else
-  if test -f "$xmldir/xercesc/util/XMLString.hpp"; then
-					{ $as_echo "$as_me:${as_lineno-$LINENO}: result: found in $xmldir" >&5
-$as_echo "found in $xmldir" >&6; }
-					found_xmldir=1
-					break;
-				  fi
 
 fi
 rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
