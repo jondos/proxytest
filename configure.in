@@ -71,6 +71,10 @@ case "$host" in
 	CFLAGS="$CFLAGS -DOS_TUDOS"
 	CXXFLAGS="$CXXFLAGS -DOS_TUDOS";
 	;;
+*-*-android*)
+	CFLAGS="$CFLAGS -DOS_TUDOS"
+	CXXFLAGS="$CXXFLAGS -DOS_TUDOS";
+	;;
 *)
 	;;
 esac
@@ -265,6 +269,43 @@ AC_ARG_ENABLE(dialog,
 
 
 LIBS="$DEFAULTLIBS"
+
+dnl todo: instead of statically configuring the right pthread options --> try< to find them dynamically
+dnl have_pthread=no
+dnl PTHREAD_FLAGS=""
+dnl PTHREAD_LIBS=""
+dnl 
+dnl if test "x$enable_threads" != xno; then
+dnl 	AC_CHECK_HEADER(pthread.h, AC_DEFINE(HAVE_PTHREAD_H))
+dnl 
+dnl 	if test x$ac_cv_header_pthread_h = xyes; then
+dnl 		dnl Check various threading options for the platforms we support
+dnl 		for flag in -lpthreads -lpthread -pthread; do
+dnl         		AC_MSG_CHECKING([for pthread_create using $flag])
+dnl 			SAVELIBS="$LIBS"
+dnl 			LIBS="$flag $LIBS"
+dnl         		AC_TRY_LINK([#include <pthread.h>],
+dnl 				[pthread_create(0, 0, 0, 0);],
+dnl         			have_pthread=yes)
+dnl         		AC_MSG_RESULT([$have_pthread])
+dnl 			LIBS="$SAVELIBS"
+dnl 
+dnl 			if test $have_pthread = yes; then
+dnl 				PTHREAD_FLAGS="-D_THREAD_SAFE -D_REENTRANT"
+dnl 				PTHREAD_LIBS="$flag"
+dnl 
+dnl 				# Solaris requires -D_POSIX_PTHREAD_SEMANTICS to
+dnl 				# be POSIX-compliant... :(
+dnl 				if test $uname = SunOS; then
+dnl 					PTHREAD_FLAGS="$PTHREAD_FLAGS -D_POSIX_PTHREAD_SEMANTICS"
+dnl 				fi
+dnl 				break
+dnl 			fi
+dnl			done
+dnl 	fi
+dnl fi
+
+
 
 dnl Checks for Headers
 AC_HEADER_STDC
