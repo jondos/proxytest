@@ -646,6 +646,8 @@ PKG_CONFIG_LIBDIR
 PKG_CONFIG_PATH
 PKG_CONFIG
 LIBCPPUNIT
+USE_MINIXML_FALSE
+USE_MINIXML_TRUE
 ALLOCA
 CXXCPP
 am__fastdepCXX_FALSE
@@ -18088,6 +18090,14 @@ if test "${with_minixml+set}" = set; then :
 fi
 
 
+ if test x$useminixml = xtrue; then
+  USE_MINIXML_TRUE=
+  USE_MINIXML_FALSE='#'
+else
+  USE_MINIXML_TRUE='#'
+  USE_MINIXML_FALSE=
+fi
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: Mini-XML/Xerces-C tests" >&5
 $as_echo "$as_me: Mini-XML/Xerces-C tests" >&6;}
@@ -19056,6 +19066,10 @@ if test -z "${am__fastdepCXX_TRUE}" && test -z "${am__fastdepCXX_FALSE}"; then
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
+if test -z "${USE_MINIXML_TRUE}" && test -z "${USE_MINIXML_FALSE}"; then
+  as_fn_error $? "conditional \"USE_MINIXML\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${DOTESTS_TRUE}" && test -z "${DOTESTS_FALSE}"; then
   as_fn_error $? "conditional \"DOTESTS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5

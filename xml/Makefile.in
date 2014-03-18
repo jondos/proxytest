@@ -83,6 +83,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@USE_MINIXML_TRUE@am__append_1 = mxmlDOM.hpp mxmlDOMDocument.cpp mxmlXercesDOMParser.cpp
 subdir = xml
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/mkinstalldirs $(top_srcdir)/depcomp
@@ -102,7 +103,11 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libxml_a_AR = $(AR) $(ARFLAGS)
 libxml_a_LIBADD =
-am_libxml_a_OBJECTS = DOM_Output.$(OBJEXT)
+am__libxml_a_SOURCES_DIST = DOM_Output.cpp DOM_Output.hpp mxmlDOM.hpp \
+	mxmlDOMDocument.cpp mxmlXercesDOMParser.cpp
+@USE_MINIXML_TRUE@am__objects_1 = mxmlDOMDocument.$(OBJEXT) \
+@USE_MINIXML_TRUE@	mxmlXercesDOMParser.$(OBJEXT)
+am_libxml_a_OBJECTS = DOM_Output.$(OBJEXT) $(am__objects_1)
 libxml_a_OBJECTS = $(am_libxml_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -161,7 +166,7 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libxml_a_SOURCES)
-DIST_SOURCES = $(libxml_a_SOURCES)
+DIST_SOURCES = $(am__libxml_a_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -316,7 +321,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 noinst_LIBRARIES = libxml.a
-libxml_a_SOURCES = DOM_Output.cpp DOM_Output.hpp
+libxml_a_SOURCES = DOM_Output.cpp DOM_Output.hpp $(am__append_1)
 includes = @INCLUDES@
 all: all-am
 
@@ -368,6 +373,8 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DOM_Output.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mxmlDOMDocument.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mxmlXercesDOMParser.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
