@@ -410,6 +410,7 @@ AC_ARG_WITH(ssl-dir,
 saved_LIBS="$LIBS"
 saved_LDFLAGS="$LDFLAGS"
 saved_CFLAGS="$CFLAGS"
+saved_CXXFLAGS="$CXXFLAGS"
 if test "x$prefix" != "xNONE" ; then
 	tryssldir="$tryssldir $prefix"
 fi
@@ -419,6 +420,7 @@ AC_CACHE_CHECK([for OpenSSL directory], ac_cv_openssldir, [
 		if test ! -z "$ssldir" ; then
 			LDFLAGS="$saved_LDFLAGS -L$ssldir/lib -L$ssldir"
 			CFLAGS="$saved_CFLAGS -I$ssldir/include"
+			CXXFLAGS="$saved_CXXFLAGS -I$ssldir/include"
 			if test ! -z "$need_dash_r" ; then
 				LDFLAGS="$LDFLAGS -R$ssldir/lib -R$ssldir"
 			fi
@@ -469,6 +471,7 @@ if (test ! -z "$ac_cv_openssldir" && test "x$ac_cv_openssldir" != "x(system)") ;
 	dnl Need to recover ssldir - test above runs in subshell
 	ssldir=$ac_cv_openssldir
 	CFLAGS="$saved_CFLAGS -I$ssldir/include"
+	CXXFLAGS="$saved_CXXFLAGS -I$ssldir/include"
 	LDFLAGS="$saved_LDFLAGS -L$ssldir/lib -L$ssldir"
 	if test ! -z "$need_dash_r" ; then
 		LDFLAGS="$LDFLAGS -R$ssldir/lib -R$ssldir"
@@ -528,8 +531,8 @@ if test "x$useminixml" == "xtrue" ; then
 	AC_MSG_CHECKING([for Mini-XML includes])
 
 	for xmldir in "" $tryxmlincludedir ; do
-		CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
-		CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
+		CFLAGS="$saved_CFLAGS -I$xmldir"
+		CXXFLAGS="$saved_CXXFLAGS -I$xmldir"
 		AC_RUN_IFELSE([AC_LANG_SOURCE([[
 					#include <mxml.h>
 					int main(void) 
