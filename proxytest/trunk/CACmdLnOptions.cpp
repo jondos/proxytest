@@ -4169,7 +4169,6 @@ SINT32 CACmdLnOptions::setRessourceOptions(DOMElement *elemRoot)
 // *************************************************
 SINT32 CACmdLnOptions::setTermsAndConditions(DOMElement *elemRoot)
 {
-	SINT32 ret = E_SUCCESS;
 	DOMElement *elemTnCs = NULL;
 
 	if(elemRoot == NULL)
@@ -4177,7 +4176,7 @@ SINT32 CACmdLnOptions::setTermsAndConditions(DOMElement *elemRoot)
 		return E_UNKNOWN;
 	}
 
-	ret = getDOMChildByName(elemRoot, OPTIONS_NODE_TNCS_OPTS, elemTnCs, true);
+	getDOMChildByName(elemRoot, OPTIONS_NODE_TNCS_OPTS, elemTnCs, true);
 	if(elemTnCs != NULL)
 	{
 		return invokeOptionSetters
