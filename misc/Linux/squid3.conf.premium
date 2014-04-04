@@ -14,6 +14,7 @@ coredump_dir /var/spool/squid3
 # define ACL for IPv6
 acl to_ipv6 dst ipv6
         
+
 # Set the outgiong IP address for IPv4 and IPv6, 
 # if your server have more than one IP addresses
 
@@ -46,8 +47,6 @@ acl manager proto cache_object
 acl localhost src 127.0.0.1/32
 acl to_localhost dst 127.0.0.0/32
 
-acl Safe_ports port 1-65535
-acl SSL_ports port 1-65535
 
 acl purge method PURGE
 acl CONNECT method CONNECT
@@ -60,8 +59,6 @@ http_access allow manager localhost
 http_access deny manager
 http_access allow purge localhost
 http_access deny purge
-http_access deny !Safe_ports
-http_access deny CONNECT !SSL_ports
 
 http_access deny bad
 

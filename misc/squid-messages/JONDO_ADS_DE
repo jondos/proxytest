@@ -66,7 +66,7 @@
         <li><a href="https://anonymous-proxy-servers.net/forum/" title="Diskussionsforum [5]" tabindex="5" accesskey="5">Forum</a></li>
         <li><a href="https://anonymous-proxy-servers.net/blog/index.php?user_language=de" title="JonDonym News Center [6]" tabindex="6"  accesskey="6">Blog</a></li>
         <li><a href="http://ip-check.info/?lang=de" title="IP Test. [7]" tabindex="7" accesskey="7">Anonymit&auml;tstest</a></li>
-        <li><a href="https://storage.anonymous-proxy-servers.net" title="Anonym Dateien tauschen [8]" tabindex="8" accesskey="1">Dateispeicher</a></li>
+
    </ul> <br>
 </div>
 
@@ -133,11 +133,6 @@
 <td>SOCKS5 Support</td>
 <td style="background: #e8f1f8; text-align:center;">Nein</td>
 <td style="background: #c3e5fe; text-align:center;">Ja</td>
-</tr>
-<tr>
-<td style="background: #e4e4e4;">JonDonym Dateispeicher nutzen</td>
-<td style="background: #d8e2eb; text-align:center;">Nein</td>
-<td style="background: #d2edff; text-align:center;">Ja</td>
 </tr>
 <td style="font-weight:bold; border-top: 1px #A9B8C2 solid;">Kosten</td>
 <td style="background: #e8f1f8; text-align:center; font-weight:bold; border-top: 1px #A9B8C2 solid;">kostenfrei</td>

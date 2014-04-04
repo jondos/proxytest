@@ -8,12 +8,14 @@
 # if Debian package "mix-squidmessages" was installed
 error_directory /usr/share/mix-squidmessages
 
+
 # Set core dump dir
 coredump_dir /var/spool/squid3
 
 # define ACL for IPv6
 acl to_ipv6 dst ipv6
-        
+
+
 # Set the outgiong IP address for IPv4 and IPv6, 
 # if your server have more than one IP addresses
 
@@ -54,9 +56,6 @@ deny_info ERR_ROBOT robot
 acl Safe_ports port 80 443
 deny_info ERR_NOT_SAFE_PORT !Safe_ports
 
-# for free cascades only
-acl SSL_ports port 443 
-
 acl purge method PURGE
 acl CONNECT method CONNECT
 
@@ -69,7 +68,7 @@ http_access deny manager
 http_access allow purge localhost
 http_access deny purge
 http_access deny !Safe_ports
-http_access deny CONNECT !SSL_ports
+http_access deny CONNECT !Safe_ports
 
 # for payment reminder
 acl adsde dstdomain premium-de

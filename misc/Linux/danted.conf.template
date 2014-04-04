@@ -56,10 +56,10 @@ block {
 	log: connect error
 }
 
-#everyone from localhost 127.0.0.1/32 is allowed to use tcp
+#everyone from localhost 127.0.0.1/32 is allowed to use tcp and udp
 pass {
 	from: 127.0.0.1/32  to: 0.0.0.0/0
-        protocol: tcp
+        protocol: tcp udp
 }
 
 # last line, block everyone else. 
