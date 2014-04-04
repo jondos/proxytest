@@ -2,28 +2,28 @@
 
 # Stop squid
 if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
-	invoke-rc.d squid stop
+	invoke-rc.d squid3 stop
 else
-	/etc/init.d/squid stop
+	/etc/init.d/squid3 stop
 fi
 
 # Backup old squid configuration
-if [ ! -e /usr/share/doc/mix-premium-squidconf/conf/squid.conf.orig ]
+if [ ! -e /usr/share/doc/mix-premium-squidconf/conf/squid3.conf.orig ]
 then
-  mv /etc/squid/squid.conf /usr/share/doc/mix-premium-squidconf/conf/squid.conf.orig
+  mv /etc/squid3/squid.conf /usr/share/doc/mix-premium-squidconf/conf/squid3.conf.orig
 fi
 
 # Install new squid configuration
-cp -f /usr/share/doc/mix-premium-squidconf/conf/squid.conf /etc/squid/squid.conf
+cp -f /usr/share/doc/mix-premium-squidconf/conf/squid3.conf /etc/squid3/squid.conf
 
-# Create cache directories
-squid -z -d -3
+
+#DEBHELPER#
 
 # Start squid
 if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
-	invoke-rc.d squid start || exit $?
+	invoke-rc.d squid3 start || exit $?
 else
-	/etc/init.d/squid start || exit $?
+	/etc/init.d/squid3 start || exit $?
 fi
 
 exit 0

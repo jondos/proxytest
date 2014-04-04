@@ -9,7 +9,7 @@ fi
 sleep 3
 
 # restore the backup of squid configuration
-cp -f /usr/share/doc/mix-free-squidconf/conf/squid.conf.orig /etc/squid/squid.conf
+cp -f /usr/share/doc/mix-free-squidconf/conf/squid3.conf.orig /etc/squid3/squid.conf
 
 exit 0
 

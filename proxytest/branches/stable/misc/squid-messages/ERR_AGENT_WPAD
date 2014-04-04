@@ -3,8 +3,7 @@
 <head> 
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
 <meta name="viewport" content="width=device-width">
-<title>ERROR: Access Denied.</title> 
-<style type="text/css">
+ <title>Web Browser Configuration</title> <style type="text/css">
   H1 { color: #ff3112; font-size: 1.4em; font-weight:bold; margin-top: 50px; margin-bottom: 0; padding: 0; }
   H2 { font-size: 1.2em; font-weight: bold; color:#3F7FBF; padding: 0px; margin: 1em 0px 0.25em 0px; }
   P { color: black; font-weight:normal; margin: 0.5em 0 0.5em 0; }
@@ -71,12 +70,7 @@
 
  <div id="titles" align="center"> 
  <h1>Exit Mix Error Message</h1> 
- <h2>Access denied on this mix cascade.</h2> 
+ <h2>Web Browser Configuration</h2> 
  </div> 
- <div id="content" align="center"> <p>Access to <em>%U</em> is denied.</p>
- <p>The exit mix operator blocked access to this website.<br>
- Please, use an other mix cascade for this website.</p>  
-<!-- %c  %s --> 
-</div>
- </body>
- </html> 
+ <div id="content" align="center"> 
+<p>Your Web Browser configuration needs to be corrected to use this network.</p>  <!-- %c %s --> </div> </body></html> 
