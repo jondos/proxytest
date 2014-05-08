@@ -12,7 +12,7 @@ class XercesDOMParser
 				{
 					m_curNode=NULL;
 					mxmlSetCustomHandlers( xercesdomparser_custom_load_callback,MXML_TEXT_CALLBACK);
-					mxml_node_t* top=mxmlSAXLoadString (NULL,source.getBuff(),xercesdomparser_load_callback,
+					/*mxml_node_t* top=*/mxmlSAXLoadString (NULL,source.getBuff(),xercesdomparser_load_callback,
 																							xercesdomparser_sax_callback,this);
 				}
 				

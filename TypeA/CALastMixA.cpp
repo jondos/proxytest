@@ -127,6 +127,14 @@ SINT32 CALastMixA::loop()
 									}
 								// one packet received
 								m_logUploadedPackets++;
+#ifdef ANON_DEBUG_MODE
+								if (pMixPacket->flags&CHANNEL_DEBUG)
+									{
+										UINT8 base64Payload[DATA_SIZE << 1];
+										EVP_EncodeBlock(base64Payload, pMixPacket->data,DATA_SIZE);//base64 encoding (without newline!)
+										pMixPacket->flags &= ~CHANNEL_DEBUG;
+									}
+#endif
 								pChannelListEntry=m_pChannelList->get(pMixPacket->channel);
 
 								//check if this packet was marked by the previous mixes for user surveillance
@@ -139,7 +147,7 @@ SINT32 CALastMixA::loop()
 									{
 										if(pMixPacket->flags==CHANNEL_OPEN)
 										{
-											#if defined(_DEBUG)
+											#if defined(ANON_DEBUG_MODE)
 												CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 												//keep a copy of whole packet and output it, if something with integrity check went wrong...
 												UINT8 tmpPacket[DATA_SIZE];
@@ -222,7 +230,7 @@ SINT32 CALastMixA::loop()
 													#endif
 
 												} else {
-													#if defined(_DEBUG)
+													#if defined(ANON_DEBUG_MODE)
 														UINT8 tmpPacketBase64[DATA_SIZE<<1];
 														EVP_EncodeBlock(tmpPacketBase64,tmpPacket,DATA_SIZE);
 														CAMsg::printMsg(LOG_ERR, "Integrity check ok in channel-open packet: %s\n",tmpPacketBase64);
@@ -444,6 +452,11 @@ SINT32 CALastMixA::loop()
 											}
 										else if(pMixPacket->flags==CHANNEL_DATA)
 											{
+#if defined(ANON_DEBUG_MODE)
+											//keep a copy of whole packet and output it, if something with integrity check went wrong...
+											UINT8 tmpPacket[DATA_SIZE];
+											memcpy(tmpPacket, pMixPacket->data, DATA_SIZE);
+#endif
 												#ifdef LOG_CHANNEL
 													pChannelListEntry->packetsDataInFromUser++;
 												#endif
@@ -460,6 +473,13 @@ SINT32 CALastMixA::loop()
 															retval = pChannelListEntry->pCipher->decryptMessage(pMixPacket->data, payloadLen + 3 + GCM_MAC_SIZE, plaintextBuff, true);
 														}
 													if (retval != E_SUCCESS) {
+#if defined(ANON_DEBUG_MODE)
+														UINT8 tmpPacketBase64[DATA_SIZE << 1];
+														EVP_EncodeBlock(tmpPacketBase64, tmpPacket, DATA_SIZE);
+														CAMsg::printMsg(LOG_ERR, "Integrity check failed in channel-data packet: %s\n", tmpPacketBase64);
+#else
+														CAMsg::printMsg(LOG_ERR, "Integrity check failed in channel-data packet!\n");
+#endif
 														/* invalid MAC -> send channel close packet with integrity error flag */
 														psocketgroupCacheRead->remove(*(pChannelListEntry->pSocket));
 														psocketgroupCacheWrite->remove(*(pChannelListEntry->pSocket));
@@ -487,7 +507,6 @@ SINT32 CALastMixA::loop()
 														#endif
 														m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));
 														m_logDownloadedPackets++;
-														CAMsg::printMsg(LOG_ERR, "Integrity check failed in data packet!\n");
 													} else {
 														memcpy(pMixPacket->data, plaintextBuff, payloadLen + 3);
 												#else
