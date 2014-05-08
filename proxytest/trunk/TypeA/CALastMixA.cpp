@@ -133,6 +133,7 @@ SINT32 CALastMixA::loop()
 										UINT8 base64Payload[DATA_SIZE << 1];
 										EVP_EncodeBlock(base64Payload, pMixPacket->data,DATA_SIZE);//base64 encoding (without newline!)
 										pMixPacket->flags &= ~CHANNEL_DEBUG;
+										CAMsg::printMsg(LOG_DEBUG, "AN.ON packet debug: %s\n",base64Payload);
 									}
 #endif
 								pChannelListEntry=m_pChannelList->get(pMixPacket->channel);
