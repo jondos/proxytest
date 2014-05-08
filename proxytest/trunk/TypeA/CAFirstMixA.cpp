@@ -299,8 +299,10 @@ SINT32 CAFirstMixA::loop()
 													}
 												}
 #ifdef ANON_DEBUG_MODE
+												bool bIsDebugPacket=false;
 												if (pMixPacket->flags&CHANNEL_DEBUG)
 													{
+													bIsDebugPacket=true;
 													UINT8 base64Payload[DATA_SIZE << 1];
 													EVP_EncodeBlock(base64Payload, pMixPacket->data, DATA_SIZE);//base64 encoding (without newline!)
 													pMixPacket->flags &= ~CHANNEL_DEBUG;
@@ -376,19 +378,25 @@ SINT32 CAFirstMixA::loop()
 													CASymCipher* pCipher=NULL;
 													fmChannelListEntry* pEntry;
 													pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
-													if(pEntry!=NULL&&pMixPacket->flags==CHANNEL_DATA)
-													{
-														pMixPacket->channel=pEntry->channelOut;
-														pCipher=pEntry->pCipher;
-														pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-														                     // queue the packet for sending to the next mix.
-														#ifdef LOG_PACKET_TIMES
-															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
-														#endif
+													if (pEntry != NULL&&pMixPacket->flags == CHANNEL_DATA)
+														{
+														pMixPacket->channel = pEntry->channelOut;
+														pCipher = pEntry->pCipher;
+														pCipher->crypt1(pMixPacket->data, pMixPacket->data, DATA_SIZE);
+														// queue the packet for sending to the next mix.
+#ifdef LOG_PACKET_TIMES
+														getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
+#endif
 
 														//check if this IP must be logged due to crime detection
-														#ifdef LOG_CRIME
-															crimeSurveillance(surveillanceIPs, nrOfSurveillanceIPs, pEntry->pHead->peerIP,pEntry->pHead->peerPort, pMixPacket);
+#ifdef LOG_CRIME
+														crimeSurveillance(surveillanceIPs, nrOfSurveillanceIPs, pEntry->pHead->peerIP,pEntry->pHead->peerPort, pMixPacket);
+#endif
+#ifdef ANON_DEBUG_MODE
+														if(bIsDebugPacket)
+															{
+															pMixPacket->flags|=CHANNEL_DEBUG;
+															}
 														#endif
 														m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
 														/* Don't delay upstream
@@ -470,6 +478,12 @@ SINT32 CAFirstMixA::loop()
 																	crimeSurveillance(surveillanceIPs, nrOfSurveillanceIPs, pEntry->pHead->peerIP,pEntry->pHead->peerPort, pMixPacket);
 																}
 															#endif
+#ifdef ANON_DEBUG_MODE
+																if (bIsDebugPacket)
+																	{
+																	pMixPacket->flags |= CHANNEL_DEBUG;
+																	}
+#endif
 															m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
 															/* Don't delay upstream
 															#ifdef DELAY_USERS
