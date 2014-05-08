@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.11.09"
+#define MIX_VERSION "00.11.10"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -69,7 +69,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define HAVE_EPOLL //define if you have epoll support on your (Linux) system
 //#define MXML_DOM //define this if you wnat to use the Mix-XML library (www.minixml.org) instead of the default Xerces-C library
 //#define COUNTRY_STATS //collect stats about countries users come from
-#define ONLY_LOCAL_PROXY //define to build only the local proxy (aka JAP)
+//#define ONLY_LOCAL_PROXY //define to build only the local proxy (aka JAP)
 /* LERNGRUPPE: define this to get dynamic mixes */
 //#define DYNAMIC_MIX
 //#define SDTFA // specific logic needed by SDTFA, http://www.sdtfa.com
@@ -155,7 +155,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
 #define NEW_FLOW_CONTROL //enable for the new flow control mechanism --> now enabled by default (i.e. can not be disbaled anymore!)
 #define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses RSA-OAEP for key transport and two keys for upstream/downstream channel cryption (--> now enabled by default (i.e. can not be disbaled anymore!)
-#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
+//#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
 
 //#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 1 //How often (in minutes) should the current replay timestamps be propagate
@@ -166,6 +166,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 //#define ECC
 //#define SSL_HACK //???
+
+//#define ANON_DEBUG_MODE //if defined this Mix operates in AN.ON protocol debug mode, which means that a lot of things are logged which should not be logged in productive mode. So NEVER enable this in productive environments!
+
+#ifdef LOG_CRIME //Law Enforcement and AN.ON protocol debuggin cannot be done at the same time...
+	#undef ANON_DEBUG_MODE
+#endif 
 
 #if defined(PAYMENT) && ! defined(SSL_HACK)
 	#define SSL_HACK
