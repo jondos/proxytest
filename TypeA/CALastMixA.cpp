@@ -222,7 +222,7 @@ SINT32 CALastMixA::loop()
 													#endif
 													m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));
 													m_logDownloadedPackets++;
-													#if defined(_DEBUG)
+													#if defined(ANON_DEBUG_MODE)
 														UINT8 tmpPacketBase64[DATA_SIZE<<1];
 														EVP_EncodeBlock(tmpPacketBase64,tmpPacket,DATA_SIZE);
 														CAMsg::printMsg(LOG_ERR, "Integrity check failed in channel-open packet: %s\n",tmpPacketBase64);
