@@ -298,6 +298,15 @@ SINT32 CAFirstMixA::loop()
 														goto NEXT_USER;
 													}
 												}
+#ifdef ANON_DEBUG_MODE
+												if (pMixPacket->flags&CHANNEL_DEBUG)
+													{
+													UINT8 base64Payload[DATA_SIZE << 1];
+													EVP_EncodeBlock(base64Payload, pMixPacket->data, DATA_SIZE);//base64 encoding (without newline!)
+													pMixPacket->flags &= ~CHANNEL_DEBUG;
+													CAMsg::printMsg(LOG_DEBUG, "AN.ON packet debug: %s\n", base64Payload);
+													}
+#endif
 #ifdef PAYMENT
 												if(accountTrafficUpstream(pHashEntry) != E_SUCCESS) goto NEXT_USER;
 #endif
