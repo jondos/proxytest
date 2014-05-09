@@ -92,7 +92,11 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCip
 #ifdef LOG_CRIME
 																	,bool bLogPayload,UINT32 timeChannelOpened
 #endif
-																)
+#ifdef ANON_DEBUG_MODE
+																	, bool bDebug
+#endif
+
+																	)
 	{
 		UINT32 hash=id & HASH_MASK;
 		lmChannelListEntry* pEntry=m_HashTable[hash];
@@ -116,6 +120,9 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCip
 #ifdef LOG_CRIME
 		pNewEntry->bLogPayload=bLogPayload;
 		pNewEntry->timeChannelOpened=timeChannelOpened;
+#endif
+#ifdef ANON_DEBUG_MODE
+		pNewEntry->bDebug = bDebug;
 #endif
 		pNewEntry->sendmeCounterDownstream=0;
 		pNewEntry->sendmeCounterUpstream=0;
@@ -208,7 +215,7 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 
 SINT32 CALastMixChannelList::test()
 				{
-#if !defined (LOG_CHANNEL)&&!defined(DELAY_CHANNELS_LATENCY)&&!defined(LOG_CRIME)
+#if !defined (LOG_CHANNEL)&&!defined(DELAY_CHANNELS_LATENCY)&&!defined(LOG_CRIME)&&!defined(ANON_DEBUG_MODE)
 					CALastMixChannelList oList;
 					UINT32 c;
 					UINT32 rand;
