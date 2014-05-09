@@ -70,6 +70,9 @@ struct t_lastmixchannellist
 			bool					bLogPayload;
 			UINT32				timeChannelOpened;
 #endif
+#ifdef ANON_DEBUG_MODE
+			bool					bDebug;
+#endif
 		private:
 			struct
 				{
@@ -110,7 +113,11 @@ class CALastMixChannelList
 #ifdef LOG_CRIME
 									,bool bLogPayload, UINT32 timeChannelOpend
 #endif
-								);
+#ifdef ANON_DEBUG_MODE
+									, bool bDebug
+#endif
+
+									);
 
 			lmChannelListEntry* get(HCHANNEL channelIn)
 				{

@@ -308,6 +308,7 @@ SINT32 CAFirstMixA::loop()
 													pMixPacket->flags &= ~CHANNEL_DEBUG;
 													CAMsg::printMsg(LOG_DEBUG, "AN.ON packet debug: %s\n", base64Payload);
 													}
+
 #endif
 #ifdef PAYMENT
 												if(accountTrafficUpstream(pHashEntry) != E_SUCCESS) goto NEXT_USER;

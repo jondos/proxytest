@@ -95,6 +95,9 @@ SINT32 CALastMixA::loop()
 		#ifdef LOG_CRIME
 			bool bUserSurveillance = false;
 		#endif
+#ifdef ANON_DEBUG_MODE
+			bool bIsDebugPacket = false;
+#endif
 
 		#ifdef LOG_CHANNEL
 			CAMsg::printMsg(LOG_DEBUG,"Channel time log format is as follows: Channel-ID,Channel Start [micros], Channel End [micros], Upload (bytes), Download (bytes), DataAndOpenPacketsFromUser, DataPacketsToUser\n");
@@ -134,6 +137,11 @@ SINT32 CALastMixA::loop()
 										EVP_EncodeBlock(base64Payload, pMixPacket->data,DATA_SIZE);//base64 encoding (without newline!)
 										pMixPacket->flags &= ~CHANNEL_DEBUG;
 										CAMsg::printMsg(LOG_DEBUG, "AN.ON packet debug: %s\n",base64Payload);
+										bIsDebugPacket = true;
+									}
+								else
+									{
+										bIsDebugPacket = false;
 									}
 #endif
 								pChannelListEntry=m_pChannelList->get(pMixPacket->channel);
@@ -151,8 +159,8 @@ SINT32 CALastMixA::loop()
 											#if defined(ANON_DEBUG_MODE)
 												CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 												//keep a copy of whole packet and output it, if something with integrity check went wrong...
-												UINT8 tmpPacket[DATA_SIZE];
-												memcpy(tmpPacket,pMixPacket->data,DATA_SIZE);
+												UINT8 tmpPacketData[DATA_SIZE];
+												memcpy(tmpPacketData,pMixPacket->data,DATA_SIZE);
 											#endif
 
 											
@@ -224,7 +232,7 @@ SINT32 CALastMixA::loop()
 													m_logDownloadedPackets++;
 													#if defined(ANON_DEBUG_MODE)
 														UINT8 tmpPacketBase64[DATA_SIZE<<1];
-														EVP_EncodeBlock(tmpPacketBase64,tmpPacket,DATA_SIZE);
+														EVP_EncodeBlock(tmpPacketBase64,tmpPacketData,DATA_SIZE);
 														CAMsg::printMsg(LOG_ERR, "Integrity check failed in channel-open packet: %s\n",tmpPacketBase64);
 													#else
 														CAMsg::printMsg(LOG_ERR, "Integrity check failed in channel-open packet!\n");
@@ -233,7 +241,7 @@ SINT32 CALastMixA::loop()
 												} else {
 													#if defined(ANON_DEBUG_MODE)
 														UINT8 tmpPacketBase64[DATA_SIZE<<1];
-														EVP_EncodeBlock(tmpPacketBase64,tmpPacket,DATA_SIZE);
+														EVP_EncodeBlock(tmpPacketBase64,tmpPacketData,DATA_SIZE);
 														CAMsg::printMsg(LOG_ERR, "Integrity check ok in channel-open packet: %s\n",tmpPacketBase64);
 													#endif
 											#endif
@@ -389,7 +397,10 @@ SINT32 CALastMixA::loop()
 															#ifdef LOG_CRIME
 																									,(bUserSurveillance&&CALibProxytest::getOptions()->isPayloadLogged()),timeChannelOpened
 															#endif
-																									);
+	#ifdef ANON_DEBUG_MODE
+,bIsDebugPacket
+#endif
+																										);
 #ifdef HAVE_EPOLL
 															psocketgroupCacheRead->add(*tmpSocket,m_pChannelList->get(pMixPacket->channel));
 #else
@@ -868,6 +879,15 @@ SINT32 CALastMixA::loop()
 														#ifdef LOG_PACKET_TIMES
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 														#endif
+#ifdef ANON_DEBUG_MODE
+															if (pChannelListEntry->bDebug)
+																{
+																	UINT8 tmpPacketBase64[DATA_SIZE << 1];
+																	EVP_EncodeBlock(tmpPacketBase64, pMixPacket->data, DATA_SIZE);
+																	CAMsg::printMsg(LOG_ERR, "Send AN.ON debug packet: %s\n", tmpPacketBase64);
+																}
+#endif
+
 														m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
 														m_logDownloadedPackets++;
 														#if defined(LOG_CHANNEL)
