@@ -1,8 +1,8 @@
-mix-squidconf (14.04.03) unstable; urgency=low
+mix-squidconf (14.05.11) unstable; urgency=low
 
-  * switch to Squid3
+  * switched to Squid3
 
- -- JonDos GmbH <info@jondos.de>  Thu, 03 Apr 2014 08:17:23 +0200
+ -- JonDos GmbH <info@jondos.de>  Sun, 11 May 2014 08:17:23 +0200
 
 
 mix-squidconf (12.03.14) unstable; urgency=low
