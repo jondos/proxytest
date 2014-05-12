@@ -3,10 +3,10 @@
 # or comment out to use the default squid messages
 
 # for src code from svn
-# error_directory /home/mix/stable/misc/squid-messages
+error_directory /home/mix/stable/misc/squid-messages
 
 # if Debian package "mix-squidmessages" was installed
-error_directory /usr/share/mix-squidmessages
+# error_directory /usr/share/mix-squidmessages
 
 # Set core dump dir
 coredump_dir /var/spool/squid3
