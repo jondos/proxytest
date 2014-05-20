@@ -482,7 +482,9 @@ SINT32 CAFirstMixA::loop()
 #ifdef ANON_DEBUG_MODE
 																if (bIsDebugPacket)
 																	{
-																	pMixPacket->flags |= CHANNEL_DEBUG;
+																		pMixPacket->flags |= CHANNEL_DEBUG;
+																		pEntry = m_pChannelList->get(pMuxSocket, inChannel);
+																		pEntry->bDebug = true;
 																	}
 #endif
 															m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
@@ -646,7 +648,16 @@ NEXT_USER:
 										#ifdef LOG_PACKET_TIMES
 											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 										#endif
-										pEntry->pHead->pQueueSend->add(pQueueEntry, sizeof(tQueueEntry));
+#ifdef ANON_DEBUG_MODE
+											if (pEntry->bDebug)
+												{									
+												UINT8 base64Payload[DATA_SIZE << 1];
+												EVP_EncodeBlock(base64Payload, pMixPacket->data, DATA_SIZE);//base64 encoding (without newline!)
+												CAMsg::printMsg(LOG_DEBUG, "Send Dowwstream AN.ON packet debug: %s\n", base64Payload);
+												}
+
+#endif
+											pEntry->pHead->pQueueSend->add(pQueueEntry, sizeof(tQueueEntry));
 										/*CAMsg::printMsg(
 												LOG_INFO,"adding data packet to queue: %x, queue size: %u bytes\n",
 												pEntry->pHead->pQueueSend, pEntry->pHead->pQueueSend->getSize());*/

@@ -145,6 +145,9 @@ struct t_firstmixchannellist
 			UINT64				timeCreated;
 			UINT32				packetsOutToUser;
 #endif
+#ifdef ANON_DEBUG_MODE
+			bool bDebug;
+#endif
 
 #ifdef SSL_HACK
 			UINT32				downStreamBytes; /* a hack to solve the SSL problem */
