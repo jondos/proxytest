@@ -626,7 +626,15 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 						MONITORING_FIRE_NET_EVENT(ev_net_prevConnectionClosed);
 						break;
 					}
-				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
+#ifdef ANON_DEBUG_MODE
+				if (pMixPacket->flags&CHANNEL_DEBUG)
+					{
+					UINT8 base64Payload[DATA_SIZE << 1];
+					EVP_EncodeBlock(base64Payload, pMixPacket->data, DATA_SIZE);//base64 encoding (without newline!)
+					CAMsg::printMsg(LOG_DEBUG, "Send Downstream AN.ON packet to previous Mix debug: %s\n", base64Payload);
+					}
+#endif
+				if (pMuxSocket->send(pMixPacket) != MIXPACKET_SIZE)
 					{
 						CAMsg::printMsg(LOG_ERR,"CALastMix::lm_loopSendToMix - Error in sending MixPaket\n");
 						MONITORING_FIRE_NET_EVENT(ev_net_prevConnectionClosed);

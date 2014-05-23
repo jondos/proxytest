@@ -311,7 +311,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define getpid _getpid
 	#define strncasecmp _strnicmp
 	#define open _open
-	#define write _write
+	#define myfilewrite _write
 	#define close _close
 	#define read _read
 	#define access _access
@@ -459,6 +459,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifndef S_IWRITE
 		#define S_IWRITE S_IWUSR
 	#endif
+	#define myfilewrite write
 #endif //WIn32 ?
 
 #include "basetypedefs.h"
@@ -649,7 +650,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <cppunit/TestResultCollector.h>
 	#include <cppunit/BriefTestProgressListener.h>
 	#include <cppunit/CompilerOutputter.h>
-	//#include <cppunit/ui/qt/TestRunner.h>
+#include <cppunit/TextOutputter.h>
+//#include <cppunit/ui/qt/TestRunner.h>
 #endif
 
 //Mix Version Info as multiline String

@@ -537,6 +537,11 @@ int main(int argc, const char* argv[])
 //		CADataRetentionLogFile::doCheckAndPerformanceTest();
 //		getch();
 //		exit(0);
+
+//				CAQueue::test();
+//				getch();
+//				exit(0);
+
 #ifdef _DEBUG
 			UINT32 start;
 #endif

@@ -152,7 +152,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>cppunitd_dll.lib;proxytest-lib.lib;ws2_32.lib;ssleay32.lib;libeay32.lib;pthreadVC2.lib;xerces-c_2D.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>cppunitd_dll.lib;proxytest-lib.lib;ws2_32.lib;ssleay32.lib;libeay32.lib;pthreadVC2.lib;xerces-c_3D.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>.\proxytest-lib\Debug;$(LIB_CPPUNIT);$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_ZLIB);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)AllTest.pdb</ProgramDatabaseFile>
@@ -354,7 +354,7 @@
     <ClCompile Include="test\TCAUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="proxytest-lib_VC2012.vcxproj">
+    <ProjectReference Include="proxytest-lib_VC2013.vcxproj">
       <Project>{150377b0-ca8f-4031-a0b8-45a3001f4f81}</Project>
     </ProjectReference>
   </ItemGroup>

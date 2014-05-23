@@ -1559,7 +1559,7 @@ SINT32 saveFile(const UINT8* const name,const UINT8* const buff,UINT32 buffSize)
 	int handle=open((char*)name,O_BINARY|O_WRONLY|O_CREAT);
 	if(handle<0)
 		return E_UNKNOWN;
-	if(write(handle,buff,buffSize)!=buffSize)
+	if(myfilewrite(handle,buff,buffSize)!=buffSize)
 		{
 			close(handle);
 			return E_UNKNOWN;

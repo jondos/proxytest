@@ -301,7 +301,7 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 															&(pMsg->m_pCipher->oKey),
 															pMsg->m_pCipher->iv,
 															&(pMsg->m_pCipher->iv_off));
-					if(write(pMsg->m_hFileEncrypted,bp,ret)!=ret)
+					if(myfilewrite(pMsg->m_hFileEncrypted,bp,ret)!=ret)
 						ret=E_UNKNOWN;
 			 	}
 			}
@@ -336,7 +336,7 @@ SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 										sprintf(buff,"%.15s mix AnonMix: ",ctime(&currtime)+4);
 										write(pMsg->m_hFileInfo,buff,strlen(buff));
 			#endif
-										if(write(pMsg->m_hFileInfo,pMsg->m_strMsgBuff,strlen(pMsg->m_strMsgBuff))==-1)
+										if (myfilewrite(pMsg->m_hFileInfo, pMsg->m_strMsgBuff, strlen(pMsg->m_strMsgBuff)) == -1)
 											ret=E_UNKNOWN;
 										pMsg->m_NrOfWrites++;
 										if( //(pMsg->m_NrOfWrites > 10000) &&
@@ -509,7 +509,7 @@ SINT32 CAMsg::openLog(UINT32 type)
 				return E_UNKNOWN;
 			}
 		//create sym enc key and write it to the file (enc with pub enc key)
-		write(pMsg->m_hFileEncrypted,"\n----Start of EncryptionKey----\n",32);
+		myfilewrite(pMsg->m_hFileEncrypted, "\n----Start of EncryptionKey----\n", 32);
 		UINT8 keyandiv[128];
 		getRandom(keyandiv,128);
 		keyandiv[0]&=0x7F;
@@ -521,8 +521,8 @@ SINT32 CAMsg::openLog(UINT32 type)
 		UINT32 outlen=255;
 		oRSA.encrypt(keyandiv,keyandiv);
 		CABase64::encode(keyandiv,128,out,&outlen);
-		write(pMsg->m_hFileEncrypted,out,outlen);
-		write(pMsg->m_hFileEncrypted,"-----End of EncryptionKey-----\n",31);
+		myfilewrite(pMsg->m_hFileEncrypted, out, outlen);
+		myfilewrite(pMsg->m_hFileEncrypted, "-----End of EncryptionKey-----\n", 31);
 		return E_SUCCESS;
 	}
 
