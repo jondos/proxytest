@@ -880,11 +880,12 @@ SINT32 CALastMixA::loop()
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 														#endif
 #ifdef ANON_DEBUG_MODE
-															if (pChannelListEntry->bDebug)
+															if (pChannelListEntry->bDebug )
 																{
+																	pMixPacket->flags |= CHANNEL_DEBUG;
 																	UINT8 tmpPacketBase64[DATA_SIZE << 1];
 																	EVP_EncodeBlock(tmpPacketBase64, pMixPacket->data, DATA_SIZE);
-																	CAMsg::printMsg(LOG_ERR, "Send AN.ON debug packet: %s\n", tmpPacketBase64);
+																	CAMsg::printMsg(LOG_ERR, "Put AN.ON debug packet into send queue: %s\n", tmpPacketBase64);
 																}
 #endif
 

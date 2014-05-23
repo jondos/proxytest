@@ -650,7 +650,8 @@ NEXT_USER:
 										#endif
 #ifdef ANON_DEBUG_MODE
 											if (pEntry->bDebug)
-												{									
+												{	
+												pMixPacket->flags |= CHANNEL_DEBUG;
 												UINT8 base64Payload[DATA_SIZE << 1];
 												EVP_EncodeBlock(base64Payload, pMixPacket->data, DATA_SIZE);//base64 encoding (without newline!)
 												CAMsg::printMsg(LOG_DEBUG, "Send Dowwstream AN.ON packet debug: %s\n", base64Payload);
@@ -803,6 +804,16 @@ bool CAFirstMixA::sendToUsers()
 #ifdef SSL_HACK
 					finishPacket(pfmHashEntry);
 #endif //SSL_HACK
+#ifdef ANON_DEBUG_MODE
+					if (packetToSend->packet.flags&CHANNEL_DEBUG)
+						{
+						UINT8 base64Payload[DATA_SIZE << 1];
+						EVP_EncodeBlock(base64Payload, packetToSend->packet.data, DATA_SIZE);//base64 encoding (without newline!)
+						CAMsg::printMsg(LOG_DEBUG, "Send Downstream AN.ON packet to user debug: %s\n", base64Payload);
+						packetToSend->packet.flags &= ~CHANNEL_DEBUG;
+						}
+
+#endif
 					pfmHashEntry->pMuxSocket->prepareForSend(&(packetToSend->packet));
 					pfmHashEntry->uAlreadySendPacketSize = 0;
 				}
