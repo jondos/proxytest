@@ -1,5 +1,12 @@
 #!/bin/bash
 
-/etc/init.d/squid reload
+if [ -e /var/run/squid3.pid ]; then
+  # Reload squid
+  if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+	invoke-rc.d squid3 reload || exit $?
+  else
+	/etc/init.d/squid3 reload || exit $?
+  fi
+fi
 
 exit 0
