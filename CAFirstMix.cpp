@@ -1136,6 +1136,16 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 						getcurrentTimeMicros(pQueueEntry->pool_timestamp_out);
 					#endif
 				#endif
+#ifdef ANON_DEBUG_MODE
+						if (pMixPacket->flags&CHANNEL_DEBUG)
+							{
+							UINT8 base64Payload[DATA_SIZE << 1];
+							EVP_EncodeBlock(base64Payload, pMixPacket->data, DATA_SIZE);//base64 encoding (without newline!)
+							CAMsg::printMsg(LOG_DEBUG, "Received Downstream AN.ON packet from previous Mix debug: %s\n", base64Payload);
+							pMixPacket->flags &= ~CHANNEL_DEBUG;
+							}
+
+#endif
 				pQueue->add(pQueueEntry, sizeof(tQueueEntry));
 				getcurrentTimeMillis(keepaliveLast);
 			}

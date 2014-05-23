@@ -135,8 +135,8 @@ class CAQueue
 #endif
 		
 		private:
-			QUEUE* m_Queue; 
-			QUEUE* m_lastElem;
+			volatile QUEUE* m_Queue;
+			volatile QUEUE* m_lastElem;
 			volatile UINT32 m_nQueueSize;
 			volatile bool m_bClosed;
 			UINT32 m_nExpectedElementSize;

@@ -167,7 +167,7 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 				pbuff+=m_Queue->size;
 				space-=m_Queue->size;
 				m_nQueueSize-=m_Queue->size;
-				QUEUE* tmp=m_Queue;
+				QUEUE* tmp=(QUEUE*)m_Queue;
 				m_Queue=m_Queue->next;
 				//tmp->next=m_pHeap;
 				//m_pHeap=tmp;
@@ -266,7 +266,7 @@ SINT32 CAQueue::peek(UINT8* pbuff,UINT32* psize)
 				m_pcsQueue->unlock();
 				return ret;
 			}
-		QUEUE* tmpQueue=m_Queue;
+		QUEUE* tmpQueue=(QUEUE*)m_Queue;
 		while(space>=tmpQueue->size)
 			{
 				memcpy(pbuff,tmpQueue->pBuff+tmpQueue->index,tmpQueue->size);
@@ -307,7 +307,7 @@ SINT32 CAQueue::remove(UINT32* psize)
 				*psize+=m_Queue->size;
 				space-=m_Queue->size;
 				m_nQueueSize-=m_Queue->size;
-				QUEUE* tmp=m_Queue;
+				QUEUE* tmp=(QUEUE*)m_Queue;
 				m_Queue=m_Queue->next;
 //				tmp->next=m_pHeap;
 //				m_pHeap=tmp;
