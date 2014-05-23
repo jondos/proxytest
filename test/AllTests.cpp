@@ -77,7 +77,7 @@ int main(void) {
   runner.addTest( CPPUNIT_NS::TestFactoryRegistry::getRegistry().makeTest() );
   runner.run( controller );
 	CPPUNIT_NS::CompilerOutputter outputter( &result, std::cerr );
-  outputter.write();
+	outputter.write();
 	getch();
 	//CPPUNIT_NS::QtTestRunner runner;
   //runner.addTest( CPPUNIT_NS::TestFactoryRegistry::getRegistry().makeTest() );

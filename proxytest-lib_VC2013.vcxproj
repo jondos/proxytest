@@ -939,7 +939,8 @@
     </ClCompile>
     <ClCompile Include="CACertStore.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
-      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">Disabled</Optimization>
+      <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">
+      </Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug_with_unit_tests|Win32'">Disabled</Optimization>
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -951,7 +952,8 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug_with_unit_tests|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">EnableFastChecks</BasicRuntimeChecks>
-      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">EnableFastChecks</BasicRuntimeChecks>
+      <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">
+      </BasicRuntimeChecks>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">EnableFastChecks</BasicRuntimeChecks>
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug_with_unit_tests|Win32'">EnableFastChecks</BasicRuntimeChecks>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</BrowseInformation>

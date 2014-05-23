@@ -339,6 +339,7 @@ struct __queue_test
 		SINT32 len;
 	};
 
+/*
 THREAD_RETURN producer(void* param)
 	{
 		struct __queue_test* pTest=(struct __queue_test *)param;
@@ -375,6 +376,59 @@ THREAD_RETURN consumer(void* param)
 				pTest->len-=aktSize;
 			}while(pTest->len>10);
 		THREAD_RETURN_SUCCESS;
+	}
+
+*/
+THREAD_RETURN producer(void* param)
+	{
+	struct __queue_test* pTest = (struct __queue_test *)param;
+	UINT32 count = 0;
+	UINT32 aktSize;
+	UINT8 buff[992];
+	UINT8 b = 0;
+	UINT32 burst=1;
+	while (pTest->len>10)
+		{
+		buff[0] = b;
+		b++;
+		if (pTest->pQueue->add(buff, 992) != E_SUCCESS)
+			THREAD_RETURN_ERROR;
+		burst--;
+		if (burst == 0)
+			{
+			burst = rand() % 10+1;
+				msSleep(rand() % 100);
+
+			}
+		}
+	THREAD_RETURN_SUCCESS;
+	}
+
+THREAD_RETURN consumer(void* param)
+	{
+	struct __queue_test* pTest = (struct __queue_test *)param;
+	UINT32 count = 0;
+	UINT32 aktSize=992;
+	UINT8 buff[992];
+	UINT8 b = 0;
+	UINT32 burst=1;
+	do
+		{
+		aktSize = 992;
+		if (pTest->pQueue->getOrWait(buff, &aktSize) != E_SUCCESS)
+			THREAD_RETURN_ERROR;
+		if (buff[0]!=b)
+			THREAD_RETURN_ERROR;
+		b++;
+		burst--;
+		if (burst == 0)
+			{
+			burst = rand() % 10 + 1;
+			msSleep(rand() % 100);
+
+			}
+		} while (pTest->len>10);
+	THREAD_RETURN_SUCCESS;
 	}
 
 SINT32 CAQueue::test()

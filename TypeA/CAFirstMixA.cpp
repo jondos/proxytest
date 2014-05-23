@@ -533,9 +533,21 @@ NEXT_USER:
 						countRead--;
 						ret=sizeof(tQueueEntry);
 						m_pQueueReadFromMix->get((UINT8*)pQueueEntry,(UINT32*)&ret);
+
 						#ifdef LOG_PACKET_TIMES
 							getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start_OP);
 						#endif
+#ifdef ANON_DEBUG_MODE
+						if (pMixPacket->flags&CHANNEL_DEBUG)
+							{
+								UINT8 base64Payload[DATA_SIZE << 1];
+								EVP_EncodeBlock(base64Payload, pMixPacket->data, DATA_SIZE);//base64 encoding (without newline!)
+								CAMsg::printMsg(LOG_DEBUG, "Dequeued Downstream AN.ON packet from previous Mix debug: %s\n", base64Payload);
+								pMixPacket->flags &= ~CHANNEL_DEBUG;
+							}
+
+#endif
+
 						if(pMixPacket->flags==CHANNEL_CLOSE) //close event
 							{
 								#if defined(_DEBUG) && !defined(__MIX_TEST)
