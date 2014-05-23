@@ -1,15 +1,15 @@
 #!/bin/sh -e
 
-if [ ! -e /etc/squid/squid-block.acl.local ]; then
-  touch /etc/squid/squid-block.acl.local
+if [ ! -e /etc/squid3/squid-block.acl.local ]; then
+  touch /etc/squid3/squid-block.acl.local
 fi
 
-if [ -e /var/run/squid.pid ]; then
+if [ -e /var/run/squid3.pid ]; then
   # Reload squid
   if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
-	invoke-rc.d squid reload || exit $?
+	invoke-rc.d squid3 reload || exit $?
   else
-	/etc/init.d/squid reload || exit $?
+	/etc/init.d/squid3 reload || exit $?
   fi
 fi
 exit 0
