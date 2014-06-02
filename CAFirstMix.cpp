@@ -1069,84 +1069,84 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 		UINT32 u32KeepAliveRecvInterval=pFirstMix->m_u32KeepAliveRecvInterval;
 		getcurrentTimeMillis(keepaliveLast);
 		CAControlChannelDispatcher* pControlChannelDispatcher=pFirstMix->m_pMuxOutControlChannelDispatcher;
-		while(!pFirstMix->m_bRestart)
+		while (!pFirstMix->m_bRestart)
 			{
-				if(pQueue->getSize()>MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE)
+			if (pQueue->getSize() > MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE)
+				{
+#ifdef DEBUG
+				CAMsg::printMsg(LOG_DEBUG, "CAFirstMix::Queue is full!\n");
+#endif
+				msSleep(200);
+				getcurrentTimeMillis(keepaliveLast);
+				continue;
+				}
+			//check if the connection is broken because we did not received a Keep_alive-Message
+			getcurrentTimeMillis(keepaliveNow);
+			UINT32 keepaliveDiff = diff64(keepaliveNow, keepaliveLast);
+			if (keepaliveDiff > u32KeepAliveRecvInterval)
+				{
+				CAMsg::printMsg(LOG_DEBUG, "CAFirstMix::loopReadFromMix() -- restart because of KeepAlive-Traffic Timeout!\n");
+				pFirstMix->m_bRestart = true;
+				MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
+				break;
+				}
+			SINT32 ret = pSocketGroup->select(MIX_POOL_TIMEOUT);
+			if (ret == E_TIMEDOUT)
+				{
+#ifdef USE_POOL
+				pMixPacket->flags=CHANNEL_DUMMY;
+				pMixPacket->channel=DUMMY_CHANNEL;
+				getRandom(pMixPacket->data,DATA_SIZE);
+#ifdef LOG_PACKET_TIMES
+				setZero64(pQueueEntry->timestamp_proccessing_start);
+#endif
+#else
+				continue;
+#endif
+				}
+			else if (ret > 0)
+				{
+				ret = pMuxSocket->receive(pMixPacket);
+#ifdef LOG_PACKET_TIMES
+				getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
+#endif
+				if (ret != MIXPACKET_SIZE)
+					{
+					pFirstMix->m_bRestart = true;
+					CAMsg::printMsg(LOG_ERR, "CAFirstMix::lm_loopReadFromMix - received returned: %i -- restarting!\n", ret);
+					MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
+					break;
+					}
+				if (pMixPacket->channel > 0 && pMixPacket->channel < 256)
 					{
 #ifdef DEBUG
-						CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::Queue is full!\n");
+					CAMsg::printMsg(LOG_DEBUG, "CAFirstMix - sent a packet from the next mix to the ControlChanelDispatcher... \n");
 #endif
-						msSleep(200);
-						getcurrentTimeMillis(keepaliveLast);
-						continue;
+					pControlChannelDispatcher->proccessMixPacket(pMixPacket);
+					getcurrentTimeMillis(keepaliveLast);
+					continue;
 					}
-				//check if the connection is broken because we did not received a Keep_alive-Message
-				getcurrentTimeMillis(keepaliveNow);
-				UINT32 keepaliveDiff=diff64(keepaliveNow,keepaliveLast);
-				if(keepaliveDiff>u32KeepAliveRecvInterval)
-					{
-						CAMsg::printMsg(LOG_DEBUG,"CAFirstMix::loopReadFromMix() -- restart because of KeepAlive-Traffic Timeout!\n");
-						pFirstMix->m_bRestart=true;
-						MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
-						break;
-					}
-				SINT32 ret=pSocketGroup->select(MIX_POOL_TIMEOUT);
-				if(ret==E_TIMEDOUT)
-					{
-						#ifdef USE_POOL
-							pMixPacket->flags=CHANNEL_DUMMY;
-							pMixPacket->channel=DUMMY_CHANNEL;
-							getRandom(pMixPacket->data,DATA_SIZE);
-							#ifdef LOG_PACKET_TIMES
-								setZero64(pQueueEntry->timestamp_proccessing_start);
-							#endif
-						#else
-							continue;
-						#endif
-					}
-				else if(ret>0)
-					{
-						ret=pMuxSocket->receive(pMixPacket);
-						#ifdef LOG_PACKET_TIMES
-							getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start);
-						#endif
-						if(ret!=MIXPACKET_SIZE)
-							{
-								pFirstMix->m_bRestart=true;
-								CAMsg::printMsg(LOG_ERR,"CAFirstMix::lm_loopReadFromMix - received returned: %i -- restarting!\n",ret);
-								MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
-								break;
-							}
-					}
-					if(pMixPacket->channel>0&&pMixPacket->channel<256)
-						{
-							#ifdef DEBUG
-								CAMsg::printMsg(LOG_DEBUG,"CAFirstMix - sent a packet from the next mix to the ControlChanelDispatcher... \n");
-							#endif
-							pControlChannelDispatcher->proccessMixPacket(pMixPacket);
-							getcurrentTimeMillis(keepaliveLast);
-							continue;
-						}
-				#ifdef USE_POOL
-					#ifdef LOG_PACKET_TIMES
-						getcurrentTimeMicros(pQueueEntry->pool_timestamp_in);
-					#endif
-					pPool->pool((tPoolEntry*)pQueueEntry);
-					#ifdef LOG_PACKET_TIMES
-						getcurrentTimeMicros(pQueueEntry->pool_timestamp_out);
-					#endif
-				#endif
+#ifdef USE_POOL
+#ifdef LOG_PACKET_TIMES
+				getcurrentTimeMicros(pQueueEntry->pool_timestamp_in);
+#endif
+				pPool->pool((tPoolEntry*)pQueueEntry);
+#ifdef LOG_PACKET_TIMES
+				getcurrentTimeMicros(pQueueEntry->pool_timestamp_out);
+#endif
+#endif
 #ifdef ANON_DEBUG_MODE
-						if (pMixPacket->flags&CHANNEL_DEBUG)
-							{
-							UINT8 base64Payload[DATA_SIZE << 1];
-							EVP_EncodeBlock(base64Payload, pMixPacket->data, DATA_SIZE);//base64 encoding (without newline!)
-							CAMsg::printMsg(LOG_DEBUG, "Received Downstream AN.ON packet from previous Mix debug: %s\n", base64Payload);
-							}
+				if (pMixPacket->flags&CHANNEL_DEBUG)
+					{
+					UINT8 base64Payload[DATA_SIZE << 1];
+					EVP_EncodeBlock(base64Payload, pMixPacket->data, DATA_SIZE);//base64 encoding (without newline!)
+					CAMsg::printMsg(LOG_DEBUG, "Received Downstream AN.ON packet from previous Mix debug: %s\n", base64Payload);
+					}
 
 #endif
 				pQueue->add(pQueueEntry, sizeof(tQueueEntry));
 				getcurrentTimeMillis(keepaliveLast);
+				}
 			}
 		delete pQueueEntry;
 		pQueueEntry = NULL;
