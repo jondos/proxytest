@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef CAMULTISIGNATURE_HPP_
 #define CAMULTISIGNATURE_HPP_
-
+#ifndef ONLY_LOCAL_PROXY
 #include "CACertStore.hpp"
 #include "CACertificate.hpp"
 
@@ -67,5 +67,5 @@ class CAMultiSignature
 		UINT8* m_xoredID;
 		SINT32 getSKI(UINT8* in, UINT32 inlen, const UINT8* a_ski);
 };
-
+#endif //ONLY_LOCAL_PROXY
 #endif /* CAMULTISIGNATURE_HPP_ */
