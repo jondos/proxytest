@@ -1091,18 +1091,31 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 				break;
 				}
 			SINT32 ret = pSocketGroup->select(MIX_POOL_TIMEOUT);
-			if (ret == E_TIMEDOUT)
+			if (ret < 0)
 				{
+				if (ret == E_TIMEDOUT)
+					{
 #ifdef USE_POOL
-				pMixPacket->flags=CHANNEL_DUMMY;
-				pMixPacket->channel=DUMMY_CHANNEL;
-				getRandom(pMixPacket->data,DATA_SIZE);
+					pMixPacket->flags=CHANNEL_DUMMY;
+					pMixPacket->channel=DUMMY_CHANNEL;
+					getRandom(pMixPacket->data,DATA_SIZE);
 #ifdef LOG_PACKET_TIMES
-				setZero64(pQueueEntry->timestamp_proccessing_start);
+					setZero64(pQueueEntry->timestamp_proccessing_start);
 #endif
 #else
-				continue;
+					continue;
 #endif
+					}
+				else
+					{
+					/* another error occured (happens sometimes while debugging because
+					* of interruption, if a breakpoint is reached -> poll() returns
+					* errorcode EINTR)
+					* Note: Any Error on select() does not mean, that the underliny connections have some error state, because
+					* in this case select() returns the socket and than this socket returns the error
+					*/
+					continue;
+					}
 				}
 			else if (ret > 0)
 				{
@@ -1116,7 +1129,7 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 					CAMsg::printMsg(LOG_ERR, "CAFirstMix::lm_loopReadFromMix - received returned: %i -- restarting!\n", ret);
 					MONITORING_FIRE_NET_EVENT(ev_net_nextConnectionClosed);
 					break;
-					}
+				}
 				if (pMixPacket->channel > 0 && pMixPacket->channel < 256)
 					{
 #ifdef DEBUG
@@ -1126,6 +1139,7 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 					getcurrentTimeMillis(keepaliveLast);
 					continue;
 					}
+			}
 #ifdef USE_POOL
 #ifdef LOG_PACKET_TIMES
 				getcurrentTimeMicros(pQueueEntry->pool_timestamp_in);
@@ -1145,9 +1159,8 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 
 #endif
 				pQueue->add(pQueueEntry, sizeof(tQueueEntry));
-				getcurrentTimeMillis(keepaliveLast);
+				getcurrentTimeMillis(keepaliveLast); ///ToDo: check if keep-alive is really correct here - should it not be moved upwards?
 				}
-			}
 		delete pQueueEntry;
 		pQueueEntry = NULL;
 		delete pSocketGroup;

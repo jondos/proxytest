@@ -208,8 +208,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 		SINT32 retLock = m_csReceive.lock();
 		if (retLock != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_CRIT,
-				"Could not lock MuxSocket receive method! Error code: %d\n", retLock);
+			CAMsg::printMsg(LOG_CRIT,	"Could not lock MuxSocket receive method! Error code: %d\n", retLock);
 			return E_UNKNOWN;
 		}
 		

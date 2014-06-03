@@ -791,7 +791,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 			#endif
 		#endif
 				pQueue->add(pQueueEntry,sizeof(tQueueEntry));
-				getcurrentTimeMillis(keepaliveLast);
+				getcurrentTimeMillis(keepaliveLast);///ToDo: check if keep-alive is really correct here - should it not be moved upwards?
 			}
 		delete pQueueEntry;
 		pQueueEntry = NULL;
