@@ -128,7 +128,7 @@ class CASingleSocketGroup
 					}
 					#ifdef _DEBUG
 						ret=GET_NET_ERROR;
-						CAMsg::printMsg(LOG_DEBUG,"SocketGroup Select-Fehler: %i\n",ret);
+						CAMsg::printMsg(LOG_DEBUG,"SocketGroup poll Select-Fehler: %i\n",ret);
 					#endif
 					return E_UNKNOWN;
 				}
