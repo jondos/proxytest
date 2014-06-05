@@ -1114,6 +1114,9 @@ THREAD_RETURN fm_loopReadFromMix(void* pParam)
 					* Note: Any Error on select() does not mean, that the underliny connections have some error state, because
 					* in this case select() returns the socket and than this socket returns the error
 					*/
+#ifdef DEBUG
+					CAMsg::printMsg(LOG_DEBUG, "CAFirstMix::loopReadFromMix() - socket select error: %i\n",ret);
+#endif
 					continue;
 					}
 				}
