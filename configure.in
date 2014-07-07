@@ -535,7 +535,7 @@ if test "x$useminixml" == "xtrue" ; then
 	for xmldir in "" $tryxmlincludedir ; do
 		CFLAGS="$saved_CFLAGS -I$xmldir"
 		CXXFLAGS="$saved_CXXFLAGS -I$xmldir"
-		AC_RUN_IFELSE([AC_LANG_SOURCE([[
+		AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
 					#include <mxml.h>
 					int main(void) 
 					{
@@ -559,7 +559,7 @@ else
 	for xmldir in "" $tryxmlincludedir ; do
 		CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
 		CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
-		AC_RUN_IFELSE([AC_LANG_SOURCE([[
+		AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
 					#include <dom/DOM.hpp>
 					int main(void) 
 					{
