@@ -79,7 +79,7 @@ protected:
 	}*/
 
 private:
-	SINT32 doTLSConnect(CASocketAddr &psa);
+	SINT32 doTLSConnect(const CASocketAddr &psa);
 
 	SSL *m_pSSL;
 	SSL_CTX *m_pCtx;
