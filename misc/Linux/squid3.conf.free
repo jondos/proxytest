@@ -1,0 +1,107 @@
+
+# Set the path to your error message directory
+# or comment out to use the default squid messages
+
+# for src code from svn
+error_directory /home/mix/stable/misc/squid-messages
+
+# if Debian package "mix-squidmessages" was installed
+# error_directory /usr/share/mix-squidmessages
+
+
+# Set core dump dir
+coredump_dir /var/spool/squid3
+
+# define ACL for IPv6
+acl to_ipv6 dst ipv6
+
+
+# Set the outgiong IP address for IPv4 and IPv6, 
+# if your server have more than one IP addresses
+
+# tcp_outgoing_address 123.123.123.123 !to_ipv6
+# tcp_outgoing_address 2000::1 to_ipv6
+
+
+http_port 127.0.0.1:3128
+icp_port 0
+
+max_filedescriptors 16384
+
+hierarchy_stoplist cgi-bin ?
+acl QUERY urlpath_regex cgi-bin \?
+no_cache deny QUERY
+
+maximum_object_size 16384 KB
+
+cache_store_log none
+cache_access_log none
+
+refresh_pattern ^ftp:		1440	20%	10080
+refresh_pattern ^gopher:	1440	0%	1440
+refresh_pattern -i (/cgi-bin/|\?) 0	0%	0
+refresh_pattern .		0	20%	4320
+
+half_closed_clients off
+
+acl manager proto cache_object
+acl localhost src 127.0.0.1/32
+acl to_localhost dst 127.0.0.0/32
+
+# for free cascades only
+acl robot browser -i bot
+deny_info ERR_ROBOT robot
+
+# for free cascades only
+acl Safe_ports port 80 443
+deny_info ERR_NOT_SAFE_PORT !Safe_ports
+
+acl purge method PURGE
+acl CONNECT method CONNECT
+
+acl bad dstdomain "/etc/squid3/squid3-block.acl"
+deny_info ERR_ACCESS_DENIED_BAD bad
+
+
+http_access allow manager localhost
+http_access deny manager
+http_access allow purge localhost
+http_access deny purge
+http_access deny !Safe_ports
+http_access deny CONNECT !Safe_ports
+
+# for payment reminder
+acl adsde dstdomain premium-de
+deny_info JONDO_ADS_DE adsde
+acl adsen dstdomain premium-en
+deny_info JONDO_ADS_EN adsen
+http_access deny adsde
+http_access deny adsen
+
+# for limit the up- and donwload to 2 MB
+acl jondonym1 dstdomain www.anonym-surfen.de
+acl jondonym2 dstdomain anonymous-proxy-servers.net
+acl anon1 dstdomain anon.inf.tu-dresden.de
+acl anon2 dst 141.76.45.41
+reply_body_max_size 2 MB all !jondonym1 !jondonym2 !anon1 !anon2
+request_body_max_size 2048 KB
+
+http_access deny bad
+http_access deny robot
+
+http_access allow localhost
+http_access deny all
+
+http_reply_access allow all
+
+icp_access allow all
+
+visible_hostname none
+forwarded_for delete
+via off
+
+dns_v4_first on
+
+
+
+
