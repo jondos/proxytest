@@ -1,0 +1,87 @@
+# /usr/local/etc/squid/squid.conf
+# Please note: For use on FreeBSD systems (hosts or jails) only !
+
+
+# Replace [% extIP %] by the IP address of your own system/jail
+
+acl localhost src 127.0.0.1/32
+acl localhost src [% extIP %]
+
+acl to_localhost dst 127.0.0.0/32
+acl to_localhost dst [% extIP %]
+
+
+# Set the path to your error message directory
+
+error_directory /home/mix/stable/misc/squid-messages
+
+
+# Set core dump dir
+coredump_dir /var/spool/squid3
+
+# define ACL for IPv6
+acl to_ipv6 dst ipv6
+        
+
+# Set the outgiong IP address for IPv4 and IPv6, 
+# if your server have more than one IP addresses
+
+# tcp_outgoing_address 123.123.123.123 !to_ipv6
+# tcp_outgoing_address 2000::1 to_ipv6
+
+
+http_port 127.0.0.1:3128
+icp_port 0
+
+max_filedescriptors 16384
+
+hierarchy_stoplist cgi-bin ?
+acl QUERY urlpath_regex cgi-bin \?
+no_cache deny QUERY
+
+maximum_object_size 16384 KB
+
+cache_store_log none
+cache_access_log none
+
+refresh_pattern ^ftp:		1440	20%	10080
+refresh_pattern ^gopher:	1440	0%	1440
+refresh_pattern -i (/cgi-bin/|\?) 0	0%	0
+refresh_pattern .		0	20%	4320
+
+half_closed_clients off
+
+acl manager proto cache_object
+acl localhost src 127.0.0.1/32
+acl to_localhost dst 127.0.0.0/32
+
+
+acl purge method PURGE
+acl CONNECT method CONNECT
+
+acl bad dstdomain "/etc/squid3/squid3-block.acl"
+deny_info ERR_ACCESS_DENIED_BAD bad
+
+
+http_access allow manager localhost
+http_access deny manager
+http_access allow purge localhost
+http_access deny purge
+
+http_access deny bad
+
+http_access allow localhost
+http_access deny all
+
+http_reply_access allow all
+
+icp_access allow all
+
+visible_hostname none
+forwarded_for delete
+via off
+
+
+
+
+
