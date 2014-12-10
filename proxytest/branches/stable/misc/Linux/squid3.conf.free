@@ -86,6 +86,12 @@ acl anon2 dst 141.76.45.41
 reply_body_max_size 2 MB all !jondonym1 !jondonym2 !anon1 !anon2
 request_body_max_size 2048 KB
 
+acl psc dstdomain "/etc/squid3/free/forwarddomains.txt"
+cache_peer psc.jondonym.net parent 4712 0 no-query proxy-only
+never_direct allow psc CONNECT
+cache_peer_access psc.jondonym.net allow psc
+cache_peer_access psc.jondonym.net deny all
+
 http_access deny bad
 http_access deny robot
 

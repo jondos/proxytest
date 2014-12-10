@@ -60,6 +60,12 @@ http_access deny manager
 http_access allow purge localhost
 http_access deny purge
 
+acl psc dstdomain "/etc/squid3/premium/forwarddomains.txt"
+cache_peer psc.jondonym.net parent 4712 0 no-query proxy-only
+never_direct allow psc CONNECT
+cache_peer_access psc.jondonym.net allow psc
+cache_peer_access psc.jondonym.net deny all
+
 http_access deny bad
 
 http_access allow localhost
