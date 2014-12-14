@@ -1,5 +1,0 @@
-# Some services block IP addresses they know to belong to anonymizers.
-#
-# Here you can enter domain names for which requests will be forwarded 
-# to a special cache peer (another proxy) to mask the anonymizer's 
-# exit node IP.
