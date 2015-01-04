@@ -1,4 +1,4 @@
-mix-squidconf (14.12.12) unstable; urgency=low
+mix-squidconf (14.12.12) unstable; urgency=high
 
   * workaround for paysafecard blocking anonymizers
 
