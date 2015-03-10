@@ -788,10 +788,10 @@ SINT32 CALastMixA::loop()
 									{
 										countRead--;
 #endif
-										UINT32 bucketSize;
+										//UINT32 bucketSize;
 										if((pChannelListEntry->sendmeCounterDownstream<FLOW_CONTROL_SENDME_HARD_LIMIT)
 												#ifdef DELAY_CHANNELS
-													&&((bucketSize=m_pChannelList->getDelayBuckets(pChannelListEntry->delayBucketID))>0 )
+											 && ( pChannelListEntry->delayBucket>0)
 												#endif
 												#ifdef DELAY_CHANNELS_LATENCY
 													&&(isGreater64(current_time_millis,pChannelListEntry->timeLatency))
@@ -803,7 +803,7 @@ SINT32 CALastMixA::loop()
 												#else
 													UINT32 readLen=
 																min(
-																	/*m_pChannelList->getDelayBuckets(pChannelListEntry->delayBucketID)*/bucketSize,
+																	pChannelListEntry->delayBucket,
 																	PAYLOAD_SIZE);
 													ret=pChannelListEntry->pSocket->receive(pMixPacket->payload.data,readLen);
 												#endif

@@ -178,8 +178,8 @@ class CALastMixChannelList
 				public:
 					void setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall);
 					void reduceDelayBuckets(UINT32 delayBucketID, UINT32 amount);
-					bool hasDelayBuckets(UINT32 delayBucketID);
-					UINT32 getDelayBuckets(UINT32 delayBucketID);
+					//bool hasDelayBuckets(UINT32 delayBucketID);
+					//UINT32 getDelayBuckets(UINT32 delayBucketID);
 			#endif
 			#ifdef DELAY_CHANNELS_LATENCY
 				//Parameters
