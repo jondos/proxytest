@@ -283,21 +283,19 @@ SINT32 CALastMixChannelList::test()
 	}
 	
 	void CALastMixChannelList::reduceDelayBuckets(UINT32 delayBucketID, UINT32 amount)
-	{
-		m_pMutexDelayChannel->lock();
-		//if(delayBucketID < MAX_POLLFD)
-		//{
-			//if(m_pDelayBuckets[delayBucketID] != NULL)
-			//{
-				*(m_pDelayBuckets[delayBucketID]) -= ( (*(m_pDelayBuckets[delayBucketID])) > amount ) 
-															? amount : (*(m_pDelayBuckets[delayBucketID]));
-			//}
-			/*CAMsg::printMsg(LOG_DEBUG,"DelayBuckets decrementing ID %u downto %u\n", 
-								delayBucketID, (*(m_pDelayBuckets[delayBucketID])) );*/
-		//}
-		m_pMutexDelayChannel->unlock();
-	}
-	
+		{
+			m_pMutexDelayChannel->lock();
+			if (*(m_pDelayBuckets[delayBucketID]) < amount)
+				{
+					*(m_pDelayBuckets[delayBucketID]) = 0;
+				}
+			else
+				{
+					*(m_pDelayBuckets[delayBucketID]) -= amount;
+				}
+			m_pMutexDelayChannel->unlock();
+		}
+	/*
 	UINT32 CALastMixChannelList::getDelayBuckets(UINT32 delayBucketID)
 	{
 		UINT32 ret = 0;
@@ -305,9 +303,9 @@ SINT32 CALastMixChannelList::test()
 		ret = ( (*(m_pDelayBuckets[delayBucketID])) > 0 ) ? (*(m_pDelayBuckets[delayBucketID])) : 0;
 		m_pMutexDelayChannel->unlock();
 		return ret;
-	}
+	}*/
 	
-	bool CALastMixChannelList::hasDelayBuckets(UINT32 delayBucketID)
+	/*bool CALastMixChannelList::hasDelayBuckets(UINT32 delayBucketID)
 	{
 		bool ret = false;
 		m_pMutexDelayChannel->lock();
@@ -320,7 +318,7 @@ SINT32 CALastMixChannelList::test()
 		//}
 		m_pMutexDelayChannel->unlock();
 		return ret;
-	}
+	}*/
 	
 	void CALastMixChannelList::setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall)
 	{
