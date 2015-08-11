@@ -38,6 +38,7 @@
 #include "../CAPool.hpp"
 #include "../CACmdLnOptions.hpp"
 #include "../CAUtil.hpp"
+#include "../CALibProxytest.hpp"
 
 #ifdef HAVE_EPOLL
   #include "../CASocketGroupEpoll.hpp"
@@ -52,7 +53,8 @@ void CALastMixB::reconfigureMix() {
   #ifdef DELAY_CHANNELS
     CAMsg::printMsg(LOG_DEBUG, "CALastMixB: Set new resources limitation parameters.\n");
     if (m_pChainTable != NULL) {
-      m_pChainTable->setDelayParameters(pglobalOptions->getDelayChannelUnlimitTraffic(), pglobalOptions->getDelayChannelBucketGrow(), pglobalOptions->getDelayChannelBucketGrowIntervall());
+			m_pChainTable->setDelayParameters(CALibProxytest::getOptions()->getDelayChannelUnlimitTraffic(), CALibProxytest::getOptions()->getDelayChannelBucketGrow(), 
+				CALibProxytest::getOptions()->getDelayChannelBucketGrowIntervall());
     }
   #endif
 }

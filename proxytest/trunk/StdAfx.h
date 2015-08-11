@@ -307,7 +307,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#if _MSC_VER <1500
 		#define vsnprintf _vsnprintf
 	#endif
-	#define snprintf _snprintf
+	#if _MSC_VER <1900
+		#define snprintf _snprintf
+	#endif
 	#define getpid _getpid
 	#define strncasecmp _strnicmp
 	#define open _open
