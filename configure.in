@@ -311,7 +311,7 @@ dnl Checks for Headers
 AC_HEADER_STDC
 AC_CHECK_HEADERS(sys/filio.h)
 AC_CHECK_HEADERS(sys/epoll.h)
-AC_CHECK_HEADER([malloc.h])
+AC_CHECK_HEADER([malloc.h],AC_DEFINE([HAVE_MALLOC_H],[],[Define if you have a working version of malloc.h])
 
 
 dnl Check for some "standard" libraries
