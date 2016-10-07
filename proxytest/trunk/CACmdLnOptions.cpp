@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAMsg.hpp"
 #include "CASocketAddrINet.hpp"
-#include "CAIPAddrWithNetmask.hpp"
+//#include "CAIPAddrWithNetmask.hpp"
 #include "CASocket.hpp"
 #include "CAXMLBI.hpp"
 #include "xml/DOM_Output.hpp"
@@ -3835,6 +3835,10 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 				{
 					proxy_type=TARGET_HTTP_PROXY;
 				}
+				else if (strcmp((char*)tmpBuff, "VPN") == 0)
+				{
+					proxy_type = TARGET_VPN_PROXY;
+				}
 				else
 				{
 					continue;
@@ -3897,7 +3901,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 
 
 				// check connection to proxy
-				tmpSocket = new CASocket;
+				tmpSocket = new CASocket();
 				tmpSocket->setRecvBuff(50000);
 				tmpSocket->setSendBuff(5000);
 				ret = tmpSocket->connect(*addr,LAST_MIX_TO_PROXY_CONNECT_TIMEOUT);
