@@ -16,7 +16,6 @@
 #include "../StdAfx.h"
 #include "tre-internal.h"
 #include "tre-mem.h"
-#include "malloc.h"
 
 
 /* Returns a new memory allocator or NULL if out of memory. */
