@@ -211,7 +211,7 @@ SINT32 CASignature::setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const ch
 						tmpRSA->flags |= RSA_FLAG_NO_BLINDING;
 					#endif
 					#if OPENSSL_VERSION_NUMBER	> 0x0090707fL
-						tmpRSA->flags |= RSA_FLAG_NO_EXP_CONSTTIME;
+						//tmpRSA->flags |= RSA_FLAG_NO_EXP_CONSTTIME;
 					#endif
 					RSA_free(m_pRSA);
 					m_pRSA=tmpRSA;
