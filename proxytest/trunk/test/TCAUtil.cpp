@@ -4,6 +4,8 @@
 #include "../TypeA/CALastMixA.hpp"
 #include "../CALibProxytest.hpp"
 
+
+#ifdef LOG_CRIME
 class CparseDomainFromPayloadHelper :public CALastMix
 	{
 		public:
@@ -21,53 +23,25 @@ class CparseDomainFromPayloadHelper :public CALastMix
 		
 	};
 
-class TCAUtilTest : public CPPUNIT_NS::TestCase
-{
-  CPPUNIT_TEST_SUITE(TCAUtilTest);
-  CPPUNIT_TEST(test_parseU64);
-#ifdef LOG_CRIME
-  CPPUNIT_TEST(test_parseDomainFromPayload);
-#endif
-	CPPUNIT_TEST(test_regexp_payload);
-	CPPUNIT_TEST_SUITE_END();
+void CparseDomainFromPayloadHelper::doTest()
+	{
+	UINT8* domain = parseDomainFromPayload(m_payload, strlen((char*)m_payload));
+	CPPUNIT_ASSERT(domain != NULL);
+	if (domain != NULL)
+		{
+		int ret = strcmp((char*)domain, (char*)m_expectedDomain);
+		CPPUNIT_ASSERT(ret == 0);
+		}
+	}
 
+
+/*
 public:
 	void setUp(void) {CALibProxytest::init();}
   void tearDown(void) {CALibProxytest::cleanup();} 
+*/
 
-protected:
-  void test_parseU64(void) 
-		{
-			UINT64 u64;
-			UINT64 u64Ref;
-			SINT32 ret;
-			set64(u64Ref,(UINT32)1);
-			set64(u64,(UINT32)0);
-			ret=parseU64((UINT8*)"1",u64);
-			CPPUNIT_ASSERT_EQUAL(ret,E_SUCCESS);
-			CPPUNIT_ASSERT(isEqual64(u64Ref,u64));
-
-			set64(u64Ref,(UINT32)0);
-			ret=parseU64((UINT8*)"0",u64);
-			CPPUNIT_ASSERT_EQUAL(ret,E_SUCCESS);
-			CPPUNIT_ASSERT(isEqual64(u64Ref,u64));
-
-			ret=parseU64((UINT8*)"-1",u64);
-			CPPUNIT_ASSERT(ret!=E_SUCCESS);
-
-			ret=parseU64((UINT8*)"-a",u64);
-			CPPUNIT_ASSERT(ret!=E_SUCCESS);
-
-			ret=parseU64((UINT8*)"d",u64);
-			CPPUNIT_ASSERT(ret!=E_SUCCESS);
-
-			set64(u64Ref,(UINT32)34564566);
-			ret=parseU64((UINT8*)"34564566",u64);
-			CPPUNIT_ASSERT_EQUAL(ret,E_SUCCESS);
-			CPPUNIT_ASSERT(isEqual64(u64Ref,u64));
-	}
-
-	void test_parseDomainFromPayload()
+TEST(TCAUtil, parseDomainFromPayload)
 		{
 			CparseDomainFromPayloadHelper arTest[]=
 			{
@@ -79,28 +53,49 @@ protected:
 				arTest[i].doTest();
 		}
 
-	void test_regexp_payload()
-		{
-			regex_t regex;
-			regcomp(&regex,"HALLO",REG_EXTENDED|REG_ICASE|REG_NOSUB);
-			int ret=regexec(&regex,"dfdsfdsf\n\rdsfdsfdsf\nfgfdgdfgfdg\r\ndfdfdfdsfHaLlofdsfdsf",0,NULL,0);
-			CPPUNIT_ASSERT_EQUAL(ret,0);
-			regfree(&regex);
-		}
 
-};
-
-CPPUNIT_TEST_SUITE_REGISTRATION(TCAUtilTest);
-
-#ifdef LOG_CRIME
-void CparseDomainFromPayloadHelper::doTest()
-	{
-		UINT8* domain=parseDomainFromPayload(m_payload,strlen((char*)m_payload));
-		CPPUNIT_ASSERT(domain!=NULL);
-		if(domain!=NULL)
-			{
-				int ret=strcmp((char*)domain,(char*)m_expectedDomain);
-				CPPUNIT_ASSERT(ret==0);
-			}
-	}
 #endif
+
+
+
+
+
+TEST(TCAUtil, parseU64)
+	{
+	UINT64 u64;
+	UINT64 u64Ref;
+	SINT32 ret;
+	set64(u64Ref, (UINT32)1);
+	set64(u64, (UINT32)0);
+	ret = parseU64((UINT8*)"1", u64);
+	ASSERT_EQ(ret, E_SUCCESS);
+	ASSERT_TRUE(isEqual64(u64Ref, u64));
+
+	set64(u64Ref, (UINT32)0);
+	ret = parseU64((UINT8*)"0", u64);
+	ASSERT_EQ(ret, E_SUCCESS);
+	ASSERT_TRUE(isEqual64(u64Ref, u64));
+
+	ret = parseU64((UINT8*)"-1", u64);
+	ASSERT_TRUE(ret != E_SUCCESS);
+
+	ret = parseU64((UINT8*)"-a", u64);
+	ASSERT_TRUE(ret != E_SUCCESS);
+
+	ret = parseU64((UINT8*)"d", u64);
+	ASSERT_TRUE(ret != E_SUCCESS);
+
+	set64(u64Ref, (UINT32)34564566);
+	ret = parseU64((UINT8*)"34564566", u64);
+	ASSERT_EQ(ret, E_SUCCESS);
+	ASSERT_TRUE(isEqual64(u64Ref, u64));
+	}
+
+TEST(TCAUtil, regex)
+	{
+	regex_t regex;
+	regcomp(&regex, "HALLO", REG_EXTENDED | REG_ICASE | REG_NOSUB);
+	int ret = regexec(&regex, "dfdsfdsf\n\rdsfdsfdsf\nfgfdgdfgfdg\r\ndfdfdfdsfHaLlofdsfdsf", 0, NULL, 0);
+	ASSERT_EQ(ret, 0);
+	regfree(&regex);
+	}

@@ -77,7 +77,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>LLVM-vs2013</PlatformToolset>
+    <PlatformToolset>LLVM-vs2014</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_with_unit_tests|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
@@ -160,13 +160,13 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\proxytest-lib\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\build\$(ProjectName)\$(Configuration)\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">.\proxytest-lib\Debug-with-googleperftools\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">.\proxytest-lib\Debug with LLVM\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">$(SolutionDir)\build\$(ProjectName)\$(Configuration)\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug_with_unit_tests|Win32'">.\proxytest-lib\Debug\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\proxytest-lib\Debug\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\build\$(ProjectName)\$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">.\proxytest-lib\Debug-with-googleperftools\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">.\proxytest-lib\Debug with LLVM\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">$(SolutionDir)\build\$(ProjectName)\$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug_with_unit_tests|Win32'">.\proxytest-lib\Debug\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\proxytest-lib\Release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\proxytest-lib\Release\</IntDir>
@@ -310,7 +310,7 @@
       <CompileAs>CompileAsCpp</CompileAs>
       <AdditionalOptions>-Wno-unknown-pragmas  -Wno-microsoft %(AdditionalOptions)</AdditionalOptions>
       <EnablePREfast>false</EnablePREfast>
-      <ExceptionHandling>false</ExceptionHandling>
+      <ExceptionHandling>Sync</ExceptionHandling>
       <FloatingPointModel />
       <CallingConvention />
     </ClCompile>

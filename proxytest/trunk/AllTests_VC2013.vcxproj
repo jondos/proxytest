@@ -39,6 +39,7 @@
     <ProjectGUID>{1DE75B05-314A-4E97-B281-5D1075F7CF2D}</ProjectGUID>
     <RootNamespace>AllTest</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -54,7 +55,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>LLVM-vs2014</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_with_unit_tests|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -98,11 +99,11 @@
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllTest\Debug\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">AllTest\Debug\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">AllTest\Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">AllTest\DebugWithLLVM\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug_with_unit_tests|Win32'">AllTest\Debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllTest/Debug\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">AllTest/Debug\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">AllTest/Debug\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">AllTest/DebugWithLLVM\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug_with_unit_tests|Win32'">AllTest/Debug\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">AllTest</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">AllTest</TargetName>
@@ -205,7 +206,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>cppunitd_dll.lib;proxytest-lib.lib;ws2_32.lib;ssleay32.lib;libeay32.lib;pthreadVC2.lib;xerces-c_2D.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>.\proxytest-lib\Debug;$(LIB_CPPUNIT);$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_ZLIB);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>.\proxytest-lib\Debug with LLVM;$(LIB_CPPUNIT);$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_ZLIB);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)AllTest.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>

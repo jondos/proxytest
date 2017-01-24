@@ -34,6 +34,7 @@
     <ProjectName>BulletinBoard</ProjectName>
     <ProjectGUID>{9DB252A3-2EE3-440F-AC14-E961994FCE7A}</ProjectGUID>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -103,10 +104,10 @@
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Debug\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">Debug\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">Debug\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">$(SolutionDir)\$(ProjectName)\$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Debug\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">Debug\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">Debug\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">$(SolutionDir)\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">BulletinBoard</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">BulletinBoard</TargetName>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">BulletinBoard</TargetName>
