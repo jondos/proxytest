@@ -53,7 +53,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xml", "xml", "{065C3B05-C62
 		xml\Makefile.am = xml\Makefile.am
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AllTests_VC2015", "AllTests\AllTests_VC2015.vcxproj", "{6A4CE475-E3C6-4862-9656-E1E0E531C119}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AllTests", "AllTests\AllTests_VC2015.vcxproj", "{6A4CE475-E3C6-4862-9656-E1E0E531C119}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -754,6 +754,5 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{065C3B05-C626-4FF4-BEED-A88F2A4A184D} = {54C687C4-A40F-4654-8DA3-66D2D382DDC8}
-		{6A4CE475-E3C6-4862-9656-E1E0E531C119} = {54C687C4-A40F-4654-8DA3-66D2D382DDC8}
 	EndGlobalSection
 EndGlobal
