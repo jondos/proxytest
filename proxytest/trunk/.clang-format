@@ -1,11 +1,11 @@
-AccessModifierOffset: -2
+AccessModifierOffset: 2
 ConstructorInitializerIndentWidth: 2
 AlignEscapedNewlinesLeft: false
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: true
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: 'None'
 AlwaysBreakTemplateDeclarations: false
 AlwaysBreakBeforeMultilineStrings: false
 BreakBeforeBinaryOperators: false
@@ -16,7 +16,7 @@ ColumnLimit:     0
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 DerivePointerBinding: false
 ExperimentalAutoDetectBinPacking: false
-IndentCaseLabels: false
+IndentCaseLabels: true
 MaxEmptyLinesToKeep: 1
 NamespaceIndentation: None
 ObjCSpaceBeforeProtocolList: true
@@ -33,7 +33,6 @@ Standard:        Cpp03
 IndentWidth:     2
 TabWidth:        2
 UseTab:          Always
-BreakBeforeBraces: Allman
 IndentFunctionDeclarationAfterType: true
 SpacesInParentheses: false
 SpacesInAngles:  false
@@ -42,3 +41,10 @@ SpacesInCStyleCastParentheses: false
 SpaceAfterControlStatementKeyword: true
 SpaceBeforeAssignmentOperators: true
 ContinuationIndentWidth: 2
+BreakBeforeBraces: 'Custom'
+BraceWrapping: {
+AfterClass : true,
+AfterFunction: true,
+IndentBraces : true,
+AfterControlStatement: true
+ }
