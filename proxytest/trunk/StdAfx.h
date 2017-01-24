@@ -522,6 +522,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 
 
+//For Google Test Framework Unit Tests
+#ifdef __GOOGLE_UNIT_TEST__
+#include <gtest/gtest.h>
+#endif
+
+
 #include <stdio.h>
 #include <time.h>
 #include <sys/types.h>
@@ -646,10 +652,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <zlib.h>
 #endif
 
-//For Google Test Framework Unit Tests
-#ifdef __GOOGLE_UNIT_TEST__
-#include "gtest/gtest.h"
-#endif
 
 
 //Mix Version Info as multiline String
