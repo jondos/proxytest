@@ -877,7 +877,7 @@ AC_ARG_ENABLE(build-only-lib,
 
 
 if test "x$DOTHETEST" != "xyes" ; then
-	AC_SUBST(LIBCPPUNIT,cppunit)
+	AC_SUBST(LIBGOOGLETEST,gtest)
 fi
 
 WIRESHARK_CFLAGS=""
