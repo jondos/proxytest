@@ -104,7 +104,8 @@ mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am_test_proxytest_OBJECTS = TCAUtil.$(OBJEXT)
+am_test_proxytest_OBJECTS = TCAUtil.$(OBJEXT) TCACertificate.$(OBJEXT) \
+	AllTests.$(OBJEXT)
 test_proxytest_OBJECTS = $(am_test_proxytest_OBJECTS)
 test_proxytest_DEPENDENCIES = $(top_srcdir)/libproxytest.a \
 	$(top_srcdir)/xml/libxml.a $(top_srcdir)/popt/libpopt.a
@@ -419,7 +420,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
-LIBCPPUNIT = @LIBCPPUNIT@
+LIBGOOGLETEST = @LIBGOOGLETEST@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -507,8 +508,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-test_proxytest_SOURCES = TCAUtil.cpp
-test_proxytest_LDADD = -l @LIBCPPUNIT@ $(top_srcdir)/libproxytest.a $(top_srcdir)/xml/libxml.a \
+test_proxytest_SOURCES = TCAUtil.cpp TCACertificate.cpp AllTests.cpp
+test_proxytest_LDADD = -l @LIBGOOGLETEST@ $(top_srcdir)/libproxytest.a $(top_srcdir)/xml/libxml.a \
 	$(top_srcdir)/popt/libpopt.a
 
 includes = @INCLUDES@
@@ -565,6 +566,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AllTests.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TCACertificate.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TCAUtil.Po@am__quote@
 
 .cpp.o:
