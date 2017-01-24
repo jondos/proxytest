@@ -34,6 +34,7 @@
     <ProjectName>FlashMixUser</ProjectName>
     <ProjectGUID>{C639FF43-A8F6-4957-8BB3-AA5692E8AC9F}</ProjectGUID>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.11.14"
+#define MIX_VERSION "00.11.15"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -287,7 +287,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifdef _MSC_VER
 		#define ftime _ftime
 		#define timeb _timeb
-		#define gmtime_r(x,y) gmtime(x)
+		#define NEED_GMTIME_R_WINDOWS
+		struct tm * gmtime_r(const time_t *timep, struct tm *result);
+	
 	#endif
 	#include <malloc.h>
 	#define SET_NET_ERROR(x)
@@ -644,18 +646,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <zlib.h>
 #endif
 
-//For CPPUnit Test
-#ifdef __UNIT_TEST__
-	#include <cppunit/ui/text/TestRunner.h>
-	#include <cppunit/extensions/HelperMacros.h>
-	#include <cppunit/TestFixture.h>
-	#include <cppunit/TestResult.h>
-	#include <cppunit/TestResultCollector.h>
-	#include <cppunit/BriefTestProgressListener.h>
-	#include <cppunit/CompilerOutputter.h>
-#include <cppunit/TextOutputter.h>
-//#include <cppunit/ui/qt/TestRunner.h>
+//For Google Test Framework Unit Tests
+#ifdef __GOOGLE_UNIT_TEST__
+#include "gtest/gtest.h"
 #endif
+
 
 //Mix Version Info as multiline String
 #ifdef XERCES_FULLVERSIONDOT
