@@ -1584,7 +1584,7 @@ SINT32 parseU64(const UINT8 * str, UINT64& value)
 		value = strtoull((const char *) str, &endptr, 0);
 		if(endptr!=NULL&&*endprt==0) //check if whole string was parsed...
 			return E_SUCCESS;
-		return E_UNKNWON;
+		return E_UNKNOWN;
 	#else
 		#ifdef HAVE_NATIVE_UINT64
 				if (str == NULL)
