@@ -127,22 +127,23 @@ am__libproxytest_a_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CAControlChannelDispatcher.cpp CAControlChannelTest.cpp \
 	CADatabase.cpp CADatagramSocket.cpp CADataRetentionLog.cpp \
 	CADataRetentionLogFile.cpp CADynaNetworking.cpp \
-	CADynamicCascadeConfigurator.cpp CAFirstMix.cpp \
-	CAFirstMixChannelList.cpp CAHttpClient.cpp CAInfoService.cpp \
-	CAInfoServiceAware.cpp CAIPList.cpp CAIPAddrWithNetmask.cpp \
-	CALastMix.cpp CALastMixChannelList.cpp CAListenerInterface.cpp \
-	CALibProxytest.cpp CALocalProxy.cpp CALogPacketStats.cpp \
-	CAMiddleMix.cpp CAMiddleMixChannelList.cpp CAMix.cpp \
-	CAMixWithReplayDB.cpp CAMsg.cpp CAMultiSignature.cpp \
-	CAMutex.cpp CAMuxSocket.cpp CAPriceInfo.cpp CAPool.cpp \
-	CAQueue.cpp CAReplayControlChannel.cpp \
-	CAReplayCtrlChannelMsgProc.cpp CASemaphore.cpp CASignature.cpp \
-	CASingleSocketGroup.cpp CASocket.cpp CASocketAddrINet.cpp \
-	CASocketAddrUnix.cpp CASocketGroup.cpp CASocketGroupEpoll.cpp \
-	CASocketList.cpp CAStatusManager.cpp CATLSClientSocket.cpp \
-	CASymCipher.cpp CASyncControlChannel.cpp CATempIPBlockList.cpp \
-	CAThread.cpp CAThreadPool.cpp CAThreadList.cpp CAUtil.cpp \
-	CAXMLBI.cpp CAXMLCostConfirmation.cpp CAXMLErrorMessage.cpp \
+	CADynamicCascadeConfigurator.cpp CAFileSystemDirectory.cpp \
+	CAFirstMix.cpp CAFirstMixChannelList.cpp CAHttpClient.cpp \
+	CAInfoService.cpp CAInfoServiceAware.cpp CAIPList.cpp \
+	CAIPAddrWithNetmask.cpp CALastMix.cpp CALastMixChannelList.cpp \
+	CAListenerInterface.cpp CALibProxytest.cpp CALocalProxy.cpp \
+	CALogPacketStats.cpp CAMiddleMix.cpp \
+	CAMiddleMixChannelList.cpp CAMix.cpp CAMixWithReplayDB.cpp \
+	CAMsg.cpp CAMultiSignature.cpp CAMutex.cpp CAMuxSocket.cpp \
+	CAPriceInfo.cpp CAPool.cpp CAQueue.cpp \
+	CAReplayControlChannel.cpp CAReplayCtrlChannelMsgProc.cpp \
+	CASemaphore.cpp CASignature.cpp CASingleSocketGroup.cpp \
+	CASocket.cpp CASocketAddrINet.cpp CASocketAddrUnix.cpp \
+	CASocketGroup.cpp CASocketGroupEpoll.cpp CASocketList.cpp \
+	CAStatusManager.cpp CATLSClientSocket.cpp CASymCipher.cpp \
+	CASyncControlChannel.cpp CATempIPBlockList.cpp CAThread.cpp \
+	CAThreadPool.cpp CAThreadList.cpp CAUtil.cpp CAXMLBI.cpp \
+	CAXMLCostConfirmation.cpp CAXMLErrorMessage.cpp \
 	CAXMLPriceCert.cpp Hashtable.cpp TermsAndConditions.cpp \
 	packetintro.cpp
 @ONLY_LIB_FALSE@am_libproxytest_a_OBJECTS = libproxytest_a-CAAbstractControlChannel.$(OBJEXT) \
@@ -169,6 +170,7 @@ am__libproxytest_a_SOURCES_DIST = CAAbstractControlChannel.cpp \
 @ONLY_LIB_FALSE@	libproxytest_a-CADataRetentionLogFile.$(OBJEXT) \
 @ONLY_LIB_FALSE@	libproxytest_a-CADynaNetworking.$(OBJEXT) \
 @ONLY_LIB_FALSE@	libproxytest_a-CADynamicCascadeConfigurator.$(OBJEXT) \
+@ONLY_LIB_FALSE@	libproxytest_a-CAFileSystemDirectory.$(OBJEXT) \
 @ONLY_LIB_FALSE@	libproxytest_a-CAFirstMix.$(OBJEXT) \
 @ONLY_LIB_FALSE@	libproxytest_a-CAFirstMixChannelList.$(OBJEXT) \
 @ONLY_LIB_FALSE@	libproxytest_a-CAHttpClient.$(OBJEXT) \
@@ -728,13 +730,14 @@ AUTOMAKE_OPTIONS = foreign
 @ONLY_LIB_FALSE@		    CADataRetentionLogFile.cpp\
 @ONLY_LIB_FALSE@		    CADynaNetworking.cpp \
 @ONLY_LIB_FALSE@		    CADynamicCascadeConfigurator.cpp \
+@ONLY_LIB_FALSE@		    CAFileSystemDirectory.cpp \
 @ONLY_LIB_FALSE@		    CAFirstMix.cpp \
 @ONLY_LIB_FALSE@		    CAFirstMixChannelList.cpp \
 @ONLY_LIB_FALSE@		    CAHttpClient.cpp \
 @ONLY_LIB_FALSE@		    CAInfoService.cpp \
 @ONLY_LIB_FALSE@		    CAInfoServiceAware.cpp \
 @ONLY_LIB_FALSE@		    CAIPList.cpp \
-@ONLY_LIB_FALSE@			CAIPAddrWithNetmask.cpp \
+@ONLY_LIB_FALSE@		    CAIPAddrWithNetmask.cpp \
 @ONLY_LIB_FALSE@		    CALastMix.cpp \
 @ONLY_LIB_FALSE@		    CALastMixChannelList.cpp\
 @ONLY_LIB_FALSE@		    CAListenerInterface.cpp\
@@ -1052,6 +1055,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CADatagramSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CADynaNetworking.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CADynamicCascadeConfigurator.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAFileSystemDirectory.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAFirstMix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAFirstMixChannelList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAHttpClient.Po@am__quote@
@@ -1461,6 +1465,20 @@ libproxytest_a-CADynamicCascadeConfigurator.obj: CADynamicCascadeConfigurator.cp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CADynamicCascadeConfigurator.cpp' object='libproxytest_a-CADynamicCascadeConfigurator.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-CADynamicCascadeConfigurator.obj `if test -f 'CADynamicCascadeConfigurator.cpp'; then $(CYGPATH_W) 'CADynamicCascadeConfigurator.cpp'; else $(CYGPATH_W) '$(srcdir)/CADynamicCascadeConfigurator.cpp'; fi`
+
+libproxytest_a-CAFileSystemDirectory.o: CAFileSystemDirectory.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-CAFileSystemDirectory.o -MD -MP -MF $(DEPDIR)/libproxytest_a-CAFileSystemDirectory.Tpo -c -o libproxytest_a-CAFileSystemDirectory.o `test -f 'CAFileSystemDirectory.cpp' || echo '$(srcdir)/'`CAFileSystemDirectory.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-CAFileSystemDirectory.Tpo $(DEPDIR)/libproxytest_a-CAFileSystemDirectory.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAFileSystemDirectory.cpp' object='libproxytest_a-CAFileSystemDirectory.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-CAFileSystemDirectory.o `test -f 'CAFileSystemDirectory.cpp' || echo '$(srcdir)/'`CAFileSystemDirectory.cpp
+
+libproxytest_a-CAFileSystemDirectory.obj: CAFileSystemDirectory.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-CAFileSystemDirectory.obj -MD -MP -MF $(DEPDIR)/libproxytest_a-CAFileSystemDirectory.Tpo -c -o libproxytest_a-CAFileSystemDirectory.obj `if test -f 'CAFileSystemDirectory.cpp'; then $(CYGPATH_W) 'CAFileSystemDirectory.cpp'; else $(CYGPATH_W) '$(srcdir)/CAFileSystemDirectory.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-CAFileSystemDirectory.Tpo $(DEPDIR)/libproxytest_a-CAFileSystemDirectory.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAFileSystemDirectory.cpp' object='libproxytest_a-CAFileSystemDirectory.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-CAFileSystemDirectory.obj `if test -f 'CAFileSystemDirectory.cpp'; then $(CYGPATH_W) 'CAFileSystemDirectory.cpp'; else $(CYGPATH_W) '$(srcdir)/CAFileSystemDirectory.cpp'; fi`
 
 libproxytest_a-CAFirstMix.o: CAFirstMix.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-CAFirstMix.o -MD -MP -MF $(DEPDIR)/libproxytest_a-CAFirstMix.Tpo -c -o libproxytest_a-CAFirstMix.o `test -f 'CAFirstMix.cpp' || echo '$(srcdir)/'`CAFirstMix.cpp
@@ -3171,14 +3189,14 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-sbinPROGRAMS
 @ONLY_LIB_TRUE@		    CADataRetentionLogFile.hpp\
 @ONLY_LIB_TRUE@		    CADynaNetworking.hpp \
 @ONLY_LIB_TRUE@		    CADynamicCascadeConfigurator.hpp \
-@ONLY_LIB_TRUE@			CAFileSystemDirectory.hpp \
+@ONLY_LIB_TRUE@		    CAFileSystemDirectory.hpp \
 @ONLY_LIB_TRUE@		    CAFirstMix.hpp \
 @ONLY_LIB_TRUE@		    CAFirstMixChannelList.hpp \
 @ONLY_LIB_TRUE@		    CAHttpClient.hpp \
 @ONLY_LIB_TRUE@		    CAInfoService.hpp \
 @ONLY_LIB_TRUE@		    CAInfoServiceAware.hpp \
 @ONLY_LIB_TRUE@		    CAIPList.hpp \
-@ONLY_LIB_TRUE@			CAIPAddrWithNetmask.hpp \
+@ONLY_LIB_TRUE@		    CAIPAddrWithNetmask.hpp \
 @ONLY_LIB_TRUE@		    CALastMix.hpp \
 @ONLY_LIB_TRUE@		    CALastMixChannelList.hpp\
 @ONLY_LIB_TRUE@		    CAListenerInterface.hpp\
@@ -3252,13 +3270,14 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-sbinPROGRAMS
 @ONLY_LIB_FALSE@		    CADataRetentionLogFile.hpp\
 @ONLY_LIB_FALSE@		    CADynaNetworking.hpp \
 @ONLY_LIB_FALSE@		    CADynamicCascadeConfigurator.hpp \
+@ONLY_LIB_FALSE@		    CAFileSystemDirectory.hpp \
 @ONLY_LIB_FALSE@		    CAFirstMix.hpp \
 @ONLY_LIB_FALSE@		    CAFirstMixChannelList.hpp \
 @ONLY_LIB_FALSE@		    CAHttpClient.hpp \
 @ONLY_LIB_FALSE@		    CAInfoService.hpp \
 @ONLY_LIB_FALSE@		    CAInfoServiceAware.hpp \
 @ONLY_LIB_FALSE@		    CAIPList.hpp \
-@ONLY_LIB_FALSE@			CAIPAddrWithNetmask.hpp \
+@ONLY_LIB_FALSE@		    CAIPAddrWithNetmask.hpp \
 @ONLY_LIB_FALSE@		    CALastMix.hpp \
 @ONLY_LIB_FALSE@		    CALastMixChannelList.hpp\
 @ONLY_LIB_FALSE@		    CAListenerInterface.hpp\
