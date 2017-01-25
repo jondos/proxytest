@@ -91,11 +91,11 @@ tre_expand_macro(const tre_char_t *regex, const tre_char_t *regex_end,
     }
 }
 
-static reg_errcode_t
+static tre_reg_errcode_t
 tre_new_item(tre_mem_t mem, int min, int max, int *i, int *max_i,
 	 tre_ast_node_t ***items)
 {
-  reg_errcode_t status;
+  tre_reg_errcode_t status;
   tre_ast_node_t **array = *items;
   /* Allocate more space if necessary. */
   if (*i >= *max_i)
@@ -106,26 +106,26 @@ tre_new_item(tre_mem_t mem, int min, int max, int *i, int *max_i,
 	 probably an error in the regexp (e.g. not a '\0' terminated
 	 string and missing ']') */
       if (*max_i > 1024)
-	return REG_ESPACE;
+	return TRE_REG_ESPACE;
       *max_i *= 2;
       new_items =(tre_ast_node_t **) xrealloc(array, sizeof(*items) * *max_i);
       if (new_items == NULL)
-	return REG_ESPACE;
+	return TRE_REG_ESPACE;
       *items = array = new_items;
     }
   array[*i] = tre_ast_new_literal(mem, min, max, -1);
-  status = array[*i] == NULL ? REG_ESPACE : REG_OK;
+  status = array[*i] == NULL ? TRE_REG_ESPACE : REG_OK;
   (*i)++;
   return status;
 }
 
 
 /* Expands a character class to character ranges. */
-static reg_errcode_t
+static tre_reg_errcode_t
 tre_expand_ctype(tre_mem_t mem, tre_ctype_t tre_class, tre_ast_node_t ***items,
 		 int *i, int *max_i, int cflags)
 {
-  reg_errcode_t status = REG_OK;
+  tre_reg_errcode_t status = REG_OK;
   tre_cint_t c;
   int j, min = -1, max = 0;
   assert(TRE_MB_CUR_MAX == 1);
@@ -245,14 +245,14 @@ tre_ctype_t tre_ctype(const char *name)
 
 #define REST(re) (int)(ctx->re_end - (re)), (re)
 
-static reg_errcode_t
+static tre_reg_errcode_t
 tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 			tre_ctype_t neg_classes[], int *num_neg_classes,
 			tre_ast_node_t ***items, int *num_items,
 			int *items_size)
 {
   const tre_char_t *re = ctx->re;
-  reg_errcode_t status = REG_OK;
+  tre_reg_errcode_t status = REG_OK;
   tre_ctype_t tre_class = (tre_ctype_t)0;
   int i = *num_items;
   int max_i = *items_size;
@@ -264,7 +264,7 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
       skip = 0;
       if (re == ctx->re_end)
 	{
-	  status = REG_EBRACK;
+	  status = TRE_REG_EBRACK;
 	}
       else if (*re == CHAR_RBRACKET && re > ctx->re)
 	{
@@ -287,14 +287,14 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 	      /* XXX - Should use collation order instead of encoding values
 		 in character ranges. */
 	      if (min > max)
-		status = REG_ERANGE;
+		status = TRE_REG_ERANGE;
 	    }
 	  else if (re + 1 < ctx->re_end
 		   && *re == CHAR_LBRACKET && *(re + 1) == CHAR_PERIOD)
-	    status = REG_ECOLLATE;
+	    status = TRE_REG_ECOLLATE;
 	  else if (re + 1 < ctx->re_end
 		   && *re == CHAR_LBRACKET && *(re + 1) == CHAR_EQUAL)
-	    status = REG_ECOLLATE;
+	    status = TRE_REG_ECOLLATE;
 	  else if (re + 1 < ctx->re_end
 		   && *re == CHAR_LBRACKET && *(re + 1) == CHAR_COLON)
 	    {
@@ -330,7 +330,7 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 		  DPRINT(("  class name: %s\n", tmp_str));
 		  tre_class = tre_ctype(tmp_str);
 		  if (!tre_class)
-		    status = REG_ECTYPE;
+		    status = TRE_REG_ECTYPE;
 		  /* Optimize character classes for 8 bit character sets. */
 		  if (status == REG_OK && ctx->cur_max == 1)
 		    {
@@ -342,7 +342,7 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 		  re = endptr + 2;
 		}
 	      else
-		status = REG_ECTYPE;
+		status = TRE_REG_ECTYPE;
 	      min = 0;
 	      max = TRE_CHAR_MAX;
 	    }
@@ -352,7 +352,7 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 	      if (*re == CHAR_MINUS && *(re + 1) != CHAR_RBRACKET
 		  && ctx->re != re)
 		/* Two ranges are not allowed to share and endpoint. */
-		status = REG_ERANGE;
+		status = TRE_REG_ERANGE;
 	      min = max = *re++;
 	    }
 
@@ -361,7 +361,7 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
 
 	  if (tre_class && negate)
 	    if (*num_neg_classes >= MAX_NEG_CLASSES)
-	      status = REG_ESPACE;
+	      status = TRE_REG_ESPACE;
 	    else
 	      neg_classes[(*num_neg_classes)++] = tre_class;
 	  else if (!skip)
@@ -414,12 +414,12 @@ tre_parse_bracket_items(tre_parse_ctx_t *ctx, int negate,
   return status;
 }
 
-static reg_errcode_t
+static tre_reg_errcode_t
 tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 {
   tre_ast_node_t *node = NULL;
   int negate = 0;
-  reg_errcode_t status = REG_OK;
+  tre_reg_errcode_t status = REG_OK;
   tre_ast_node_t **items, *u, *n;
   int i = 0, j, max_i = 32, curr_max, curr_min;
   tre_ctype_t neg_classes[MAX_NEG_CLASSES];
@@ -428,7 +428,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
   /* Start off with an array of `max_i' elements. */
   items =(tre_ast_node_t**) xmalloc(sizeof(*items) * max_i);
   if (items == NULL)
-    return REG_ESPACE;
+    return TRE_REG_ESPACE;
 
   if (*ctx->re == CHAR_CARET)
     {
@@ -499,7 +499,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 					      * (num_neg_classes + 1)));
 	      if (l->neg_classes == NULL)
 		{
-		  status = REG_ESPACE;
+		  status = TRE_REG_ESPACE;
 		  break;
 		}
 	      for (k = 0; k < num_neg_classes; k++)
@@ -514,7 +514,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 	    {
 	      u = tre_ast_new_union(ctx->mem, node, items[j]);
 	      if (u == NULL)
-		status = REG_ESPACE;
+		status = TRE_REG_ESPACE;
 	      node = u;
 	    }
 	}
@@ -529,7 +529,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
       DPRINT(("final: creating %d - %d\n", curr_min, (int)TRE_CHAR_MAX));
       n = tre_ast_new_literal(ctx->mem, curr_min, TRE_CHAR_MAX, ctx->position);
       if (n == NULL)
-	status = REG_ESPACE;
+	status = TRE_REG_ESPACE;
       else
 	{
 	  tre_literal_t *l =(tre_literal_t*) n->obj;
@@ -540,7 +540,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 					      * (num_neg_classes + 1)));
 	      if (l->neg_classes == NULL)
 		{
-		  status = REG_ESPACE;
+		  status = TRE_REG_ESPACE;
 		  goto parse_bracket_done;
 		}
 	      for (k = 0; k < num_neg_classes; k++)
@@ -555,7 +555,7 @@ tre_parse_bracket(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 	    {
 	      u = tre_ast_new_union(ctx->mem, node, n);
 	      if (u == NULL)
-		status = REG_ESPACE;
+		status = TRE_REG_ESPACE;
 	      node = u;
 	    }
 	}
@@ -595,7 +595,7 @@ tre_parse_int(const tre_char_t **regex, const tre_char_t *regex_end)
 }
 
 
-static reg_errcode_t
+static tre_reg_errcode_t
 tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 {
   int min, max, i;
@@ -629,7 +629,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 
   /* Check that the repeat counts are sane. */
   if ((max >= 0 && min > max) || max > RE_DUP_MAX)
-    return REG_BADBR;
+    return TRE_REG_BADBR;
 
 
   /*
@@ -774,7 +774,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 		      costs_set = 1;
 		      break;
 		    default:
-		      return REG_BADBR;
+		      return TRE_REG_BADBR;
 		    }
 		}
 	      else
@@ -788,17 +788,17 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 
   /* Missing }. */
   if (r >= ctx->re_end)
-    return REG_EBRACE;
+    return TRE_REG_EBRACE;
 
   /* Empty contents of {}. */
   if (r == ctx->re)
-    return REG_BADBR;
+    return TRE_REG_BADBR;
 
   /* Parse the ending '}' or '\}'.*/
   if (ctx->cflags & REG_EXTENDED)
     {
       if (r >= ctx->re_end || *r != CHAR_RBRACE)
-	return REG_BADBR;
+	return TRE_REG_BADBR;
       r++;
     }
   else
@@ -806,7 +806,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
       if (r + 1 >= ctx->re_end
 	  || *r != CHAR_BACKSLASH
 	  || *(r + 1) != CHAR_RBRACE)
-	return REG_BADBR;
+	return TRE_REG_BADBR;
       r += 2;
     }
 
@@ -822,7 +822,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
       else if (*r == CHAR_STAR || *r == CHAR_PLUS)
 	{
 	  /* These are reserved for future extensions. */
-	  return REG_BADRPT;
+	  return TRE_REG_BADRPT;
 	}
     }
 
@@ -831,7 +831,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
     {
       *result = tre_ast_new_literal(ctx->mem, EMPTY, -1, -1);
       if (*result == NULL)
-	return REG_ESPACE;
+	return TRE_REG_ESPACE;
     }
   else
     {
@@ -841,7 +841,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 
       *result = tre_ast_new_iter(ctx->mem, *result, min, max, minimal);
       if (!*result)
-	return REG_ESPACE;
+	return TRE_REG_ESPACE;
 
       /* If approximate matching parameters are set, add them to the
 	 iteration node. */
@@ -885,7 +885,7 @@ tre_parse_bound(tre_parse_ctx_t *ctx, tre_ast_node_t **result)
 	  ctx->have_approx = 1;
 	  params =(int*) tre_mem_alloc(ctx->mem, sizeof(*params) * TRE_PARAM_LAST);
 	  if (!params)
-	    return REG_ESPACE;
+	    return TRE_REG_ESPACE;
 	  for (i = 0; i < TRE_PARAM_LAST; i++)
 	    params[i] = TRE_PARAM_UNSET;
 	  params[TRE_PARAM_COST_INS] = cost_ins;
@@ -925,12 +925,12 @@ typedef enum {
 } tre_parse_re_stack_symbol_t;
 
 
-reg_errcode_t
+tre_reg_errcode_t
 tre_parse(tre_parse_ctx_t *ctx)
 {
   tre_ast_node_t *result = NULL;
   tre_parse_re_stack_symbol_t symbol;
-  reg_errcode_t status = REG_OK;
+  tre_reg_errcode_t status = REG_OK;
   tre_stack_t *stack = ctx->stack;
   int bottom = tre_stack_num_objects(stack);
   int depth = 0;
@@ -1009,7 +1009,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 			    && *(ctx->re + 1) == CHAR_RPAREN)))
 		  {
 		    if (!(ctx->cflags & REG_EXTENDED) && depth == 0)
-		      status = REG_EPAREN;
+		      status = TRE_REG_EPAREN;
 		    DPRINT(("tre_parse:	  group end: '%.*" STRF "'\n",
 			    REST(ctx->re)));
 		    depth--;
@@ -1048,7 +1048,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 	    tre_ast_node_t *tmp_node;
 	    tmp_node = tre_ast_new_catenation(ctx->mem, tree, result);
 	    if (!tmp_node)
-	      return REG_ESPACE;
+	      return TRE_REG_ESPACE;
 	    result = tmp_node;
 	    break;
 	  }
@@ -1087,7 +1087,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 	    tre_ast_node_t *tree =(tre_ast_node_t*) tre_stack_pop_voidptr(stack);
 	    tmp_node = tre_ast_new_union(ctx->mem, tree, result);
 	    if (!tmp_node)
-	      return REG_ESPACE;
+	      return TRE_REG_ESPACE;
 	    result = tmp_node;
 	    break;
 	  }
@@ -1136,7 +1136,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 			     || *(ctx->re + 1) == CHAR_PLUS)
 		      {
 			/* These are reserved for future extensions. */
-			return REG_BADRPT;
+			return TRE_REG_BADRPT;
 		      }
 		  }
 
@@ -1146,7 +1146,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		tmp_node = tre_ast_new_iter(ctx->mem, result, rep_min, rep_max,
 					    minimal);
 		if (tmp_node == NULL)
-		  return REG_ESPACE;
+		  return TRE_REG_ESPACE;
 		result = tmp_node;
 		STACK_PUSHX(stack, int, PARSE_POSTFIX);
 	      }
@@ -1286,7 +1286,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 			      break;
 			    }
 			  else
-			    return REG_BADPAT;
+			    return TRE_REG_BADPAT;
 			}
 		      else if (*ctx->re == CHAR_RPAREN)
 			{
@@ -1294,7 +1294,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 			  break;
 			}
 		      else
-			return REG_BADPAT;
+			return TRE_REG_BADPAT;
 		    }
 
 		  /* Turn on the cflags changes for the rest of the
@@ -1352,7 +1352,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		     an empty expression (which matches an empty string).  */
 		  result = tre_ast_new_literal(ctx->mem, EMPTY, -1, -1);
 		  if (result == NULL)
-		    return REG_ESPACE;
+		    return TRE_REG_ESPACE;
 		  if (!(ctx->cflags & REG_EXTENDED))
 		    ctx->re--;
 		}
@@ -1406,7 +1406,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 
 	      if (ctx->re + 1 >= ctx->re_end)
 		/* Trailing backslash. */
-		return REG_EESCAPE;
+		return TRE_REG_EESCAPE;
 
 #ifdef REG_LITERAL
 	      if (*(ctx->re + 1) == L'Q')
@@ -1489,7 +1489,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 			      ctx->re++;
 			      continue;
 			    }
-			  return REG_EBRACE;
+			  return TRE_REG_EBRACE;
 			}
 		      ctx->re++;
 		      tmp[i] = 0;
@@ -1511,7 +1511,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		      result = tre_ast_new_literal(ctx->mem, BACKREF, val,
 						   ctx->position);
 		      if (result == NULL)
-			return REG_ESPACE;
+			return TRE_REG_ESPACE;
 		      ctx->position++;
 		      ctx->max_backref = MAX(val, ctx->max_backref);
 		      ctx->re++;
@@ -1529,7 +1529,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  break;
 		}
 	      if (result == NULL)
-		return REG_ESPACE;
+		return TRE_REG_ESPACE;
 	      break;
 
 	    case CHAR_PERIOD:	 /* the any-symbol */
@@ -1542,14 +1542,14 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  tmp1 = tre_ast_new_literal(ctx->mem, 0, L'\n' - 1,
 					     ctx->position);
 		  if (!tmp1)
-		    return REG_ESPACE;
+		    return TRE_REG_ESPACE;
 		  tmp2 = tre_ast_new_literal(ctx->mem, L'\n' + 1, TRE_CHAR_MAX,
 					     ctx->position + 1);
 		  if (!tmp2)
-		    return REG_ESPACE;
+		    return TRE_REG_ESPACE;
 		  result = tre_ast_new_union(ctx->mem, tmp1, tmp2);
 		  if (!result)
-		    return REG_ESPACE;
+		    return TRE_REG_ESPACE;
 		  ctx->position += 2;
 		}
 	      else
@@ -1557,7 +1557,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  result = tre_ast_new_literal(ctx->mem, 0, TRE_CHAR_MAX,
 					       ctx->position);
 		  if (!result)
-		    return REG_ESPACE;
+		    return TRE_REG_ESPACE;
 		  ctx->position++;
 		}
 	      ctx->re++;
@@ -1577,7 +1577,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  result = tre_ast_new_literal(ctx->mem, ASSERTION,
 					       ASSERT_AT_BOL, -1);
 		  if (result == NULL)
-		    return REG_ESPACE;
+		    return TRE_REG_ESPACE;
 		  ctx->re++;
 		}
 	      else
@@ -1598,7 +1598,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 		  result = tre_ast_new_literal(ctx->mem, ASSERTION,
 					       ASSERT_AT_EOL, -1);
 		  if (result == NULL)
-		    return REG_ESPACE;
+		    return TRE_REG_ESPACE;
 		  ctx->re++;
 		}
 	      else
@@ -1645,7 +1645,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 			  REST(ctx->re)));
 		  result = tre_ast_new_literal(ctx->mem, EMPTY, -1, -1);
 		  if (!result)
-		    return REG_ESPACE;
+		    return TRE_REG_ESPACE;
 		  break;
 		}
 
@@ -1672,22 +1672,22 @@ tre_parse(tre_parse_ctx_t *ctx)
 					     tre_toupper(*ctx->re),
 					     ctx->position);
 		  if (!tmp1)
-		    return REG_ESPACE;
+		    return TRE_REG_ESPACE;
 		  tmp2 = tre_ast_new_literal(ctx->mem, tre_tolower(*ctx->re),
 					     tre_tolower(*ctx->re),
 					     ctx->position);
 		  if (!tmp2)
-		    return REG_ESPACE;
+		    return TRE_REG_ESPACE;
 		  result = tre_ast_new_union(ctx->mem, tmp1, tmp2);
 		  if (!result)
-		    return REG_ESPACE;
+		    return TRE_REG_ESPACE;
 		}
 	      else
 		{
 		  result = tre_ast_new_literal(ctx->mem, *ctx->re, *ctx->re,
 					       ctx->position);
 		  if (!result)
-		    return REG_ESPACE;
+		    return TRE_REG_ESPACE;
 		}
 	      ctx->position++;
 	      ctx->re++;
@@ -1704,10 +1704,10 @@ tre_parse(tre_parse_ctx_t *ctx)
 		tre_ast_node_t *n, *tmp_node;
 		n = tre_ast_new_literal(ctx->mem, EMPTY, -1, -1);
 		if (n == NULL)
-		  return REG_ESPACE;
+		  return TRE_REG_ESPACE;
 		tmp_node = tre_ast_new_catenation(ctx->mem, n, result);
 		if (tmp_node == NULL)
-		  return REG_ESPACE;
+		  return TRE_REG_ESPACE;
 		tmp_node->num_submatches = result->num_submatches;
 		result = tmp_node;
 	      }
@@ -1728,7 +1728,7 @@ tre_parse(tre_parse_ctx_t *ctx)
 
   /* Check for missing closing parentheses. */
   if (depth > 0)
-    return REG_EPAREN;
+    return TRE_REG_EPAREN;
 
   if (status == REG_OK)
     ctx->result = result;

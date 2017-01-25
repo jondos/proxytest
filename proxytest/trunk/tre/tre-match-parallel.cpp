@@ -105,7 +105,7 @@ tre_print_reach(const tre_tnfa_t *tnfa, tre_tnfa_reach_t *reach, int num_tags)
 }
 #endif /* TRE_DEBUG */
 
-reg_errcode_t
+tre_reg_errcode_t
 tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 		      tre_str_type_t type, int *match_tags, int eflags,
 		      int *match_end_ofs)
@@ -172,7 +172,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
     buf =(char *) xmalloc((unsigned)total_bytes);
 #endif /* !TRE_USE_ALLOCA */
     if (buf == NULL)
-      return REG_ESPACE;
+      return TRE_REG_ESPACE;
     memset(buf, 0, (size_t)total_bytes);
 
     /* Get the various pointers within tmp_buf (properly aligned). */
@@ -216,7 +216,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 	  if (buf)
 	    xfree(buf);
 #endif /* !TRE_USE_ALLOCA */
-	  return REG_NOMATCH;
+	  return TRE_REG_NOMATCH;
 	}
       DPRINT(("skipped %lu chars\n", (unsigned long)(str_byte - orig_str)));
       if (str_byte >= orig_str + 1)
@@ -496,7 +496,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 #endif /* !TRE_USE_ALLOCA */
 
   *match_end_ofs = match_eo;
-  return match_eo >= 0 ? REG_OK : REG_NOMATCH;
+  return match_eo >= 0 ? REG_OK : TRE_REG_NOMATCH;
 }
 
 /* EOF */

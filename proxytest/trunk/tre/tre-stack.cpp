@@ -65,7 +65,7 @@ tre_stack_num_objects(tre_stack_t *s)
   return s->ptr;
 }
 
-static reg_errcode_t
+static tre_reg_errcode_t
 tre_stack_push(tre_stack_t *s, union tre_stack_item value)
 {
   if (s->ptr < s->size)
@@ -78,7 +78,7 @@ tre_stack_push(tre_stack_t *s, union tre_stack_item value)
       if (s->size >= s->max_size)
 	{
 	  DPRINT(("tre_stack_push: stack full\n"));
-	  return REG_ESPACE;
+	  return TRE_REG_ESPACE;
 	}
       else
 	{
@@ -92,7 +92,7 @@ tre_stack_push(tre_stack_t *s, union tre_stack_item value)
 	  if (new_buffer == NULL)
 	    {
 	      DPRINT(("tre_stack_push: realloc failed.\n"));
-	      return REG_ESPACE;
+	      return TRE_REG_ESPACE;
 	    }
 	  DPRINT(("tre_stack_push: realloc succeeded.\n"));
 	  assert(new_size > s->size);

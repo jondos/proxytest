@@ -259,23 +259,23 @@ void
 tre_fill_pmatch(size_t nmatch, tre_regmatch_t pmatch[], int cflags,
 		const tre_tnfa_t *tnfa, int *tags, int match_eo);
 
-reg_errcode_t
+tre_reg_errcode_t
 tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 		      tre_str_type_t type, int *match_tags, int eflags,
 		      int *match_end_ofs);
 
-reg_errcode_t
+tre_reg_errcode_t
 tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 		      tre_str_type_t type, int *match_tags, int eflags,
 		      int *match_end_ofs);
 
-reg_errcode_t
+tre_reg_errcode_t
 tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 		       int len, tre_str_type_t type, int *match_tags,
 		       int eflags, int *match_end_ofs);
 
 #ifdef TRE_APPROX
-reg_errcode_t
+tre_reg_errcode_t
 tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
 		    tre_str_type_t type, int *match_tags,
 		    regamatch_t *match, regaparams_t params,

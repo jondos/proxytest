@@ -28,7 +28,7 @@ tre_regncomp(tre_regex_t *preg, const char *regex, size_t n, int cflags)
 
   wregex =(tre_char_t*) xmalloc(sizeof(tre_char_t) * (n + 1));
   if (wregex == NULL)
-    return REG_ESPACE;
+    return TRE_REG_ESPACE;
 
   /* If the current locale uses the standard single byte encoding of
      characters, we don't do a multibyte string conversion.  If we did,
@@ -110,7 +110,7 @@ tre_regncompb(tre_regex_t *preg, const char *regex, size_t n, int cflags)
 
   wregex =(tre_char_t*) xmalloc(sizeof(tre_char_t) * n);
   if (wregex == NULL)
-    return REG_ESPACE;
+    return TRE_REG_ESPACE;
 
   for (i = 0; i < n; i++)
     wregex[i] = (tre_char_t) ((unsigned char) regex[i]);
@@ -141,7 +141,7 @@ tre_regcompb(tre_regex_t *preg, const char *regex, int cflags)
   tre_char_t *wstr;
 
   wregex =(tre_char_t*) xmalloc(sizeof(tre_char_t) * (n + 1));
-  if (wregex == NULL) return REG_ESPACE;
+  if (wregex == NULL) return TRE_REG_ESPACE;
   wstr = wregex;
 
   for (i = 0; i < n; i++) *(wstr++) = *(str++);

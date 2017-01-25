@@ -139,7 +139,7 @@ typedef struct tre_backtrack_struct {
 		xfree(pmatch);						      \
 	      if (states_seen)						      \
 		xfree(states_seen);					      \
-	      return REG_ESPACE;					      \
+	      return TRE_REG_ESPACE;					      \
 	    }								      \
 	  s->prev = stack;						      \
 	  s->next = NULL;						      \
@@ -154,7 +154,7 @@ typedef struct tre_backtrack_struct {
 		xfree(pmatch);						      \
 	      if (states_seen)						      \
 		xfree(states_seen);					      \
-	      return REG_ESPACE;					      \
+	      return TRE_REG_ESPACE;					      \
 	    }								      \
 	  stack->next = s;						      \
 	  stack = s;							      \
@@ -195,7 +195,7 @@ typedef struct tre_backtrack_struct {
 #undef MIN
 #define MIN(a, b) ((a) <= (b) ? (a) : (b))
 
-reg_errcode_t
+tre_reg_errcode_t
 tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 		       int len, tre_str_type_t type, int *match_tags,
 		       int eflags, int *match_end_ofs)
@@ -252,11 +252,11 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 #endif /* TRE_MBSTATE */
 
   if (!mem)
-    return REG_ESPACE;
+    return TRE_REG_ESPACE;
   stack = (tre_backtrack_t) tre_bt_mem_alloc(mem, sizeof(*stack));
   if (!stack)
     {
-      ret = REG_ESPACE;
+      ret = TRE_REG_ESPACE;
       goto error_exit;
     }
   stack->prev = NULL;
@@ -275,7 +275,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
       tags = xmalloc(sizeof(*tags) * tnfa->num_tags);
       if (!tags)
 	{
-	  ret = REG_ESPACE;
+	  ret = TRE_REG_ESPACE;
 	  goto error_exit;
 	}
     }
@@ -284,7 +284,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
       pmatch = xmalloc(sizeof(*pmatch) * tnfa->num_submatches);
       if (!pmatch)
 	{
-	  ret = REG_ESPACE;
+	  ret = TRE_REG_ESPACE;
 	  goto error_exit;
 	}
     }
@@ -293,7 +293,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
       states_seen = xmalloc(sizeof(*states_seen) * tnfa->num_states);
       if (!states_seen)
 	{
-	  ret = REG_ESPACE;
+	  ret = TRE_REG_ESPACE;
 	  goto error_exit;
 	}
     }
@@ -648,7 +648,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 	}
     }
 
-  ret = match_eo >= 0 ? REG_OK : REG_NOMATCH;
+  ret = match_eo >= 0 ? REG_OK : TRE_REG_NOMATCH;
   *match_end_ofs = match_eo;
 
  error_exit:
@@ -662,5 +662,5 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
     xfree(states_seen);
 #endif /* !TRE_USE_ALLOCA */
 
-  return (reg_errcode_t)ret;
+  return (tre_reg_errcode_t)ret;
 }
