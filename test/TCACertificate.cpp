@@ -3,7 +3,7 @@
 #include "../CACertificate.hpp"
 #include "../CALibProxytest.hpp"
 #include "../CAFileSystemDirectory.hpp"
-#define CERT_DIR "test/certs/"
+#define CERT_DIR "certs/"
 
 /*
 	public:

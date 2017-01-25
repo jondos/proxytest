@@ -3,7 +3,7 @@
   <GoogleTestAdapterSettings>
     <SolutionSettings>
       <Settings>
-        <WorkingDir>$(SolutionDir)</WorkingDir>
+        <WorkingDir>$(SolutionDir)/test</WorkingDir>
       </Settings>
     </SolutionSettings>
   </GoogleTestAdapterSettings>
