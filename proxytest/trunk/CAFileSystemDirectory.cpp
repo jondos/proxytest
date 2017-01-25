@@ -72,11 +72,11 @@ SINT32 CAFileSystemDirectory::find(UINT8* strPattern)
 			}
 		return E_SUCCESS;
 #else
-	m_hSearch=opendir(m_strPath);
+	m_hSearch=opendir((char*)m_strPath);
 	if(m_hSearch==NULL)
 		return E_UNKNOWN;
 	m_strPattern = new UINT8[strlen((char*)strPattern) + 1];
-	strcpy(m_strPattern, strPattern);
+	strcpy((char*)m_strPattern,(char*) strPattern);
 	return E_SUCCESS;
 #endif
 	}
