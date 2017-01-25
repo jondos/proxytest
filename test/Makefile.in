@@ -509,7 +509,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 test_proxytest_SOURCES = TCAUtil.cpp TCACertificate.cpp AllTests.cpp
-test_proxytest_LDADD = -l @LIBGOOGLETEST@ $(top_srcdir)/libproxytest.a $(top_srcdir)/xml/libxml.a \
+test_proxytest_LDADD = -l@LIBGOOGLETEST@ $(top_srcdir)/libproxytest.a $(top_srcdir)/xml/libxml.a \
 	$(top_srcdir)/popt/libpopt.a
 
 includes = @INCLUDES@
