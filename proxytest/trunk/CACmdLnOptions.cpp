@@ -42,7 +42,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAAccountingDBInterface.hpp"
 #endif
 //#ifdef LOG_CRIME
-	#include "tre/regex.h"
+	#include "tre/tre.h"
 //#endif
 
 

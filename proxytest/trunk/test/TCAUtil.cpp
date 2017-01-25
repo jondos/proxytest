@@ -93,9 +93,9 @@ TEST(TCAUtil, parseU64)
 
 TEST(TCAUtil, regex)
 	{
-	regex_t regex;
-	regcomp(&regex, "HALLO", REG_EXTENDED | REG_ICASE | REG_NOSUB);
-	int ret = regexec(&regex, "dfdsfdsf\n\rdsfdsfdsf\nfgfdgdfgfdg\r\ndfdfdfdsfHaLlofdsfdsf", 0, NULL, 0);
+	tre_regex_t regex;
+	tre_regcomp(&regex, "HALLO", REG_EXTENDED | REG_ICASE | REG_NOSUB);
+	int ret = tre_regexec(&regex, "dfdsfdsf\n\rdsfdsfdsf\nfgfdgdfgfdg\r\ndfdfdfdsfHaLlofdsfdsf", 0, NULL, 0);
 	ASSERT_EQ(ret, 0);
-	regfree(&regex);
+	tre_regfree(&regex);
 	}

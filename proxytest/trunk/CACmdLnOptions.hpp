@@ -44,7 +44,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAXMLBI.hpp"
 #include "CAXMLPriceCert.hpp"
 //#ifdef LOG_CRIME
-	#include "tre/regex.h"
+	#include "tre/tre.h"
 //#endif
 
 #define REGEXP_BUFF_SIZE 4096
@@ -968,7 +968,7 @@ class CACmdLnOptions
 };
 
 SINT32 setRegExpressions(DOMElement *rootElement, const char* const childElementName,
-		regex_t **regExContainer, UINT32* regExNr);
+		tre_regex_t **regExContainer, UINT32* regExNr);
 
 #endif
 
