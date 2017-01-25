@@ -74,10 +74,10 @@ typedef enum {
 
 /* POSIX tre_regexec() flags. */
 #define REG_NOTBOL 1
-#define REG_NOTEOL (REG_NOTBOL << 1)
+#define TRE_REG_NOTEOL (REG_NOTBOL << 1)
 
 /* Extra tre_regexec() flags. */
-#define REG_APPROX_MATCHER	 (REG_NOTEOL << 1)
+#define REG_APPROX_MATCHER	 (TRE_REG_NOTEOL << 1)
 #define REG_BACKTRACKING_MATCHER (REG_APPROX_MATCHER << 1)
 
 
