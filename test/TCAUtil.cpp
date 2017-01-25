@@ -56,10 +56,6 @@ TEST(TCAUtil, parseDomainFromPayload)
 
 #endif
 
-
-
-
-
 TEST(TCAUtil, parseU64)
 	{
 	UINT64 u64;
