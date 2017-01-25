@@ -1570,11 +1570,16 @@ SINT32 saveFile(const UINT8* const name,const UINT8* const buff,UINT32 buffSize)
 
 /**
  * Parses a 64bit unsigned integer.
- * Note: If the value is out of range or not parseable an erro is returned.
+ * Note: If the value is out of range or not parseable an error is returned.
  */
 SINT32 parseU64(const UINT8 * str, UINT64& value)
 {
 	#ifdef	HAVE_STRTOULL
+		//strtoull() will silently accept negative values --> below is a simple chekc to detect negative values...
+		if(strchr((const char*)str,'-')!=NULL)
+			{
+				return E_UNKNOWN;
+			}
 		value = strtoull((const char *) str, NULL, 0);
 		return E_SUCCESS;
 	#else
