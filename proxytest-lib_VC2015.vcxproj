@@ -3955,11 +3955,11 @@
     <ClInclude Include="popt\poptint.h" />
     <ClInclude Include="popt\system.h" />
     <ClInclude Include="StdAfx.h" />
-    <ClInclude Include="tre\regex.h" />
     <ClInclude Include="tre\tre-config.h" />
     <ClInclude Include="tre\tre-internal.h" />
     <ClInclude Include="tre\tre-match-utils.h" />
     <ClInclude Include="tre\tre-mem.h" />
+    <ClInclude Include="tre\tre.h" />
     <ClInclude Include="trio\trio.hpp" />
     <ClInclude Include="trio\triodef.h" />
     <ClInclude Include="trio\trionan.h" />

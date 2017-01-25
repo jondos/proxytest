@@ -1,24 +1,32 @@
 /*
-  regcomp.c - TRE POSIX compatible regex compilation functions.
+  tre_regcomp.c - TRE POSIX compatible regex compilation functions.
 
   This software is released under a BSD-style license.
   See the file LICENSE for details and copyright.
 
 */
 
-#include "../StdAfx.h"
-#include "regex.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif /* HAVE_CONFIG_H */
+
+#include <string.h>
+#include <errno.h>
+#include <stdlib.h>
+
+#include "tre.h"
 #include "tre-internal.h"
+#include "xmalloc.h"
 
 int
-regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
+tre_regncomp(tre_regex_t *preg, const char *regex, size_t n, int cflags)
 {
   int ret;
 #if TRE_WCHAR
   tre_char_t *wregex;
-  int wlen;
+  size_t wlen;
 
-  wregex = xmalloc(sizeof(tre_char_t) * (n + 1));
+  wregex =(tre_char_t*) xmalloc(sizeof(tre_char_t) * (n + 1));
   if (wregex == NULL)
     return REG_ESPACE;
 
@@ -82,7 +90,7 @@ regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
 #endif /* TRE_MULTIBYTE */
 
   wregex[wlen] = L'\0';
-  ret = tre_compile(preg, wregex, (unsigned)wlen, cflags);
+  ret = tre_compile(preg, wregex, wlen, cflags);
   xfree(wregex);
 #else /* !TRE_WCHAR */
   ret = tre_compile(preg, (const tre_char_t *)regex, n, cflags);
@@ -91,29 +99,76 @@ regncomp(regex_t *preg, const char *regex, size_t n, int cflags)
   return ret;
 }
 
+/* this version takes bytes literally, to be used with raw vectors */
 int
-regcomp(regex_t *preg, const char *regex, int cflags)
+tre_regncompb(tre_regex_t *preg, const char *regex, size_t n, int cflags)
 {
-  return regncomp(preg, regex, regex ? strlen(regex) : 0, cflags);
+  int ret;
+#if TRE_WCHAR /* wide chars = we need to convert it all to the wide format */
+  tre_char_t *wregex;
+  size_t i;
+
+  wregex =(tre_char_t*) xmalloc(sizeof(tre_char_t) * n);
+  if (wregex == NULL)
+    return REG_ESPACE;
+
+  for (i = 0; i < n; i++)
+    wregex[i] = (tre_char_t) ((unsigned char) regex[i]);
+
+  ret = tre_compile(preg, wregex, n, cflags | REG_USEBYTES);
+  xfree(wregex);
+#else /* !TRE_WCHAR */
+  ret = tre_compile(preg, (const tre_char_t *)regex, n, cflags | REG_USEBYTES);
+#endif /* !TRE_WCHAR */
+
+  return ret;
+}
+
+int
+tre_regcomp(tre_regex_t *preg, const char *regex, int cflags)
+{
+  return tre_regncomp(preg, regex, regex ? strlen(regex) : 0, cflags);
+}
+
+int
+tre_regcompb(tre_regex_t *preg, const char *regex, int cflags)
+{
+  int ret;
+  tre_char_t *wregex;
+  size_t wlen, n = strlen(regex);
+  unsigned int i;
+  const unsigned char *str = (const unsigned char *)regex;
+  tre_char_t *wstr;
+
+  wregex =(tre_char_t*) xmalloc(sizeof(tre_char_t) * (n + 1));
+  if (wregex == NULL) return REG_ESPACE;
+  wstr = wregex;
+
+  for (i = 0; i < n; i++) *(wstr++) = *(str++);
+  wlen = n;
+  wregex[wlen] = L'\0';
+  ret = tre_compile(preg, wregex, wlen, cflags | REG_USEBYTES);
+  xfree(wregex);
+  return ret;
 }
 
 
 #ifdef TRE_WCHAR
 int
-regwncomp(regex_t *preg, const wchar_t *regex, size_t n, int cflags)
+tre_regwncomp(tre_regex_t *preg, const wchar_t *regex, size_t n, int cflags)
 {
   return tre_compile(preg, regex, n, cflags);
 }
 
 int
-regwcomp(regex_t *preg, const wchar_t *regex, int cflags)
+tre_regwcomp(tre_regex_t *preg, const wchar_t *regex, int cflags)
 {
   return tre_compile(preg, regex, regex ? wcslen(regex) : 0, cflags);
 }
 #endif /* TRE_WCHAR */
 
 void
-regfree(regex_t *preg)
+tre_regfree(tre_regex_t *preg)
 {
   tre_free(preg);
 }
