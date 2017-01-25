@@ -18615,7 +18615,7 @@ GOOGLETEST_LIB=""
 if test "${with_googletest_lib+set}" = set; then :
   withval=$with_googletest_lib;
 		if test "x$withval" != "xno" ; then
-			GOOGLETEST_LIB="-L$withval
+			GOOGLETEST_LIB="-L$withval"
 		fi
 
 
