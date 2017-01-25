@@ -55,6 +55,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "xml", "xml", "{065C3B05-C62
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AllTests", "test\AllTests_VC2015.vcxproj", "{6A4CE475-E3C6-4862-9656-E1E0E531C119}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tre", "tre", "{BB86079F-23BC-49E3-8254-61B410EE7D6C}"
+	ProjectSection(SolutionItems) = preProject
+		tre\Makefile.am = tre\Makefile.am
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{AA3F9615-7F75-4888-A964-CA4128B780A7}"
+	ProjectSection(SolutionItems) = preProject
+		test\Makefile.am = test\Makefile.am
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug with LLVM|Any CPU = Debug with LLVM|Any CPU
@@ -754,5 +764,7 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{065C3B05-C626-4FF4-BEED-A88F2A4A184D} = {54C687C4-A40F-4654-8DA3-66D2D382DDC8}
+		{BB86079F-23BC-49E3-8254-61B410EE7D6C} = {54C687C4-A40F-4654-8DA3-66D2D382DDC8}
+		{AA3F9615-7F75-4888-A964-CA4128B780A7} = {54C687C4-A40F-4654-8DA3-66D2D382DDC8}
 	EndGlobalSection
 EndGlobal

@@ -34,6 +34,8 @@ CAFileSystemDirectory::CAFileSystemDirectory(UINT8* strPath)
 		strcpy((char*)m_strPath,(char*) strPath);
 #ifdef _WIN32
 		m_hSearch = -1;
+#else
+		m_hSearch = NULL;
 #endif
 	}
 
@@ -43,6 +45,11 @@ CAFileSystemDirectory::~CAFileSystemDirectory()
 		if (m_hSearch >= 0)
 			{
 				_findclose(m_hSearch);
+			}
+#else
+	if (m_hSearch != NULL)
+		{
+		closedir(m_hSearch);
 			}
 #endif
 		delete m_strPath;
@@ -63,7 +70,10 @@ SINT32 CAFileSystemDirectory::find(UINT8* strPattern)
 			}
 		return E_SUCCESS;
 #else
-	return E_UNKNOWN;
+	m_hSearch=opendir(m_strPath);
+	if(m_hSearch==NULL)
+		return E_UNKNOWN;
+	return E_SUCCESS;
 #endif
 	}
 
@@ -85,6 +95,6 @@ SINT32 CAFileSystemDirectory::getNextSearchResult(UINT8* strResult, UINT32 sizeR
 	else
 		return E_UNKNOWN;
 #else
-	return e_UNKNOWN;
+	return E_UNKNOWN;
 #endif
 	}
