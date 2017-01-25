@@ -3960,6 +3960,7 @@
     <ClInclude Include="tre\tre-match-utils.h" />
     <ClInclude Include="tre\tre-mem.h" />
     <ClInclude Include="tre\tre.h" />
+    <ClInclude Include="tre\xmalloc.h" />
     <ClInclude Include="trio\trio.hpp" />
     <ClInclude Include="trio\triodef.h" />
     <ClInclude Include="trio\trionan.h" />
