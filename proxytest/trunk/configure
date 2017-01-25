@@ -811,6 +811,7 @@ enable_google_cpuprofiler
 enable_google_heapchecker
 enable_crime_detection
 enable_tests
+with_googletest_lib
 enable_wireshark
 enable_manioq
 enable_build_only_lib
@@ -1519,6 +1520,8 @@ Optional Packages:
   --with-xml-include=PATH Specify path to Mini-XML/XERCES-C include files
                           (without a trailing '/xercesc')
   --with-xml-lib=PATH     Specify path to Mini-XML/XERCES-C library files
+  --with-googletest-lib=PATH
+                          Specify path to Google Test library files
 
 Some influential environment variables:
   CC          C compiler command
@@ -18606,6 +18609,20 @@ if test "${enable_tests+set}" = set; then :
 
 fi
 
+GOOGLETEST_LIB=""
+
+# Check whether --with-googletest-lib was given.
+if test "${with_googletest_lib+set}" = set; then :
+  withval=$with_googletest_lib;
+		if test "x$withval" != "xno" ; then
+			GOOGLETEST_LIB="-L$withval
+		fi
+
+
+fi
+
+
+
 
 DOWITHWIRESHARK=""
 # Check whether --enable-wireshark was given.
@@ -18652,6 +18669,9 @@ if test "x$DOTHETEST" != "xyes" ; then
 
 	TEST_CFLAGS="-D__GOOGLE_UNIT_TEST__"
 fi
+
+
+
 
 WIRESHARK_CFLAGS=""
 
@@ -18863,7 +18883,7 @@ fi
 
 CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS"
 CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS"
-LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB"
+LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB $GOOGLETEST_LIB"
 
  if test x$DOTHETESTS = xyes; then
   DOTESTS_TRUE=
