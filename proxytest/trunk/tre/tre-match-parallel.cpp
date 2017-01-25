@@ -122,7 +122,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 #endif /* TRE_MBSTATE */
 #endif /* TRE_WCHAR */
   int reg_notbol = eflags & REG_NOTBOL;
-  int reg_noteol = eflags & REG_NOTEOL;
+  int reg_noteol = eflags & TRE_REG_NOTEOL;
   int reg_newline = tnfa->cflags & REG_NEWLINE;
   int str_user_end = 0;
 
