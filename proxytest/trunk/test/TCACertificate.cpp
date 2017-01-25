@@ -42,7 +42,7 @@
 		{
 			UINT8 filename[4096];
 			strcpy((char*)filename,CERT_DIR);
-			strcat((char*)filename,"speedy_public.b64.cer");
+			strcat((char*)filename,"cert1.cer");
 			printf("\nLoading cert %s:\n",filename);
 			UINT32 certInBuffLen=0;
 			UINT8* certInBuff=readFile(filename,&certInBuffLen);
@@ -51,7 +51,7 @@
 			ASSERT_TRUE( cert1 != NULL);
 
 			strcpy((char*)filename,CERT_DIR);
-			strcat((char*)filename,"yatrade_public.b64.cer");
+			strcat((char*)filename,"cert2.cer");
 			printf("\nLoading cert %s:\n",filename);
 			certInBuff=readFile(filename,&certInBuffLen);
 			CACertificate* cert2=CACertificate::decode(certInBuff,certInBuffLen,CERT_DER);
@@ -62,7 +62,7 @@
 			ASSERT_TRUE(ret == E_SUCCESS);
 
 			strcpy((char*)filename,CERT_DIR);
-			strcat((char*)filename,"Operator_CA.cer");
+			strcat((char*)filename,"cert3.cer");
 			printf("\nLoading cert %s:\n",filename);
 			certInBuff=readFile(filename,&certInBuffLen);
 			CACertificate* cert3=CACertificate::decode(certInBuff,certInBuffLen,CERT_DER);
