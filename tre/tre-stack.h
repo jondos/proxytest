@@ -10,7 +10,7 @@
 #ifndef TRE_STACK_H
 #define TRE_STACK_H 1
 
-#include "regex.h"
+#include "tre.h"
 
 typedef struct tre_stack_rec tre_stack_t;
 
@@ -30,11 +30,11 @@ int
 tre_stack_num_objects(tre_stack_t *s);
 
 /* Each tre_stack_push_*(tre_stack_t *s, <type> value) function pushes
-   `value' on top of stack `s'.  Returns REG_ESPACE if out of memory.
+   `value' on top of stack `s'.  Returns TRE_REG_ESPACE if out of memory.
    This tries to realloc() more space before failing if maximum size
    has not yet been reached.  Returns REG_OK if successful. */
 #define declare_pushf(typetag, type)					      \
-  reg_errcode_t tre_stack_push_ ## typetag(tre_stack_t *s, type value)
+  tre_reg_errcode_t tre_stack_push_ ## typetag(tre_stack_t *s, type value)
 
 declare_pushf(voidptr, void *);
 declare_pushf(int, int);
@@ -50,9 +50,11 @@ declare_popf(int, int);
 
 /* Just to save some typing. */
 #define STACK_PUSH(s, typetag, value)					      \
+  do									      \
     {									      \
       status = tre_stack_push_ ## typetag(s, value);			      \
-    }
+    }									      \
+  while (/*CONSTCOND*/(void)0,0)
 
 #define STACK_PUSHX(s, typetag, value)					      \
   {									      \
@@ -63,7 +65,7 @@ declare_popf(int, int);
 
 #define STACK_PUSHR(s, typetag, value)					      \
   {									      \
-    reg_errcode_t _status;						      \
+    tre_reg_errcode_t _status;						      \
     _status = tre_stack_push_ ## typetag(s, value);			      \
     if (_status != REG_OK)						      \
       return _status;							      \
