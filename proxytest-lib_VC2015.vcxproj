@@ -3955,6 +3955,7 @@
     <ClInclude Include="popt\poptint.h" />
     <ClInclude Include="popt\system.h" />
     <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="tre\tre-ast.h" />
     <ClInclude Include="tre\tre-compile.h" />
     <ClInclude Include="tre\tre-config.h" />
     <ClInclude Include="tre\tre-internal.h" />
