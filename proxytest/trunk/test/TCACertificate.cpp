@@ -2,6 +2,7 @@
 #include "../CAUtil.hpp"
 #include "../CACertificate.hpp"
 #include "../CALibProxytest.hpp"
+#include "../CAFileSystemDirectory.hpp"
 #define CERT_DIR "test/certs/"
 
 /*
@@ -17,18 +18,12 @@
 		*/
 		TEST(TCACertificate,decodeCerts)
 		{
-#ifdef _WIN32
-			struct _finddata_t c_file;
-			intptr_t hFile;
-			UINT8 filename[4096];
-			strcpy((char*)filename,CERT_DIR);
-			strcat((char*)filename,"*.cer");
+			UINT8 filename[8192];
 			printf("\nTesting certs in %s:\n",CERT_DIR);
-			hFile = _findfirst( (char*)filename, &c_file );
-			do
+			CAFileSystemDirectory dir((UINT8*)CERT_DIR);
+			dir.find((UINT8*)"*.cer");
+			while(dir.getNextSearchResult(filename,8192)==E_SUCCESS)
 				{
-					strcpy((char*)filename,CERT_DIR);
-					strcat((char*)filename,c_file.name);
 					printf("Testing cert: %s -- ",filename);
 					UINT32 certInBuffLen=0;
 					UINT8* certInBuff=readFile(filename,&certInBuffLen);
@@ -41,9 +36,6 @@
 						printf("failed!\n");
 
 				}
-			while( _findnext( hFile, &c_file ) == 0 );
-			_findclose( hFile );
-#endif
 		}
 
 		TEST(TCACertificate, verifyCerts)

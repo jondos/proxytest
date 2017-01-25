@@ -1243,6 +1243,7 @@
     <ClCompile Include="CADataRetentionLogFile.cpp" />
     <ClCompile Include="CADynamicCascadeConfigurator.cpp" />
     <ClCompile Include="CADynaNetworking.cpp" />
+    <ClCompile Include="CAFileSystemDirectory.cpp" />
     <ClCompile Include="CAFirstMix.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">Disabled</Optimization>
@@ -3898,6 +3899,7 @@
     <ClInclude Include="CADataRetentionLog.hpp" />
     <ClInclude Include="CADataRetentionLogFile.hpp" />
     <ClInclude Include="CADynaNetworking.hpp" />
+    <ClInclude Include="CAFileSystemDirectory.hpp" />
     <ClInclude Include="CAFirstMix.hpp" />
     <ClInclude Include="CAFirstMixChannelList.hpp" />
     <ClInclude Include="CAHttpClient.hpp" />
