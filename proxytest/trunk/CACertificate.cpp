@@ -457,7 +457,8 @@ SINT32 CACertificate::verify(const CACertificate* a_cert) const
 		CAMsg::printMsg(LOG_ERR, "Verification Error: Signature Algorithm does not match!\n");
 		//return E_UNKNOWN;
 	}*/
-	if(X509_verify(m_pCert, pubKey) == 1)
+	SINT32 ret = X509_verify(m_pCert, pubKey);
+	if(ret == 1)
 	{
 		CAMsg::printMsg(LOG_DEBUG, "Successfully verified certificate.\n");
 		return E_SUCCESS;
