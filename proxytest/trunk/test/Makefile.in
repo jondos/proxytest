@@ -108,7 +108,9 @@ am_test_proxytest_OBJECTS = TCAUtil.$(OBJEXT) TCACertificate.$(OBJEXT) \
 	AllTests.$(OBJEXT)
 test_proxytest_OBJECTS = $(am_test_proxytest_OBJECTS)
 test_proxytest_DEPENDENCIES = $(top_srcdir)/libproxytest.a \
-	$(top_srcdir)/xml/libxml.a $(top_srcdir)/popt/libpopt.a
+	$(top_srcdir)/xml/libxml.a $(top_srcdir)/popt/libpopt.a \
+	$(top_srcdir)/trio/libtrio.a $(top_srcdir)/tre/libtre.a \
+	$(top_srcdir)/gcm/libgcm.a $(top_srcdir)/TypeA/libmixa.a
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -509,8 +511,14 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 test_proxytest_SOURCES = TCAUtil.cpp TCACertificate.cpp AllTests.cpp
-test_proxytest_LDADD = -l@LIBGOOGLETEST@ $(top_srcdir)/libproxytest.a $(top_srcdir)/xml/libxml.a \
-	$(top_srcdir)/popt/libpopt.a
+test_proxytest_LDADD = -l@LIBGOOGLETEST@ \
+		$(top_srcdir)/libproxytest.a \
+	    $(top_srcdir)/xml/libxml.a \
+	    $(top_srcdir)/popt/libpopt.a \
+	    $(top_srcdir)/trio/libtrio.a \
+	    $(top_srcdir)/tre/libtre.a \
+	    $(top_srcdir)/gcm/libgcm.a \
+	    $(top_srcdir)/TypeA/libmixa.a
 
 includes = @INCLUDES@
 all: all-am
