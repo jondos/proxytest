@@ -32,6 +32,7 @@ libmix_la_SOURCES = CAAbstractControlChannel.cpp\
 		    CADataRetentionLogFile.cpp\
 		    CADynaNetworking.cpp \
 		    CADynamicCascadeConfigurator.cpp \
+			CAFileSystemDirectory.cpp \
 		    CAFirstMix.cpp \
 		    CAFirstMixChannelList.cpp \
 		    CAHttpClient.cpp \
@@ -107,6 +108,7 @@ libmix_la_SOURCES = CAAbstractControlChannel.cpp\
 		    CADataRetentionLogFile.hpp\
 		    CADynaNetworking.hpp \
 		    CADynamicCascadeConfigurator.hpp \
+			CAFileSystemDirectory.hpp \
 		    CAFirstMix.hpp \
 		    CAFirstMixChannelList.hpp \
 		    CAHttpClient.hpp \
