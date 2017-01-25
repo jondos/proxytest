@@ -407,9 +407,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifdef HAVE_EPOLL
 		#include <sys/epoll.h>
 	#endif
-	#define TRE_USE_SYSTEM_REGEX_H
-	#define TRE_SYSTEM_REGEX_H_PATH <regex.h>
-	#define HAVE_REG_ERRCODE_T
 	#include <sys/ioctl.h>
 	#include <sys/types.h>
 	#include <sys/socket.h>
@@ -428,9 +425,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <sys/resource.h>
 	#include <sys/wait.h>
 	#include <termios.h>
-
+	#include <fnmatch.h>
 	#include <ctype.h>
-		typedef struct sockaddr SOCKADDR;
+	typedef struct sockaddr SOCKADDR;
 	typedef SOCKADDR* LPSOCKADDR;
 	#define SOCKET int
 	typedef struct hostent HOSTENT;
