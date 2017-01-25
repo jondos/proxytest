@@ -109,7 +109,7 @@ SINT32 CAFileSystemDirectory::getNextSearchResult(UINT8* strResult, UINT32 sizeR
 			return E_UNKNOWN;
 			}
 
-		if (fnmatch(m_strPattern, pEntry->d_name, FNM_PATHNAME) != 0)
+		if (fnmatch((char*)m_strPattern, pEntry->d_name, FNM_PATHNAME) != 0)
 			return E_UNKNOWN;
 
 		strcpy((char*)strResult, (char*)m_strPath);
