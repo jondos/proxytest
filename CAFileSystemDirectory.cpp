@@ -36,6 +36,7 @@ CAFileSystemDirectory::CAFileSystemDirectory(UINT8* strPath)
 		m_hSearch = -1;
 #else
 		m_hSearch = NULL;
+		m_strPattern = NULL;
 #endif
 	}
 
@@ -51,6 +52,7 @@ CAFileSystemDirectory::~CAFileSystemDirectory()
 		{
 		closedir(m_hSearch);
 			}
+	delete m_strPattern;
 #endif
 		delete m_strPath;
 	}
@@ -73,6 +75,8 @@ SINT32 CAFileSystemDirectory::find(UINT8* strPattern)
 	m_hSearch=opendir(m_strPath);
 	if(m_hSearch==NULL)
 		return E_UNKNOWN;
+	m_strPattern = new UINT8[strlen((char*)strPattern) + 1];
+	strcpy(m_strPattern, strPattern);
 	return E_SUCCESS;
 #endif
 	}
@@ -95,6 +99,24 @@ SINT32 CAFileSystemDirectory::getNextSearchResult(UINT8* strResult, UINT32 sizeR
 	else
 		return E_UNKNOWN;
 #else
-	return E_UNKNOWN;
+	if (m_hSearch !=NULL)
+		{
+		struct dirent * pEntry=readdir(m_hSearch);
+		if (pEntry == NULL)
+			{
+			closedir(m_hSearch);
+			m_hSearch = NULL;
+			return E_UNKNOWN;
+			}
+
+		if (fnmatch(m_strPattern, pEntry->d_name, FNM_PATHNAME) != 0)
+			return E_UNKNOWN;
+
+		strcpy((char*)strResult, (char*)m_strPath);
+		strcat((char*)strResult, (char*)pEntry->d_name);
+		return E_SUCCESS;
+		}
+	else
+		return E_UNKNOWN;
 #endif
 	}

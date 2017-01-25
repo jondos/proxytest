@@ -41,6 +41,7 @@ class CAFileSystemDirectory
 			struct _finddata_t m_finddataFoundFile;
 			intptr_t m_hSearch;
 #else
+			UINT8* m_strPattern;
 			DIR* m_hSearch;
 #endif
 	};
