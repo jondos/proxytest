@@ -426,6 +426,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <sys/wait.h>
 	#include <termios.h>
 	#include <fnmatch.h>
+	#include <dirent.h>
 	#include <ctype.h>
 	typedef struct sockaddr SOCKADDR;
 	typedef SOCKADDR* LPSOCKADDR;
