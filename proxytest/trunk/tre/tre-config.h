@@ -45,7 +45,7 @@
 #define HAVE_ALLOCA 1
 
 /* Define to 1 if you have <malloc.h> and it should be used. */
-#define HAVE_MALLOC_H 1
+//#define HAVE_MALLOC_H 1
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
