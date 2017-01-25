@@ -847,7 +847,7 @@ AC_ARG_WITH(googletest-lib,
 	AS_HELP_STRING([--with-googletest-lib=PATH],[Specify path to Google Test library files]),
 	[
 		if test "x$withval" != "xno" ; then
-			GOOGLETEST_LIB="-L$withval
+			GOOGLETEST_LIB="-L$withval"
 		fi
 	]
 )
