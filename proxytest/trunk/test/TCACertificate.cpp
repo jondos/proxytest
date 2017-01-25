@@ -17,6 +17,7 @@
 		*/
 		TEST(TCACertificate,decodeCerts)
 		{
+#ifdef _WIN32
 			struct _finddata_t c_file;
 			intptr_t hFile;
 			UINT8 filename[4096];
@@ -42,7 +43,7 @@
 				}
 			while( _findnext( hFile, &c_file ) == 0 );
 			_findclose( hFile );
-
+#endif
 		}
 
 		TEST(TCACertificate, verifyCerts)
