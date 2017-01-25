@@ -40,5 +40,7 @@ class CAFileSystemDirectory
 #ifdef _WIN32
 			struct _finddata_t m_finddataFoundFile;
 			intptr_t m_hSearch;
+#else
+			DIR* m_hSearch;
 #endif
 	};
