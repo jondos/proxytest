@@ -291,7 +291,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		struct tm * gmtime_r(const time_t *timep, struct tm *result);
 	
 	#endif
-	#include <malloc.h>
+	#define HAVE_MALLOC_H
 	#define SET_NET_ERROR(x)
 	#define GET_NET_ERROR (WSAGetLastError())
 	#define GET_NET_ERROR_STR(x) ("Unknown error")
@@ -406,9 +406,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifdef HAVE_EPOLL
 		#include <sys/epoll.h>
 	#endif
-	#ifdef HAVE_MALLOC_H
-			#include <malloc.h>
-	#endif
+	#define	TRE_USE_SYSTEM_REGEX_H
+	#define	TRE_SYSTEM_REGEX_H_PATH <regex.h>
 	#include <sys/ioctl.h>
 	#include <sys/types.h>
 	#include <sys/socket.h>
@@ -468,6 +467,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif //WIn32 ?
 
 #include "basetypedefs.h"
+
+#ifdef HAVE_MALLOC_H
+	#include <malloc.h>
+#endif
+
 
 #include <assert.h>
 
