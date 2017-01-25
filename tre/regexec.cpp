@@ -141,7 +141,7 @@ tre_match(const tre_tnfa_t *tnfa, const void *string, size_t len,
 	  tre_str_type_t type, size_t nmatch, tre_regmatch_t pmatch[],
 	  int eflags)
 {
-  reg_errcode_t status;
+  tre_reg_errcode_t status;
   int *tags = NULL, eo;
   if (tnfa->num_tags > 0 && nmatch > 0)
     {
@@ -151,7 +151,7 @@ tre_match(const tre_tnfa_t *tnfa, const void *string, size_t len,
       tags =(int*) xmalloc(sizeof(*tags) * tnfa->num_tags);
 #endif /* !TRE_USE_ALLOCA */
       if (tags == NULL)
-	return REG_ESPACE;
+	return TRE_REG_ESPACE;
     }
 
   /* Dispatch to the appropriate matcher. */
@@ -164,7 +164,7 @@ tre_match(const tre_tnfa_t *tnfa, const void *string, size_t len,
 	  if (source->rewind == NULL || source->compare == NULL)
 	    /* The backtracking matcher requires rewind and compare
 	       capabilities from the input stream. */
-	    return REG_BADPAT;
+	    return TRE_REG_BADPAT;
 	}
       status = tre_tnfa_run_backtrack(tnfa, string, (int)len, type,
 				      tags, eflags, &eo);
@@ -274,7 +274,7 @@ tre_match_approx(const tre_tnfa_t *tnfa, const void *string, size_t len,
 		 tre_str_type_t type, regamatch_t *match, regaparams_t params,
 		 int eflags)
 {
-  reg_errcode_t status;
+  tre_reg_errcode_t status;
   int *tags = NULL, eo;
 
   /* If the regexp does not use approximate matching features, the
@@ -297,7 +297,7 @@ tre_match_approx(const tre_tnfa_t *tnfa, const void *string, size_t len,
       tags =(int*) xmalloc(sizeof(*tags) * tnfa->num_tags);
 #endif /* !TRE_USE_ALLOCA */
       if (tags == NULL)
-	return REG_ESPACE;
+	return TRE_REG_ESPACE;
     }
   status = tre_tnfa_run_approx(tnfa, string, (int)len, type, tags,
 			       match, params, eflags, &eo);

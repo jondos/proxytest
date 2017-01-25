@@ -11,7 +11,7 @@
 /* Define to 1 if you have the <libutf8.h> header file. */
 /* #undef HAVE_LIBUTF8_H */
 
-/* Define to 1 if the system has the type `reg_errcode_t'. */
+/* Define to 1 if the system has the type `tre_reg_errcode_t'. */
 /* #undef HAVE_REG_ERRCODE_T */
 
 /* Define to 1 if you have the <sys/types.h> header file. */

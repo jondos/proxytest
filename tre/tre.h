@@ -43,20 +43,20 @@ typedef enum {
   REG_OK = 0,		/* No error. */
   /* POSIX tre_regcomp() return error codes.  (In the order listed in the
      standard.)	 */
-  REG_NOMATCH,		/* No match. */
-  REG_BADPAT,		/* Invalid regexp. */
-  REG_ECOLLATE,		/* Unknown collating element. */
-  REG_ECTYPE,		/* Unknown character class name. */
-  REG_EESCAPE,		/* Trailing backslash. */
-  REG_ESUBREG,		/* Invalid back reference. */
-  REG_EBRACK,		/* "[]" imbalance */
-  REG_EPAREN,		/* "\(\)" or "()" imbalance */
-  REG_EBRACE,		/* "\{\}" or "{}" imbalance */
-  REG_BADBR,		/* Invalid content of {} */
-  REG_ERANGE,		/* Invalid use of range operator */
-  REG_ESPACE,		/* Out of memory.  */
-  REG_BADRPT            /* Invalid use of repetition operators. */
-} reg_errcode_t;
+  TRE_REG_NOMATCH,		/* No match. */
+	TRE_REG_BADPAT,		/* Invalid regexp. */
+	TRE_REG_ECOLLATE,		/* Unknown collating element. */
+	TRE_REG_ECTYPE,		/* Unknown character class name. */
+	TRE_REG_EESCAPE,		/* Trailing backslash. */
+	TRE_REG_ESUBREG,		/* Invalid back reference. */
+	TRE_REG_EBRACK,		/* "[]" imbalance */
+	TRE_REG_EPAREN,		/* "\(\)" or "()" imbalance */
+	TRE_REG_EBRACE,		/* "\{\}" or "{}" imbalance */
+	TRE_REG_BADBR,		/* Invalid content of {} */
+	TRE_REG_ERANGE,		/* Invalid use of range operator */
+	TRE_REG_ESPACE,		/* Out of memory.  */
+	TRE_REG_BADRPT            /* Invalid use of repetition operators. */
+} tre_reg_errcode_t;
 
 /* POSIX tre_regcomp() flags. */
 #define REG_EXTENDED	1
