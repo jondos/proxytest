@@ -11,7 +11,7 @@
   regexps.  The parser supports both the obsolete default syntax and
   the "extended" syntax, and some nonstandard extensions.
 */
-
+#include "../StdAfx.h"
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
