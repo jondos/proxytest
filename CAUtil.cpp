@@ -1582,7 +1582,7 @@ SINT32 parseU64(const UINT8 * str, UINT64& value)
 			}
 		char *endptr = NULL;
 		value = strtoull((const char *) str, &endptr, 0);
-		if(endptr!=NULL&&*endprt==0) //check if whole string was parsed...
+		if(endptr!=NULL&&*endptr==0) //check if whole string was parsed...
 			return E_SUCCESS;
 		return E_UNKNOWN;
 	#else
