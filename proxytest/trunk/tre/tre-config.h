@@ -39,7 +39,7 @@
 #define TRE_REGEX_T_FIELD value
 
 /* Define to enable wide character (wchar_t) support. */
-#define TRE_WCHAR 1
+//#define TRE_WCHAR 1
 
 /* TRE version string. */
 #define TRE_VERSION "0.8.0"
