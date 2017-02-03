@@ -50,7 +50,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "xml/DOM_Output.hpp"
 	#include "CAMix.hpp"
 	#ifdef LOG_CRIME
-		#include "tre/regex.h"
+		#include "tre/tre.h"
 	#endif
 	#ifdef NEW_MIX_TYPE
 		/* use TypeB mixes */

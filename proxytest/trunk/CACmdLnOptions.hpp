@@ -523,13 +523,13 @@ class CACmdLnOptions
 		}
 
 #ifdef LOG_CRIME
-		regex_t* getCrimeRegExpsURL(UINT32* len)
+		tre_regex_t* getCrimeRegExpsURL(UINT32* len)
 		{
 			*len=m_nCrimeRegExpsURL;
 			return m_arCrimeRegExpsURL;
 		}
 
-		regex_t* getCrimeRegExpsPayload(UINT32* len)
+		tre_regex_t* getCrimeRegExpsPayload(UINT32* len)
 		{
 			*len=m_nCrimeRegExpsPayload;
 			return m_arCrimeRegExpsPayload;
@@ -774,7 +774,7 @@ class CACmdLnOptions
 		bool		m_bAutoReconnect; //auto reconnect if connection to first mix lost ??
 		UINT8*	m_strCascadeName;
 		char*		m_strLogDir;
-		char* 		m_strLogLevel;
+		char* 	m_strLogLevel;
 		SINT64	m_maxLogFileSize;
 		UINT32	m_maxLogFiles; //how many log files can be created before starting again with the first one
 		char*		m_strEncryptedLogDir;
@@ -802,9 +802,9 @@ class CACmdLnOptions
 
 #ifdef LOG_CRIME
 		bool m_logPayload;
-		regex_t* m_arCrimeRegExpsURL;
+		tre_regex_t* m_arCrimeRegExpsURL;
 		UINT32 m_nCrimeRegExpsURL;
-		regex_t* m_arCrimeRegExpsPayload;
+		tre_regex_t* m_arCrimeRegExpsPayload;
 		UINT32 m_nCrimeRegExpsPayload;
 		UINT32 m_nrOfSurveillanceIPs;
 		CAIPAddrWithNetmask* m_surveillanceIPs;

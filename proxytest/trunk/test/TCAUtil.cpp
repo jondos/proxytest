@@ -26,11 +26,11 @@ class CparseDomainFromPayloadHelper :public CALastMix
 void CparseDomainFromPayloadHelper::doTest()
 	{
 	UINT8* domain = parseDomainFromPayload(m_payload, strlen((char*)m_payload));
-	CPPUNIT_ASSERT(domain != NULL);
+	ASSERT_TRUE(domain != NULL);
 	if (domain != NULL)
 		{
 		int ret = strcmp((char*)domain, (char*)m_expectedDomain);
-		CPPUNIT_ASSERT(ret == 0);
+		ASSERT_TRUE(ret == 0);
 		}
 	}
 
