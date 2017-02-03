@@ -9,7 +9,7 @@
 class CparseDomainFromPayloadHelper :public CALastMix
 	{
 		public:
-			CparseDomainFromPayloadHelper(char* payload,char* expectedDomain)
+			CparseDomainFromPayloadHelper(const char* payload,const char* expectedDomain)
 				{
 					m_payload=(UINT8*)payload;
 					m_expectedDomain=(UINT8*)expectedDomain;
