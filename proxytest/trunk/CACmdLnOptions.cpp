@@ -3645,7 +3645,9 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 }
 
 
-// Proxy settings and next mix settings 
+/** This method sets the proxy or next mix settings.
+
+**/
 SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 {
 	UINT8 tmpBuff[TMP_BUFF_SIZE];

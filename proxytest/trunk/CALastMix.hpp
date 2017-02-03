@@ -77,6 +77,7 @@ class CALastMix:public
 					m_pQueueSendToMix=m_pQueueReadFromMix=NULL;
 					m_pCacheLB=new CACacheLoadBalancing();
 					m_pSocksLB=new CACacheLoadBalancing();
+					m_pVPNLB = new CACacheLoadBalancing();
 
 					#ifdef LOG_PACKET_STATS
 						m_pLogPacketStats=NULL;
@@ -100,6 +101,8 @@ class CALastMix:public
 					m_pCacheLB = NULL;
 					delete m_pSocksLB;
 					m_pSocksLB = NULL;
+					delete m_pVPNLB;
+					m_pVPNLB = NULL;
 #ifdef LOG_CRIME
 					tre_regfree(m_pregexpRequestLine);
 					delete m_pregexpRequestLine;
@@ -152,6 +155,7 @@ class CALastMix:public
 			#endif
 			CACacheLoadBalancing*	m_pCacheLB;
 			CACacheLoadBalancing* m_pSocksLB;
+			CACacheLoadBalancing* m_pVPNLB;
 			CAASymCipher*					m_pRSA;
 			CAThread*							m_pthreadSendToMix;
 			CAThread*							m_pthreadReadFromMix;
