@@ -37,7 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 
 #ifdef LOG_CRIME
-	#include "tre/regex.h"
+	#include "tre/tre.h"
 #endif
 	/**
 *	Removes leading and ending whitespaces (chars<=32) from a zero terminated string.
@@ -551,9 +551,9 @@ SINT32 integrateDOMNode(const DOMNode *srcNode, DOMNode *dstNode, bool recursive
 			/*UINT8 *tn = (UINT8 *) XMLString::transcode(currSrcChildName);
 			CAMsg::printMsg(LOG_DEBUG,"handle %s\n", tn);
 			XMLString::release(&tn);*/
-			for(UINT32 i = 0; i < nodeNamesIndex; i++ )
+			for(UINT32 j = 0; j < nodeNamesIndex; j++ )
 			{
-				if(XMLString::equals(currSrcChildName, nodeNames[i]))
+				if(XMLString::equals(currSrcChildName, nodeNames[j]))
 				{
 					nodeAlreadyFinished = true;
 					break;
@@ -589,6 +589,8 @@ SINT32 integrateDOMNode(const DOMNode *srcNode, DOMNode *dstNode, bool recursive
 					}
 					else
 					{
+						///@todo: check!
+						//This seems to be wrong!!
 						dstElem->replaceChild(dstOwnerDoc->cloneNode(currSrcChildren->item(j)),currDstChildren->item(j));
 					}
 					continue;

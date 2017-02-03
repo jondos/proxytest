@@ -4615,7 +4615,7 @@ SINT32 CACmdLnOptions::setCrimeSurveillanceAccounts(DOMElement *elemCrimeDetecti
 }
 
 SINT32 setRegExpressions(DOMElement *rootElement, const char* const childElementName,
-		regex_t **regExContainer, UINT32* regExNr)
+		tre_regex_t **regExContainer, UINT32* regExNr)
 {
 	if( (rootElement == NULL) || (childElementName == NULL) ||
 		(regExNr == NULL) || (regExContainer == NULL) )
@@ -4630,7 +4630,7 @@ SINT32 setRegExpressions(DOMElement *rootElement, const char* const childElement
 
 	if(nlRegExp != NULL)
 	{
-		(*regExContainer) = new regex_t[nlRegExp->getLength()];
+		(*regExContainer) = new tre_regex_t[nlRegExp->getLength()];
 
 		for(UINT32 i = 0; i < nlRegExp->getLength(); i++)
 		{
@@ -4641,7 +4641,7 @@ SINT32 setRegExpressions(DOMElement *rootElement, const char* const childElement
 
 			if(getDOMElementValue(tmpChild, buffRegExp, &lenRegExp)==E_SUCCESS)
 			{
-				if(regcomp( &((*regExContainer)[(*regExNr)]),
+				if(tre_regcomp( &((*regExContainer)[(*regExNr)]),
 							 ((char*) buffRegExp),
 							 REG_EXTENDED | REG_ICASE | REG_NOSUB) != 0 )
 				{

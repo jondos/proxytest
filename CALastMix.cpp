@@ -870,8 +870,8 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 
 			//OK lets try to use a regular expression for the task instead of a hand crafted parser...
 			//do the match...
-			regmatch_t theMatches[3];
-			int ret=regnexec(m_pregexpRequestLine,(const char*)payloadData,payloadDataLength,3,theMatches,0);
+			tre_regmatch_t theMatches[3];
+			int ret=tre_regnexec(m_pregexpRequestLine,(const char*)payloadData,payloadDataLength,3,theMatches,0);
 			if(ret!=0)
 				return NULL;
 
@@ -888,8 +888,8 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 			else
 				{
 					//do the match...
-					regmatch_t theDomainMatches[2];
-					ret=regnexec(m_pregexpDomainOfURI,(const char*)payloadData+theMatches[2].rm_so,theMatches[2].rm_eo-theMatches[2].rm_so,2,theDomainMatches,0);
+					tre_regmatch_t theDomainMatches[2];
+					ret=tre_regnexec(m_pregexpDomainOfURI,(const char*)payloadData+theMatches[2].rm_so,theMatches[2].rm_eo-theMatches[2].rm_so,2,theDomainMatches,0);
 					if(ret!=0)
 						return NULL;
 					UINT32 matchLen=theDomainMatches[1].rm_eo-theDomainMatches[1].rm_so;
@@ -914,7 +914,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 						UINT32 strLen = strlen((char *)startOfUrl);
 						for(UINT32 i = 0; i < m_nCrimeRegExpsURL; i++)
 						{
-							if(regnexec(&m_pCrimeRegExpsURL[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
+							if(tre_regnexec(&m_pCrimeRegExpsURL[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
 							{
 								delete [] startOfUrl;
 								return true;
@@ -925,7 +925,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 			}
 		for(UINT32 i = 0; i < m_nCrimeRegExpsPayload; i++)
 		{
-			if (regnexec(&m_pCrimeRegExpsPayload[i],(const char*)payLoad ,payLen,0,NULL,0)==0)
+			if (tre_regnexec(&m_pCrimeRegExpsPayload[i],(const char*)payLoad ,payLen,0,NULL,0)==0)
 			{
 				return true;
 			}
