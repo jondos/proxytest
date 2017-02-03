@@ -888,7 +888,7 @@ AC_ARG_ENABLE(build-only-lib,
 
 TEST_CFLAGS=""
 
-if test "x$DOTHETEST" == "xyes" ; then
+if test "x$DOTHETESTS" == "xyes" ; then
 	AC_SUBST(LIBGOOGLETEST,gtest)
 	TEST_CFLAGS="-D__GOOGLE_UNIT_TEST__"
 fi

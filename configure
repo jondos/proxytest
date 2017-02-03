@@ -18664,7 +18664,7 @@ fi
 
 TEST_CFLAGS=""
 
-if test "x$DOTHETEST" == "xyes" ; then
+if test "x$DOTHETESTS" == "xyes" ; then
 	LIBGOOGLETEST=gtest
 
 	TEST_CFLAGS="-D__GOOGLE_UNIT_TEST__"
