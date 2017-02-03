@@ -251,6 +251,8 @@ SINT32 CALastMixA::loop()
 											ret=E_UNKNOWN;
 											if(pMixPacket->payload.type==MIX_PAYLOAD_SOCKS)
 												ptmpLB=m_pSocksLB;
+											else if (pMixPacket->payload.type == MIX_PAYLOAD_VPN)
+												ptmpLB = m_pVPNLB;
 											for(UINT32 count=0;count<ptmpLB->getElementCount();count++)
 											{
 												tmpSocket->create();

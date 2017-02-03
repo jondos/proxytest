@@ -948,6 +948,7 @@ SINT32 CALastMix::setTargets()
 			}
 		m_pCacheLB->clean();
 		m_pSocksLB->clean();
+		m_pVPNLB->clean();
 		UINT32 i;
 		for(i=1;i<=cntTargets;i++)
 			{
@@ -961,6 +962,10 @@ SINT32 CALastMix::setTargets()
 				{
 					m_pSocksLB->add(oTargetInterface.getAddr());
 				}
+				else if (oTargetInterface.getTargetType() == TARGET_VPN_PROXY)
+					{
+					m_pVPNLB->add(oTargetInterface.getAddr());
+					}
 				oTargetInterface.cleanAddr();
 			}
 		CAMsg::printMsg(LOG_DEBUG,"This mix will use the following proxies:\n");
@@ -979,6 +984,14 @@ SINT32 CALastMix::setTargets()
 				pAddr->getIP(ip);
 				UINT32 port=pAddr->getPort();
 				CAMsg::printMsg(LOG_DEBUG,"%u. SOCKS Proxy's Address: %u.%u.%u.%u:%u\n",i+1,ip[0],ip[1],ip[2],ip[3],port);
+			}
+		for (i = 0; i<m_pVPNLB->getElementCount(); i++)
+			{
+			CASocketAddrINet* pAddr = m_pVPNLB->get();
+			UINT8 ip[4];
+			pAddr->getIP(ip);
+			UINT32 port = pAddr->getPort();
+			CAMsg::printMsg(LOG_DEBUG, "%u. VPN Proxy's Address: %u.%u.%u.%u:%u\n", i + 1, ip[0], ip[1], ip[2], ip[3], port);
 			}
 
 
