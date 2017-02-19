@@ -3788,6 +3788,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 			CASocketAddr* addr=NULL;
 			UINT16 port;
 			bool bHttpProxyFound = false;
+			bool bVPNProxyFound = false;
 			for(UINT32 i=0; i < nlTargetInterfaces->getLength(); i++)
 			{
 				delete addr;
@@ -3940,6 +3941,10 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 						// TODO maybe there is also a possibility to check the response of the SOCKS proxy?
 						m_bSocksSupport = true;
 					}
+					else if (proxy_type == TARGET_VPN_PROXY)
+						{
+							bVPNProxyFound = true;
+						}
 				}
 
 				tmpSocket->close();
@@ -3958,9 +3963,9 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 				addr=NULL;
 			}
 
-			if (!bHttpProxyFound)
+			if (!bHttpProxyFound&&!bVPNProxyFound)
 			{
-				CAMsg::printMsg(LOG_CRIT, "No valid HTTP proxy was specified! Please install and configure an HTTP proxy like Squid before starting the mix.\n");
+				CAMsg::printMsg(LOG_CRIT, "No valid HTTP or VPN proxy was specified! Please install and configure an HTTP or VPN  proxy like Squid or the ANONVPN proxy before starting the mix.\n");
 				for (UINT32 i = 0; i < aktInterface; i++)
 				{
 					m_arTargetInterfaces[aktInterface].cleanAddr();
