@@ -639,11 +639,12 @@ NEXT_USER:
 													if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
 														log=LOG_CRIT;
 													CAMsg::printMsg(log,"Detecting crime activity - next mix channel: %u -- "
-															"In-IP is: %u.%u.%u.%u \n", pMixPacket->channel,
+															"Incoming (User) IP:Port is: %u.%u.%u.%u:%u \n", pMixPacket->channel,
 															pEntry->pHead->peerIP[0],
 															pEntry->pHead->peerIP[1],
 															pEntry->pHead->peerIP[2],
-															pEntry->pHead->peerIP[3]);
+															pEntry->pHead->peerIP[3],
+															pEntry->pHead->peerPort);
 													continue;
 												}
 										#endif

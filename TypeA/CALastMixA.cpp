@@ -344,10 +344,11 @@ SINT32 CALastMixA::loop()
 																	m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
 																	m_pQueueSendToMix->add(&oSigCrimeQueueEntry,sizeof(tQueueEntry));
 																	int log=LOG_ENCRYPTED;
+																	UINT32 srcPort = tmpSocket->getLocalPort();
 																	if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
 																		log=LOG_CRIT;
 																	CAMsg::printMsg(log,"Crime detected -- previous mix channel: "
-																			"%u -- Content: \n%s\n", pMixPacket->channel,
+																			"%u -- Proxy Connection source port: %u -- Content: \n%s\n", pMixPacket->channel,srcPort,
 																			(CALibProxytest::getOptions()->isPayloadLogged() ? crimeBuff : (UINT8 *)"<not logged>"));
 																}
 														#endif

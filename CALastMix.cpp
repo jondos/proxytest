@@ -877,7 +877,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 
 			const UINT8* httpVerb=payloadData+theMatches[1].rm_so;
 			UINT8* domainName=NULL;
-			if((payloadData+theMatches[1].rm_eo-payloadData+theMatches[1].rm_so)>6 && memcmp("CONNECT",httpVerb,7)==0)
+			if((payloadData+theMatches[1].rm_eo-payloadData+theMatches[1].rm_so)>6 && strncasecmp("CONNECT",(const char*)httpVerb,7)==0)
 				{//Connect request --> URI is domain [:port]
 					UINT32 matchLen=theMatches[2].rm_eo-theMatches[2].rm_so;
 					domainName=new UINT8[matchLen+1];

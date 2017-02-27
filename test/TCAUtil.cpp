@@ -26,7 +26,7 @@ class CparseDomainFromPayloadHelper :public CALastMix
 void CparseDomainFromPayloadHelper::doTest()
 	{
 	UINT8* domain = parseDomainFromPayload(m_payload, strlen((char*)m_payload));
-	ASSERT_TRUE(domain != NULL);
+	ASSERT_TRUE(domain != NULL) << "Failure in Payload: " << m_payload;
 	if (domain != NULL)
 		{
 		int ret = strcmp((char*)domain, (char*)m_expectedDomain);
@@ -47,8 +47,12 @@ TEST(TCAUtil, parseDomainFromPayload)
 			{
 				CparseDomainFromPayloadHelper("GET http://www.bild.de HTTP/1.1","www.bild.de"),
 				CparseDomainFromPayloadHelper("GET http://www.bild.de","www.bild.de"),
-				CparseDomainFromPayloadHelper("CONNECT www.bild.de:443","www.bild.de")
-			};
+				CparseDomainFromPayloadHelper("GET https://www.bild.de:443","www.bild.de"),
+				CparseDomainFromPayloadHelper("GET https://145.67.78.98:443","145.67.78.98"),
+				CparseDomainFromPayloadHelper("CONNECT www.bild.de:443","www.bild.de"),
+				CparseDomainFromPayloadHelper("connect www.bild.de:443","www.bild.de"),
+				CparseDomainFromPayloadHelper("connect 145.67.78.98:443","145.67.78.98")
+				};
 			for(UINT32 i=0;i<sizeof(arTest)/sizeof(CparseDomainFromPayloadHelper);i++)
 				arTest[i].doTest();
 		}
