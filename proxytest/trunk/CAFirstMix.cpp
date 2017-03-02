@@ -1857,6 +1857,33 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				m_pIPList->removeIP(peerIP);
 				return E_UNKNOWN;
 			}
+		//Check access control credential if access control is enabled...
+		if (CALibProxytest::getOptions()->isAccessControlEnabled())
+			{
+				DOMElement* elemCredential = NULL;
+				UINT8 buffUserCredential[255], buffMixCredential[255];
+				UINT32 lenUserCredential = 255, lenMixCredential = 255;
+				getDOMChildByName(elemRoot, "AccessControlCredential", elemCredential, false);
+				if(getDOMElementValue(elemCredential, buffUserCredential, &lenUserCredential)!=E_SUCCESS ||
+					CALibProxytest::getOptions()->getAccessControlCredential(buffMixCredential, &lenMixCredential)!=E_SUCCESS ||
+					 lenUserCredential!= lenMixCredential || 
+					 memcmp(buffMixCredential, buffUserCredential, lenMixCredential)!=0)
+					{
+					if (doc != NULL)
+						{
+						doc->release();
+						doc = NULL;
+						}
+					delete[] xml_buff;
+					xml_buff = NULL;
+					delete pNewUser;
+					pNewUser = NULL;
+					m_pIPList->removeIP(peerIP);
+					return E_UNKNOWN;
+					}
+			}
+
+
 		//Getting control channel keys if available
 		///TODO: move to the if-statement above
 		DOMElement* elemControlChannelEnc=NULL;

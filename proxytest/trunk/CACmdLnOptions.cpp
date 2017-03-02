@@ -76,7 +76,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_docOpTnCs=NULL; //Operator Terms and Conditions (if any)
 		m_bAcceptReconfiguration=false;
 		m_maxNrOfUsers = 0;
-		
+		m_strAccessControlCredential = NULL;
 #ifdef PAYMENT		
 		m_PaymentReminderProbability= -1;
 #else
@@ -257,7 +257,9 @@ void CACmdLnOptions::initGeneralOptionSetters()
 		&CACmdLnOptions::setMaxUsers;
 	generalOptionSetters[++count]=
 		&CACmdLnOptions::setPaymentReminder;
-}
+	generalOptionSetters[++count] =
+		&CACmdLnOptions::setAccessControlCredential;
+	}
 
 void CACmdLnOptions::initCertificateOptionSetters()
 {
@@ -571,6 +573,12 @@ void CACmdLnOptions::clean()
 			m_docOpTnCs->release();
 			m_docOpTnCs=NULL;
 		}
+
+		if (m_strAccessControlCredential != NULL)
+			{
+			delete[]m_strAccessControlCredential;
+			m_strAccessControlCredential = NULL;
+			}
 
 #ifdef COUNTRY_STATS
 		delete[] m_dbCountryStatsHost;
@@ -2507,6 +2515,43 @@ SINT32 CACmdLnOptions::setPaymentReminder(DOMElement* elemGeneral)
 }
 
 
+SINT32 CACmdLnOptions::setAccessControlCredential(DOMElement* elemGeneral)
+	{
+	if (m_strAccessControlCredential != NULL)
+		{
+		delete[]m_strAccessControlCredential;
+		m_strAccessControlCredential = NULL;
+		}
+
+	DOMElement* elemCredential = NULL;
+	UINT8 tmpBuff[TMP_BUFF_SIZE];
+	UINT32 tmpLen = TMP_BUFF_SIZE;
+
+	if (elemGeneral == NULL) return E_UNKNOWN;
+	ASSERT_GENERAL_OPTIONS_PARENT
+	(elemGeneral->getNodeName(), OPTIONS_NODE_CREDENTIAL);
+
+	//get Run as Daemon
+	getDOMChildByName(elemGeneral, OPTIONS_NODE_CREDENTIAL, elemCredential, false);
+
+	if (getDOMElementValue(elemCredential, tmpBuff, &tmpLen) == E_SUCCESS)
+		{	
+			m_strAccessControlCredential = new UINT8[tmpLen + 1]; 
+			memcpy(m_strAccessControlCredential,tmpBuff,tmpLen);
+			m_strAccessControlCredential[tmpLen] = 0;
+		}
+	return E_SUCCESS;
+	}
+
+SINT32 CACmdLnOptions::getAccessControlCredential(UINT8* outbuff, UINT32* inoutsize)
+	{
+	
+	if (outbuff== NULL || inoutsize == NULL || m_strAccessControlCredential==NULL || *inoutsize<=strlen((char*)m_strAccessControlCredential))
+		return E_UNKNOWN;
+	strcpy((char*)outbuff, (char*)m_strAccessControlCredential);
+	*inoutsize = strlen((char*)m_strAccessControlCredential);
+	return E_SUCCESS;
+	}
 
 
 /* append the mix description to the mix info DOM structure

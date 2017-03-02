@@ -72,6 +72,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define OPTIONS_NODE_USER_ID "UserID"
 #define OPTIONS_NODE_FD_NR "NrOfFileDescriptors"
 #define OPTIONS_NODE_DAEMON "Daemon"
+#define OPTIONS_NODE_CREDENTIAL "AccessControlCredential"
 #define OPTIONS_NODE_MAX_USERS "MaxUsers"
 #define OPTIONS_NODE_PAYMENT_REMINDER "PaymentReminderProbability"
 #define OPTIONS_NODE_LOGGING "Logging"
@@ -480,6 +481,14 @@ class CACmdLnOptions
 		{
 			return (m_addrInfoServicesSize>0);
 		}
+
+		SINT32 getAccessControlCredential(UINT8* outbuff, UINT32* outbuffsize);
+
+		bool isAccessControlEnabled()
+			{
+			return m_strAccessControlCredential != NULL;
+			}
+
 #endif //ONLY_LOCAL_PROXY
 		bool getCompressLogs()
 		{
@@ -768,6 +777,8 @@ class CACmdLnOptions
 		UINT32 m_u32KeepAliveRecvInterval;
 
 		bool m_perfTestEnabled;
+
+		UINT8* m_strAccessControlCredential;
 #endif //ONLY_LOCAL_PROXY
 
 		bool		m_bLocalProxy,m_bFirstMix,m_bMiddleMix,m_bLastMix;
@@ -901,7 +912,7 @@ class CACmdLnOptions
 		SINT32 setTermsAndConditions(DOMElement *elemRoot);
 
 		/* General Options */
-#define GENERAL_OPTIONS_NR 12
+#define GENERAL_OPTIONS_NR 13
 		SINT32 setMixType(DOMElement* elemGeneral);
 		SINT32 setMixName(DOMElement* elemGeneral);
 		SINT32 setMixID(DOMElement* elemGeneral);
@@ -914,6 +925,7 @@ class CACmdLnOptions
 		SINT32 setMaxUsers(DOMElement* elemGeneral);
 		SINT32 setLoggingOptions(DOMElement* elemGeneral);
 		SINT32 setPaymentReminder(DOMElement* elemGeneral);
+		SINT32 setAccessControlCredential(DOMElement* elemGeneral);
 
 		/* Certificate Options */
 #define MAX_CERTIFICATE_OPTIONS_NR 6
