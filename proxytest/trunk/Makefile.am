@@ -166,6 +166,11 @@ libmix_la_SOURCES = CAAbstractControlChannel.cpp\
 		    StdAfx.h\
 		    basetypedefs.h
 
+libmix_la_LIBADD = $(top_srcdir)/xml/libxml.a \
+	    $(top_srcdir)/popt/libpopt.a \
+	    $(top_srcdir)/trio/libtrio.a \
+	    $(top_srcdir)/tre/libtre.a \
+	    $(top_srcdir)/gcm/libgcm.a
 else
 
 noinst_LIBRARIES = libproxytest.a
