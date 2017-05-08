@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CASocketAddrUnix.hpp"
 #endif
 
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 const char* CAListenerInterface::XML_ELEMENT_CONTAINER_NAME = "ListenerInterfaces";
 const char* CAListenerInterface::XML_ELEMENT_NAME = "ListenerInterface";
 #endif
@@ -114,9 +114,7 @@ SINT32	CAListenerInterface::toDOMElement(DOMElement* & elemListenerInterface,XER
 		setDOMElementValue(elem,ip);
 		return E_SUCCESS;
 	}
-#endif
 
-#ifndef ONLY_LOCAL_PROXY
 CAListenerInterface** CAListenerInterface::getInstance(DOMElement* a_elemListenerInterfaces, 
 													  UINT32& r_length)
 {
@@ -254,4 +252,5 @@ ERR:
 		pListener = NULL;
 		return NULL;
 }
+
 #endif //ONLY_LOCAL_PROXY

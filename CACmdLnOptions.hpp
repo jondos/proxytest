@@ -296,18 +296,6 @@ class CACmdLnOptions
 		};
 
 #ifndef ONLY_LOCAL_PROXY
-		//for last Mixes: number of outside visible addresses
-		UINT32 getVisibleAddressesCount(){return m_cnVisibleAddresses;}
-
-		/** Fills \c strAddressBuff with a outside visible adress.
-		 * @param strAddressBuff buffer for adress information (either hostname or IP string)
-		 * @param len size of strAddressBuff
-		 * @param nr the number of the adress we request information about (starting with 1 for the first address)
-		 * @retval E_SUCCESS if successful
-		 * @retval E_SPACE if buffer is to small for the requested address
-		 * @retval E_UNKNOWN if \c nr is out of range
-		 */
-		SINT32 getVisibleAddress(UINT8* strAddressBuff, UINT32 len,UINT32 nr);
 
 		UINT16 getSOCKSPort();
 		SINT32 getSOCKSHost(UINT8* host,UINT32 len);
@@ -321,6 +309,19 @@ class CACmdLnOptions
 
 
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+		//for last Mixes: number of outside visible addresses
+		UINT32 getVisibleAddressesCount(){return m_cnVisibleAddresses;}
+
+		/** Fills \c strAddressBuff with a outside visible adress.
+		 * @param strAddressBuff buffer for adress information (either hostname or IP string)
+		 * @param len size of strAddressBuff
+		 * @param nr the number of the adress we request information about (starting with 1 for the first address)
+		 * @retval E_SUCCESS if successful
+		 * @retval E_SPACE if buffer is to small for the requested address
+		 * @retval E_UNKNOWN if \c nr is out of range
+		 */
+		SINT32 getVisibleAddress(UINT8* strAddressBuff, UINT32 len,UINT32 nr);
+
 		//TODO maybe clone MultiSignature object!
 		CAMultiSignature* getMultiSigner(){ return m_pMultiSignature; }
 		bool verifyMixCertificates() {return m_bVerifyMixCerts;}
@@ -395,6 +396,15 @@ class CACmdLnOptions
 
 		SINT32 getCascadeName(UINT8* name,UINT32 len) const;
 		CAListenerInterface** getInfoServices(UINT32& r_size);
+
+		// added by ronin <ronin2@web.de>
+		SINT32 setCascadeName(const UINT8* name)
+		{
+			delete[] m_strCascadeName;
+			m_strCascadeName = new UINT8[strlen((const char*)name)+1];
+			strcpy((char*)m_strCascadeName,(const char*)name);
+			return E_SUCCESS;
+		}
 #endif
 #ifndef ONLY_LOCAL_PROXY
 
@@ -475,14 +485,7 @@ class CACmdLnOptions
 
 
 
-		// added by ronin <ronin2@web.de>
-		SINT32 setCascadeName(const UINT8* name)
-		{
-			delete[] m_strCascadeName;
-			m_strCascadeName = new UINT8[strlen((const char*)name)+1];
-			strcpy((char*)m_strCascadeName,(const char*)name);
-			return E_SUCCESS;
-		}
+
 
 		SINT32 reread(CAMix* pMix);
 
@@ -732,8 +735,6 @@ class CACmdLnOptions
 		SINT32 checkListenerInterfaces();
 		SINT32 checkCertificates();
 #endif //DYNAMIC_MIX
-		bool m_bDynamic;
-		SINT32 parseInfoServices(DOMElement* a_infoServiceNode);
 		/* END LERNGRUPPE */
 		static SINT32 buildDefaultConfig(XERCES_CPP_NAMESPACE::DOMDocument* a_doc,bool bForLastMix);
 #endif //only_LOCAL_PROXY
@@ -758,6 +759,10 @@ class CACmdLnOptions
 		UINT32	m_maxNrOfUsers;
 		XERCES_CPP_NAMESPACE::DOMDocument* m_docMixInfo;
 		CAListenerInterface**	m_addrInfoServices;
+		DOMNodeList*		m_opCertList;
+		CACertificate* 		m_OpCert;
+		CACertificate*	m_pLogEncryptionCertificate;
+		bool m_bDynamic;
 	
 #endif
 #ifndef ONLY_LOCAL_PROXY
@@ -774,20 +779,16 @@ class CACmdLnOptions
 		CAXMLPriceCert*		m_pPriceCertificate;
 #endif
 
-		CACertificate* 		m_OpCert;
 		//CACertificate** 	m_opCerts;
 		//UINT32 				m_opCertsLength;
-		DOMNodeList*		m_opCertList;
 
 
-		CACertificate*	m_pLogEncryptionCertificate;
 
 		
 		SINT32	m_PaymentReminderProbability;
 
 		// added by ronin <ronin2@web.de>
 		DOMElement* m_pCascadeXML;
-		XERCES_CPP_NAMESPACE::DOMDocument* m_docMixXml;
 		XERCES_CPP_NAMESPACE::DOMDocument* m_docOpTnCs;
 
 
@@ -900,11 +901,6 @@ class CACmdLnOptions
 	private:
 		SINT32 setNewValues(CACmdLnOptions& newOptions);
 #ifndef ONLY_LOCAL_PROXY
-		SINT32 readXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* & docConfig,const UINT8* const configFileName);
-		SINT32 readXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* & docConfig,const UINT8* const buf, UINT32 len);
-		SINT32 processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* docConfig);
-		SINT32 clearVisibleAddresses();
-		SINT32 addVisibleAddresses(DOMNode* nodeProxy);
 #ifdef COUNTRY_STATS
 		char* m_dbCountryStatsHost;
 		char* m_dbCountryStatsUser;
@@ -915,7 +911,17 @@ class CACmdLnOptions
 		SINT32 clearListenerInterfaces();
 
 
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+		SINT32 parseInfoServices(DOMElement* a_infoServiceNode);
+
+		SINT32 clearVisibleAddresses();
+		SINT32 addVisibleAddresses(DOMNode* nodeProxy);
+		XERCES_CPP_NAMESPACE::DOMDocument* m_docMixXml;
+	
+		SINT32 readXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* & docConfig,const UINT8* const configFileName);
+		SINT32 readXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* & docConfig,const UINT8* const buf, UINT32 len);
+		SINT32 processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* docConfig);
+
 		/* NR of all Option types, i.e. General, Certificates, Networking, etc. (excluding *mainOptionSetters)
 		 * these options are all direct children of <MixConfiguration>*/
 #define MAIN_OPTION_SETTERS_NR 8
@@ -927,7 +933,11 @@ class CACmdLnOptions
 		SINT32 setTermsAndConditions(DOMElement *elemRoot);
 
 		/* General Options */
-#define GENERAL_OPTIONS_NR 13
+#if !defined ONLY_LOCAL_PROXY || defined INLUCDE_MIDDLE_MIX
+	#define GENERAL_OPTIONS_NR 13
+#else
+	#define GENERAL_OPTIONS_NR 10
+#endif
 		SINT32 setMixType(DOMElement* elemGeneral);
 		SINT32 setMixName(DOMElement* elemGeneral);
 		SINT32 setMixID(DOMElement* elemGeneral);
@@ -937,11 +947,13 @@ class CACmdLnOptions
 		SINT32 setUserID(DOMElement* elemGeneral);
 		SINT32 setNrOfFileDescriptors(DOMElement* elemGeneral);
 		SINT32 setDaemonMode(DOMElement* elemGeneral);
-		SINT32 setMaxUsers(DOMElement* elemGeneral);
 		SINT32 setLoggingOptions(DOMElement* elemGeneral);
+
+#if !defined ONLY_LOCAL_PROXY || defined INLUCDE_MIDDLE_MIX
 		SINT32 setPaymentReminder(DOMElement* elemGeneral);
 		SINT32 setAccessControlCredential(DOMElement* elemGeneral);
-
+		SINT32 setMaxUsers(DOMElement* elemGeneral);
+#endif
 		/* Certificate Options */
 #define MAX_CERTIFICATE_OPTIONS_NR 6
 		UINT32 m_nCertificateOptionsSetters;

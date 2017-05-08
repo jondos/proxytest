@@ -75,6 +75,7 @@ class DOMNodeList
 						{
 							DOMNode* pNode = pEntry->node;
 							pList->add(pNode->clone(true, pDoc));
+							pEntry = pEntry->next;
 						}
 					return pList;
 				}
