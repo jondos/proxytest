@@ -612,7 +612,7 @@ uninstall-am:
 .PRECIOUS: Makefile
 
 
-@USE_MINIXML_TRUE@	libxml_a_SOURCES += dom/mxml/mxmlDOM.hpp dom/mxml/mxmlDOMDocument.cpp dom/mxml/mxmlXercesDOMParser.cpp dom/mxml/mxmlXercesDOMElement.cpp
+@USE_MINIXML_TRUE@	libxml_a_SOURCES += dom/mxml/mxmlDOM.hpp dom/mxml/mxmlDOMDocument.cpp dom/mxml/mxmlXercesDOMParser.cpp dom/mxml/mxmlXercesDOMElement.cpp dom/mxml/mxmlXercesDOMNode.cpp
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
