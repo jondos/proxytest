@@ -961,23 +961,23 @@ SINT32 CASignature::verifyDER(UINT8* in, UINT32 inlen, const UINT8 * dsaSig, con
 /** Verifies a XML Signature under node root.*/
 SINT32 CASignature::verifyXML(DOMNode* root,CACertStore* trustedCerts)
 	{
-		DOMNode* elemSignature;
+		DOMNode* elemSignature=NULL;
 		getDOMChildByName(root,"Signature",elemSignature);
 		if(elemSignature==NULL)
 			return E_UNKNOWN;
-		DOMNode* elemSigValue;
+		DOMNode* elemSigValue=NULL;
 		getDOMChildByName(elemSignature,"SignatureValue",elemSigValue);
 		if(elemSigValue==NULL)
 			return E_UNKNOWN;
-		DOMNode* elemSigInfo;
+		DOMNode* elemSigInfo=NULL;
 		getDOMChildByName(elemSignature,"SignedInfo",elemSigInfo);
 		if(elemSigInfo==NULL)
 			return E_UNKNOWN;
-		DOMNode* elemReference;
+		DOMNode* elemReference=NULL;
 		getDOMChildByName(elemSigInfo,"Reference",elemReference);
 		if(elemReference==NULL)
 			return E_UNKNOWN;
-		DOMNode* elemDigestValue;
+		DOMNode* elemDigestValue=NULL;
 		getDOMChildByName(elemReference,"DigestValue",elemDigestValue);
 		if(elemDigestValue==NULL)
 			return E_UNKNOWN;
@@ -1015,7 +1015,7 @@ SINT32 CASignature::verifyXML(DOMNode* root,CACertStore* trustedCerts)
 			}
 			DSA_SIG* dsaSig=DSA_SIG_new();
 			SINT32 ret=decodeRS(tmpSig, tmpSiglen, dsaSig);
-			if(verify(out,outlen,dsaSig)!=E_SUCCESS)
+			if(ret!=E_SUCCESS||verify(out,outlen,dsaSig)!=E_SUCCESS)
 			{
 				DSA_SIG_free(dsaSig);
 				delete[] out;
@@ -1197,7 +1197,7 @@ SINT32 CASignature::verifyDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* si
 		DSA_SIG_set0(dsaSig,r,s);
 	#else
 		dsaSig->r = r;
-		dasSig->s = s;
+		dsaSig->s = s;
 	#endif
 
 	SINT32 ret = DSA_do_verify(dgst, dgstLen, dsaSig, m_pDSA);
