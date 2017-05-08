@@ -28,7 +28,7 @@ class XMLFormatter
 			XMLFormatter& operator<< (const XMLCh toFormat)
 				{
 					XMLCh c = toFormat;
-					formatBuf(&toFormat, 1, m_EscapeFlag);
+					formatBuf(&c, 1, m_EscapeFlag);
 					return *this;
 				}
 
