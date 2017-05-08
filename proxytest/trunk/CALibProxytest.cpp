@@ -39,11 +39,11 @@ unsigned long openssl_get_thread_id(void)
 /**do necessary initialisations of libraries etc.*/
 SINT32 CALibProxytest::init()
 	{
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY && !defined MXML_DOM 
 		XMLPlatformUtils::Initialize();
 #endif
 		initDOMParser();
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INLUDE_MIDDLE_MIX
 		SSL_library_init();
 #endif
 		OpenSSL_add_all_algorithms();
