@@ -64,10 +64,15 @@ inline void setRSAFlags(RSA *pRSA)
 {
 	if (pRSA == NULL)
 		return;
-	pRSA->flags |= RSA_FLAG_THREAD_SAFE;
-#ifdef RSA_FLAG_NO_BLINDING
-	pRSA->flags |= RSA_FLAG_NO_BLINDING;
-#endif
+	#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+		RSA_set_flags(pRSA,RSA_FLAG_THREAD_SAFE | RSA_FLAG_NO_BLINDING );
+	#else
+			pRSA->flags |= RSA_FLAG_THREAD_SAFE;
+			pRSA->flags |= RSA_FLAG_SIGN_VER;
+		#ifdef RSA_FLAG_NO_BLINDING
+			pRSA->flags |= RSA_FLAG_NO_BLINDING;
+		#endif
+	#endif //OPENSSL_VERSION_NUMBER >= 0x1000204fL
 #if OPENSSL_VERSION_NUMBER > 0x0090707fL
 //	pRSA->flags|=RSA_FLAG_NO_EXP_CONSTTIME;
 #endif
@@ -292,21 +297,6 @@ _ERROR:
 */
 
 #ifndef ONLY_LOCAL_PROXY
-SINT32 CAASymCipher::addKeyPart(DOMElement *elemRoot,
-                                XERCES_CPP_NAMESPACE::DOMDocument *docOwner,
-                                const char *partName, BIGNUM *part)
-{
-	DOMElement *node = createDOMElement(docOwner, partName);
-	elemRoot->appendChild(node);
-	UINT8 tmpBuff[256];
-	UINT32 size = 256;
-	BN_bn2bin(part, tmpBuff);
-	CABase64::encode(tmpBuff, BN_num_bytes(part), tmpBuff, &size);
-	tmpBuff[size] = 0;
-	DOMText *tmpTextNode = createDOMText(docOwner, (const char *const)tmpBuff);
-	node->appendChild(tmpTextNode);
-	return E_SUCCESS;
-}
 
 /** Stores the public key in \c buff as XML. The format is as follows:
         *
@@ -345,18 +335,6 @@ SINT32 CAASymCipher::getPublicKeyAsXML(UINT8 *buff, UINT32 *len)
 	return E_SUCCESS;
 }
 
-SINT32 CAASymCipher::getPublicKeyAsDOMElement(
-  DOMElement *&elemRoot, XERCES_CPP_NAMESPACE::DOMDocument *docOwner)
-{
-	if (m_pRSA == NULL)
-		return E_UNKNOWN;
-	elemRoot = createDOMElement(docOwner, "RSAKeyValue");
-
-	addKeyPart(elemRoot, docOwner, "Modulus", m_pRSA->n);
-	addKeyPart(elemRoot, docOwner, "Exponent", m_pRSA->e);
-
-	return E_SUCCESS;
-}
 
 #ifdef EXPORT_ASYM_PRIVATE_KEY
 /** Stores the private key in \c buff as XML. The format is as follows (see
@@ -582,24 +560,32 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOMNode *node)
 			if (equals(root->getNodeName(), "RSAKeyValue"))
 				{
 					RSA *tmpRSA = RSA_new();
+					BIGNUM* n = NULL;
+					BIGNUM* e = NULL;
 					DOMNode *child = root->getFirstChild();
 					while (child != NULL)
 						{
 							if (equals(child->getNodeName(), "Modulus"))
 								{
-									getKeyPart(&tmpRSA->n, child);
+									getKeyPart(&n, child);
 								}
 							else if (equals(child->getNodeName(), "Exponent"))
 								{
-									getKeyPart(&tmpRSA->e, child);
+									getKeyPart(&e, child);
 								}
 							child = child->getNextSibling();
 						}
-					if (tmpRSA->n != NULL && tmpRSA->e != NULL)
+					if (n != NULL && e != NULL)
 						{
 							if (m_pRSA != NULL)
 								RSA_free(m_pRSA);
 							m_pRSA = tmpRSA;
+							#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+								RSA_set0_key(m_pRSA,n,e, NULL );
+							#else
+								m_pRSA->n=n;
+								m_pRSA->e=e;
+							#endif
 							setRSAFlags(m_pRSA);
 							return E_SUCCESS;
 						}
@@ -623,10 +609,22 @@ SINT32 CAASymCipher::setPublicKey(const CACertificate *pCert)
 	if (pCert == NULL)
 		return E_UNKNOWN;
 	EVP_PKEY *pubkey = X509_get_pubkey(pCert->m_pCert);
-	if (pubkey == NULL ||
-	    (pubkey->type != EVP_PKEY_RSA && pubkey->type != EVP_PKEY_RSA2))
+	int keyType = 0;
+#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+	keyType = EVP_PKEY_id(pubkey);
+#else
+	keyType = pubkey->type;
+#endif
+
+	if (pubkey == NULL || (keyType != EVP_PKEY_RSA && keyType != EVP_PKEY_RSA2))
 		return E_UNKNOWN;
-	RSA *r = pubkey->pkey.rsa;
+	RSA *r = NULL;
+#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+	r = EVP_PKEY_get1_RSA(pubkey);
+#else
+	r = pubkey->pkey.rsa;
+#endif
+
 	if (RSA_size(r) != 128)
 		return E_UNKNOWN;
 	if (m_pRSA != NULL)
@@ -644,15 +642,21 @@ SINT32 CAASymCipher::setPublicKey(const UINT8 *m, UINT32 mlen, const UINT8 *e,
 	UINT32 decLen = 4096;
 	UINT8 decBuff[4096];
 	CABase64::decode(m, mlen, decBuff, &decLen);
-	tmpRSA->n = BN_bin2bn(decBuff, decLen, NULL);
+	BIGNUM* bnE = BN_bin2bn(decBuff, decLen, NULL);
 	decLen = 4096;
 	CABase64::decode(e, elen, decBuff, &decLen);
-	tmpRSA->e = BN_bin2bn(decBuff, decLen, NULL);
-	if (tmpRSA->n != NULL && tmpRSA->e != NULL)
+	BIGNUM* bnN = BN_bin2bn(decBuff, decLen, NULL);
+	if (bnN != NULL && bnE != NULL)
 		{
 			if (m_pRSA != NULL)
 				RSA_free(m_pRSA);
 			m_pRSA = tmpRSA;
+			#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+				RSA_set0_key(m_pRSA,bnN,bnE, NULL );
+			#else
+				m_pRSA->n=n;
+				m_pRSA->e=e;
+			#endif
 			setRSAFlags(m_pRSA);
 			return E_SUCCESS;
 		}
@@ -741,3 +745,46 @@ SINT32 CAASymCipher::testSpeed()
 	printf("CAASymCiper::testSpeed() takes %u ms for %u decrypts!\n", d, runs);
 	return E_SUCCESS;
 }
+
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+
+SINT32 CAASymCipher::addKeyPart(DOMElement *elemRoot,
+                                XERCES_CPP_NAMESPACE::DOMDocument *docOwner,
+                                const char *partName, BIGNUM *part)
+{
+	DOMElement *node = createDOMElement(docOwner, partName);
+	elemRoot->appendChild(node);
+	UINT8 tmpBuff[256];
+	UINT32 size = 256;
+	BN_bn2bin(part, tmpBuff);
+	CABase64::encode(tmpBuff, BN_num_bytes(part), tmpBuff, &size);
+	tmpBuff[size] = 0;
+	DOMText *tmpTextNode = createDOMText(docOwner, (const char *const)tmpBuff);
+	node->appendChild(tmpTextNode);
+	return E_SUCCESS;
+}
+
+
+SINT32 CAASymCipher::getPublicKeyAsDOMElement(DOMElement *&elemRoot, XERCES_CPP_NAMESPACE::DOMDocument *docOwner)
+{
+	if (m_pRSA == NULL)
+		return E_UNKNOWN;
+	elemRoot = createDOMElement(docOwner, "RSAKeyValue");
+	BIGNUM* n = NULL;
+	BIGNUM* e = NULL;
+#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+	RSA_get0_key(m_pRSA,(const BIGNUM**) &n,(const BIGNUM**) &e, NULL );
+#else
+	n = m_pRSA->n;
+	e = m_pRSA->e;
+#endif
+	addKeyPart(elemRoot, docOwner, "Modulus", n);
+	addKeyPart(elemRoot, docOwner, "Exponent", e);
+
+	return E_SUCCESS;
+}
+
+
+#endif
+
+

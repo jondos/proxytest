@@ -12,6 +12,13 @@ class DOMText:public DOMNode
 					m_xmlchNodeName=XMLString::replicate((XMLCh*)"#text");
 					m_nodeType=DOMNode::TEXT_NODE;
 				}
+
+				DOMText* clone(XERCES_CPP_NAMESPACE::DOMDocument* doc)
+				{
+					DOMText* pNode = new DOMText(doc,getNodeValue());
+					return pNode;
+				}
+
 			friend class XERCES_CPP_NAMESPACE::DOMDocument;
 	};
 

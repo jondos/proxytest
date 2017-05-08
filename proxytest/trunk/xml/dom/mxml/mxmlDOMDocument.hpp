@@ -17,7 +17,7 @@ namespace XERCES_CPP_NAMESPACE
 							return (DOMElement*)m_nodeFirstChild;
 						}
 
-					DOMNode*		importNode(DOMNode* importedNode, bool deep);
+					DOMNode* importNode(DOMNode* importedNode, bool deep);
 					DOMDocumentFragment* createDocumentFragment();
 					DOMText* createTextNode(const XMLCh* data)
 						{

@@ -26,7 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "CAThread.hpp"
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
@@ -145,7 +145,7 @@ SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 				return E_UNKNOWN;
 			}
 		#endif
-#ifdef _DEBUG
+#if defined _DEBUG  && !defined(ONLY_LOCAL_PROXY)
 		if(m_pThreadList != NULL)
 		{
 			m_pThreadList->put(this);
@@ -198,7 +198,7 @@ SINT32 CAThread::join()
 	SINT32 ret=pthread_join(*m_pThread,NULL);
 	if(ret==0)
 	{
-#ifdef DEBUG
+#if defined DEBUG && !defined ONLY_LOCAL_PROXY
 			CAMsg::printMsg(LOG_DEBUG,"CAThread %s - join() successful\n", m_strName);
 			m_pThreadList->remove(this);
 #endif	

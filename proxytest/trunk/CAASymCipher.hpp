@@ -43,6 +43,7 @@ DAMAGE
 
 #define RSA_SIZE 128
 
+
 class CAASymCipher
 {
 		public:
@@ -57,16 +58,19 @@ class CAASymCipher
 											UINT32 *len);
 	SINT32 generateKeyPair(UINT32 size);
 // SINT32 getPublicKey(UINT8* buff,UINT32 *len);
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+
+	SINT32 getPublicKeyAsDOMElement(DOMElement *&elemRoot, XERCES_CPP_NAMESPACE::DOMDocument *docOwner);
+#endif
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 		private:
-	SINT32 addKeyPart(DOMElement *elemRoot,
-										XERCES_CPP_NAMESPACE::DOMDocument *docOwner,
+	SINT32 addKeyPart(DOMElement *elemRoot,	XERCES_CPP_NAMESPACE::DOMDocument *docOwner,
 										const char *partName, BIGNUM *part);
+#endif
+#ifndef ONLY_LOCAL_PROXY
 
 		public:
 	SINT32 getPublicKeyAsXML(UINT8 *buff, UINT32 *len);
-	SINT32 getPublicKeyAsDOMElement(DOMElement *&elemRoot,
-																	XERCES_CPP_NAMESPACE::DOMDocument *docOwner);
 #ifdef EXPORT_ASYM_PRIVATE_KEY
 	SINT32 getPrivateKeyAsXML(UINT8 *buff, UINT32 *len);
 	SINT32 getPrivateKeyAsDOMElement(DOMElement *&elemRoot,
@@ -94,5 +98,8 @@ class CAASymCipher
 		private:
 	RSA *m_pRSA;
 };
+
+void setRSAFlags(RSA *pRSA);
+
 
 #endif

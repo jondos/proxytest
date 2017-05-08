@@ -58,8 +58,10 @@ class CAListenerInterface
 					return m_bVirtual;
 				}
 			char* getHostname() { return (char*)m_strHostname; }
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 			SINT32 toDOMElement(DOMElement* & elem,XERCES_CPP_NAMESPACE::DOMDocument* ownerDoc) const;
+#endif
+#ifndef ONLY_LOCAL_PROXY
 			static const char* XML_ELEMENT_CONTAINER_NAME;
 			static const char* XML_ELEMENT_NAME;
 #endif

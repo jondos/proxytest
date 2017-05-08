@@ -46,6 +46,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAReplayDatabase.hpp"
 #endif
 
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+	#include "CAMiddleMix.hpp"
+// The Mix....
+CAMix* pMix=NULL;
+#endif
+
 #ifndef ONLY_LOCAL_PROXY
 	#include "xml/DOM_Output.hpp"
 	#include "CAMix.hpp"
@@ -60,15 +66,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#include "TypeA/CAFirstMixA.hpp"
 		#include "TypeA/CALastMixA.hpp"
 	#endif
-	#include "CAMiddleMix.hpp"
 	#include "CALogPacketStats.hpp"
 	#include "CATLSClientSocket.hpp"
 
 #ifdef REPLAY_DATABASE_PERFORMANCE_TEST
   #include "CAReplayDatabase.hpp"
 #endif
-// The Mix....
-CAMix* pMix=NULL;
 #endif
 
 bool bTriedTermination = false;
@@ -155,7 +158,7 @@ void my_terminate(void)
 	if(!bTriedTermination)
 	{
 		bTriedTermination = true;
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 		if(pMix!=NULL)
 		{
 			pMix->shutDown();
@@ -453,7 +456,7 @@ See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 int main(int argc, const char* argv[])
 	{
 		SINT32 exitCode=0;
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 		pMix=NULL;
 #endif
 		UINT32 lLogOpts = 0;
@@ -830,7 +833,7 @@ exit(0);
 				//		goto EXIT;
 				//	}
 				//else
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 			SINT32 s32MaxSockets=CASocket::getMaxOpenSockets();
 			CAMsg::printMsg(LOG_INFO,"Max Number of sockets we can open: %i\n",s32MaxSockets);
 			
@@ -843,6 +846,7 @@ exit(0);
 				CASocket::setMaxNormalSockets(s32MaxSockets-10);
 				}
 				MONITORING_FIRE_SYS_EVENT(ev_sys_start);
+#if !defined ONLY_LOCAL_PROXY
 				if(CALibProxytest::getOptions()->isFirstMix())
 				{
 					CAMsg::printMsg(LOG_INFO,"I am the First MIX...\n");
@@ -853,12 +857,15 @@ exit(0);
 					#endif
 					MONITORING_FIRE_NET_EVENT(ev_net_firstMixInited);
 				}
-				else if(CALibProxytest::getOptions()->isMiddleMix())
+				else
+#endif
+				if(CALibProxytest::getOptions()->isMiddleMix())
 				{
 					CAMsg::printMsg(LOG_INFO,"I am a Middle MIX...\n");
 					pMix=new CAMiddleMix();
 					MONITORING_FIRE_NET_EVENT(ev_net_middleMixInited);
 				}
+#if !defined ONLY_LOCAL_PROXY
 				else
 				{
 					CAMsg::printMsg(LOG_INFO,"I am the Last MIX...\n");
@@ -869,12 +876,13 @@ exit(0);
 					#endif
 					MONITORING_FIRE_NET_EVENT(ev_net_lastMixInited);
 				}
+#endif
 #else
 				CAMsg::printMsg(LOG_ERR,"this Mix is compiled to work only as local proxy!\n");
 				exit(EXIT_FAILURE);
 #endif
 			}
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #ifndef DYNAMIC_MIX
 	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
 		if(pMix->start()!=E_SUCCESS)

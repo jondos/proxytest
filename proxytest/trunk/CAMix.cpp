@@ -26,7 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "CAMix.hpp"
 #include "CAUtil.hpp"
 #include "CAInfoService.hpp"
@@ -402,7 +402,7 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
 	if(CALibProxytest::getOptions()->isLastMix())
 		{
 		addMixInfo(elemMixesDocCascade, false);
-		getLastDOMChildByName(elemMixesDocCascade, "Mix", elemMix);
+		::getLastDOMChildByName(elemMixesDocCascade, "Mix", elemMix);
 		// create signature
 		if (signXML(elemMix) != E_SUCCESS)
 			{
@@ -453,8 +453,8 @@ SINT32 CAMix::addMixInfo(DOMNode* a_element, bool a_bForceFirstNode)
 	return E_SUCCESS;
 	}
 
-DOMNode *CAMix::appendTermsAndConditionsExtension(XERCES_CPP_NAMESPACE::DOMDocument *ownerDoc,
-    DOMElement *root)
+#ifdef PAYMENT
+DOMNode *CAMix::appendTermsAndConditionsExtension(XERCES_CPP_NAMESPACE::DOMDocument *ownerDoc,DOMElement *root)
 	{
 	if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
 		{
@@ -629,7 +629,7 @@ DOMNode *CAMix::termsAndConditionsInfoNode(XERCES_CPP_NAMESPACE::DOMDocument *ow
 
 	}
 
-
+#endif
 SINT32 CAMix::appendCompatibilityInfo(DOMNode* a_parent)
 	{
 	DOMElement* elemCompatibility=createDOMElement(a_parent->getOwnerDocument(),"Compatibility");
@@ -771,7 +771,7 @@ SINT32 CAMix::checkCompatibility(DOMNode* a_parent, const char* a_mixPosition)
 			lenAllFlags = 1;
 			for (UINT32 i = 0; i < flags->getLength(); i++)
 				{
-				if (getNodeName(flags->item(i), strNodeName, &lenNodeName) == E_SUCCESS)
+				if (::getNodeName(flags->item(i), strNodeName, &lenNodeName) == E_SUCCESS)
 					{
 
 					lenAllFlags += strlen((char*)strNodeName) + 1;

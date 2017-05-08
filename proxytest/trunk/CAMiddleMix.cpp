@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "CAMiddleMix.hpp"
 #include "CASingleSocketGroup.hpp"
 #include "CAMsg.hpp"
@@ -44,6 +44,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "xml/DOM_Output.hpp"
 #include "CAStatusManager.hpp"
 #include "CALibProxytest.hpp"
+#include "CAControlChannelDispatcher.hpp"
 
 SINT32 CAMiddleMix::initOnce()
 	{
@@ -219,15 +220,15 @@ SINT32 CAMiddleMix::processKeyExchange()
 						oRSA.setPublicKeyAsDOMNode(rsaKey);
 						UINT8 key[64];
 						getRandom(key,64);
-						XERCES_CPP_NAMESPACE::DOMDocument* docSymKey=createDOMDocument();
+						XERCES_CPP_NAMESPACE::DOMDocument* docSymKey=::createDOMDocument();
 						DOMElement* elemRoot=NULL;
-						encodeXMLEncryptedKey(key,64,elemRoot,docSymKey,&oRSA);
+						::encodeXMLEncryptedKey(key,64,elemRoot,docSymKey,&oRSA);
 						docSymKey->appendChild(elemRoot);
 
 						appendCompatibilityInfo(elemRoot);
 
 						DOMElement* elemNonceHash=createDOMElement(docSymKey,"Nonce");
-						setDOMElementValue(elemNonceHash,arNonce);
+						::setDOMElementValue(elemNonceHash,arNonce);
 						elemRoot->appendChild(elemNonceHash);
 
 						///Getting the KeepAlive Traffice...
@@ -320,20 +321,20 @@ SINT32 CAMiddleMix::processKeyExchange()
 				return E_UNKNOWN;
 			}
 		count++;
-		setDOMElementAttribute(root,"count",count);
+		::setDOMElementAttribute(root,"count",count);
 
 		addMixInfo(root, true);
 		DOMElement* mixNode;
-		getDOMChildByName(root, "Mix", mixNode, false);
+		::getDOMChildByName(root, "Mix", mixNode, false);
 
 
 		UINT8 tmpBuff[50];
 		CALibProxytest::getOptions()->getMixId(tmpBuff,50); //the mix id...
-		setDOMElementAttribute(mixNode,"id",tmpBuff);
+		::setDOMElementAttribute(mixNode,"id",tmpBuff);
 		//Supported Mix Protocol -->currently "0.3"
 		DOMElement* elemMixProtocolVersion=createDOMElement(doc,"MixProtocolVersion");
 		mixNode->appendChild(elemMixProtocolVersion);
-		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
+		::setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
 
 		DOMElement* elemKey=NULL;
 		m_pRSA->getPublicKeyAsDOMElement(elemKey,doc); //the key
@@ -371,12 +372,13 @@ SINT32 CAMiddleMix::processKeyExchange()
 		 * Extensions, (nodes that can be removed from the KeyInfo without
 		 * destroying the signature of the "Mix"-node).
 		 */
+#ifdef PAYMENT
 		if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
 		{
 			appendTermsAndConditionsExtension(doc, root);
 			mixNode->appendChild(termsAndConditionsInfoNode(doc));
 		}
-
+#endif
 		// create signature
 		if(signXML(mixNode)!=E_SUCCESS)
 		{
@@ -550,7 +552,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		UINT8 key[150];
 		UINT32 keySize=150;
 
-		ret=decodeXMLEncryptedKey(key,&keySize,elemRoot,m_pRSA);
+		ret=::decodeXMLEncryptedKey(key,&keySize,elemRoot,m_pRSA);
 		if(ret!=E_SUCCESS||keySize!=64)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);

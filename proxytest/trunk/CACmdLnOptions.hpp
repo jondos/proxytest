@@ -311,7 +311,7 @@ class CACmdLnOptions
 
 		UINT16 getSOCKSPort();
 		SINT32 getSOCKSHost(UINT8* host,UINT32 len);
-		CAListenerInterface** getInfoServices(UINT32& r_size);
+		
 #endif //ONLY_LOCAL_PROXY
 
 		SINT32 getMaxOpenFiles()
@@ -320,9 +320,84 @@ class CACmdLnOptions
 		}
 
 
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 		//TODO maybe clone MultiSignature object!
 		CAMultiSignature* getMultiSigner(){ return m_pMultiSignature; }
+		bool verifyMixCertificates() {return m_bVerifyMixCerts;}
+		CACertStore* getTrustedCertificateStore()
+			{
+					return m_pTrustedRootCertificates;
+			}
+		CACertificate* getNextMixTestCertificate()
+			{
+				if(m_pNextMixCertificate!=NULL)
+					return m_pNextMixCertificate->clone();
+				return NULL;
+			}
+				
+		SINT32 setNextMixTestCertificate(CACertificate* cert)
+			{
+					if(cert != NULL)
+					{
+							m_pNextMixCertificate = cert->clone();
+							return E_SUCCESS;
+					}
+					return E_UNKNOWN;
+			}
+		CACertificate* getPrevMixTestCertificate()
+			{
+				if(m_pPrevMixCertificate!=NULL)
+					return m_pPrevMixCertificate->clone();
+				return NULL;
+			}
+
+		SINT32 setPrevMixTestCertificate(CACertificate* cert)
+			{
+				if(cert != NULL)
+					{
+						m_pPrevMixCertificate = cert->clone();
+						return E_SUCCESS;
+					}
+				return E_UNKNOWN;
+			}
+
+		bool hasPrevMixTestCertificate()
+		{
+			return m_pPrevMixCertificate!=NULL;
+		}
+
+		bool hasNextMixTestCertificate()
+		{
+			return m_pNextMixCertificate!=NULL;
+		}
+
+		UINT32 getKeepAliveSendInterval()
+			{
+				return m_u32KeepAliveSendInterval;
+			}
+
+		UINT32 getKeepAliveRecvInterval()
+			{
+				return m_u32KeepAliveRecvInterval;
+			}
+
+		SINT32 getMixXml(XERCES_CPP_NAMESPACE::DOMDocument* & docMixInfo);
+
+		bool acceptReconfiguration() { return m_bAcceptReconfiguration; }
+		bool isInfoServiceEnabled()
+		{
+			return (m_addrInfoServicesSize>0);
+		}
+		UINT32 getMaxNrOfUsers()
+		{
+			return m_maxNrOfUsers;
+		}
+
+		SINT32 getCascadeName(UINT8* name,UINT32 len) const;
+		CAListenerInterface** getInfoServices(UINT32& r_size);
+#endif
+#ifndef ONLY_LOCAL_PROXY
+
 		/*CASignature* getSignKey()
 		{
 			if(m_pSignKey!=NULL)
@@ -366,53 +441,7 @@ class CACmdLnOptions
 #ifdef COUNTRY_STATS
 		SINT32 getCountryStatsDBConnectionLoginData(char** db_host,char**db_user,char**db_passwd);
 #endif
-		bool hasPrevMixTestCertificate()
-		{
-			return m_pPrevMixCertificate!=NULL;
-		}
 
-		CACertificate* getPrevMixTestCertificate()
-		{
-			if(m_pPrevMixCertificate!=NULL)
-				return m_pPrevMixCertificate->clone();
-			return NULL;
-		}
-
-		SINT32 setPrevMixTestCertificate(CACertificate* cert)
-		{
-			if(cert != NULL)
-			{
-				m_pPrevMixCertificate = cert->clone();
-				return E_SUCCESS;
-			}
-						return E_UNKNOWN;
-				}
-
-		bool hasNextMixTestCertificate()
-		{
-			return m_pNextMixCertificate!=NULL;
-		}
-
-		CACertificate* getNextMixTestCertificate()
-		{
-			if(m_pNextMixCertificate!=NULL)
-				return m_pNextMixCertificate->clone();
-			return NULL;
-		}
-				
-				SINT32 setNextMixTestCertificate(CACertificate* cert)
-				{
-						if(cert != NULL)
-						{
-								m_pNextMixCertificate = cert->clone();
-								return E_SUCCESS;
-						}
-						return E_UNKNOWN;
-				}
-				CACertStore* getTrustedCertificateStore()
-				{
-						return m_pTrustedRootCertificates;
-				}
 
 		/** Returns if the encrpyted Log could/should be used**/
 		bool isEncryptedLogEnabled()
@@ -444,7 +473,7 @@ class CACmdLnOptions
 			return m_pCascadeXML;
 		}
 
-		SINT32 getCascadeName(UINT8* name,UINT32 len) const;
+
 
 		// added by ronin <ronin2@web.de>
 		SINT32 setCascadeName(const UINT8* name)
@@ -462,25 +491,12 @@ class CACmdLnOptions
 
 		/** Get the XML describing the Mix. this is not a string!*/
 		//SINT32 getMixXml(UINT8* strxml,UINT32* len);
-		SINT32 getMixXml(XERCES_CPP_NAMESPACE::DOMDocument* & docMixInfo);
 
 		UINT32 getNumberOfTermsAndConditionsTemplates();
 		XERCES_CPP_NAMESPACE::DOMDocument **getAllTermsAndConditionsTemplates();
 		XERCES_CPP_NAMESPACE::DOMElement *getTermsAndConditions();
 
-		UINT32 getKeepAliveSendInterval()
-		{
-			return m_u32KeepAliveSendInterval;
-		}
 
-		UINT32 getKeepAliveRecvInterval()
-		{
-			return m_u32KeepAliveRecvInterval;
-		}
-		bool isInfoServiceEnabled()
-		{
-			return (m_addrInfoServicesSize>0);
-		}
 
 		SINT32 getAccessControlCredential(UINT8* outbuff, UINT32* outbuffsize);
 
@@ -658,17 +674,13 @@ class CACmdLnOptions
 		// needed for autoconfiguration
 		SINT32 setNextMix(XERCES_CPP_NAMESPACE::DOMDocument* pDoc);
 		SINT32 setPrevMix(XERCES_CPP_NAMESPACE::DOMDocument* pDoc);
-		bool acceptReconfiguration() { return m_bAcceptReconfiguration; }
 
 		friend THREAD_RETURN threadReConfigure(void *param);
 
 		/** Writes a default configuration file into the file named by filename*/
 		static SINT32 createMixOnCDConfiguration(const UINT8* strFileName);
 		static SINT32 saveToFile(XERCES_CPP_NAMESPACE::DOMDocument* a_doc, const UINT8* a_strFileName);
-		UINT32 getMaxNrOfUsers()
-		{
-			return m_maxNrOfUsers;
-		}
+
 
 #ifdef DYNAMIC_MIX
 		/* LERNGRUPPE (refactoring + new) */
@@ -711,7 +723,6 @@ class CACmdLnOptions
 #endif // DYNAMIC_MIX
 		XERCES_CPP_NAMESPACE::DOMDocument **m_termsAndConditionsTemplates;
 		UINT32 m_nrOfTermsAndConditionsTemplates;
-				bool verifyMixCertificates() {return m_bVerifyMixCerts;}
 	private:
 #ifdef DYNAMIC_MIX
 		UINT8* m_strLastCascadeProposal;
@@ -733,16 +744,30 @@ class CACmdLnOptions
 		char*		m_strTargetHost; //only for the local proxy...
 		char*		m_strSOCKSHost;
 		UINT16	m_iSOCKSPort;
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+		CAMultiSignature* 	m_pMultiSignature;
+		/* for mix certificate verification */
+		bool				m_bVerifyMixCerts;
+		CACertStore*		m_pTrustedRootCertificates;
+		CACertificate*	m_pNextMixCertificate;
+		CACertificate*	m_pPrevMixCertificate;
+		UINT32 m_u32KeepAliveSendInterval;
+		UINT32 m_u32KeepAliveRecvInterval;
+		bool m_bAcceptReconfiguration;
+		UINT32 m_addrInfoServicesSize;
+		UINT32	m_maxNrOfUsers;
+		XERCES_CPP_NAMESPACE::DOMDocument* m_docMixInfo;
+		CAListenerInterface**	m_addrInfoServices;
+	
+#endif
 #ifndef ONLY_LOCAL_PROXY
 		bool		m_bIsRunReConfigure; //true, if an async reconfigure is under way
 		CAMutex* m_pcsReConfigure; //Ensures that reconfigure is running only once at the same time;
 		CAThread m_threadReConfigure; //Thread, that does the actual reconfigure work
-		CAListenerInterface**	m_addrInfoServices;
-		UINT32 m_addrInfoServicesSize;
+		
 
 		//CASignature*		m_pSignKey;
 		//CACertificate*		m_pOwnCertificate;
-		CAMultiSignature* 	m_pMultiSignature;
 		//CACertificate** 	m_ownCerts;
 		//UINT32 				m_ownCertsLength;
 #ifdef PAYMENT
@@ -754,27 +779,17 @@ class CACmdLnOptions
 		//UINT32 				m_opCertsLength;
 		DOMNodeList*		m_opCertList;
 
-		/* for mix certificate verification */
-		bool				m_bVerifyMixCerts;
-		CACertStore*		m_pTrustedRootCertificates;
 
-		CACertificate*	m_pPrevMixCertificate;
-		CACertificate*	m_pNextMixCertificate;
 		CACertificate*	m_pLogEncryptionCertificate;
 
-		UINT32	m_maxNrOfUsers;
 		
 		SINT32	m_PaymentReminderProbability;
 
 		// added by ronin <ronin2@web.de>
 		DOMElement* m_pCascadeXML;
-		bool m_bAcceptReconfiguration;
-		XERCES_CPP_NAMESPACE::DOMDocument* m_docMixInfo;
 		XERCES_CPP_NAMESPACE::DOMDocument* m_docMixXml;
 		XERCES_CPP_NAMESPACE::DOMDocument* m_docOpTnCs;
 
-		UINT32 m_u32KeepAliveSendInterval;
-		UINT32 m_u32KeepAliveRecvInterval;
 
 		bool m_perfTestEnabled;
 

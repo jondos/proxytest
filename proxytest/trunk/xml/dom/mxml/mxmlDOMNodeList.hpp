@@ -67,7 +67,21 @@ class DOMNodeList
 					m_uSize++;
 				}
 
+			DOMNodeList* clone(XERCES_CPP_NAMESPACE::DOMDocument* pDoc)
+				{
+					DOMNodeList* pList = new DOMNodeList();
+					t_DOMNodeList_entry* pEntry = m_pHead;
+					while (pEntry != NULL)
+						{
+							DOMNode* pNode = pEntry->node;
+							pList->add(pNode->clone(true, pDoc));
+						}
+					return pList;
+				}
+
 			friend class DOMElement;
+			friend class DOMNode;
+			friend class DOMNamedNodeMap;
 
 		private:
 			UINT32 m_uSize;

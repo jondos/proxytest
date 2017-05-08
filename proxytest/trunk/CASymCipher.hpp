@@ -40,7 +40,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	* we have crypt1() and crypt2() depending on the used IV.
 	*/
 class CASymCipher
-#ifndef ONLY_LOCAL_PROXY	
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 	:public CALockAble
 #endif
 	{
