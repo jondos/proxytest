@@ -157,6 +157,7 @@ SINT32 getDOMElementValue(const DOMElement * const pElem, UINT32& value, UINT32 
 
 SINT32 getDOMElementValue(const DOMElement * const pElem, UINT32* value);
 
+
 #if !defined LOCAL_PROXY_ONLY || defined INCLUDE_MIDDLE_MIX 
 	/** Creates an empty DOM DOcument.
 	*/
@@ -165,11 +166,14 @@ SINT32 getDOMElementValue(const DOMElement * const pElem, UINT32* value);
 	SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOMElement* & elemRootEncodedKey,XERCES_CPP_NAMESPACE::DOMDocument* docOwner,CAASymCipher* pRSA);
 	SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, UINT32 xmllen,CAASymCipher* pRSA);
 	SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const DOMNode* pRoot,CAASymCipher* pRSA);
+	SINT32 getDOMElementValue(const DOMElement * const pElem,UINT16* value);
 	SINT32 setDOMElementValue(DOMElement* pElem,const UINT8* value);
 	SINT32 setDOMElementValue(DOMElement* pElem, UINT32 value);
 	SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, UINT32 value);
 	SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,UINT32& value);
 	SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,UINT8* value,UINT32* len);
+	SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,SINT64& value);
+	SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,bool& value);
 	SINT32 getNodeName(const DOMNode * const pElem, UINT8* value,UINT32* valuelen);
 	SINT32 getLastDOMChildByName(const DOMNode* pNode,const char * const name,DOMElement* & a_child);
 	SINT32 getLastDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNode* & a_child);
@@ -278,7 +282,6 @@ SINT32 getDOMElementValue(const DOMElement * const pElem, SINT64 &value);
 
 SINT32 getDOMElementValue(const DOMElement * const pElem,SINT32* value);
 
-SINT32 getDOMElementValue(const DOMElement * const pElem,UINT16* value);
 
 SINT32 getDOMElementValue(const DOMElement * const pElem,double* value);
 
@@ -290,8 +293,6 @@ SINT32 setDOMElementAttribute(DOMNode* pElem, const char* attrName, SINT64 value
 SINT32 setDOMElementValue(DOMElement* pElem,double floatValue);
 SINT32 setDOMElementValue(DOMElement* pElem, bool value);
 
-SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,SINT64& value);
-SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,bool& value);
 
 SINT32 setCurrentTimeMilliesAsDOMAttribute(DOMNode *pElem);
 

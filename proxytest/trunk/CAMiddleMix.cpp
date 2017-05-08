@@ -1062,7 +1062,7 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 	{
 	CAMiddleMix* pMix = static_cast<CAMiddleMix*>(param);
 		HCHANNEL channelIn;
-		CASymCipher* pCipher;
+		CASymCipher* pCipher=NULL;
 
 		tPoolEntry* pPoolEntry=new tPoolEntry;
 		MIXPACKET* pMixPacket=&pPoolEntry->packet;

@@ -9,6 +9,8 @@ class XMLString
 		public:
 			static char* transcode  ( const XMLCh *const   toTranscode)
 				{
+					if (toTranscode == NULL)
+						return NULL;
 					UINT32 len=strlen((char*)toTranscode)+1;
 					char* newBuf=new char[len];
 					memcpy(newBuf,toTranscode,len);
@@ -17,6 +19,8 @@ class XMLString
 			
 			static XMLCh* transcode  ( const char *const   toTranscode)
 				{
+					if (toTranscode == NULL)
+						return NULL;
 					UINT32 len=strlen(toTranscode)+1;
 					XMLCh* newBuf=new XMLCh[len];
 					memcpy(newBuf,toTranscode,len);
@@ -48,6 +52,8 @@ class XMLString
 			
 			static XMLCh* replicate(const XMLCh* const toRep)
 				{
+					if (toRep == NULL)
+						return NULL;
 					UINT32 len=XMLString::stringLen(toRep)+1;
 					XMLCh* c=new XMLCh[len];
 					memcpy(c,toRep,len);

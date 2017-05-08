@@ -451,36 +451,6 @@ bool CACertificate::isValid() const
 	return false;
 }
 
-#endif
-#ifndef ONLY_LOCAL_PROXY
-SINT32 CACertificate::getAuthorityKeyIdentifier(UINT8* r_aki, UINT32* r_akiLen) const
-{
-	if(m_pAKI == NULL)
-	{
-		return E_UNKNOWN;
-	}
-
-	ASN1_OCTET_STRING* pKeyID = NULL;
-	pKeyID = m_pAKI->keyid;
-	if(pKeyID == NULL)
-	{
-		return E_UNKNOWN;
-	}
-
-	// Get the ASCII string format of the authority key identifier
-	UINT8* cKeyID = (UINT8*)i2s_ASN1_OCTET_STRING(NULL, pKeyID);
-	if (cKeyID == NULL)
-	{
-		return E_UNKNOWN;
-	}
-	removeColons(cKeyID, strlen((const char*)cKeyID), r_aki, r_akiLen);
-	OPENSSL_free(cKeyID);
-	return E_SUCCESS;
-}
-
-
-
-
 SINT32 CACertificate::getRawSubjectKeyIdentifier(UINT8* r_ski, UINT32* r_skiLen)
 {
 	if (m_pSKI == NULL)
@@ -506,6 +476,30 @@ SINT32 CACertificate::getRawSubjectKeyIdentifier(UINT8* r_ski, UINT32* r_skiLen)
 	return E_SUCCESS;
 }
 
+SINT32 CACertificate::getAuthorityKeyIdentifier(UINT8* r_aki, UINT32* r_akiLen) const
+{
+	if(m_pAKI == NULL)
+	{
+		return E_UNKNOWN;
+	}
+
+	ASN1_OCTET_STRING* pKeyID = NULL;
+	pKeyID = m_pAKI->keyid;
+	if(pKeyID == NULL)
+	{
+		return E_UNKNOWN;
+	}
+
+	// Get the ASCII string format of the authority key identifier
+	UINT8* cKeyID = (UINT8*)i2s_ASN1_OCTET_STRING(NULL, pKeyID);
+	if (cKeyID == NULL)
+	{
+		return E_UNKNOWN;
+	}
+	removeColons(cKeyID, strlen((const char*)cKeyID), r_aki, r_akiLen);
+	OPENSSL_free(cKeyID);
+	return E_SUCCESS;
+}
 
 
 #endif //ONLY_LOCAL_PROXY

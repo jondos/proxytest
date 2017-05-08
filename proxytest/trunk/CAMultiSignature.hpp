@@ -58,12 +58,12 @@ class CAMultiSignature
 		SINT32 signXML(DOMNode* a_node, bool appendCerts);
 		SINT32 signXML(UINT8* in, UINT32 inlen, UINT8* out, UINT32* outlen, bool appendCerts);
 	  SINT32 sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen);
-	
-#endif
-#ifndef ONLY_LOCAL_PROXY
 		SINT32 addSignature(CASignature* a_signature, CACertStore* a_certs, UINT8* a_ski, UINT32 a_skiLen);
 		UINT32 getSignatureCount(){ return m_sigCount; }
 		SINT32 getXORofSKIs(UINT8* out, UINT32 outlen);
+	
+#endif
+#ifndef ONLY_LOCAL_PROXY
 		SINT32 findSKI(const UINT8* a_strSKI);
 #endif
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
@@ -71,8 +71,6 @@ class CAMultiSignature
 		SIGNATURE* m_signatures;
 		UINT32 m_sigCount;
 		UINT8* m_xoredID;
-#endif
-#ifndef ONLY_LOCAL_PROXY
 		SINT32 getSKI(UINT8* in, UINT32 inlen, const UINT8* a_ski);
 #endif
 };

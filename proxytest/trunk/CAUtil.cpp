@@ -754,6 +754,10 @@ SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,UI
 		const XMLCh* tmpCh=((DOMElement*)elem)->getAttribute(name);
 		XMLString::release(&name);
 		char* tmpStr=XMLString::transcode(tmpCh);
+		if (tmpStr == NULL)
+			{
+				return E_UNKNOWN;
+			}
 		UINT32 l=strlen(tmpStr);
 		if(l>=*len)
 			{
@@ -963,61 +967,6 @@ SINT32 setDOMElementValue(DOMElement* pElem, bool value)
 	return setDOMElementValue(pElem,((UINT8*) (value ? STR_VALUE_TRUE : STR_VALUE_FALSE)));
 }
 
-SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,SINT64& value)
-{
-	UINT8 val[50];
-	UINT32 len=50;
-	if(getDOMElementAttribute(elem,attrName,val,&len)!=E_SUCCESS)
-	{
-		return E_UNKNOWN;
-	}
-	if(parseS64(val,value)!=E_SUCCESS)
-	{
-		return E_UNKNOWN;
-	}
-	return E_SUCCESS;
-}
-
-SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName, UINT64& value)
-{
-	UINT8 val[50];
-	UINT32 len=50;
-	if(getDOMElementAttribute(elem,attrName,val,&len)!=E_SUCCESS)
-	{
-		return E_UNKNOWN;
-	}
-	if(parseU64(val,value)!=E_SUCCESS)
-	{
-		return E_UNKNOWN;
-	}
-	return E_SUCCESS;
-}
-
-
-SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,bool& value)
-{
-	UINT8 val[50];
-	UINT32 len=50;
-	if(getDOMElementAttribute(elem,attrName,val,&len) != E_SUCCESS)
-	{
-		return E_UNKNOWN;
-	}
-	SINT32 ret = E_UNSPECIFIED;
-	if(strncasecmp((char*)val, STR_VALUE_TRUE, strlen(STR_VALUE_TRUE)) == 0)
-	{
-		value = true;
-		ret = E_SUCCESS;
-	}
-	else if(strncasecmp((char*)val, STR_VALUE_FALSE, strlen(STR_VALUE_FALSE)) == 0)
-	{
-		value = false;
-		ret = E_SUCCESS;
-	}
-	return ret;
-}
-
-
-
 
 SINT32 getDOMElementValue(const DOMElement* const pElem,SINT32* value)
 {
@@ -1077,25 +1026,6 @@ SINT32 getDOMElementValue(const DOMElement* const pElem, SINT64 &value)
 	}
 	return E_SUCCESS;
 }
-
-
-SINT32 getDOMElementValue(const DOMElement* const pElem,UINT16* value)
-{
-	UINT32 tmp;
-	if(getDOMElementValue(pElem,&tmp)!=E_SUCCESS)
-		return E_UNKNOWN;
-	if(tmp>0xFFFF)
-		return E_UNKNOWN;
-	*value=(UINT16)tmp;
-	return E_SUCCESS;
-}
-
-
-
-
-
-
-
 
 
 /** The resulting encrypted xml struct is as follows:
@@ -1773,5 +1703,69 @@ SINT32 getLastDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNod
 		}
 	return E_UNKNOWN;
 }
+
+SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,bool& value)
+{
+	UINT8 val[50];
+	UINT32 len=50;
+	if(getDOMElementAttribute(elem,attrName,val,&len) != E_SUCCESS)
+	{
+		return E_UNKNOWN;
+	}
+	SINT32 ret = E_UNSPECIFIED;
+	if(strncasecmp((char*)val, STR_VALUE_TRUE, strlen(STR_VALUE_TRUE)) == 0)
+	{
+		value = true;
+		ret = E_SUCCESS;
+	}
+	else if(strncasecmp((char*)val, STR_VALUE_FALSE, strlen(STR_VALUE_FALSE)) == 0)
+	{
+		value = false;
+		ret = E_SUCCESS;
+	}
+	return ret;
+}
+
+SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName,SINT64& value)
+{
+	UINT8 val[50];
+	UINT32 len=50;
+	if(getDOMElementAttribute(elem,attrName,val,&len)!=E_SUCCESS)
+	{
+		return E_UNKNOWN;
+	}
+	if(parseS64(val,value)!=E_SUCCESS)
+	{
+		return E_UNKNOWN;
+	}
+	return E_SUCCESS;
+}
+
+SINT32 getDOMElementAttribute(const DOMNode * const elem,const char* attrName, UINT64& value)
+{
+	UINT8 val[50];
+	UINT32 len=50;
+	if(getDOMElementAttribute(elem,attrName,val,&len)!=E_SUCCESS)
+	{
+		return E_UNKNOWN;
+	}
+	if(parseU64(val,value)!=E_SUCCESS)
+	{
+		return E_UNKNOWN;
+	}
+	return E_SUCCESS;
+}
+
+SINT32 getDOMElementValue(const DOMElement* const pElem,UINT16* value)
+{
+	UINT32 tmp;
+	if(getDOMElementValue(pElem,&tmp)!=E_SUCCESS)
+		return E_UNKNOWN;
+	if(tmp>0xFFFF)
+		return E_UNKNOWN;
+	*value=(UINT16)tmp;
+	return E_SUCCESS;
+}
+
 
 #endif
