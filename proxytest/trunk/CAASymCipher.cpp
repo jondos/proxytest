@@ -60,7 +60,7 @@ SINT32 CAASymCipher::destroy()
 	return E_SUCCESS;
 }
 
-inline void setRSAFlags(RSA *pRSA)
+void setRSAFlags(RSA *pRSA)
 {
 	if (pRSA == NULL)
 		return;
@@ -172,7 +172,7 @@ SINT32 CAASymCipher::generateKeyPair(UINT32 size)
 {
 	RSA_free(m_pRSA);
 	m_pRSA = RSA_generate_key(size, 65537, NULL, NULL);
-	setRSAFlags(m_pRSA);
+	::setRSAFlags(m_pRSA);
 	if (m_pRSA == NULL)
 		return E_UNKNOWN;
 	else
@@ -493,7 +493,7 @@ SINT32 CAASymCipher::setPrivateKeyAsDOMNode(DOMNode *node)
 							if (m_pRSA != NULL)
 								RSA_free(m_pRSA);
 							m_pRSA = tmpRSA;
-							setRSAFlags(m_pRSA);
+							::setRSAFlags(m_pRSA);
 							return E_SUCCESS;
 						}
 					RSA_free(tmpRSA);
@@ -586,7 +586,7 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOMNode *node)
 								m_pRSA->n=n;
 								m_pRSA->e=e;
 							#endif
-							setRSAFlags(m_pRSA);
+							::setRSAFlags(m_pRSA);
 							return E_SUCCESS;
 						}
 					RSA_free(tmpRSA);
@@ -630,7 +630,7 @@ SINT32 CAASymCipher::setPublicKey(const CACertificate *pCert)
 	if (m_pRSA != NULL)
 		RSA_free(m_pRSA);
 	m_pRSA = r;
-	setRSAFlags(m_pRSA);
+	::setRSAFlags(m_pRSA);
 	return E_SUCCESS;
 }
 #endif // ONLY_LOCAL_PROXY
@@ -656,7 +656,7 @@ SINT32 CAASymCipher::setPublicKey(const UINT8 *m, UINT32 mlen, const UINT8 *e, U
 				m_pRSA->n=bnN;
 				m_pRSA->e=bnE;
 			#endif
-			setRSAFlags(m_pRSA);
+			::setRSAFlags(m_pRSA);
 			return E_SUCCESS;
 		}
 	RSA_free(tmpRSA);
