@@ -635,8 +635,7 @@ SINT32 CAASymCipher::setPublicKey(const CACertificate *pCert)
 }
 #endif // ONLY_LOCAL_PROXY
 
-SINT32 CAASymCipher::setPublicKey(const UINT8 *m, UINT32 mlen, const UINT8 *e,
-                                  UINT32 elen)
+SINT32 CAASymCipher::setPublicKey(const UINT8 *m, UINT32 mlen, const UINT8 *e, UINT32 elen)
 {
 	RSA *tmpRSA = RSA_new();
 	UINT32 decLen = 4096;
@@ -654,8 +653,8 @@ SINT32 CAASymCipher::setPublicKey(const UINT8 *m, UINT32 mlen, const UINT8 *e,
 			#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
 				RSA_set0_key(m_pRSA,bnN,bnE, NULL );
 			#else
-				m_pRSA->n=n;
-				m_pRSA->e=e;
+				m_pRSA->n=bnN;
+				m_pRSA->e=bnE;
 			#endif
 			setRSAFlags(m_pRSA);
 			return E_SUCCESS;
