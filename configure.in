@@ -933,5 +933,5 @@ AM_CONDITIONAL([DOTESTS], [test x$DOTHETESTS = xyes])
 AM_CONDITIONAL([DOWIRESHARK], [test x$DOWITHWIRESHARK = xyes])
 AM_CONDITIONAL([ONLY_LIB], [test x$onlylib = xtrue])
 
-AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile xml/dom/mxml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile])
+AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile])
 AC_OUTPUT
