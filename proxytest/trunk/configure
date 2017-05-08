@@ -18935,7 +18935,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile"
+ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile xml/dom/mxml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -20072,6 +20072,7 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "popt/Makefile") CONFIG_FILES="$CONFIG_FILES popt/Makefile" ;;
     "xml/Makefile") CONFIG_FILES="$CONFIG_FILES xml/Makefile" ;;
+    "xml/dom/mxml/Makefile") CONFIG_FILES="$CONFIG_FILES xml/dom/mxml/Makefile" ;;
     "trio/Makefile") CONFIG_FILES="$CONFIG_FILES trio/Makefile" ;;
     "tre/Makefile") CONFIG_FILES="$CONFIG_FILES tre/Makefile" ;;
     "TypeA/Makefile") CONFIG_FILES="$CONFIG_FILES TypeA/Makefile" ;;
