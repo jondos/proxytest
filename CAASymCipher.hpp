@@ -99,7 +99,7 @@ class CAASymCipher
 	RSA *m_pRSA;
 };
 
-void setRSAFlags(RSA *pRSA);
+void inline setRSAFlags(RSA *pRSA);
 
 
 #endif
