@@ -815,7 +815,7 @@ with_googletest_lib
 enable_wireshark
 enable_manioq
 enable_build_only_lib
-enable_only_midle_mix
+enable_only_middle_mix
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1504,7 +1504,7 @@ Optional Features:
   --enable-wireshark      Build also the Wireshark AN.ON protocol dissector
   --enable-manioq         Switch for Manioq provider mixes
   --enable-build-only-lib Build just the library, but not the executable
-  --enable-only-midlle-mix
+  --enable-only-middle-mix
                           Build just the code for operating a middle mix
 
 Optional Packages:
@@ -18666,9 +18666,9 @@ fi
 
 
 onlymiddlemix="false"
-# Check whether --enable-only-midle-mix was given.
-if test "${enable_only_midle_mix+set}" = set; then :
-  enableval=$enable_only_midle_mix;
+# Check whether --enable-only-middle-mix was given.
+if test "${enable_only_middle_mix+set}" = set; then :
+  enableval=$enable_only_middle_mix;
 		if test "x$enableval" != "xno" ; then
 			onlymiddlemix="true"
 		fi

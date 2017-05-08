@@ -887,8 +887,8 @@ AC_ARG_ENABLE(build-only-lib,
 )
 
 onlymiddlemix="false"
-AC_ARG_ENABLE(only-midle-mix,
-	AS_HELP_STRING([--enable-only-midlle-mix],[Build just the code for operating a middle mix]),
+AC_ARG_ENABLE(only-middle-mix,
+	AS_HELP_STRING([--enable-only-middle-mix],[Build just the code for operating a middle mix]),
 	[
 		if test "x$enableval" != "xno" ; then
 			onlymiddlemix="true"
