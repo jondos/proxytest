@@ -43,7 +43,7 @@ class MemFormatTarget: public XMLFormatTarget
 					m_aktIndex=0;
 				}
 
-			~MemFormatTarget()
+			virtual ~MemFormatTarget()
 				{
 					delete m_pQueue;
 					m_pQueue = NULL;
