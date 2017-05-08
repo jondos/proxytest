@@ -93,7 +93,6 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@USE_MINIXML_TRUE@am__append_1 = dom/mxml/mxmlDOM.hpp dom/mxml/mxmlDOMDocument.cpp dom/mxml/mxmlXercesDOMParser.cpp
 subdir = xml
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -112,12 +111,7 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libxml_a_AR = $(AR) $(ARFLAGS)
 libxml_a_LIBADD =
-am__libxml_a_SOURCES_DIST = DOM_Output.cpp DOM_Output.hpp \
-	dom/mxml/mxmlDOM.hpp dom/mxml/mxmlDOMDocument.cpp \
-	dom/mxml/mxmlXercesDOMParser.cpp
-@USE_MINIXML_TRUE@am__objects_1 = mxmlDOMDocument.$(OBJEXT) \
-@USE_MINIXML_TRUE@	mxmlXercesDOMParser.$(OBJEXT)
-am_libxml_a_OBJECTS = DOM_Output.$(OBJEXT) $(am__objects_1)
+am_libxml_a_OBJECTS = DOM_Output.$(OBJEXT)
 libxml_a_OBJECTS = $(am_libxml_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -135,12 +129,12 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
-	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) \
 	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
@@ -176,7 +170,7 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libxml_a_SOURCES)
-DIST_SOURCES = $(am__libxml_a_SOURCES_DIST)
+DIST_SOURCES = $(libxml_a_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -333,7 +327,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 noinst_LIBRARIES = libxml.a
-libxml_a_SOURCES = DOM_Output.cpp DOM_Output.hpp $(am__append_1)
+libxml_a_SOURCES = DOM_Output.cpp DOM_Output.hpp
 includes = @INCLUDES@
 all: all-am
 
@@ -384,8 +378,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DOM_Output.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mxmlDOMDocument.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mxmlXercesDOMParser.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -407,34 +399,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LTCXXCOMPILE) -c -o $@ $<
-
-mxmlDOMDocument.o: dom/mxml/mxmlDOMDocument.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mxmlDOMDocument.o -MD -MP -MF $(DEPDIR)/mxmlDOMDocument.Tpo -c -o mxmlDOMDocument.o `test -f 'dom/mxml/mxmlDOMDocument.cpp' || echo '$(srcdir)/'`dom/mxml/mxmlDOMDocument.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mxmlDOMDocument.Tpo $(DEPDIR)/mxmlDOMDocument.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dom/mxml/mxmlDOMDocument.cpp' object='mxmlDOMDocument.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mxmlDOMDocument.o `test -f 'dom/mxml/mxmlDOMDocument.cpp' || echo '$(srcdir)/'`dom/mxml/mxmlDOMDocument.cpp
-
-mxmlDOMDocument.obj: dom/mxml/mxmlDOMDocument.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mxmlDOMDocument.obj -MD -MP -MF $(DEPDIR)/mxmlDOMDocument.Tpo -c -o mxmlDOMDocument.obj `if test -f 'dom/mxml/mxmlDOMDocument.cpp'; then $(CYGPATH_W) 'dom/mxml/mxmlDOMDocument.cpp'; else $(CYGPATH_W) '$(srcdir)/dom/mxml/mxmlDOMDocument.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mxmlDOMDocument.Tpo $(DEPDIR)/mxmlDOMDocument.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dom/mxml/mxmlDOMDocument.cpp' object='mxmlDOMDocument.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mxmlDOMDocument.obj `if test -f 'dom/mxml/mxmlDOMDocument.cpp'; then $(CYGPATH_W) 'dom/mxml/mxmlDOMDocument.cpp'; else $(CYGPATH_W) '$(srcdir)/dom/mxml/mxmlDOMDocument.cpp'; fi`
-
-mxmlXercesDOMParser.o: dom/mxml/mxmlXercesDOMParser.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mxmlXercesDOMParser.o -MD -MP -MF $(DEPDIR)/mxmlXercesDOMParser.Tpo -c -o mxmlXercesDOMParser.o `test -f 'dom/mxml/mxmlXercesDOMParser.cpp' || echo '$(srcdir)/'`dom/mxml/mxmlXercesDOMParser.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mxmlXercesDOMParser.Tpo $(DEPDIR)/mxmlXercesDOMParser.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dom/mxml/mxmlXercesDOMParser.cpp' object='mxmlXercesDOMParser.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mxmlXercesDOMParser.o `test -f 'dom/mxml/mxmlXercesDOMParser.cpp' || echo '$(srcdir)/'`dom/mxml/mxmlXercesDOMParser.cpp
-
-mxmlXercesDOMParser.obj: dom/mxml/mxmlXercesDOMParser.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mxmlXercesDOMParser.obj -MD -MP -MF $(DEPDIR)/mxmlXercesDOMParser.Tpo -c -o mxmlXercesDOMParser.obj `if test -f 'dom/mxml/mxmlXercesDOMParser.cpp'; then $(CYGPATH_W) 'dom/mxml/mxmlXercesDOMParser.cpp'; else $(CYGPATH_W) '$(srcdir)/dom/mxml/mxmlXercesDOMParser.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mxmlXercesDOMParser.Tpo $(DEPDIR)/mxmlXercesDOMParser.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dom/mxml/mxmlXercesDOMParser.cpp' object='mxmlXercesDOMParser.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mxmlXercesDOMParser.obj `if test -f 'dom/mxml/mxmlXercesDOMParser.cpp'; then $(CYGPATH_W) 'dom/mxml/mxmlXercesDOMParser.cpp'; else $(CYGPATH_W) '$(srcdir)/dom/mxml/mxmlXercesDOMParser.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -647,6 +611,8 @@ uninstall-am:
 
 .PRECIOUS: Makefile
 
+
+@USE_MINIXML_TRUE@	libxml_a_SOURCES += dom/mxml/mxmlDOM.hpp dom/mxml/mxmlDOMDocument.cpp dom/mxml/mxmlXercesDOMParser.cpp
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

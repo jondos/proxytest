@@ -252,7 +252,11 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(sbindir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libmix_la_LIBADD =
+@ONLY_LIB_TRUE@libmix_la_DEPENDENCIES = $(top_srcdir)/xml/libxml.a \
+@ONLY_LIB_TRUE@	$(top_srcdir)/popt/libpopt.a \
+@ONLY_LIB_TRUE@	$(top_srcdir)/trio/libtrio.a \
+@ONLY_LIB_TRUE@	$(top_srcdir)/tre/libtre.a \
+@ONLY_LIB_TRUE@	$(top_srcdir)/gcm/libgcm.a
 am__libmix_la_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CAAbstractXMLEncodable.cpp CAAbstractXMLSignable.cpp \
 	CAAccountingBIInterface.cpp CAAccountingControlChannel.cpp \
@@ -703,6 +707,12 @@ AUTOMAKE_OPTIONS = foreign
 @ONLY_LIB_TRUE@		    Hashtable.cpp\
 @ONLY_LIB_TRUE@		    TermsAndConditions.cpp \
 @ONLY_LIB_TRUE@		    packetintro.cpp
+
+@ONLY_LIB_TRUE@libmix_la_LIBADD = $(top_srcdir)/xml/libxml.a \
+@ONLY_LIB_TRUE@	    $(top_srcdir)/popt/libpopt.a \
+@ONLY_LIB_TRUE@	    $(top_srcdir)/trio/libtrio.a \
+@ONLY_LIB_TRUE@	    $(top_srcdir)/tre/libtre.a \
+@ONLY_LIB_TRUE@	    $(top_srcdir)/gcm/libgcm.a
 
 @ONLY_LIB_FALSE@noinst_LIBRARIES = libproxytest.a
 @ONLY_LIB_FALSE@libproxytest_a_CPPFLAGS = -DSOMEFLAG
