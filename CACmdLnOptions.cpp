@@ -1578,23 +1578,7 @@ SINT32 CACmdLnOptions::getOperatorSubjectKeyIdentifier(UINT8 *buffer, UINT32 *le
 
 }
 
-CAListenerInterface** CACmdLnOptions::getInfoServices(UINT32& r_size)
- {
-		r_size = m_addrInfoServicesSize;
-		return m_addrInfoServices;
-	}
 
-SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len) const
-	{
-		if(m_strCascadeName==NULL)
-				return E_UNKNOWN;
-		if(len<=(UINT32)strlen((char*)m_strCascadeName))
-				{
-					return E_UNKNOWN;
-				}
-		strcpy((char*)name,(char*)m_strCascadeName);
-		return E_SUCCESS;
-	}
 
 
 SINT32 CACmdLnOptions::getEncryptedLogDir(UINT8* name,UINT32 len)
@@ -1890,35 +1874,6 @@ SINT32 CACmdLnOptions::setLoggingOptions(DOMElement* elemGeneral)
 	}
 
 
-
-/** Returns the XML tree describing the Mix . This is NOT a copy!
-	* @param docMixInfo destination for the XML tree
-	*	@retval E_SUCCESS if it was successful
-	* @retval E_UNKNOWN in case of an error
-*/
-SINT32 CACmdLnOptions::getMixXml(XERCES_CPP_NAMESPACE::DOMDocument* & docMixInfo)
-{
-	if(m_docMixInfo == NULL)
-	{
-		CAMsg::printMsg(LOG_CRIT,"No mixinfo document initialized!\n");
-		return E_UNKNOWN;
-	}
-	docMixInfo=m_docMixInfo;
-	//insert (or update) the Timestamp
-	DOMElement* elemTimeStamp=NULL;
-	DOMElement* elemRoot=docMixInfo->getDocumentElement();
-	if(getDOMChildByName(elemRoot, UNIVERSAL_NODE_LAST_UPDATE, elemTimeStamp, false)!=E_SUCCESS)
-	{
-		elemTimeStamp=createDOMElement(docMixInfo, UNIVERSAL_NODE_LAST_UPDATE);
-		elemRoot->appendChild(elemTimeStamp);
-	}
-	UINT64 currentMillis;
-	getcurrentTimeMillis(currentMillis);
-	UINT8 tmpStrCurrentMillis[50];
-	print64(tmpStrCurrentMillis,currentMillis);
-	setDOMElementValue(elemTimeStamp,tmpStrCurrentMillis);
-	return E_SUCCESS;
-}
 
 UINT32 CACmdLnOptions::getNumberOfTermsAndConditionsTemplates()
 {
@@ -3970,7 +3925,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 					}
 				}
 
-				if (ret == E_SUCCESS)
+				else //if (ret == E_SUCCESS)
 				{
 					if (proxy_type == TARGET_HTTP_PROXY)
 					{
@@ -5454,3 +5409,55 @@ SINT32 CACmdLnOptions::getDataRetentionLogDir(UINT8* strLogDir,UINT32 len)
 #endif// DATA_RETENTION_LOG
 
 #endif //ONLY_LOCAL_PROXY
+
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+/** Returns the XML tree describing the Mix . This is NOT a copy!
+	* @param docMixInfo destination for the XML tree
+	*	@retval E_SUCCESS if it was successful
+	* @retval E_UNKNOWN in case of an error
+*/
+SINT32 CACmdLnOptions::getMixXml(XERCES_CPP_NAMESPACE::DOMDocument* & docMixInfo)
+{
+	if(m_docMixInfo == NULL)
+	{
+		CAMsg::printMsg(LOG_CRIT,"No mixinfo document initialized!\n");
+		return E_UNKNOWN;
+	}
+	docMixInfo=m_docMixInfo;
+	//insert (or update) the Timestamp
+	DOMElement* elemTimeStamp=NULL;
+	DOMElement* elemRoot=docMixInfo->getDocumentElement();
+	if(getDOMChildByName(elemRoot, UNIVERSAL_NODE_LAST_UPDATE, elemTimeStamp, false)!=E_SUCCESS)
+	{
+		elemTimeStamp=createDOMElement(docMixInfo, UNIVERSAL_NODE_LAST_UPDATE);
+		elemRoot->appendChild(elemTimeStamp);
+	}
+	UINT64 currentMillis;
+	getcurrentTimeMillis(currentMillis);
+	UINT8 tmpStrCurrentMillis[50];
+	print64(tmpStrCurrentMillis,currentMillis);
+	setDOMElementValue(elemTimeStamp,tmpStrCurrentMillis);
+	return E_SUCCESS;
+}
+
+SINT32 CACmdLnOptions::getCascadeName(UINT8* name,UINT32 len) const
+	{
+		if(m_strCascadeName==NULL)
+				return E_UNKNOWN;
+		if(len<=(UINT32)strlen((char*)m_strCascadeName))
+				{
+					return E_UNKNOWN;
+				}
+		strcpy((char*)name,(char*)m_strCascadeName);
+		return E_SUCCESS;
+	}
+
+CAListenerInterface** CACmdLnOptions::getInfoServices(UINT32& r_size)
+ {
+		r_size = m_addrInfoServicesSize;
+		return m_addrInfoServices;
+	}
+
+#endif
+
+

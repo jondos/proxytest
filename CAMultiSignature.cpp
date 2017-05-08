@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
  *      Author: zenoxx
  */
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "CABase64.hpp"
 #include "CAUtil.hpp"
 #include "xml/DOM_Output.hpp"
@@ -68,55 +68,6 @@ CAMultiSignature::~CAMultiSignature()
 		tmp = NULL;
 	}
 	delete[] m_xoredID;
-}
-
-
-SINT32 CAMultiSignature::findSKI(const UINT8* a_strSKI)
-{
-	SIGNATURE* tmp = m_signatures;
-	UINT8 tmpSKI[200];
-	
-	if (tmp == NULL)
-	{
-		return E_UNKNOWN;
-	}
-	
-	while(tmp != NULL)
-	{
-		if (getSKI(tmpSKI, 200, tmp->pSKI) == E_SUCCESS &&
-			strncmp((char*)a_strSKI, (char*)tmpSKI, strlen((char*)tmpSKI) ) == 0)
-		{
-			return E_SUCCESS;
-		}
-		tmp = tmp->next;
-	}
-	
-	if (getSKI(tmpSKI, 200, m_xoredID) == E_SUCCESS &&
-		strncmp((char*)a_strSKI, (char*)tmpSKI, strlen((char*)tmpSKI) ) == 0)
-	{
-		return E_SUCCESS;
-	}
-	
-	return E_NOT_FOUND;
-}
-
-SINT32 CAMultiSignature::addSignature(CASignature* a_signature, CACertStore* a_certs, UINT8* a_ski, UINT32 a_skiLen)
-{
-	if(a_signature == NULL || a_certs == NULL || a_ski == NULL || a_skiLen != SHA_DIGEST_LENGTH)
-		return E_UNKNOWN;
-	for(SINT32 i=0; i<SHA_DIGEST_LENGTH; i++)
-	{
-		m_xoredID[i] = m_xoredID[i] ^ a_ski[i];
-	}
-	SIGNATURE* newSignature = new SIGNATURE;
-	newSignature->pSig = a_signature;
-	newSignature->pCerts = a_certs;
-	newSignature->pSKI = new UINT8[a_skiLen];
-	memcpy(newSignature->pSKI, a_ski, a_skiLen);
-	newSignature->next = m_signatures;
-	m_signatures = newSignature;
-	m_sigCount++;
-	return E_SUCCESS;
 }
 
 SINT32 CAMultiSignature::signXML(UINT8* in,UINT32 inlen,UINT8* out,UINT32* outlen, bool appendCerts)
@@ -470,6 +421,59 @@ SINT32 CAMultiSignature::sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen)
 		return E_UNKNOWN;
 	}
 	return m_signatures->pSig->sign(in, inlen, sig, siglen);
+}
+
+
+
+#endif
+
+#ifndef ONLY_LOCAL_PROXY
+SINT32 CAMultiSignature::findSKI(const UINT8* a_strSKI)
+{
+	SIGNATURE* tmp = m_signatures;
+	UINT8 tmpSKI[200];
+	
+	if (tmp == NULL)
+	{
+		return E_UNKNOWN;
+	}
+	
+	while(tmp != NULL)
+	{
+		if (getSKI(tmpSKI, 200, tmp->pSKI) == E_SUCCESS &&
+			strncmp((char*)a_strSKI, (char*)tmpSKI, strlen((char*)tmpSKI) ) == 0)
+		{
+			return E_SUCCESS;
+		}
+		tmp = tmp->next;
+	}
+	
+	if (getSKI(tmpSKI, 200, m_xoredID) == E_SUCCESS &&
+		strncmp((char*)a_strSKI, (char*)tmpSKI, strlen((char*)tmpSKI) ) == 0)
+	{
+		return E_SUCCESS;
+	}
+	
+	return E_NOT_FOUND;
+}
+
+SINT32 CAMultiSignature::addSignature(CASignature* a_signature, CACertStore* a_certs, UINT8* a_ski, UINT32 a_skiLen)
+{
+	if(a_signature == NULL || a_certs == NULL || a_ski == NULL || a_skiLen != SHA_DIGEST_LENGTH)
+		return E_UNKNOWN;
+	for(SINT32 i=0; i<SHA_DIGEST_LENGTH; i++)
+	{
+		m_xoredID[i] = m_xoredID[i] ^ a_ski[i];
+	}
+	SIGNATURE* newSignature = new SIGNATURE;
+	newSignature->pSig = a_signature;
+	newSignature->pCerts = a_certs;
+	newSignature->pSKI = new UINT8[a_skiLen];
+	memcpy(newSignature->pSKI, a_ski, a_skiLen);
+	newSignature->next = m_signatures;
+	m_signatures = newSignature;
+	m_sigCount++;
+	return E_SUCCESS;
 }
 
 SINT32 CAMultiSignature::getSKI(UINT8* out, UINT32 outlen, const UINT8* a_ski)

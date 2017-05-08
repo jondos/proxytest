@@ -32,7 +32,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
 #include "CAMiddleMixChannelList.hpp"
-//#include "CASignature.hpp"
+#include "CAQueue.hpp"
 #include "CAInfoService.hpp"
 #include "CAMixWithReplayDB.hpp"
 

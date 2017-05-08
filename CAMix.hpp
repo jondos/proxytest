@@ -28,7 +28,7 @@
 #ifndef __CAMIX__
 #define __CAMIX__
 
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 
 class CAMultiSignature;
 class CAInfoService;

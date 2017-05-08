@@ -38,21 +38,26 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE
 */
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "CAInfoService.hpp"
+#include "CALibProxytest.hpp"
+#include "xml/DOM_Output.hpp"
+#include "CAHttpClient.hpp"
+#endif
+#ifndef ONLY_LOCAL_PROXY
 #include "CASocket.hpp"
 #include "CACmdLnOptions.hpp"
 #include "CAMsg.hpp"
 #include "CASocketAddrINet.hpp"
 #include "CAUtil.hpp"
-#include "xml/DOM_Output.hpp"
 #include "CASingleSocketGroup.hpp"
 #include "CALastMix.hpp"
-#include "CAHttpClient.hpp"
 #include "CACertificate.hpp"
 #include "CAXMLBI.hpp"
-#include "CALibProxytest.hpp"
+
 #include "CADynamicCascadeConfigurator.hpp"
+#endif
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 
 const char * STRINGS_REQUEST_TYPES[NR_REQUEST_TYPES] = { "POST", "GET" };
 const char * STRINGS_REQUEST_COMMANDS[NR_REQUEST_COMMANDS] = { "configure", "helo", "mixinfo/", "dynacascade", "cascade", "feedback", "tc" };
@@ -64,6 +69,19 @@ const UINT64 CAInfoService::SEND_MIX_INFO_WAIT = MINUTE * 10;
 const UINT64 CAInfoService::SEND_STATUS_INFO_WAIT = MINUTE;
 const UINT32 CAInfoService::SEND_INFO_TIMEOUT_MS = 3000; // timeout for single send operations
 const UINT32 CAInfoService::REPEAT_ON_STATUS_SENT_ERROR = 3;
+
+struct CAInfoService::InfoServiceHeloMsg
+{
+	UINT8* strXML;
+	UINT32 len;
+	CASocketAddrINet* addr;
+	CAInfoService* is;
+	SINT32 requestCommand;
+	const UINT8* param;
+	SINT32 retVal;
+};
+
+
 
 THREAD_RETURN CAInfoService::InfoLoop(void *p)
 {
@@ -135,6 +153,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			currentTime = time(NULL);
 			if (currentTime >= (lastCascadeUpdate + CAInfoService::SEND_CASCADE_INFO_WAIT) || pInfoService->isConfiguring())
 				{
+#ifndef INCLUDE_MIDDLE_MIX
 					if (CALibProxytest::getOptions()->isFirstMix() || (CALibProxytest::getOptions()->isLastMix() && pInfoService->isConfiguring()))
 						{
 							if (pInfoService->m_pMix->isConnected() && pInfoService->m_pMix->getLastConnectionTime() < (currentTime - (SEND_LOOP_SLEEP / 2))
@@ -150,6 +169,7 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 										CAMsg::printMsg(LOG_WARNING, "InfoService: Could not send Cascade information.\n");
 									}
 						}
+#endif
 					currentTime = time(NULL);
 					if ((currentTime >= (lastMixInfoUpdate + CAInfoService::SEND_MIX_INFO_WAIT) &&
 					     pInfoService->m_pMix->getLastConnectionTime() < (currentTime - (SEND_LOOP_SLEEP / 2))) || pInfoService->isConfiguring())
@@ -243,29 +263,6 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 	THREAD_RETURN_SUCCESS;
 }
 
-
-struct CAInfoService::InfoServiceHeloMsg
-{
-	UINT8* strXML;
-	UINT32 len;
-	CASocketAddrINet* addr;
-	CAInfoService* is;
-	SINT32 requestCommand;
-	const UINT8* param;
-	SINT32 retVal;
-};
-
-THREAD_RETURN CAInfoService::TCascadeHelo(void *p)
-{
-	INIT_STACK;
-	BEGIN_STACK("CAInfoService::TCascadeHelo");
-
-	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
-	message->retVal = message->is->sendCascadeHelo(message->strXML, message->len, message->addr);
-	FINISH_STACK("CAInfoService::TCascadeHelo");
-	THREAD_RETURN_SUCCESS;
-}
-
 THREAD_RETURN CAInfoService::TCascadeStatus(void *p)
 {
 	INIT_STACK;
@@ -289,6 +286,22 @@ THREAD_RETURN CAInfoService::TMixHelo(void *p)
 	FINISH_STACK("CAInfoService::TMixHelo");
 	THREAD_RETURN_SUCCESS;
 }
+
+#endif
+#ifndef ONLY_LOCAL_PROXY
+
+THREAD_RETURN CAInfoService::TCascadeHelo(void *p)
+{
+	INIT_STACK;
+	BEGIN_STACK("CAInfoService::TCascadeHelo");
+
+	InfoServiceHeloMsg* message = (InfoServiceHeloMsg*)p;
+	message->retVal = message->is->sendCascadeHelo(message->strXML, message->len, message->addr);
+	FINISH_STACK("CAInfoService::TCascadeHelo");
+	THREAD_RETURN_SUCCESS;
+}
+
+
 
 
 
@@ -376,6 +389,14 @@ SINT32 CAInfoService::dynamicCascadeConfiguration()
 }
 #endif
 
+
+
+
+
+
+#endif
+
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 CAInfoService::CAInfoService()
 {
 	m_pMix = NULL;
@@ -391,7 +412,6 @@ CAInfoService::CAInfoService()
 	m_bReconfig = false;
 #endif
 }
-
 CAInfoService::CAInfoService(CAMix* pMix)
 {
 	m_pMix = NULL;
@@ -417,8 +437,6 @@ CAInfoService::~CAInfoService()
 	delete m_pthreadRunLoop;
 	m_pthreadRunLoop = NULL;
 }
-
-
 SINT32 CAInfoService::setMultiSignature(CAMultiSignature* pMultiSig)
 {
 	m_pMultiSignature = pMultiSig;
@@ -427,19 +445,23 @@ SINT32 CAInfoService::setMultiSignature(CAMultiSignature* pMultiSig)
 
 SINT32 CAInfoService::getLevel(SINT32* puser, SINT32* prisk, SINT32* ptraffic)
 {
+#if !defined ONLY_LOCAL_PROXY
 	if (m_pMix != NULL && CALibProxytest::getOptions()->isFirstMix())
 		{
 			return ((CAFirstMix*)m_pMix)->getLevel(puser, prisk, ptraffic);
 		}
+#endif
 	return E_UNKNOWN;
 }
 
 SINT32 CAInfoService::getMixedPackets(UINT64& ppackets)
 {
+#if ! defined ONLY_LOCAL_PROXY
 	if (m_pMix != NULL && CALibProxytest::getOptions()->isFirstMix())
 		{
 			return ((CAFirstMix*)m_pMix)->getMixedPackets(ppackets);
 		}
+#endif
 	return E_UNKNOWN;
 }
 
@@ -524,7 +546,6 @@ SINT32 CAInfoService::sendStatus(bool bIncludeCerts)
 }
 
 
-
 UINT8* CAInfoService::getStatusXMLAsString(bool bIncludeCerts, UINT32& len)
 {
 	SINT32 tmpUser, tmpRisk, tmpTraffic;
@@ -597,6 +618,68 @@ UINT8* CAInfoService::getStatusXMLAsString(bool bIncludeCerts, UINT32& len)
 	return buff;
 }
 
+SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN(*a_thread)(void *), UINT8* a_strThreadName, SINT32 requestCommand, const UINT8* param)
+{
+	SINT32 returnValue = E_UNKNOWN;
+	UINT32 nrAddresses;
+	CAListenerInterface** socketAddresses = CALibProxytest::getOptions()->getInfoServices(nrAddresses);
+	CAThread** threads = new CAThread*[nrAddresses];
+	InfoServiceHeloMsg** messages = new InfoServiceHeloMsg*[nrAddresses];
+
+	for (UINT32 i = 0; i < nrAddresses; i++)
+		{
+			messages[i] = new InfoServiceHeloMsg();
+			messages[i]->addr = (CASocketAddrINet*)socketAddresses[i]->getAddr();
+			messages[i]->len = a_len;
+			messages[i]->strXML = a_strXML;
+			messages[i]->is = this;
+			messages[i]->requestCommand = requestCommand;
+			messages[i]->param = param;
+#if !defined(NO_INFOSERVICE_TRHEADS)
+			threads[i] = new CAThread(a_strThreadName);
+			threads[i]->setMainLoop((THREAD_RETURN (*)(void *))a_thread);
+			threads[i]->start((void*)(messages[i]), false, true);
+#else
+			(*a_thread)(messages[i]);
+			if (messages[i]->retVal == E_SUCCESS)
+				{
+					returnValue = E_SUCCESS;
+				}
+#endif
+		}
+
+	for (UINT32 i = 0; i < nrAddresses; i++)
+		{
+#if !defined(NO_INFOSERVICE_TRHEADS)
+			if (threads[i]->join() == E_SUCCESS)
+				{
+					// CAMsg::printMsg(LOG_DEBUG,"InfoService: helo thread %u joined.\n", i);
+					if (messages[i]->retVal == E_SUCCESS)
+						{
+							returnValue = E_SUCCESS;
+						}
+				}
+			delete threads[i];
+			threads[i] = NULL;
+#endif
+			delete messages[i]->addr;
+			messages[i]->addr = NULL;
+			delete messages[i];
+			messages[i] = NULL;
+		}
+	//Message looks senseless but please keep it because Rolf reported a helo thread deadlock.
+	//Perhaps there is a problem when the threads are joined.
+	// CAMsg::printMsg(LOG_DEBUG,"InfoService: all helo threads joined. continue.\n");
+	delete[] messages;
+	messages = NULL;
+	delete[] threads;
+	threads = NULL;
+
+	return returnValue;
+}
+
+
+
 
 /** POSTs mix status to the InfoService. [only first mix does this at the moment]
 	* @retval E_UNKNOWN if something goes wrong
@@ -665,60 +748,6 @@ SINT32 CAInfoService::sendStatus(const UINT8* a_strStatusXML, UINT32 a_len, cons
 	CAMsg::printMsg(LOG_DEBUG, "InfoService: Sending status failed, ret: %d \n", ret);
 	return E_UNKNOWN;
 }
-
-
-SINT32 CAInfoService::sendOperatorTnCData()
-{
-	/*SINT32 ret = E_SUCCESS;
-	UINT32 *lengths_ptr = NULL;
-	XMLSize_t nrOfTnCs = 0;
-	UINT32 i = 0;
-	UINT8 **tncData = getOperatorTnCsAsStrings(&lengths_ptr, &nrOfTnCs);
-
-	if(tncData != NULL)
-	{
-	for (;i < nrOfTnCs; i++)
-	{
-	#ifdef DEBUG
-	CAMsg::printMsg(LOG_DEBUG,"InfoService:sendMixTnCData(), object: %s, len: %u\n",
-	tncData[i], lengths_ptr[i]);
-	#endif
-	if( tncData[i] != NULL )
-	{
-	ret |= sendHelo(tncData[i], lengths_ptr[i],
-	TMixHelo, (UINT8*)"Mix TnC Thread",
-	REQUEST_COMMAND_TNC_DATA, NULL);
-	delete [] tncData[i];
-	tncData[i] = NULL;
-	}
-	else
-	{
-	CAMsg::printMsg(LOG_ERR,"InfoService:sendMixTnCData() -- Element %u is invalid!\n", (i+1) );
-	ret |= E_UNKNOWN;
-	}
-
-	}
-	delete [] lengths_ptr;
-	lengths_ptr = NULL;
-
-	delete [] tncData;
-	}
-	else
-	{
-	CAMsg::printMsg(LOG_DEBUG,"InfoService:sendMixTnCData() -- No TnC data specified!\n");
-	return E_SUCCESS;
-	}
-	return ret;*/
-	return E_SUCCESS;
-}
-
-/** POSTs the MIXINFO message for a mix to the InfoService.
-	*/
-/*SINT32 CAInfoService::sendMixInfo(const UINT8* pMixID)
-{
-return sendMixHelo(REQUEST_COMMAND_MIXINFO,pMixID, NULL);
-}
-*/
 SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand, const UINT8* param)
 {
 	UINT32 len;
@@ -740,142 +769,10 @@ SINT32 CAInfoService::sendMixHelo(SINT32 requestCommand, const UINT8* param)
 	return ret;
 }
 
-/**
- * returns a string array with all signed Terms and Condition-Objects
- * NOTE: this method has a side-effect: the DOMNodes are all signed and thus modified
- * @param lengths contains the lengths of each corresponding object. Its memory
- * 			is allocated by this method and has to be freed explicitly by calling
- * 			delete []
- * @param nrOfTnCs is the length of the returned array
- * @retval a list with all Terms and conditions object which has to be freed explicitly
- * 			by calling delete []
- */
-UINT8 **CAInfoService::getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrOfTnCs)
-{
-
-	XERCES_CPP_NAMESPACE::DOMElement *tnCs = CALibProxytest::getOptions()->getTermsAndConditions();
-	if (tnCs == NULL)
-		{
-			return NULL;
-		}
-
-	XERCES_CPP_NAMESPACE::DOMNodeList *docTnCsList =
-	  getElementsByTagName(tnCs, OPTIONS_NODE_TNCS_TRANSLATION);
-
-	if (docTnCsList == NULL)
-		{
-			return NULL;
-		}
-
-	UINT8 **elementList = NULL;
-	DOMNode *iterator = NULL;
-	XMLSize_t i = 0;
-
-	UINT8 tmpOpSKIBuff[TMP_BUFF_SIZE];
-	UINT32 tmpOpSKILen = TMP_BUFF_SIZE;
-
-	CALibProxytest::getOptions()->getOperatorSubjectKeyIdentifier(tmpOpSKIBuff, &tmpOpSKILen);
-	if (tmpOpSKILen == 0)
-		{
-			return NULL;
-		}
-
-	UINT8 tmpDate[TMP_BUFF_SIZE];
-	UINT32 tmpDateLen = TMP_BUFF_SIZE;
-
-	getDOMElementAttribute(tnCs, OPTIONS_ATTRIBUTE_TNC_DATE, tmpDate, &tmpDateLen);
-	if (tmpDateLen == 0)
-		{
-			return NULL;
-		}
-
-	UINT8 tmpVersion[TMP_BUFF_SIZE];
-	UINT32 tmpVersionLen = TMP_BUFF_SIZE;
-
-	UINT8* serial = NULL;
-
-	getDOMElementAttribute(tnCs, OPTIONS_ATTRIBUTE_TNC_VERSION, tmpVersion, &tmpVersionLen);
-	if (tmpVersionLen > 0)
-		{
-			serial = new UINT8[tmpDateLen + tmpVersionLen + 1];
-			memcpy(serial, tmpDate, tmpDateLen);
-			memcpy(serial + tmpDateLen, tmpVersion, tmpVersionLen);
-			serial[tmpDateLen + tmpVersionLen] = 0;
-		}
-	else
-		{
-			serial = new UINT8[tmpDateLen + 1];
-			memcpy(serial, tmpDate, tmpDateLen);
-			serial[tmpDateLen] = 0;
-		}
-
-	UINT32 locale_len = 3;
-	UINT8* id = new UINT8[tmpOpSKILen + locale_len + 1];
-	UINT8* locale = new UINT8[locale_len];
-
-	locale[locale_len - 1] = 0;
-
-	memcpy(id, tmpOpSKIBuff, tmpOpSKILen);
-	id[tmpOpSKILen] = 0;
-	id[tmpOpSKILen + (locale_len - 1) + 1] = 0;
-
-	(*nrOfTnCs) = docTnCsList->getLength();
-	elementList = new UINT8 *[(*nrOfTnCs)];
-	(*lengths) = new UINT32[(*nrOfTnCs)];
-	for (; i < (*nrOfTnCs); i++)
-		{
-			//after every loop turn locale is explicitly reset to 3 because ...
-			locale_len = 3;
-			iterator = docTnCsList->item(i);
-			//... it is modified by getDOMElementAttribute
-			getDOMElementAttribute(iterator, OPTIONS_ATTRIBUTE_TNC_LOCALE, locale, &locale_len);
-			if (locale_len == 0)
-				{
-					elementList[i] = NULL;
-					continue;
-				}
-			//only append the locale code to the id when it is
-			//not the default locale
-			if (strncasecmp((char *)locale, LOCALE_DEFAULT, 2) == 0)
-				{
-					id[tmpOpSKILen] = 0;
-				}
-			else
-				{
-					id[tmpOpSKILen] = '_';
-					memcpy((id + tmpOpSKILen + 1), locale, locale_len);
-				}
-
-			if (setDOMElementAttribute(iterator, OPTIONS_ATTRIBUTE_TNC_ID, id) != E_SUCCESS)
-				{
-					elementList[i] = NULL;
-					continue;
-				}
-			if (setDOMElementAttribute(iterator, OPTIONS_ATTRIBUTE_TNC_DATE, tmpDate) != E_SUCCESS)
-				{
-					elementList[i] = NULL;
-					continue;
-				}
-			if (setDOMElementAttribute(iterator, OPTIONS_ATTRIBUTE_TNC_SERIAL, serial) != E_SUCCESS)
-				{
-					elementList[i] = NULL;
-					continue;
-				}
-			setCurrentTimeMilliesAsDOMAttribute(iterator);
-			elementList[i] = xmlDocToStringWithSignature(iterator, (*lengths)[i], true);
-		}
-
-	delete[] serial;
-	delete[] id;
-	delete[] locale;
-	return elementList;
-
-}
-
 UINT8* CAInfoService::getMixHeloXMLAsString(UINT32& a_len)
 {
 	XERCES_CPP_NAMESPACE::DOMDocument* docMixInfo = NULL;
-	XERCES_CPP_NAMESPACE::DOMElement* mixInfoRoot = NULL;
+	DOMElement* mixInfoRoot = NULL;
 
 	if ((CALibProxytest::getOptions()->getMixXml(docMixInfo) != E_SUCCESS) ||
 	    (docMixInfo == NULL))
@@ -1108,65 +1005,195 @@ ERR:
 }
 
 
-SINT32 CAInfoService::sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN(*a_thread)(void *), UINT8* a_strThreadName, SINT32 requestCommand, const UINT8* param)
+#endif
+#ifndef ONLY_LOCAL_PROXY
+
+SINT32 CAInfoService::sendOperatorTnCData()
 {
-	SINT32 returnValue = E_UNKNOWN;
-	UINT32 nrAddresses;
-	CAListenerInterface** socketAddresses = CALibProxytest::getOptions()->getInfoServices(nrAddresses);
-	CAThread** threads = new CAThread*[nrAddresses];
-	InfoServiceHeloMsg** messages = new InfoServiceHeloMsg*[nrAddresses];
+	/*SINT32 ret = E_SUCCESS;
+	UINT32 *lengths_ptr = NULL;
+	XMLSize_t nrOfTnCs = 0;
+	UINT32 i = 0;
+	UINT8 **tncData = getOperatorTnCsAsStrings(&lengths_ptr, &nrOfTnCs);
 
-	for (UINT32 i = 0; i < nrAddresses; i++)
-		{
-			messages[i] = new InfoServiceHeloMsg();
-			messages[i]->addr = (CASocketAddrINet*)socketAddresses[i]->getAddr();
-			messages[i]->len = a_len;
-			messages[i]->strXML = a_strXML;
-			messages[i]->is = this;
-			messages[i]->requestCommand = requestCommand;
-			messages[i]->param = param;
-#if !defined(NO_INFOSERVICE_TRHEADS)
-			threads[i] = new CAThread(a_strThreadName);
-			threads[i]->setMainLoop((THREAD_RETURN (*)(void *))a_thread);
-			threads[i]->start((void*)(messages[i]), false, true);
-#else
-			(*a_thread)(messages[i]);
-			if (messages[i]->retVal == E_SUCCESS)
-				{
-					returnValue = E_SUCCESS;
-				}
-#endif
-		}
+	if(tncData != NULL)
+	{
+	for (;i < nrOfTnCs; i++)
+	{
+	#ifdef DEBUG
+	CAMsg::printMsg(LOG_DEBUG,"InfoService:sendMixTnCData(), object: %s, len: %u\n",
+	tncData[i], lengths_ptr[i]);
+	#endif
+	if( tncData[i] != NULL )
+	{
+	ret |= sendHelo(tncData[i], lengths_ptr[i],
+	TMixHelo, (UINT8*)"Mix TnC Thread",
+	REQUEST_COMMAND_TNC_DATA, NULL);
+	delete [] tncData[i];
+	tncData[i] = NULL;
+	}
+	else
+	{
+	CAMsg::printMsg(LOG_ERR,"InfoService:sendMixTnCData() -- Element %u is invalid!\n", (i+1) );
+	ret |= E_UNKNOWN;
+	}
 
-	for (UINT32 i = 0; i < nrAddresses; i++)
-		{
-#if !defined(NO_INFOSERVICE_TRHEADS)
-			if (threads[i]->join() == E_SUCCESS)
-				{
-					// CAMsg::printMsg(LOG_DEBUG,"InfoService: helo thread %u joined.\n", i);
-					if (messages[i]->retVal == E_SUCCESS)
-						{
-							returnValue = E_SUCCESS;
-						}
-				}
-			delete threads[i];
-			threads[i] = NULL;
-#endif
-			delete messages[i]->addr;
-			messages[i]->addr = NULL;
-			delete messages[i];
-			messages[i] = NULL;
-		}
-	//Message looks senseless but please keep it because Rolf reported a helo thread deadlock.
-	//Perhaps there is a problem when the threads are joined.
-	// CAMsg::printMsg(LOG_DEBUG,"InfoService: all helo threads joined. continue.\n");
-	delete[] messages;
-	messages = NULL;
-	delete[] threads;
-	threads = NULL;
+	}
+	delete [] lengths_ptr;
+	lengths_ptr = NULL;
 
-	return returnValue;
+	delete [] tncData;
+	}
+	else
+	{
+	CAMsg::printMsg(LOG_DEBUG,"InfoService:sendMixTnCData() -- No TnC data specified!\n");
+	return E_SUCCESS;
+	}
+	return ret;*/
+	return E_SUCCESS;
 }
+
+/** POSTs the MIXINFO message for a mix to the InfoService.
+	*/
+/*SINT32 CAInfoService::sendMixInfo(const UINT8* pMixID)
+{
+return sendMixHelo(REQUEST_COMMAND_MIXINFO,pMixID, NULL);
+}
+*/
+/**
+ * returns a string array with all signed Terms and Condition-Objects
+ * NOTE: this method has a side-effect: the DOMNodes are all signed and thus modified
+ * @param lengths contains the lengths of each corresponding object. Its memory
+ * 			is allocated by this method and has to be freed explicitly by calling
+ * 			delete []
+ * @param nrOfTnCs is the length of the returned array
+ * @retval a list with all Terms and conditions object which has to be freed explicitly
+ * 			by calling delete []
+ */
+UINT8 **CAInfoService::getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrOfTnCs)
+{
+
+	XERCES_CPP_NAMESPACE::DOMElement *tnCs = CALibProxytest::getOptions()->getTermsAndConditions();
+	if (tnCs == NULL)
+		{
+			return NULL;
+		}
+
+	XERCES_CPP_NAMESPACE::DOMNodeList *docTnCsList =
+	  getElementsByTagName(tnCs, OPTIONS_NODE_TNCS_TRANSLATION);
+
+	if (docTnCsList == NULL)
+		{
+			return NULL;
+		}
+
+	UINT8 **elementList = NULL;
+	DOMNode *iterator = NULL;
+	XMLSize_t i = 0;
+
+	UINT8 tmpOpSKIBuff[TMP_BUFF_SIZE];
+	UINT32 tmpOpSKILen = TMP_BUFF_SIZE;
+
+	CALibProxytest::getOptions()->getOperatorSubjectKeyIdentifier(tmpOpSKIBuff, &tmpOpSKILen);
+	if (tmpOpSKILen == 0)
+		{
+			return NULL;
+		}
+
+	UINT8 tmpDate[TMP_BUFF_SIZE];
+	UINT32 tmpDateLen = TMP_BUFF_SIZE;
+
+	getDOMElementAttribute(tnCs, OPTIONS_ATTRIBUTE_TNC_DATE, tmpDate, &tmpDateLen);
+	if (tmpDateLen == 0)
+		{
+			return NULL;
+		}
+
+	UINT8 tmpVersion[TMP_BUFF_SIZE];
+	UINT32 tmpVersionLen = TMP_BUFF_SIZE;
+
+	UINT8* serial = NULL;
+
+	getDOMElementAttribute(tnCs, OPTIONS_ATTRIBUTE_TNC_VERSION, tmpVersion, &tmpVersionLen);
+	if (tmpVersionLen > 0)
+		{
+			serial = new UINT8[tmpDateLen + tmpVersionLen + 1];
+			memcpy(serial, tmpDate, tmpDateLen);
+			memcpy(serial + tmpDateLen, tmpVersion, tmpVersionLen);
+			serial[tmpDateLen + tmpVersionLen] = 0;
+		}
+	else
+		{
+			serial = new UINT8[tmpDateLen + 1];
+			memcpy(serial, tmpDate, tmpDateLen);
+			serial[tmpDateLen] = 0;
+		}
+
+	UINT32 locale_len = 3;
+	UINT8* id = new UINT8[tmpOpSKILen + locale_len + 1];
+	UINT8* locale = new UINT8[locale_len];
+
+	locale[locale_len - 1] = 0;
+
+	memcpy(id, tmpOpSKIBuff, tmpOpSKILen);
+	id[tmpOpSKILen] = 0;
+	id[tmpOpSKILen + (locale_len - 1) + 1] = 0;
+
+	(*nrOfTnCs) = docTnCsList->getLength();
+	elementList = new UINT8 *[(*nrOfTnCs)];
+	(*lengths) = new UINT32[(*nrOfTnCs)];
+	for (; i < (*nrOfTnCs); i++)
+		{
+			//after every loop turn locale is explicitly reset to 3 because ...
+			locale_len = 3;
+			iterator = docTnCsList->item(i);
+			//... it is modified by getDOMElementAttribute
+			getDOMElementAttribute(iterator, OPTIONS_ATTRIBUTE_TNC_LOCALE, locale, &locale_len);
+			if (locale_len == 0)
+				{
+					elementList[i] = NULL;
+					continue;
+				}
+			//only append the locale code to the id when it is
+			//not the default locale
+			if (strncasecmp((char *)locale, LOCALE_DEFAULT, 2) == 0)
+				{
+					id[tmpOpSKILen] = 0;
+				}
+			else
+				{
+					id[tmpOpSKILen] = '_';
+					memcpy((id + tmpOpSKILen + 1), locale, locale_len);
+				}
+
+			if (setDOMElementAttribute(iterator, OPTIONS_ATTRIBUTE_TNC_ID, id) != E_SUCCESS)
+				{
+					elementList[i] = NULL;
+					continue;
+				}
+			if (setDOMElementAttribute(iterator, OPTIONS_ATTRIBUTE_TNC_DATE, tmpDate) != E_SUCCESS)
+				{
+					elementList[i] = NULL;
+					continue;
+				}
+			if (setDOMElementAttribute(iterator, OPTIONS_ATTRIBUTE_TNC_SERIAL, serial) != E_SUCCESS)
+				{
+					elementList[i] = NULL;
+					continue;
+				}
+			setCurrentTimeMilliesAsDOMAttribute(iterator);
+			elementList[i] = xmlDocToStringWithSignature(iterator, (*lengths)[i], true);
+		}
+
+	delete[] serial;
+	delete[] id;
+	delete[] locale;
+	return elementList;
+
+}
+
+
+
 
 
 

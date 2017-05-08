@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "CACertificate.hpp"
 #include "CABase64.hpp"
 #include "CAUtil.hpp"
@@ -53,6 +53,34 @@ CACertificate::CACertificate(X509* x)
 				m_pAKI = (AUTHORITY_KEYID*) X509_get_ext_d2i (m_pCert, NID_authority_key_identifier, NULL, NULL);
 			}
 	}
+/**
+  * LERNGRUPPE
+  * Sets the subjectKeyIdentifier extension for this certificate to the given value
+  * @param a_value The value which should be set as SKI
+  * @param a_valueLen The length of a_value
+  * @retval E_SUCCESS upon successful removal
+  * @retval E_UNKNOWN otherwise
+  */
+SINT32 CACertificate::setSubjectKeyIdentifier( UINT8* a_value, UINT32 a_valueLen )
+{
+    SINT32 ret = E_UNKNOWN;
+    ASN1_OCTET_STRING* skid = NULL;
+
+    skid = ASN1_OCTET_STRING_new();
+    if(NULL == skid)   goto end;
+
+    ASN1_OCTET_STRING_set(skid, a_value, a_valueLen);
+    if( X509_add1_ext_i2d(m_pCert, NID_subject_key_identifier, skid, false, X509V3_ADD_REPLACE) == 1)
+    {
+    	m_pSKI = skid;
+    	ret = E_SUCCESS;
+    }
+
+end:
+    //ASN1_OCTET_STRING_free(skid);
+    return ret;
+}
+
 
 CACertificate* CACertificate::decode(const DOMNode* n,UINT32 type,const char* passwd)
 	{
@@ -284,29 +312,18 @@ SINT32 CACertificate::getSubjectKeyIdentifier(UINT8* r_ski, UINT32 *r_skiLen)
     return E_SUCCESS;
 }
 
-SINT32 CACertificate::getAuthorityKeyIdentifier(UINT8* r_aki, UINT32* r_akiLen) const
+/**
+  * LERNGRUPPE
+  * Sets the subjectKeyIdentifier extension for this certificate to the hash of the public key
+  * @retval E_SUCCESS upon successful removal
+  * @retval E_UNKNOWN otherwise
+  */
+SINT32 CACertificate::setSubjectKeyIdentifier()
 {
-	if(m_pAKI == NULL)
-	{
-		return E_UNKNOWN;
-	}
-
-	ASN1_OCTET_STRING* pKeyID = NULL;
-	pKeyID = m_pAKI->keyid;
-	if(pKeyID == NULL)
-	{
-		return E_UNKNOWN;
-	}
-
-	// Get the ASCII string format of the authority key identifier
-	UINT8* cKeyID = (UINT8*)i2s_ASN1_OCTET_STRING(NULL, pKeyID);
-	if (cKeyID == NULL)
-	{
-		return E_UNKNOWN;
-	}
-	removeColons(cKeyID, strlen((const char*)cKeyID), r_aki, r_akiLen);
-	OPENSSL_free(cKeyID);
-	return E_SUCCESS;
+    UINT32 len = 0;
+    UINT8 sha_hash[SHA_DIGEST_LENGTH];
+    X509_pubkey_digest(m_pCert, EVP_sha1(), sha_hash, &len);
+    return setSubjectKeyIdentifier( sha_hash, len );
 }
 
 /**
@@ -341,73 +358,6 @@ SINT32 CACertificate::removeColons(const UINT8* a_cSkid, UINT32 a_cSkidLen, UINT
     r_ski[i-j] = 0;
     *r_skiLen = i-j;
     return E_SUCCESS;
-}
-
-/**
-  * LERNGRUPPE
-  * Sets the subjectKeyIdentifier extension for this certificate to the hash of the public key
-  * @retval E_SUCCESS upon successful removal
-  * @retval E_UNKNOWN otherwise
-  */
-SINT32 CACertificate::setSubjectKeyIdentifier()
-{
-    UINT32 len = 0;
-    UINT8 sha_hash[SHA_DIGEST_LENGTH];
-    X509_pubkey_digest(m_pCert, EVP_sha1(), sha_hash, &len);
-    return setSubjectKeyIdentifier( sha_hash, len );
-}
-
-/**
-  * LERNGRUPPE
-  * Sets the subjectKeyIdentifier extension for this certificate to the given value
-  * @param a_value The value which should be set as SKI
-  * @param a_valueLen The length of a_value
-  * @retval E_SUCCESS upon successful removal
-  * @retval E_UNKNOWN otherwise
-  */
-SINT32 CACertificate::setSubjectKeyIdentifier( UINT8* a_value, UINT32 a_valueLen )
-{
-    SINT32 ret = E_UNKNOWN;
-    ASN1_OCTET_STRING* skid = NULL;
-
-    skid = ASN1_OCTET_STRING_new();
-    if(NULL == skid)   goto end;
-
-    ASN1_OCTET_STRING_set(skid, a_value, a_valueLen);
-    if( X509_add1_ext_i2d(m_pCert, NID_subject_key_identifier, skid, false, X509V3_ADD_REPLACE) == 1)
-    {
-    	m_pSKI = skid;
-    	ret = E_SUCCESS;
-    }
-
-end:
-    //ASN1_OCTET_STRING_free(skid);
-    return ret;
-}
-
-SINT32 CACertificate::getRawSubjectKeyIdentifier(UINT8* r_ski, UINT32* r_skiLen)
-{
-	if (m_pSKI == NULL)
-	{
-		setSubjectKeyIdentifier();
-		if(m_pSKI == NULL)
-		{
-			CAMsg::printMsg( LOG_ERR, "Unable to retrieve raw SKI from Certificate\n");
-			return E_UNKNOWN;
-        }
-
-	}
-	if(*r_skiLen < (UINT32) m_pSKI->length)
-	{
-		CAMsg::printMsg( LOG_ERR, "Unable to copy SKI to target array, size must at least be %i but is only %i!\n", m_pSKI->length, r_skiLen );
-		return E_UNKNOWN;
-	}
-	*r_skiLen = m_pSKI->length;
-	for(SINT32 i=0; i<m_pSKI->length; i++)
-	{
-		r_ski[i] = m_pSKI->data[i];
-	}
-	return E_SUCCESS;
 }
 
 SINT32 CACertificate::verify(const CACertificate* a_cert) const
@@ -500,6 +450,63 @@ bool CACertificate::isValid() const
 	}
 	return false;
 }
+
+#endif
+#ifndef ONLY_LOCAL_PROXY
+SINT32 CACertificate::getAuthorityKeyIdentifier(UINT8* r_aki, UINT32* r_akiLen) const
+{
+	if(m_pAKI == NULL)
+	{
+		return E_UNKNOWN;
+	}
+
+	ASN1_OCTET_STRING* pKeyID = NULL;
+	pKeyID = m_pAKI->keyid;
+	if(pKeyID == NULL)
+	{
+		return E_UNKNOWN;
+	}
+
+	// Get the ASCII string format of the authority key identifier
+	UINT8* cKeyID = (UINT8*)i2s_ASN1_OCTET_STRING(NULL, pKeyID);
+	if (cKeyID == NULL)
+	{
+		return E_UNKNOWN;
+	}
+	removeColons(cKeyID, strlen((const char*)cKeyID), r_aki, r_akiLen);
+	OPENSSL_free(cKeyID);
+	return E_SUCCESS;
+}
+
+
+
+
+SINT32 CACertificate::getRawSubjectKeyIdentifier(UINT8* r_ski, UINT32* r_skiLen)
+{
+	if (m_pSKI == NULL)
+	{
+		setSubjectKeyIdentifier();
+		if(m_pSKI == NULL)
+		{
+			CAMsg::printMsg( LOG_ERR, "Unable to retrieve raw SKI from Certificate\n");
+			return E_UNKNOWN;
+        }
+
+	}
+	if(*r_skiLen < (UINT32) m_pSKI->length)
+	{
+		CAMsg::printMsg( LOG_ERR, "Unable to copy SKI to target array, size must at least be %i but is only %i!\n", m_pSKI->length, r_skiLen );
+		return E_UNKNOWN;
+	}
+	*r_skiLen = m_pSKI->length;
+	for(SINT32 i=0; i<m_pSKI->length; i++)
+	{
+		r_ski[i] = m_pSKI->data[i];
+	}
+	return E_SUCCESS;
+}
+
+
 
 #endif //ONLY_LOCAL_PROXY
 

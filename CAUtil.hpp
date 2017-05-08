@@ -157,17 +157,107 @@ SINT32 getDOMElementValue(const DOMElement * const pElem, UINT32& value, UINT32 
 
 SINT32 getDOMElementValue(const DOMElement * const pElem, UINT32* value);
 
-#ifndef ONLY_LOCAL_PROXY
-/** Creates an empty DOM DOcument.
+#if !defined LOCAL_PROXY_ONLY || defined INCLUDE_MIDDLE_MIX 
+	/** Creates an empty DOM DOcument.
 	*/
-XERCES_CPP_NAMESPACE::DOMDocument* createDOMDocument();
+	XERCES_CPP_NAMESPACE::DOMDocument* createDOMDocument();
+	SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA);
+	SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOMElement* & elemRootEncodedKey,XERCES_CPP_NAMESPACE::DOMDocument* docOwner,CAASymCipher* pRSA);
+	SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, UINT32 xmllen,CAASymCipher* pRSA);
+	SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const DOMNode* pRoot,CAASymCipher* pRSA);
+	SINT32 setDOMElementValue(DOMElement* pElem,const UINT8* value);
+	SINT32 setDOMElementValue(DOMElement* pElem, UINT32 value);
+	SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, UINT32 value);
+	SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,UINT32& value);
+	SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,UINT8* value,UINT32* len);
+	SINT32 getNodeName(const DOMNode * const pElem, UINT8* value,UINT32* valuelen);
+	SINT32 getLastDOMChildByName(const DOMNode* pNode,const char * const name,DOMElement* & a_child);
+	SINT32 getLastDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNode* & a_child);
+	SINT32 getLastDOMChildByName(const DOMNode* pNode,const char * const name,DOMNode* & a_child);
+
+	DOMNodeList* getElementsByTagName(DOMElement* pElem,const char* const name);
+
+
+	/**
+ * Clones an OpenSSL DSA structure
+ */
+inline DSA* DSA_clone(DSA* dsa)
+	{
+		if(dsa==NULL)
+			return NULL;
+		DSA* tmpDSA=DSA_new();
+#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+		BIGNUM* p = NULL;
+		BIGNUM* q = NULL;
+		BIGNUM* g = NULL;
+		BIGNUM* pub_key = NULL;
+		BIGNUM* priv_key = NULL;
+		DSA_get0_pqg(dsa,(const BIGNUM**) &p,(const BIGNUM**) &q,(const BIGNUM**) &g);
+		DSA_set0_pqg(tmpDSA,BN_dup(p), BN_dup(q), BN_dup(g));
+		DSA_get0_key(dsa,(const BIGNUM**) &pub_key,(const BIGNUM**) &priv_key);
+		DSA_set0_key(tmpDSA,BN_dup(pub_key), BN_dup(priv_key));
+#else
+		tmpDSA->g=BN_dup(dsa->g);
+		tmpDSA->p=BN_dup(dsa->p);
+		tmpDSA->q=BN_dup(dsa->q);
+		tmpDSA->pub_key=BN_dup(dsa->pub_key);
+		if(dsa->priv_key!=NULL)
+			tmpDSA->priv_key=BN_dup(dsa->priv_key);
+#endif
+		return tmpDSA;
+	}
+
+/**
+ * Clones an OpenSSL RSA structure
+ */
+inline RSA* RSA_clone(RSA* rsa)
+	{
+		if(rsa == NULL)
+		{
+			return NULL;
+		}
+#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+		return RSAPrivateKey_dup(rsa);
+#else
+		RSA* tmpRSA = RSA_new();
+		tmpRSA->n = BN_dup(rsa->n);
+		tmpRSA->e = BN_dup(rsa->e);
+		if(rsa->d != NULL)
+		{ //we have a private key
+			tmpRSA->d = BN_dup(rsa->d);
+			if(tmpRSA->p != NULL)
+			{
+				tmpRSA->p = BN_dup(rsa->p);
+			}
+			if(tmpRSA->q != NULL)
+			{
+				tmpRSA->q = BN_dup(rsa->q);
+			}
+		}
+		if(tmpRSA->dmp1 != NULL)
+		{
+			tmpRSA->dmp1 = BN_dup(rsa->dmp1);
+		}
+		if(tmpRSA->dmq1 != NULL)
+		{
+			tmpRSA->dmq1 = BN_dup(rsa->dmq1);
+		}
+		if(tmpRSA->iqmp != NULL)
+		{
+			tmpRSA->iqmp = BN_dup(rsa->iqmp);
+		}
+		return tmpRSA;
+#endif
+	}
+
+
+#endif
+
+#ifndef ONLY_LOCAL_PROXY
 
 /** Creates a new DOMText with the given value which belongs to the DOMDocument owernDoc.
 **/
 DOMText* createDOMText(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char * const text);
-
-
-SINT32 setDOMElementValue(DOMElement* pElem, UINT32 value);
 
 SINT32 setDOMElementValue(DOMElement* pElem, SINT32 value);
 /**
@@ -182,7 +272,6 @@ SINT32 setDOMElementValue(DOMElement* pElem, SINT32 value);
 SINT32 setDOMElementValue(DOMElement* pElem, const UINT64 text);
 SINT32 setDOMElementValue(DOMElement* pElem, const SINT64 text);
 
-SINT32 getNodeName(const DOMNode * const pElem, UINT8* value,UINT32* valuelen);
 
 SINT32 getDOMElementValue(const DOMNode * const pElem, UINT64 &value);
 SINT32 getDOMElementValue(const DOMElement * const pElem, SINT64 &value);
@@ -191,14 +280,10 @@ SINT32 getDOMElementValue(const DOMElement * const pElem,SINT32* value);
 
 SINT32 getDOMElementValue(const DOMElement * const pElem,UINT16* value);
 
-SINT32 setDOMElementValue(DOMElement* pElem,const UINT8* value);
-
-
 SINT32 getDOMElementValue(const DOMElement * const pElem,double* value);
 
 SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, bool value);
 SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, SINT32 value);
-SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, UINT32 value);
 SINT32 setDOMElementAttribute(DOMNode* pElem, const char* attrName, UINT64 value);
 SINT32 setDOMElementAttribute(DOMNode* pElem, const char* attrName, SINT64 value);
 
@@ -206,25 +291,12 @@ SINT32 setDOMElementValue(DOMElement* pElem,double floatValue);
 SINT32 setDOMElementValue(DOMElement* pElem, bool value);
 
 SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,SINT64& value);
-SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,UINT32& value);
 SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,bool& value);
-SINT32 getDOMElementAttribute(const DOMNode * const pElem,const char* attrName,UINT8* value,UINT32* len);
-
-DOMNodeList* getElementsByTagName(DOMElement* pElem,const char* const name);
-
-SINT32 getLastDOMChildByName(const DOMNode* pNode,const XMLCh* const name,DOMNode* & a_child);
-SINT32 getLastDOMChildByName(const DOMNode* pNode,const char * const name,DOMNode* & a_child);
-SINT32 getLastDOMChildByName(const DOMNode* pNode,const char * const name,DOMElement* & a_child);
 
 SINT32 setCurrentTimeMilliesAsDOMAttribute(DOMNode *pElem);
 
 //if not null the returned char pointer must be explicitely freed by the caller with 'delete []'
 UINT8 *getTermsAndConditionsTemplateRefId(DOMNode *tcTemplateRoot);
-
-SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, UINT8* xml, UINT32* xmllen,CAASymCipher* pRSA);
-SINT32 encodeXMLEncryptedKey(UINT8* key,UINT32 keylen, DOMElement* & elemRootEncodedKey,XERCES_CPP_NAMESPACE::DOMDocument* docOwner,CAASymCipher* pRSA);
-SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const UINT8* const xml, UINT32 xmllen,CAASymCipher* pRSA);
-SINT32 decodeXMLEncryptedKey(UINT8* key,UINT32* keylen, const DOMNode* pRoot,CAASymCipher* pRSA);
 
 SINT32 integrateDOMNode(const DOMNode *srcNode, DOMNode *dstNode, bool recursive, bool replace);
 
@@ -477,61 +549,5 @@ void logMemoryUsage();
 
 
 #ifndef ONLY_LOCAL_PROXY
-/**
- * Clones an OpenSSL DSA structure
- */
-inline DSA* DSA_clone(DSA* dsa)
-	{
-		if(dsa==NULL)
-			return NULL;
-		DSA* tmpDSA=DSA_new();
-		tmpDSA->g=BN_dup(dsa->g);
-		tmpDSA->p=BN_dup(dsa->p);
-		tmpDSA->q=BN_dup(dsa->q);
-		tmpDSA->pub_key=BN_dup(dsa->pub_key);
-		if(dsa->priv_key!=NULL)
-			tmpDSA->priv_key=BN_dup(dsa->priv_key);
-		return tmpDSA;
-	}
-
-/**
- * Clones an OpenSSL RSA structure
- */
-inline RSA* RSA_clone(RSA* rsa)
-	{
-		if(rsa == NULL)
-		{
-			return NULL;
-		}
-		RSA* tmpRSA = RSA_new();
-		tmpRSA->n = BN_dup(rsa->n);
-		tmpRSA->e = BN_dup(rsa->e);
-		if(rsa->d != NULL)
-		{ //we have a private key
-			tmpRSA->d = BN_dup(rsa->d);
-			if(tmpRSA->p != NULL)
-			{
-				tmpRSA->p = BN_dup(rsa->p);
-			}
-			if(tmpRSA->q != NULL)
-			{
-				tmpRSA->q = BN_dup(rsa->q);
-			}
-		}
-		if(tmpRSA->dmp1 != NULL)
-		{
-			tmpRSA->dmp1 = BN_dup(rsa->dmp1);
-		}
-		if(tmpRSA->dmq1 != NULL)
-		{
-			tmpRSA->dmq1 = BN_dup(rsa->dmq1);
-		}
-		if(tmpRSA->iqmp != NULL)
-		{
-			tmpRSA->iqmp = BN_dup(rsa->iqmp);
-		}
-		return tmpRSA;
-	}
-
 #endif //ONLY_LOCAL_PROXY
 #endif

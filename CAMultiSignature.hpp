@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef CAMULTISIGNATURE_HPP_
 #define CAMULTISIGNATURE_HPP_
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "CACertStore.hpp"
 #include "CACertificate.hpp"
 
@@ -52,20 +52,29 @@ class CAMultiSignature
 	public:
 		CAMultiSignature();
 		virtual ~CAMultiSignature();
-		SINT32 addSignature(CASignature* a_signature, CACertStore* a_certs, UINT8* a_ski, UINT32 a_skiLen);
-		SINT32 signXML(DOMNode* a_node, bool appendCerts);
-		SINT32 signXML(UINT8* in, UINT32 inlen, UINT8* out, UINT32* outlen, bool appendCerts);
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 		static SINT32 verifyXML(const UINT8* const in, UINT32 inlen, CACertificate* a_cert);
 		static SINT32 verifyXML(DOMNode* a_node, CACertificate* a_cert);
+		SINT32 signXML(DOMNode* a_node, bool appendCerts);
+		SINT32 signXML(UINT8* in, UINT32 inlen, UINT8* out, UINT32* outlen, bool appendCerts);
+	  SINT32 sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen);
+	
+#endif
+#ifndef ONLY_LOCAL_PROXY
+		SINT32 addSignature(CASignature* a_signature, CACertStore* a_certs, UINT8* a_ski, UINT32 a_skiLen);
 		UINT32 getSignatureCount(){ return m_sigCount; }
-		SINT32 sign(UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen);
 		SINT32 getXORofSKIs(UINT8* out, UINT32 outlen);
 		SINT32 findSKI(const UINT8* a_strSKI);
+#endif
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 	private:
 		SIGNATURE* m_signatures;
 		UINT32 m_sigCount;
 		UINT8* m_xoredID;
+#endif
+#ifndef ONLY_LOCAL_PROXY
 		SINT32 getSKI(UINT8* in, UINT32 inlen, const UINT8* a_ski);
+#endif
 };
 #endif //ONLY_LOCAL_PROXY
 #endif /* CAMULTISIGNATURE_HPP_ */

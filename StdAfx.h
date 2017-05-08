@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.11.17"
+#define MIX_VERSION "00.11.19"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -167,7 +167,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define ECC
 //#define SSL_HACK //???
 
-#define ANON_DEBUG_MODE //if defined this Mix operates in AN.ON protocol debug mode, which means that a lot of things are logged which should not be logged in productive mode. So NEVER enable this in productive environments!
+//#define ANON_DEBUG_MODE //if defined this Mix operates in AN.ON protocol debug mode, which means that a lot of things are logged which should not be logged in productive mode. So NEVER enable this in productive environments!
 
 #ifdef LOG_CRIME //Law Enforcement and AN.ON protocol debuggin cannot be done at the same time...
 	#undef ANON_DEBUG_MODE
@@ -262,6 +262,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 
 #define PAYMENT_VERSION "2.0"
+
+#ifdef ONLY_MIDDLE_MIX
+	#define ONLY_LOCAL_PROXY
+	#define INCLUDE_MIDDLE_MIX
+#endif
 
 #if defined (_WIN32) &&!defined(__CYGWIN__)
 	//For Visual C++    #if defined(_MSC_VER)
@@ -554,12 +559,14 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			#include <openssl/modes.h>
 		}
 #endif
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+	#include <openssl/x509v3.h>
+	#include <openssl/pkcs12.h>
+	#include <openssl/dsa.h>
+#endif
 #ifndef ONLY_LOCAL_PROXY
 	#include <openssl/asn1.h>
-	#include <openssl/pkcs12.h>
-	#include <openssl/x509v3.h>
 	#include <openssl/ssl.h>
-	#include <openssl/dsa.h>
 	#include <openssl/sha.h>
 	#include <openssl/md5.h>
 #endif

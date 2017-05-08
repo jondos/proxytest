@@ -47,8 +47,13 @@ SINT32 CABase64::decode(const UINT8*in, UINT32 inlen, UINT8*out, UINT32*outlen)
 				*outlen = 0;
 				return E_SUCCESS;
 			}
-		EVP_ENCODE_CTX oCTX;
-		EVP_DecodeInit(&oCTX);
+		EVP_ENCODE_CTX* pCTX = NULL;
+#if OPENSSL_VERSION_NUMBER >= 0x1000204fL
+		pCTX=EVP_ENCODE_CTX_new();
+#else
+		pCTX = new EVP_ENCODE_CTX;
+#endif
+		EVP_DecodeInit(pCTX);
 		int len = 0;
 		*outlen = 0;
 		SINT32 ret = -1;
@@ -57,20 +62,30 @@ SINT32 CABase64::decode(const UINT8*in, UINT32 inlen, UINT8*out, UINT32*outlen)
 			{
 				UINT8*tmpIn = new UINT8[inlen];
 				memcpy(tmpIn, in, inlen);
-				ret = EVP_DecodeUpdate(&oCTX, out, (int*) outlen, tmpIn, (int) inlen);
+				ret = EVP_DecodeUpdate(pCTX, out, (int*) outlen, tmpIn, (int) inlen);
 				delete[] tmpIn;
 				tmpIn = NULL;
 			}
 		else
 			{
-				ret = EVP_DecodeUpdate(&oCTX, out, (int*) outlen, (unsigned char*) in, (int) inlen);
+				ret = EVP_DecodeUpdate(pCTX, out, (int*) outlen, (unsigned char*) in, (int) inlen);
 			}
-		if (ret < 0 || EVP_DecodeFinal(&oCTX, out + (*outlen), &len) < 0)
+		if (ret < 0 || EVP_DecodeFinal(pCTX, out + (*outlen), &len) < 0)
 			{
-				return E_UNKNOWN;
+				ret=E_UNKNOWN;
 			}
-		(*outlen) += len;
-		return E_SUCCESS;
+		else
+			{
+			(*outlen) += len;
+			ret = E_SUCCESS;
+			}
+#if OPENSSL_VERSION_NUMBER >= 0x1000204fL
+		EVP_ENCODE_CTX_free(pCTX);
+#else
+		delete pCTX;
+#endif
+
+		return ret;
 	}
 
 /** ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
@@ -95,9 +110,13 @@ SINT32 CABase64::encode(const UINT8*in, UINT32 inlen, UINT8*out, UINT32*outlen)
 			}
 		if (inlen > *outlen)
 			return E_UNKNOWN;
-
-		EVP_ENCODE_CTX oCTX;
-		EVP_EncodeInit(&oCTX);
+		EVP_ENCODE_CTX* pCTX = NULL;
+#if OPENSSL_VERSION_NUMBER >= 0x1000204fL
+		pCTX=EVP_ENCODE_CTX_new();
+#else
+		pCTX = new EVP_ENCODE_CTX;
+#endif
+		EVP_EncodeInit(pCTX);
 		UINT32 len = 0;
 		*outlen = 0;
 
@@ -106,15 +125,20 @@ SINT32 CABase64::encode(const UINT8*in, UINT32 inlen, UINT8*out, UINT32*outlen)
 			{
 				UINT8*tmpIn = new UINT8[inlen];
 				memcpy(tmpIn, in, inlen);
-				EVP_EncodeUpdate(&oCTX, out, (int*) outlen, tmpIn, (int) inlen);
+				EVP_EncodeUpdate(pCTX, out, (int*) outlen, tmpIn, (int) inlen);
 				delete[] tmpIn;
 				tmpIn = NULL;
 			}
 		else
 			{
-				EVP_EncodeUpdate(&oCTX, out, (int*) outlen, (unsigned char*) in, (int) inlen);
+				EVP_EncodeUpdate(pCTX, out, (int*) outlen, (unsigned char*) in, (int) inlen);
 			}
-		EVP_EncodeFinal(&oCTX, out + (*outlen), (int*) &len);
+		EVP_EncodeFinal(pCTX, out + (*outlen), (int*) &len);
 		(*outlen) += len;
+#if OPENSSL_VERSION_NUMBER >= 0x1000204fL
+		EVP_ENCODE_CTX_free(pCTX);
+#else
+		delete pCTX;
+#endif
 		return E_SUCCESS;
 	}

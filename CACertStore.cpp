@@ -26,7 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || INCLUDE_MIDDLE_MIX
 #include "CACertStore.hpp"
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
@@ -248,7 +248,7 @@ CACertStore* CACertStore::decode(const DOMNode* node, UINT32 type)
 	{
 		case XML_X509DATA:
 			CACertStore* store = new CACertStore();
-			DOMNodeList* certs = getElementsByTagName((DOMElement*)node, "X509Certificate");
+			DOMNodeList* certs = ::getElementsByTagName((DOMElement*)node, "X509Certificate");
 
 			for(UINT32 i=0; i<certs->getLength(); i++)
 			{

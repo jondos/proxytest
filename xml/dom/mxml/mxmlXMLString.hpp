@@ -2,6 +2,8 @@
 #define __MXML_XML_STRING__
 #include "mxmlDOMTypeDef.hpp"
 
+UINT32 strtrim(UINT8*);
+
 class XMLString
 	{
 		public:
@@ -38,7 +40,11 @@ class XMLString
 					return strcmp((char*)str1,(char*)str2)==0;
 				}
 
-			static void trim(XMLCh* const toTrim);
+			static void trim(XMLCh* const toTrim)
+				{
+					strtrim(toTrim);
+				}
+
 			
 			static XMLCh* replicate(const XMLCh* const toRep)
 				{
@@ -53,6 +59,9 @@ class XMLString
 					return strlen((char*)src);
 				}
 
-			static SINT32 compareString(const XMLCh *const str1, const XMLCh *const str2);
+			static SINT32 compareString(const XMLCh *const str1, const XMLCh *const str2)
+				{
+					return strcmp((char*)str1, (char*)str2);
+				}
 	};
 #endif //__MXML_XML_STRING__

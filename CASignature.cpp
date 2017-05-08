@@ -26,7 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY ||defined INCLUDE_MIDDLE_MIX
 #include "CASignature.hpp"
 #include "CABase64.hpp"
 #include "CAUtil.hpp"
@@ -185,39 +185,51 @@ SINT32 CASignature::setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const ch
 					return E_UNKNOWN;
 				}
 				PKCS12_free(tmpPKCS12);
-				if(EVP_PKEY_type(key->type) == EVP_PKEY_DSA)
+				int keyType = 0;
+				#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+					keyType = EVP_PKEY_id(key);
+				#else
+					keyType = key->type;
+				#endif
+				if(EVP_PKEY_type(keyType) == EVP_PKEY_DSA)
 				{
 					// found DSA key
-					DSA* tmpDSA = DSA_clone(key->pkey.dsa);
+					DSA* tmpDSA = NULL;
+					#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+						tmpDSA = DSA_clone(EVP_PKEY_get1_DSA(key));
+					#else
+						tmpDSA = DSA_clone(key->pkey.dsa);
+					#endif
 					EVP_PKEY_free(key);
-					if(DSA_sign_setup(tmpDSA,NULL,&tmpDSA->kinv,&tmpDSA->r)!=1)
-					{
-						DSA_free(tmpDSA);
-						return E_UNKNOWN;
-					}
+					#if OPENSSL_VERSION_NUMBER	< 0x1000204fL
+						if(DSA_sign_setup(tmpDSA,NULL,&tmpDSA->kinv,&tmpDSA->r)!=1)
+						{
+							DSA_free(tmpDSA);
+							return E_UNKNOWN;
+						}
+					#endif
 					DSA_free(m_pDSA);
 					m_pDSA = tmpDSA;
 					return E_SUCCESS;
 				}
-				else if(EVP_PKEY_type(key->type) == EVP_PKEY_RSA)
+				else if(EVP_PKEY_type(keyType) == EVP_PKEY_RSA)
 				{
 					// found RSA key
-					RSA* tmpRSA = RSA_clone(key->pkey.rsa);
+					RSA* tmpRSA = NULL;
+					#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+						tmpRSA = RSA_clone(EVP_PKEY_get1_RSA(key));
+					#else
+						tmpRSA = RSA_clone(key->pkey.rsa);
+					#endif
+		
 					EVP_PKEY_free(key);
 					key = NULL;
-					tmpRSA->flags |= RSA_FLAG_THREAD_SAFE;
-					tmpRSA->flags |= RSA_FLAG_SIGN_VER;
-					#ifdef RSA_FLAG_NO_BLINDING
-						tmpRSA->flags |= RSA_FLAG_NO_BLINDING;
-					#endif
-					#if OPENSSL_VERSION_NUMBER	> 0x0090707fL
-						//tmpRSA->flags |= RSA_FLAG_NO_EXP_CONSTTIME;
-					#endif
+					setRSAFlags(tmpRSA);
 					RSA_free(m_pRSA);
 					m_pRSA=tmpRSA;
 					return E_SUCCESS;
 				}
-				else if(EVP_PKEY_type(key->type) == EVP_PKEY_EC)
+				else if(EVP_PKEY_type(keyType) == EVP_PKEY_EC)
 				{
 #ifdef ECC
 					// found EC key
@@ -269,6 +281,12 @@ SINT32 CASignature::parseSignKeyXML(const UINT8* buff,UINT32 len)
 		UINT32 tlen=4096;
 		DSA* tmpDSA=DSA_new();
 		DOMNode* child=elemKeyValue->getFirstChild();
+		BIGNUM* p = NULL;
+		BIGNUM* q = NULL;
+		BIGNUM* g = NULL;
+		BIGNUM* priv_key = NULL;
+		BIGNUM* pub_key = NULL;
+
 		while(child!=NULL)
 			{
 				char* name=XMLString::transcode(child->getNodeName());
@@ -281,44 +299,54 @@ SINT32 CASignature::parseSignKeyXML(const UINT8* buff,UINT32 len)
 						XMLString::release(&tmpStr);
 						if(strcmp(name,"P")==0)
 							{
-								if(tmpDSA->p!=NULL)
-									BN_free(tmpDSA->p);
-								tmpDSA->p=BN_bin2bn(tbuff,tlen,NULL);
+								if(p!=NULL)
+									BN_free(p);
+								p=BN_bin2bn(tbuff,tlen,NULL);
 							}
 						else if(strcmp(name,"Q")==0)
 							{
-								if(tmpDSA->q!=NULL)
-									BN_free(tmpDSA->q);
-								tmpDSA->q=BN_bin2bn(tbuff,tlen,NULL);
+								if(q!=NULL)
+									BN_free(q);
+								q=BN_bin2bn(tbuff,tlen,NULL);
 							}
 						else if(strcmp(name,"G")==0)
 							{
-								if(tmpDSA->g!=NULL)
-										BN_free(tmpDSA->g);
-									tmpDSA->g=BN_bin2bn(tbuff,tlen,NULL);
+								if(g!=NULL)
+										BN_free(g);
+									g=BN_bin2bn(tbuff,tlen,NULL);
 							}
 						else if(strcmp(name,"X")==0)
 							{
-								if(tmpDSA->priv_key!=NULL)
-									BN_free(tmpDSA->priv_key);
-								tmpDSA->priv_key=BN_bin2bn(tbuff,tlen,NULL);
+								if(priv_key!=NULL)
+									BN_free(priv_key);
+								priv_key=BN_bin2bn(tbuff,tlen,NULL);
 
 							}
 						else if(strcmp(name,"Y")==0)
 							{
-								if(tmpDSA->pub_key!=NULL)
-									BN_free(tmpDSA->pub_key);
-								tmpDSA->pub_key=BN_bin2bn(tbuff,tlen,NULL);
+								if(pub_key!=NULL)
+									BN_free(pub_key);
+								pub_key=BN_bin2bn(tbuff,tlen,NULL);
 							}
 					}
 				XMLString::release(&name);
 				child=child->getNextSibling();
 			}
+#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL			
+		DSA_set0_pqg(tmpDSA, p, q, g);
+		DSA_set0_key(tmpDSA, pub_key, priv_key);
+#else
+		tmpDSA->g = g;
+		tmpDSA->p = p;
+		tmpDSA->q = q;
+		tmpDSA->priv_key = priv_key;
+		tmpDSA->pub_key = pub_key;
 		if(DSA_sign_setup(tmpDSA,NULL,&tmpDSA->kinv,&tmpDSA->r)!=1)
 			{
 				DSA_free(tmpDSA);
 				return E_UNKNOWN;
 			}
+#endif
 		if(m_pDSA!=NULL)
 			DSA_free(m_pDSA);
 		m_pDSA=tmpDSA;
@@ -657,23 +685,40 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 		}
 
 		EVP_PKEY *key=X509_get_pubkey(pCert->m_pCert);
-		if(EVP_PKEY_type(key->type) == EVP_PKEY_DSA)
+
+		int keyType = 0;
+#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+		keyType=EVP_PKEY_id(key);
+#else		
+		keyType=key->type;
+#endif
+		if(EVP_PKEY_type(keyType) == EVP_PKEY_DSA)
 		{
-			DSA* tmpDSA=DSA_clone(key->pkey.dsa);
+			DSA* tmpDSA = NULL;
+#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+			tmpDSA=DSA_clone(EVP_PKEY_get1_DSA(key));
+#else
+			tmpDSA=DSA_clone(key->pkey.dsa);
+#endif
 			EVP_PKEY_free(key);
 			DSA_free(m_pDSA);
 			m_pDSA=tmpDSA;
 			return E_SUCCESS;
 		}
-		if(EVP_PKEY_type(key->type) == EVP_PKEY_RSA)
+		if(EVP_PKEY_type(keyType) == EVP_PKEY_RSA)
 		{
-			RSA* tmpRSA = RSA_clone(key->pkey.rsa);
+			RSA* tmpRSA = NULL;
+#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+			tmpRSA=RSA_clone(EVP_PKEY_get1_RSA(key));
+#else
+			tmpRSA=RSA_clone(key->pkey.rsa);
+#endif
 			EVP_PKEY_free(key);
 			RSA_free(m_pRSA);
 			m_pRSA = tmpRSA;
 			return E_SUCCESS;
 		}
-		if(EVP_PKEY_type(key->type) == EVP_PKEY_EC)
+		if(EVP_PKEY_type(keyType) == EVP_PKEY_EC)
 		{
 #ifdef ECC
 			EC_KEY* tmpEC = EC_KEY_dup(key->pkey.ec);
@@ -755,7 +800,7 @@ SINT32 CASignature::setVerifyKey(const DOMElement* xmlKey)
 		DSA_free(tmpDSA);
 		return E_UNKNOWN;
 	}
-	tmpDSA->pub_key = BN_bin2bn(decodeBuffer,len,NULL);
+	BIGNUM *pub_key = BN_bin2bn(decodeBuffer,len,NULL);
 
 
 	// parse "G"
@@ -777,7 +822,7 @@ SINT32 CASignature::setVerifyKey(const DOMElement* xmlKey)
 		DSA_free(tmpDSA);
 		return E_UNKNOWN;
 	}
-	tmpDSA->g=BN_bin2bn(decodeBuffer,len,NULL);
+	BIGNUM *g=BN_bin2bn(decodeBuffer,len,NULL);
 
 
 	// parse "P"
@@ -799,7 +844,7 @@ SINT32 CASignature::setVerifyKey(const DOMElement* xmlKey)
 		DSA_free(tmpDSA);
 		return E_UNKNOWN;
 	}
-	tmpDSA->p=BN_bin2bn(decodeBuffer,len,NULL);
+	BIGNUM* p=BN_bin2bn(decodeBuffer,len,NULL);
 
 
 	// parse "Q"
@@ -822,14 +867,23 @@ SINT32 CASignature::setVerifyKey(const DOMElement* xmlKey)
 		DSA_free(tmpDSA);
 		return E_UNKNOWN;
 	}
-	tmpDSA->q=BN_bin2bn(decodeBuffer,len,NULL);
+	BIGNUM* q=BN_bin2bn(decodeBuffer,len,NULL);
 
-	if( tmpDSA->pub_key!=NULL && tmpDSA->g!=NULL && tmpDSA->p!=NULL && tmpDSA->q!=NULL)
+	if( pub_key!=NULL && g!=NULL && p!=NULL && q!=NULL)
 	{
 		if(m_pDSA!=NULL)
 		{
 			DSA_free(m_pDSA);
 		}
+#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+		DSA_set0_pqg(tmpDSA, p, q, g);
+		DSA_set0_key(tmpDSA, pub_key, NULL);
+#else
+		tmpDSA->q = q;
+		tmpDSA->p = p;
+		tmpDSA->g = g;
+		tmpDSA->pub_key = pub_key;
+#endif
 		m_pDSA = tmpDSA;
 		return E_SUCCESS;
 	}
@@ -840,7 +894,11 @@ SINT32 CASignature::setVerifyKey(const DOMElement* xmlKey)
 
 SINT32 CASignature::verify(const UINT8* const in,UINT32 inlen,DSA_SIG* const dsaSig) const
 	{
-		if(m_pDSA==NULL||dsaSig==NULL||dsaSig->r==NULL||dsaSig->s==NULL)
+		if(m_pDSA==NULL||dsaSig==NULL
+#if OPENSSL_VERSION_NUMBER	< 0x1000204fL			
+			||dsaSig->r==NULL||dsaSig->s==NULL
+#endif			
+			)
 			return E_UNKNOWN;
 		SINT32 ret=E_UNKNOWN;
 		UINT8* dgst=new UINT8[SHA_DIGEST_LENGTH];
@@ -956,8 +1014,7 @@ SINT32 CASignature::verifyXML(DOMNode* root,CACertStore* trustedCerts)
 				return E_UNKNOWN;
 			}
 			DSA_SIG* dsaSig=DSA_SIG_new();
-	   		dsaSig->r=BN_bin2bn(tmpSig,20,dsaSig->r);
-			dsaSig->s=BN_bin2bn(tmpSig+20,20,dsaSig->s);
+			SINT32 ret=decodeRS(tmpSig, tmpSiglen, dsaSig);
 			if(verify(out,outlen,dsaSig)!=E_SUCCESS)
 			{
 				DSA_SIG_free(dsaSig);
@@ -1013,10 +1070,18 @@ SINT32 CASignature::encodeRS(UINT8* out,UINT32* outLen,const DSA_SIG* const pdsa
 		UINT32 rSize, sSize;
 		memset(out,0,40); //make first 40 bytes '0' --> if r or s is less then 20 bytes long!
 											//(Due to be compatible to the standarad r and s must be 20 bytes each)
-		rSize = BN_num_bytes(pdsaSig->r);
-		sSize = BN_num_bytes(pdsaSig->s);
-		BN_bn2bin(pdsaSig->r,out+20-rSize); //so r is 20 bytes with leading '0'...
-		BN_bn2bin(pdsaSig->s,out+40-sSize);
+		BIGNUM * r = NULL;
+		BIGNUM * s = NULL;
+		#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+			DSA_SIG_get0(pdsaSig,(const BIGNUM **) &r,(const BIGNUM **) &s);
+		#else
+			r = pdsaSig->r;
+			s = pdsaSig->s;
+		#endif
+		rSize = BN_num_bytes(r);
+		sSize = BN_num_bytes(s);
+		BN_bn2bin(r,out+20-rSize); //so r is 20 bytes with leading '0'...
+		BN_bn2bin(s,out+40-sSize);
 		*outLen=40;
 		return E_SUCCESS;
 	}
@@ -1026,8 +1091,14 @@ SINT32 CASignature::decodeRS(const UINT8* const in, const UINT32 inLen, DSA_SIG*
 {
 	ASSERT(pDsaSig!=NULL, "DSA_SIG is null");
 	ASSERT(inLen>20, "Inbuffer is <=20 bytes");
-	pDsaSig->r = BN_bin2bn(in, 20, NULL);
-	pDsaSig->s = BN_bin2bn(in+20, inLen-20, NULL);
+		BIGNUM * r = BN_bin2bn(in, 20, NULL);
+		BIGNUM * s = BN_bin2bn(in+20, inLen-20, NULL);
+		#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+			DSA_SIG_set0(pDsaSig,r,s);
+		#else
+			pDsaSig->r=r ;
+			pDsaSig->s=s ;
+		#endif
 	return E_SUCCESS;
 }
 
@@ -1118,8 +1189,16 @@ SINT32 CASignature::verifyDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* si
 		return E_UNKNOWN;
 	}
 	DSA_SIG* dsaSig = DSA_SIG_new();
-	dsaSig->r = BN_bin2bn(sig, 20, dsaSig->r);
-	dsaSig->s = BN_bin2bn(sig+20, 20, dsaSig->s);
+	BIGNUM * r = NULL;
+	BIGNUM * s = NULL;
+	r = BN_bin2bn(sig, 20, r);
+	s = BN_bin2bn(sig+20, 20, s);
+	#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+		DSA_SIG_set0(dsaSig,r,s);
+	#else
+		dsaSig->r = r;
+		dasSig->s = s;
+	#endif
 
 	SINT32 ret = DSA_do_verify(dgst, dgstLen, dsaSig, m_pDSA);
 	DSA_SIG_free(dsaSig);
