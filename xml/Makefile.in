@@ -93,7 +93,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@USE_MINIXML_TRUE@am__append_1 = dom/mxml/mxmlDOM.hpp dom/mxml/mxmlDOMDocument.cpp dom/mxml/mxmlXercesDOMParser.cpp dom/mxml/mxmlXercesDOMNode.cpp
+@USE_MINIXML_TRUE@am__append_1 = dom/mxml/mxmlDOM.hpp dom/mxml/mxmlDOMDocument.cpp dom/mxml/mxmlXercesDOMParser.cpp dom/mxml/mxmlDOMNode.cpp
 subdir = xml
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.in
@@ -114,11 +114,10 @@ libxml_a_AR = $(AR) $(ARFLAGS)
 libxml_a_LIBADD =
 am__libxml_a_SOURCES_DIST = DOM_Output.cpp DOM_Output.hpp \
 	dom/mxml/mxmlDOM.hpp dom/mxml/mxmlDOMDocument.cpp \
-	dom/mxml/mxmlXercesDOMParser.cpp \
-	dom/mxml/mxmlXercesDOMNode.cpp
+	dom/mxml/mxmlXercesDOMParser.cpp dom/mxml/mxmlDOMNode.cpp
 @USE_MINIXML_TRUE@am__objects_1 = mxmlDOMDocument.$(OBJEXT) \
 @USE_MINIXML_TRUE@	mxmlXercesDOMParser.$(OBJEXT) \
-@USE_MINIXML_TRUE@	mxmlXercesDOMNode.$(OBJEXT)
+@USE_MINIXML_TRUE@	mxmlDOMNode.$(OBJEXT)
 am_libxml_a_OBJECTS = DOM_Output.$(OBJEXT) $(am__objects_1)
 libxml_a_OBJECTS = $(am_libxml_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -387,7 +386,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DOM_Output.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mxmlDOMDocument.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mxmlXercesDOMNode.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mxmlDOMNode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mxmlXercesDOMParser.Po@am__quote@
 
 .cpp.o:
@@ -439,19 +438,19 @@ mxmlXercesDOMParser.obj: dom/mxml/mxmlXercesDOMParser.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mxmlXercesDOMParser.obj `if test -f 'dom/mxml/mxmlXercesDOMParser.cpp'; then $(CYGPATH_W) 'dom/mxml/mxmlXercesDOMParser.cpp'; else $(CYGPATH_W) '$(srcdir)/dom/mxml/mxmlXercesDOMParser.cpp'; fi`
 
-mxmlXercesDOMNode.o: dom/mxml/mxmlXercesDOMNode.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mxmlXercesDOMNode.o -MD -MP -MF $(DEPDIR)/mxmlXercesDOMNode.Tpo -c -o mxmlXercesDOMNode.o `test -f 'dom/mxml/mxmlXercesDOMNode.cpp' || echo '$(srcdir)/'`dom/mxml/mxmlXercesDOMNode.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mxmlXercesDOMNode.Tpo $(DEPDIR)/mxmlXercesDOMNode.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dom/mxml/mxmlXercesDOMNode.cpp' object='mxmlXercesDOMNode.o' libtool=no @AMDEPBACKSLASH@
+mxmlDOMNode.o: dom/mxml/mxmlDOMNode.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mxmlDOMNode.o -MD -MP -MF $(DEPDIR)/mxmlDOMNode.Tpo -c -o mxmlDOMNode.o `test -f 'dom/mxml/mxmlDOMNode.cpp' || echo '$(srcdir)/'`dom/mxml/mxmlDOMNode.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mxmlDOMNode.Tpo $(DEPDIR)/mxmlDOMNode.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dom/mxml/mxmlDOMNode.cpp' object='mxmlDOMNode.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mxmlXercesDOMNode.o `test -f 'dom/mxml/mxmlXercesDOMNode.cpp' || echo '$(srcdir)/'`dom/mxml/mxmlXercesDOMNode.cpp
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mxmlDOMNode.o `test -f 'dom/mxml/mxmlDOMNode.cpp' || echo '$(srcdir)/'`dom/mxml/mxmlDOMNode.cpp
 
-mxmlXercesDOMNode.obj: dom/mxml/mxmlXercesDOMNode.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mxmlXercesDOMNode.obj -MD -MP -MF $(DEPDIR)/mxmlXercesDOMNode.Tpo -c -o mxmlXercesDOMNode.obj `if test -f 'dom/mxml/mxmlXercesDOMNode.cpp'; then $(CYGPATH_W) 'dom/mxml/mxmlXercesDOMNode.cpp'; else $(CYGPATH_W) '$(srcdir)/dom/mxml/mxmlXercesDOMNode.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mxmlXercesDOMNode.Tpo $(DEPDIR)/mxmlXercesDOMNode.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dom/mxml/mxmlXercesDOMNode.cpp' object='mxmlXercesDOMNode.obj' libtool=no @AMDEPBACKSLASH@
+mxmlDOMNode.obj: dom/mxml/mxmlDOMNode.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mxmlDOMNode.obj -MD -MP -MF $(DEPDIR)/mxmlDOMNode.Tpo -c -o mxmlDOMNode.obj `if test -f 'dom/mxml/mxmlDOMNode.cpp'; then $(CYGPATH_W) 'dom/mxml/mxmlDOMNode.cpp'; else $(CYGPATH_W) '$(srcdir)/dom/mxml/mxmlDOMNode.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mxmlDOMNode.Tpo $(DEPDIR)/mxmlDOMNode.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='dom/mxml/mxmlDOMNode.cpp' object='mxmlDOMNode.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mxmlXercesDOMNode.obj `if test -f 'dom/mxml/mxmlXercesDOMNode.cpp'; then $(CYGPATH_W) 'dom/mxml/mxmlXercesDOMNode.cpp'; else $(CYGPATH_W) '$(srcdir)/dom/mxml/mxmlXercesDOMNode.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mxmlDOMNode.obj `if test -f 'dom/mxml/mxmlDOMNode.cpp'; then $(CYGPATH_W) 'dom/mxml/mxmlDOMNode.cpp'; else $(CYGPATH_W) '$(srcdir)/dom/mxml/mxmlDOMNode.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
