@@ -1510,7 +1510,7 @@ SINT32 CACmdLnOptions::initLogging()
 		else
 			iLogOptions |= MSG_FILE;
 		}
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 
 	if (m_bLogConsole || iLogOptions == 0)
 		{
@@ -1537,6 +1537,8 @@ SINT32 CACmdLnOptions::initLogging()
 			CAMsg::setLogLevel(LOG_CRIT);
 			}
 		}	
+#endif
+#if!defined ONLY_LOCAL_PROXY
 	if(isEncryptedLogEnabled())
 		{
 		SINT32 retEncr;
