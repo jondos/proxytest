@@ -65,6 +65,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_pNextMixCertificate=NULL;
 		m_pTrustedRootCertificates=NULL;
 		m_bVerifyMixCerts=false;
+		m_bAcceptReconfiguration=false;
 #endif
 
 #ifndef ONLY_LOCAL_PROXY
@@ -77,7 +78,6 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bIsEncryptedLogEnabled=false;
 		m_pCascadeXML=NULL;
 		m_docOpTnCs=NULL; //Operator Terms and Conditions (if any)
-		m_bAcceptReconfiguration=false;
 		m_maxNrOfUsers = 0;
 		m_strAccessControlCredential = NULL;
 #ifdef PAYMENT		

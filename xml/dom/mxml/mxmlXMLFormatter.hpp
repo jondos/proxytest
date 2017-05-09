@@ -22,7 +22,7 @@ class XMLFormatter
 
 			void formatBuf(const XMLCh *const toFormat, const unsigned int count, const EscapeFlags)
 				{
-				m_pFormatTarget->writeChars(toFormat, count, this);
+					m_pFormatTarget->writeChars(toFormat, count, this);
 				}
 			
 			XMLFormatter& operator<< (const XMLCh toFormat)
@@ -35,6 +35,18 @@ class XMLFormatter
 			XMLFormatter& operator<< (const XMLCh* toFormat)
 				{
 					formatBuf(toFormat, XMLString::stringLen(toFormat), m_EscapeFlag);
+					return *this;
+				}
+
+			
+			XMLFormatter & XMLFormatter::operator<<	(const EscapeFlags 	newFlags)
+				{
+					return *this;
+				}
+
+
+			XMLFormatter & XMLFormatter::operator<<	(const UnRepFlags 	newFlags)
+				{
 					return *this;
 				}
 
