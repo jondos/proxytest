@@ -39,13 +39,13 @@ class XMLFormatter
 				}
 
 			
-			XMLFormatter & XMLFormatter::operator<<	(const EscapeFlags 	newFlags)
+			XMLFormatter & operator<<	(const EscapeFlags 	newFlags)
 				{
 					return *this;
 				}
 
 
-			XMLFormatter & XMLFormatter::operator<<	(const UnRepFlags 	newFlags)
+			XMLFormatter & operator<<	(const UnRepFlags 	newFlags)
 				{
 					return *this;
 				}
