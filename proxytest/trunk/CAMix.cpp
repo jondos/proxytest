@@ -434,23 +434,22 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
 
 SINT32 CAMix::addMixInfo(DOMNode* a_element, bool a_bForceFirstNode)
 	{
-	// this is a complete mixinfo node to be sent to the InfoService
-	XERCES_CPP_NAMESPACE::DOMDocument* docMixInfo=NULL;
-	if(CALibProxytest::getOptions()->getMixXml(docMixInfo)!=E_SUCCESS)
-		{
-		return E_UNKNOWN;
-		}
-	DOMNode* nodeMixInfo = a_element->getOwnerDocument()->importNode(
-	                         docMixInfo->getDocumentElement(), true);
-	if (a_bForceFirstNode && a_element->hasChildNodes())
-		{
-		a_element->insertBefore(nodeMixInfo, a_element->getFirstChild());
-		}
-	else
-		{
-		a_element->appendChild(nodeMixInfo);
-		}
-	return E_SUCCESS;
+		// this is a complete mixinfo node to be sent to the InfoService
+		XERCES_CPP_NAMESPACE::DOMDocument* docMixInfo=NULL;
+		if(CALibProxytest::getOptions()->getMixXml(docMixInfo)!=E_SUCCESS)
+			{
+				return E_UNKNOWN;
+			}
+		DOMNode* nodeMixInfo = a_element->getOwnerDocument()->importNode(docMixInfo->getDocumentElement(), true);
+		if (a_bForceFirstNode && a_element->hasChildNodes())
+			{
+				a_element->insertBefore(nodeMixInfo, a_element->getFirstChild());
+			}
+		else
+			{
+				a_element->appendChild(nodeMixInfo);
+			}
+		return E_SUCCESS;
 	}
 
 #ifdef PAYMENT

@@ -67,12 +67,12 @@ SINT32 CAMiddleMix::initOnce()
 	* \li Step 1: Opens TCP/IP-Connection to Mix \e n+1. \n
 	* \li Step 2: Receives info about Mix \e n+1 .. LastMix as XML struct
 	*         (see \ref  XMLInterMixInitSendFromLast "XML struct") \n
-	* \li Step 3: Verfies signature, generates symetric Keys used for link encryption
+	* \li Step 3: Verifies signature, generates symetric Keys used for link encryption
 	*         with Mix \n+1. \n
 	* \li Step 4: Sends symetric Key to Mix \e n+1, encrypted with PubKey of Mix \e n+1
 	*         (see \ref XMLInterMixInitAnswer "XML struct") \n
 	* \li Step 5: Sends info about Mix \e n .. LastMix as XML struct
-	*         (see \ref  XMLInterMixInitSendFromLast "XML struct")to Mix \e n-1 \n
+	*         (see \ref  XMLInterMixInitSendFromLast "XML struct") to Mix \e n-1 \n
 	* \li Step 6: Recevies symetric Key used for link encrpytion with Mix \e n-1
 	*					(see \ref XMLInterMixInitAnswer "XML struct") \n
 	*
@@ -314,17 +314,17 @@ SINT32 CAMiddleMix::processKeyExchange()
 			{
 				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
 				if (doc != NULL)
-				{
-					doc->release();
-					doc = NULL;
-				}
+					{
+						doc->release();
+						doc = NULL;
+					}
 				return E_UNKNOWN;
 			}
 		count++;
 		::setDOMElementAttribute(root,"count",count);
 
 		addMixInfo(root, true);
-		DOMElement* mixNode;
+		DOMElement* mixNode=NULL;
 		::getDOMChildByName(root, "Mix", mixNode, false);
 
 
