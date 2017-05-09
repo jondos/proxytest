@@ -177,7 +177,7 @@ class DOMNode
 							DOMNode* child=m_nodeFirstChild;
 							while(child!=NULL)
 								{
-									appendChild(child->clone(bDeep,doc));
+									pNode->appendChild(child->clone(bDeep,doc));
 									child = child->m_nodeNext;
 								}
 						}
