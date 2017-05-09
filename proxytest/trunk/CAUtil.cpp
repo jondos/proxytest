@@ -58,8 +58,11 @@ UINT32 strtrim(UINT8* s)
 		UINT32 size;
 		while(start<=end&&s[start]<=32)
 			start++;
-		if(start>end) //empty string....
-			return 0;
+		if (start > end) //empty string....
+			{
+				s[0]=0;
+				return 0;
+			}
 		while(end>start&&s[end]<=32)
 			end--;
 		size=(end+1)-start;
@@ -1556,7 +1559,7 @@ SINT32 setDOMElementValue(DOMElement* pElem,const UINT8* value)
 
 SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName, UINT32 value)
 {
-	UINT8 tmp[10];
+	UINT8 tmp[12];
 	sprintf((char*)tmp, "%u", value);
 	return setDOMElementAttribute(pElem, attrName, tmp);
 }
