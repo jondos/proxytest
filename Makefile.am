@@ -2,7 +2,7 @@
 # Autoconfiguration files for proxytest (a Mix proxy)
 # Konrad Rieck <kr@r0q.cx>
 #
-
+ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 mix_LDADD = 
 
