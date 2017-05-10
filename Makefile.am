@@ -4,6 +4,7 @@
 #
 
 AUTOMAKE_OPTIONS = foreign
+mix_LDADD = 
 
 if ONLY_LIB
 lib_LTLIBRARIES = libmix.la			
@@ -83,7 +84,7 @@ libmix_la_SOURCES = CAAbstractControlChannel.cpp\
 		    CAXMLPriceCert.cpp\
 		    Hashtable.cpp\
 		    TermsAndConditions.cpp \
-		    packetintro.cpp
+		    packetintro.cpp \
 		    StdAfx.cpp \
 		    CAAbstractControlChannel.hpp\
 		    CAAbstractXMLEncodable.hpp\
@@ -251,7 +252,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CAXMLPriceCert.cpp\
 		    Hashtable.cpp\
 		    TermsAndConditions.cpp \
-		    packetintro.cpp
+		    packetintro.cpp \
 		    StdAfx.cpp \
 		    CAAbstractControlChannel.hpp\
 		    CAAbstractXMLEncodable.hpp\
@@ -337,7 +338,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 
 mix_SOURCES = proxytest.cpp
 
-mix_LDADD = $(top_srcdir)/libproxytest.a \
+mix_LDADD += $(top_srcdir)/libproxytest.a \
 	    $(top_srcdir)/xml/libxml.a \
 	    $(top_srcdir)/popt/libpopt.a \
 	    $(top_srcdir)/trio/libtrio.a \
@@ -357,4 +358,18 @@ if DOWIRESHARK
     MAYBE_wireshark=wireshark
 endif    
 
+if ALL_FROM_SOURCE
+BUILT_SOURCES = external.h
+
+mix_LDADD += $(top_srcdir)/build/mxml/libmxml.a
+
+external.h:
+#Make MXML
+	mkdir -p $(top_srcdir)/build/mxml
+	wget https://github.com/michaelrsweet/mxml/releases/download/release-2.10/mxml-2.10.tar.gz -O $(top_srcdir)/build/mxml.tgz
+	tar -xzf $(top_srcdir)/build/mxml.tgz -C $(top_srcdir)/build/mxml --strip-components=1
+	cd $(top_srcdir)/build/mxml ; ./configure --enable-threads
+	cd $(top_srcdir)/build/mxml ; make
+#Make OpenSSL
+endif #all from source
 SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark)

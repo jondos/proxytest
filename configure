@@ -636,6 +636,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+ALL_FROM_SOURCE_FALSE
+ALL_FROM_SOURCE_TRUE
 ONLY_LIB_FALSE
 ONLY_LIB_TRUE
 DOWIRESHARK_FALSE
@@ -798,6 +800,7 @@ enable_replay_detection
 enable_new_mix_type
 enable_dynamic
 enable_dialog
+enable_all_from_source
 with_ssl_dir
 with_minixml
 with_xml_include
@@ -1485,6 +1488,8 @@ Optional Features:
   --enable-new_mix_type   Specify if to build with type B mixes
   --enable-dynamic        Specify if to build a mix for a dynamic cascade
   --enable-dialog
+  --enable-all-from-source
+                          Build all dependencies from source
   --enable-debug          Enable debug compilation mode
   --enable-debug-output   Enable output of debug messages
   --enable-dataretentionlog
@@ -17914,6 +17919,20 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
 
 
 
+allfromsource="false"
+# Check whether --enable-all-from-source was given.
+if test "${enable_all_from_source+set}" = set; then :
+  enableval=$enable_all_from_source;
+		if test "x$enableval" != "xno" ; then
+			allfromsource="true"
+		fi
+
+
+fi
+
+
+
+
 
 
 tryssldir="/usr/local/openssl /usr/lib/openssl \
@@ -18077,6 +18096,7 @@ else
 fi
 
 
+if test "x$allfromsource" != "xtrue" ; then
 { $as_echo "$as_me:${as_lineno-$LINENO}: Mini-XML/Xerces-C tests" >&5
 $as_echo "$as_me: Mini-XML/Xerces-C tests" >&6;}
 
@@ -18257,6 +18277,13 @@ if test -z "$found_xmllib"; then
 	as_fn_error $? "Mini-XML/Xerces-C libs NOT found - please use --with-xml-lib" "$LINENO" 5
 fi
 
+else
+{ $as_echo "$as_me:${as_lineno-$LINENO}: Will use Mini-XML/Xerces-C from source" >&5
+$as_echo "$as_me: Will use Mini-XML/Xerces-C from source" >&6;}
+CFLAGS="$saved_CFLAGS -Ibuild/mxml"
+CXXFLAGS="$saved_CXXFLAGS -Ibuild/mxml"
+
+fi
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -18677,6 +18704,7 @@ if test "${enable_only_middle_mix+set}" = set; then :
 fi
 
 
+
 TEST_CFLAGS=""
 
 if test "x$DOTHETESTS" == "xyes" ; then
@@ -18900,6 +18928,8 @@ CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGH
 CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS"
 LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB $GOOGLETEST_LIB"
 
+
+
 if test "x$onlylib" == "xtrue" ; then
 	CXXFLAGS="$CXXFLAGS -fPIC"
 	CFLAGS="$CFLAGS -fPIC"
@@ -18932,6 +18962,14 @@ fi
 else
   ONLY_LIB_TRUE='#'
   ONLY_LIB_FALSE=
+fi
+
+ if test x$allfromsource = xtrue; then
+  ALL_FROM_SOURCE_TRUE=
+  ALL_FROM_SOURCE_FALSE='#'
+else
+  ALL_FROM_SOURCE_TRUE='#'
+  ALL_FROM_SOURCE_FALSE=
 fi
 
 
@@ -19097,6 +19135,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${ONLY_LIB_TRUE}" && test -z "${ONLY_LIB_FALSE}"; then
   as_fn_error $? "conditional \"ONLY_LIB\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${ALL_FROM_SOURCE_TRUE}" && test -z "${ALL_FROM_SOURCE_FALSE}"; then
+  as_fn_error $? "conditional \"ALL_FROM_SOURCE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
