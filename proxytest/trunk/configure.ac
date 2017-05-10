@@ -390,18 +390,6 @@ dnl Check Endian
 AC_C_BIGENDIAN([AC_DEFINE([BYTE_ORDER_BIG_ENDIAN],,[Define if you run the code on a big endian machine])], [AC_DEFINE([BYTE_ORDER_LITTLE_ENDIAN],,[Define if you run the code on a little endian machine])])
 dnl AC_C_BIGENDIAN ( [AC_DEFINE([BYTE_ORDER_BIG_ENDIAN],,[Define if you run the code on a big endian machine])], [AC_DEFINE([BYTE_ORDER_LITTLE_ENDIAN],,[Define if you run the code on a little endian machine])] ,,)
 
-
-allfromsource="false"
-AC_ARG_ENABLE(all-from-source,
-	AS_HELP_STRING([--enable-all-from-source],[Build all dependencies from source]),
-	[
-		if test "x$enableval" != "xno" ; then
-			allfromsource="true"
-		fi
-	]
-)
-
-
 dnl Checks for libraries.
 
 
@@ -518,7 +506,6 @@ AC_ARG_WITH(minixml,
 
 AM_CONDITIONAL([USE_MINIXML], [test x$useminixml = xtrue])
 		
-if test "x$allfromsource" != "xtrue" ; then
 AC_MSG_NOTICE([Mini-XML/Xerces-C tests])
 
 dnl Check for Mini-XML/Xerces-C
@@ -655,14 +642,6 @@ fi
 if test -z "$found_xmllib"; then
 	AC_MSG_ERROR([Mini-XML/Xerces-C libs NOT found - please use --with-xml-lib])
 fi
-
-else
-dnl all from source
-AC_MSG_NOTICE([Will use Mini-XML/Xerces-C from source])
-CFLAGS="$saved_CFLAGS -Ibuild/mxml"
-CXXFLAGS="$saved_CXXFLAGS -Ibuild/mxml"
-
-fi dnl not make all from source
 
 
 AC_LANG_POP(C++)
@@ -917,7 +896,6 @@ AC_ARG_ENABLE(only-middle-mix,
 	]
 )
 
-
 TEST_CFLAGS=""
 
 if test "x$DOTHETESTS" == "xyes" ; then
@@ -941,8 +919,6 @@ CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGH
 CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS"
 LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB $GOOGLETEST_LIB"
 
-
-
 if test "x$onlylib" == "xtrue" ; then
 	CXXFLAGS="$CXXFLAGS -fPIC"
 	CFLAGS="$CFLAGS -fPIC"
@@ -956,7 +932,6 @@ fi
 AM_CONDITIONAL([DOTESTS], [test x$DOTHETESTS = xyes])
 AM_CONDITIONAL([DOWIRESHARK], [test x$DOWITHWIRESHARK = xyes])
 AM_CONDITIONAL([ONLY_LIB], [test x$onlylib = xtrue])
-AM_CONDITIONAL([ALL_FROM_SOURCE], [test x$allfromsource = xtrue])
 
 AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile])
 AC_OUTPUT
