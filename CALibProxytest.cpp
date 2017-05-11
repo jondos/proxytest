@@ -47,9 +47,13 @@ SINT32 CALibProxytest::init()
 		SSL_library_init();
 #endif
 		OpenSSL_add_all_algorithms();
+#if OPENSSL_VERSION_NUMBER < 0x10100000L 
+		//It seems that only older versions of OpenSSL need the thred locking callbacks.
+		//But the mor interesting question is: at which version did the change happen?
 		m_pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
 		CRYPTO_set_locking_callback((void (*)(int,int,const char *,int))openssl_locking_callback);
 		CRYPTO_set_id_callback(openssl_get_thread_id);
+#endif
 #if defined _DEBUG && ! defined (ONLY_LOCAL_PROXY)
 		m_pThreadList=new CAThreadList();
 		CAThread::setThreadList(m_pThreadList);
@@ -80,9 +84,11 @@ SINT32 CALibProxytest::cleanup()
 		m_pglobalOptions=NULL;
 
 	//OpenSSL Cleanup
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 		CRYPTO_set_locking_callback(NULL);
 		delete []m_pOpenSSLMutexes;
 		m_pOpenSSLMutexes=NULL;
+#endif
 		//XML Cleanup
 		//Note: We have to destroy all XML Objects and all objects that uses XML Objects BEFORE
 		//we terminate the XML lib!
