@@ -36,7 +36,7 @@ CASignature::CASignature()
 	{
 		m_pDSA = NULL;
 		m_pRSA = NULL;
-#ifdef ECC
+#ifdef HAVE_ECC
 		m_pEC = NULL;
 #endif //ECC
 	}
@@ -53,7 +53,7 @@ CASignature::~CASignature()
 			RSA_free(m_pRSA);
 			m_pRSA = NULL;
 		}
-#ifdef ECC
+#ifdef HAVE_ECC
 		if(m_pEC != NULL)
 		{
 			EC_KEY_free(m_pEC);
@@ -76,7 +76,7 @@ CASignature* CASignature::clone()
 			RSA* tmpRSA = RSA_clone(m_pRSA);
 			tmpSig->m_pRSA = tmpRSA;
 		}
-#ifdef ECC
+#ifdef HAVE_ECC
 		else if(m_pEC != NULL)
 		{
 			EC_KEY* tmpEC = EC_KEY_dup(m_pEC);
@@ -231,7 +231,7 @@ SINT32 CASignature::setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const ch
 				}
 				else if(EVP_PKEY_type(keyType) == EVP_PKEY_EC)
 				{
-#ifdef ECC
+#ifdef HAVE_ECC
 					// found EC key
 					EC_KEY* tmpECKey = EC_KEY_dup(key->pkey.ec);
 					EVP_PKEY_free(key);
@@ -379,7 +379,7 @@ SINT32 CASignature::sign(const UINT8* in,UINT32 inlen,UINT8* sig,UINT32* siglen)
 			SHA1(in,inlen,dgst);
 			return signRSA(dgst, SHA_DIGEST_LENGTH, sig, siglen);
 		}
-#ifdef ECC
+#ifdef HAVE_ECC
 		else if(m_pEC != NULL)
 		{
 			UINT8 dgst[SHA_DIGEST_LENGTH];
@@ -412,7 +412,7 @@ SINT32 CASignature::getSignatureSize() const
 		{
 			return RSA_size(m_pRSA);
 		}
-#ifdef ECC
+#ifdef HAVE_ECC
 		if(isECDSA())
 		{
 			const EC_GROUP* tmpGroup = EC_KEY_get0_group(m_pEC);
@@ -679,7 +679,7 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 				RSA_free(m_pRSA);
 				m_pRSA = NULL;
 			}
-#ifdef ECC
+#ifdef HAVE_ECC
 			else if (isECDSA());
 			{
 				EC_KEY_free(m_pEC);
@@ -725,7 +725,7 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 		}
 		if(EVP_PKEY_type(keyType) == EVP_PKEY_EC)
 		{
-#ifdef ECC
+#ifdef HAVE_ECC
 			EC_KEY* tmpEC = EC_KEY_dup(key->pkey.ec);
 			EVP_PKEY_free(key);
 			EC_KEY_free(m_pEC);
@@ -1038,7 +1038,7 @@ SINT32 CASignature::verifyXML(DOMNode* root,CACertStore* trustedCerts)
 			{
 				ret = RSA_verify(NID_sha1, sha1, SHA_DIGEST_LENGTH, tmpSig, tmpSiglen, m_pRSA);
 			}
-#ifdef ECC
+#ifdef HAVE_ECC
 			else if(isECDSA())
 			{
 				ret = ECDSA_verify(NID_sha1, sha1, SHA_DIGEST_LENGTH, tmpSig, tmpSiglen, m_pEC);
@@ -1116,7 +1116,7 @@ SINT32 CASignature::signRSA(const UINT8* dgst, UINT32 dgstLen, UINT8* sig, UINT3
 
 	return E_SUCCESS;
 }
-#ifdef ECC
+#ifdef HAVE_ECC
 SINT32 CASignature::signECDSA(const UINT8* dgst, UINT32 dgstLen, UINT8* sig, UINT32* sigLen) const
 {
 
@@ -1165,7 +1165,7 @@ SINT32 CASignature::verify(UINT8* in, UINT32 inLen, UINT8* sig, const UINT32 sig
 	{
 		ret = verifyRSA(sha1, SHA_DIGEST_LENGTH, sig, sigLen);
 	}
-#ifdef ECC
+#ifdef HAVE_ECC
 	else if(isECDSA())
 	{
 		ret = verifyECDSA(sha1, SHA_DIGEST_LENGTH, sig, sigLen);
@@ -1211,7 +1211,7 @@ SINT32 CASignature::verifyDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* si
 	return ret;
 }
 
-#ifdef ECC
+#ifdef HAVE_ECC
 SINT32 CASignature::verifyECDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32 sigLen) const
 {
 	SINT32 len = sigLen / 2;
@@ -1245,7 +1245,7 @@ bool CASignature::isRSA() const
 	return false;
 }
 
-#ifdef ECC
+#ifdef HAVE_ECC
 bool CASignature::isECDSA() const
 {
 	if(m_pEC != NULL)
@@ -1266,12 +1266,12 @@ UINT8* CASignature::getSignatureMethod()
 	{
 		return (UINT8*)RSA_SHA1_REFERENCE;
 	}
-#ifdef ECC
+#ifdef HAVE_ECC
 	if(m_pEC != NULL)
 	{
 		return (UINT8*)ECDSA_SHA1_REFERENCE;
 	}
-#endif //ECC
+#endif //HAVE_ECC
 	return NULL;
 }
 
