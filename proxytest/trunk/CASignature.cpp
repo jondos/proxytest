@@ -626,8 +626,13 @@ SINT32 CASignature::getVerifyKey(CACertificate** ppCert)
  		X509_set_version((*ppCert)->m_pCert,3);
 		ASN1_TIME* pTime=ASN1_TIME_new();
 		ASN1_TIME_set(pTime,time(NULL));
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 		X509_set_notBefore((*ppCert)->m_pCert,pTime);
 		X509_set_notAfter((*ppCert)->m_pCert,pTime);
+#else
+		X509_set1_notBefore((*ppCert)->m_pCert,pTime);
+		X509_set1_notAfter((*ppCert)->m_pCert,pTime);
+#endif
 		X509_set_pubkey((*ppCert)->m_pCert,pPKey);
 // LERNGRUPPE
 // Add the subjectKeyIdentifier-Extension to the certificate

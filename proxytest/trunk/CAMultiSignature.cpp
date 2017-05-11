@@ -449,7 +449,11 @@ SINT32 CAMultiSignature::getXORofSKIs(UINT8* out, UINT32 outlen)
 
 SINT32 CAMultiSignature::getSKI(UINT8* out, UINT32 outlen, const UINT8* a_ski)
 {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 	UINT8* tmp = (UINT8*) hex_to_string((unsigned char*)a_ski, SHA_DIGEST_LENGTH);
+#else
+	UINT8* tmp = (UINT8*) OPENSSL_buf2hexstr((unsigned char*)a_ski, SHA_DIGEST_LENGTH);
+#endif
 	UINT32 len=outlen;
 	if (CACertificate::removeColons(tmp, strlen((const char*)tmp), out, &len) != E_SUCCESS)
 	{
