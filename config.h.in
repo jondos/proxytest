@@ -17,9 +17,6 @@
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
 
-/* Elliptic curve cryptography supported */
-#undef ECC
-
 /* Define to 1 if you have `alloca', as a function or macro. */
 #undef HAVE_ALLOCA
 
@@ -32,6 +29,9 @@
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
+
+/* Elliptic curve cryptography supported */
+#undef HAVE_ECC
 
 /* Define if your OS support the epoll() syscall */
 #undef HAVE_EPOLL

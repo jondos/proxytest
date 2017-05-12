@@ -99,7 +99,10 @@ host_triplet = @host@
 @ONLY_LIB_FALSE@	    $(top_srcdir)/gcm/libgcm.a \
 @ONLY_LIB_FALSE@	    $(top_srcdir)/TypeA/libmixa.a
 
-@ALL_FROM_SOURCE_TRUE@am__append_2 = $(top_srcdir)/build/mxml/libmxml.a
+@ALL_FROM_SOURCE_TRUE@am__append_2 = $(top_srcdir)/build/mxml/libmxml.a \
+@ALL_FROM_SOURCE_TRUE@	$(top_srcdir)/build/openssl/libssl.a \
+@ALL_FROM_SOURCE_TRUE@	$(top_srcdir)/build/openssl/libcrypto.a 
+
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -1042,7 +1045,6 @@ mix_LDADD = $(am__append_1) $(am__append_2)
 @DOTESTS_TRUE@MAYBE_tests = test
 @DOWIRESHARK_TRUE@MAYBE_wireshark = wireshark
 @ALL_FROM_SOURCE_TRUE@BUILT_SOURCES = external.h
-#Make OpenSSL
 SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark)
 all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
@@ -3451,6 +3453,13 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-sbinPROGRAMS
 @ALL_FROM_SOURCE_TRUE@	tar -xzf $(top_srcdir)/build/mxml.tgz -C $(top_srcdir)/build/mxml --strip-components=1
 @ALL_FROM_SOURCE_TRUE@	cd $(top_srcdir)/build/mxml ; ./configure --enable-threads
 @ALL_FROM_SOURCE_TRUE@	cd $(top_srcdir)/build/mxml ; make
+#Make OpenSSL
+@ALL_FROM_SOURCE_TRUE@	mkdir -p $(top_srcdir)/build/openssl
+@ALL_FROM_SOURCE_TRUE@	wget https://www.openssl.org/source/openssl-1.1.0e.tar.gz -O $(top_srcdir)/build/openssl.tgz
+@ALL_FROM_SOURCE_TRUE@	tar -xzf $(top_srcdir)/build/openssl.tgz -C $(top_srcdir)/build/openssl --strip-components=1
+@ALL_FROM_SOURCE_TRUE@	cd $(top_srcdir)/build/openssl ; ./config no-capieng no-cms no-comp no-ct no-dgram no-dso no-dtls no-stdio no-ocsp no-shared no-gost no-ui no-ts   no-psk no-srp 
+#	cd $(top_srcdir)/build/openssl ; ./config 
+@ALL_FROM_SOURCE_TRUE@	cd $(top_srcdir)/build/openssl ; make
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

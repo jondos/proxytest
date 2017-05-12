@@ -18015,6 +18015,7 @@ fi
 
 
 
+if test "x$allfromsource" != "xtrue" ; then
 
 tryssldir="/usr/local/openssl /usr/lib/openssl \
 						 /usr/local/ssl /usr/lib/ssl /usr/local /usr/pkg \
@@ -18142,7 +18143,7 @@ EC_KEY_free(0);
 _ACEOF
 if ac_fn_c_try_link "$LINENO"; then :
 
-$as_echo "#define ECC /**/" >>confdefs.h
+$as_echo "#define HAVE_ECC /**/" >>confdefs.h
 
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Elliptic curve cryptography disabled" >&5
@@ -18151,7 +18152,13 @@ fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 
+else
+{ $as_echo "$as_me:${as_lineno-$LINENO}: Will use OpenSSL from source" >&5
+$as_echo "$as_me: Will use OpenSSL from source" >&6;}
+CFLAGS="$CFLAGS -I$PWD/build/openssl/include"
+CXXFLAGS="$CXXFLAGS -I$PWD/build/openssl/include"
 
+fi
 
 useminixml="false"
 USE_MINIXML=""
@@ -18361,8 +18368,8 @@ fi
 else
 { $as_echo "$as_me:${as_lineno-$LINENO}: Will use Mini-XML/Xerces-C from source" >&5
 $as_echo "$as_me: Will use Mini-XML/Xerces-C from source" >&6;}
-CFLAGS="$saved_CFLAGS -Ibuild/mxml"
-CXXFLAGS="$saved_CXXFLAGS -Ibuild/mxml"
+CFLAGS="$CFLAGS -I$PWD/build/mxml"
+CXXFLAGS="$CXXFLAGS -I$PWD/build/mxml"
 
 fi
 
