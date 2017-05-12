@@ -92,7 +92,17 @@ SINT32 CASignature::generateSignKey(UINT32 size)
 		if(m_pDSA!=NULL)
 			DSA_free(m_pDSA);
 		m_pDSA=NULL;
+#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+		m_pDSA = DSA_new();
+		SINT32 ret=DSA_generate_parameters_ex(m_pDSA,size,NULL,0,NULL,NULL,NULL);
+		if (ret != 1)
+			{
+				DSA_free(m_pDSA);
+				m_pDSA=NULL;
+			}
+#else
 		m_pDSA=DSA_generate_parameters(size,NULL,0,NULL,NULL,NULL,NULL);
+#endif
 		if(m_pDSA==NULL)
 			return E_UNKNOWN;
 		if(DSA_generate_key(m_pDSA)!=1)
