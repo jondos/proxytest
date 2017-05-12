@@ -344,8 +344,11 @@ SINT32 compDate(struct tm *date1, struct tm *date2)
 SINT32 getRandom(UINT32* val)
 	{
 		ASSERT(val!=NULL,"VAL should be not NULL");
-		if(RAND_bytes((UINT8*)val,4)!=1&&
-			 RAND_pseudo_bytes((UINT8*)val,4)<0)
+		if(RAND_bytes((UINT8*)val,4)!=1
+#if  OPENSSL_VERSION_NUMBER <0x10100000L			
+			&& RAND_pseudo_bytes((UINT8*)val,4)<0
+#endif
+			)
 				return E_UNKNOWN;
 		return E_SUCCESS;
 	}
@@ -353,9 +356,12 @@ SINT32 getRandom(UINT32* val)
 SINT32 getRandom(UINT64* val)
 	{
 		ASSERT(val!=NULL,"VAL should be not NULL");
-		if(RAND_bytes((UINT8*)val,sizeof(UINT64))!=1&&
-			 RAND_pseudo_bytes((UINT8*)val,sizeof(UINT64))<0)
-				return E_UNKNOWN;
+		if(RAND_bytes((UINT8*)val,sizeof(UINT64))!=1
+#if  OPENSSL_VERSION_NUMBER <0x10100000L			
+			 && RAND_pseudo_bytes((UINT8*)val,sizeof(UINT64))<0
+#endif
+			)
+			return E_UNKNOWN;
 		return E_SUCCESS;
 	}
 
@@ -368,8 +374,11 @@ SINT32 getRandom(UINT64* val)
 SINT32 getRandom(UINT8* buff,UINT32 len)
 	{
 		ASSERT(buff!=NULL,"BUFF should be not NULL")
-		if(RAND_bytes(buff,len)!=1&&
-			 RAND_pseudo_bytes(buff,len)<0)
+		if(RAND_bytes(buff,len)!=1
+#if  OPENSSL_VERSION_NUMBER <0x10100000L						
+			&& RAND_pseudo_bytes(buff,len)<0
+#endif			
+			)
 			return E_UNKNOWN;
 		return E_SUCCESS;
 	}
@@ -1301,9 +1310,13 @@ UINT8* readFile(const UINT8* const name,UINT32* size)
 	*size=filesize32(handle);
 	UINT8* buff=new UINT8[*size];
 	if (buff == NULL)
-		return NULL;
+		{
+			close(handle);
+			return NULL;
+		}
 	if (read(handle, buff, *size) != *size)
 		{
+			close(handle);
 			delete[] buff;
 			return NULL;
 		}
