@@ -376,7 +376,7 @@ external.h:
 	mkdir -p $(top_srcdir)/build/openssl
 	wget https://www.openssl.org/source/openssl-1.1.0e.tar.gz -O $(top_srcdir)/build/openssl.tgz
 	tar -xzf $(top_srcdir)/build/openssl.tgz -C $(top_srcdir)/build/openssl --strip-components=1
-	cd $(top_srcdir)/build/openssl ; ./config no-capieng no-cms no-comp no-ct no-dgram no-dso no-dtls no-stdio no-ocsp no-shared no-gost no-ui no-ts   no-psk no-srp 
+	cd $(top_srcdir)/build/openssl ; ./config no-capieng no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
 #	cd $(top_srcdir)/build/openssl ; ./config 
 	cd $(top_srcdir)/build/openssl ; make
 endif #all from source
