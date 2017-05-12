@@ -171,12 +171,24 @@ SINT32 CAASymCipher::encrypt(const UINT8 *from, UINT8 *to)
 SINT32 CAASymCipher::generateKeyPair(UINT32 size)
 {
 	RSA_free(m_pRSA);
-	m_pRSA = RSA_generate_key(size, 65537, NULL, NULL);
-	::setRSAFlags(m_pRSA);
+	m_pRSA = NULL;
+#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+	m_pRSA=::RSA_new();
+	BIGNUM* e = BN_new();
+	BN_set_word(e, 65537);
+	SINT32 ret=::RSA_generate_key_ex(m_pRSA,size, e, NULL);
+	if (ret != 1)
+		{
+			RSA_free(m_pRSA);
+			m_pRSA = NULL;
+		}
+#else
+	m_pRSA = ::RSA_generate_key(size, 65537, NULL, NULL);
+#endif
 	if (m_pRSA == NULL)
 		return E_UNKNOWN;
-	else
-		return E_SUCCESS;
+	::setRSAFlags(m_pRSA);
+	return E_SUCCESS;
 }
 
 /** Stores the public key in \c buff. The format is as follows:
