@@ -48,8 +48,8 @@ SINT32 CALibProxytest::init()
 #if !defined ONLY_LOCAL_PROXY || defined INLUDE_MIDDLE_MIX
 		SSL_library_init();
 #endif
-		OpenSSL_add_all_algorithms();
 #if OPENSSL_VERSION_NUMBER < 0x10100000L 
+		OpenSSL_add_all_algorithms();
 		//It seems that only older versions of OpenSSL need the thred locking callbacks.
 		//But the mor interesting question is: at which version did the change happen?
 		m_pOpenSSLMutexes=new CAMutex[CRYPTO_num_locks()];
