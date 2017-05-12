@@ -361,7 +361,9 @@ endif
 if ALL_FROM_SOURCE
 BUILT_SOURCES = external.h
 
-mix_LDADD += $(top_srcdir)/build/mxml/libmxml.a
+mix_LDADD += $(top_srcdir)/build/mxml/libmxml.a \
+	$(top_srcdir)/build/openssl/libssl.a \
+	$(top_srcdir)/build/openssl/libcrypto.a 
 
 external.h:
 #Make MXML
@@ -371,5 +373,11 @@ external.h:
 	cd $(top_srcdir)/build/mxml ; ./configure --enable-threads
 	cd $(top_srcdir)/build/mxml ; make
 #Make OpenSSL
+	mkdir -p $(top_srcdir)/build/openssl
+	wget https://www.openssl.org/source/openssl-1.1.0e.tar.gz -O $(top_srcdir)/build/openssl.tgz
+	tar -xzf $(top_srcdir)/build/openssl.tgz -C $(top_srcdir)/build/openssl --strip-components=1
+	cd $(top_srcdir)/build/openssl ; ./config no-capieng no-cms no-comp no-ct no-dgram no-dso no-dtls no-stdio no-ocsp no-shared no-gost no-ui no-ts   no-psk no-srp 
+#	cd $(top_srcdir)/build/openssl ; ./config 
+	cd $(top_srcdir)/build/openssl ; make
 endif #all from source
 SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark)

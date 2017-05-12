@@ -407,6 +407,7 @@ AC_ARG_ENABLE(all-from-source,
 dnl Checks for libraries.
 
 
+if test "x$allfromsource" != "xtrue" ; then
 
 dnl Check for OpenSSL libs and includes. Adopted from OpenSSH configure.in
 dnl default place to look for OpenSSL --> may be overwriten by the option below!
@@ -500,10 +501,16 @@ LIBS="-lcrypto -lssl $saved_LIBS"
 #dnl check if ECC crypto is available
 	AC_LINK_IFELSE([AC_LANG_PROGRAM([
 		#include "openssl/ec.h"
-		], [EC_KEY_free(0);])],[AC_DEFINE([ECC],[],[Elliptic curve cryptography supported])],
+		], [EC_KEY_free(0);])],[AC_DEFINE([HAVE_ECC],[],[Elliptic curve cryptography supported])],
 		[AC_MSG_WARN([Elliptic curve cryptography disabled])],[AC_MSG_RESULT([skip ECC test because of cross compiling])])
 
+else
+dnl build all form source
+AC_MSG_NOTICE([Will use OpenSSL from source])
+CFLAGS="$CFLAGS -I$PWD/build/openssl/include"
+CXXFLAGS="$CXXFLAGS -I$PWD/build/openssl/include"
 
+fi
 		
 useminixml="false"
 USE_MINIXML=""
@@ -661,8 +668,8 @@ fi
 else
 dnl all from source
 AC_MSG_NOTICE([Will use Mini-XML/Xerces-C from source])
-CFLAGS="$saved_CFLAGS -Ibuild/mxml"
-CXXFLAGS="$saved_CXXFLAGS -Ibuild/mxml"
+CFLAGS="$CFLAGS -I$PWD/build/mxml"
+CXXFLAGS="$CXXFLAGS -I$PWD/build/mxml"
 
 fi dnl not make all from source
 
