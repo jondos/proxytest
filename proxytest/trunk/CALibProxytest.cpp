@@ -11,7 +11,8 @@ CAMutex* CALibProxytest::m_pOpenSSLMutexes;
 	CAThreadList* CALibProxytest::m_pThreadList;
 #endif
 
-///Callbackfunction for locking required by OpenSSL
+///Callbackfunction for locking required by OpenSSL <1.1
+#if OPENSSL_VERSION_NUMBER < 0x10100000L 
 void CALibProxytest::openssl_locking_callback(int mode, int type, char * /*file*/, int /*line*/)
 	{
 		if (mode & CRYPTO_LOCK)
@@ -23,6 +24,7 @@ void CALibProxytest::openssl_locking_callback(int mode, int type, char * /*file*
 				m_pOpenSSLMutexes[type].unlock();
 			}
 	}
+#endif
 
 /** Callback used by openssl to identify a thread*/
 ///TODO: Move this to CAThread !
