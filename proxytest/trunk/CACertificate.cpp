@@ -419,13 +419,17 @@ SINT32 CACertificate::verify(const CACertificate* a_cert) const
 
 bool CACertificate::isValid() const
 {
+#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+	const ASN1_TIME* pValidNotBefore=X509_get0_notBefore(m_pCert);
+	const ASN1_TIME* pValidNotAfter=X509_get0_notAfter(m_pCert);
+#else
 	ASN1_TIME* pValidNotBefore=X509_get_notBefore(m_pCert);
 	ASN1_TIME* pValidNotAfter=X509_get_notAfter(m_pCert);
-	if(X509_cmp_current_time( pValidNotBefore) <0 
-			&& X509_cmp_current_time(pValidNotAfter) >0)
-	{
-		return true;
-	}
+#endif
+	if(X509_cmp_current_time( pValidNotBefore) <0	&& X509_cmp_current_time(pValidNotAfter) >0)
+		{
+			return true;
+		}
 	//check if certificate is valid within grace period of two months
 	time_t now = time(NULL); 		//get current time;
 	tm* time = new tm;
@@ -442,12 +446,11 @@ bool CACertificate::isValid() const
 	time_t ttiq  = mktime(time);  	//convert time back to time_t and check again
 	delete time;
 	time = NULL;
-	if(X509_cmp_time( pValidNotBefore, &ttiq) <0
-			&& X509_cmp_time(pValidNotAfter, &ttiq) >0)
-	{
-		CAMsg::printMsg(LOG_WARNING, "Certificate is only valid within grace period of two months!\n");
-		return true;
-	}
+	if(X509_cmp_time( pValidNotBefore, &ttiq) <0 && X509_cmp_time(pValidNotAfter, &ttiq) >0)
+		{
+			CAMsg::printMsg(LOG_WARNING, "Certificate is only valid within grace period of two months!\n");
+			return true;
+		}
 	return false;
 }
 
