@@ -926,6 +926,16 @@ AC_ARG_ENABLE(only-middle-mix,
 	]
 )
 
+sconetoolchain=""
+AC_ARG_WITH(SCONE,
+	AS_HELP_STRING([--with-SCONE=SCONE_TOOLCHAIN_PATH],[Build the Mix for the SCONE framework to let it run on Intel SGX. Give the path to the SCONE toolchain]),
+	[
+		if test "x$withval" != "xno" ; then
+			sconetoolchain="$withval"
+		fi
+	]
+)
+
 
 TEST_CFLAGS=""
 
@@ -960,6 +970,12 @@ fi
 if test "x$onlymiddlemix" == "xtrue" ; then
 	CXXFLAGS="$CXXFLAGS -DONLY_MIDDLE_MIX"
 	CFLAGS="$CFLAGS -DONLY_MIDDLE_MIX"
+fi
+
+if test -z "$sconetoolcahin"; then
+    CXX="$sconetoolchain/x86_64-linux-musl/bin/x86_64-linux-musl-g++"
+    CC="$sconetoolchain/x86_64-linux-musl/bin/x86_64-linux-musl-gcc"
+    SGXTOOLCHAIN="$sconetoolchain"
 fi
 
 AM_CONDITIONAL([DOTESTS], [test x$DOTHETESTS = xyes])
