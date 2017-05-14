@@ -975,7 +975,7 @@ fi
 if test -z "$sconetoolcahin"; then
     CXX="$sconetoolchain/x86_64-linux-musl/bin/x86_64-linux-musl-g++"
     CC="$sconetoolchain/x86_64-linux-musl/bin/x86_64-linux-musl-gcc"
-    SGXTOOLCHAIN="$sconetoolchain"
+    export SGXTOOLCHAIN="$sconetoolchain"
 fi
 
 AM_CONDITIONAL([DOTESTS], [test x$DOTHETESTS = xyes])
