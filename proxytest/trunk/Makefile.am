@@ -6,6 +6,9 @@ ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 mix_LDADD = 
 
+export SGXTOOLCHAIN=@SCONE_TOOLCHAIN@
+
+
 if ONLY_LIB
 lib_LTLIBRARIES = libmix.la			
 libmix_la_CPPFLAGS = -DSOMEFLAG
@@ -380,4 +383,6 @@ external.h:
 #	cd $(top_srcdir)/build/openssl ; ./config 
 	cd $(top_srcdir)/build/openssl ; make
 endif #all from source
+
+
 SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark)
