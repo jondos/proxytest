@@ -172,6 +172,7 @@ char* strins(const char* src,const char * pos,const char* ins)
 		return strins(src,pos-src,ins);
 	}
 
+#if !defined ONLY_LOCAL_PROXY 
 /** Log information about the current memory (heap) usage. */
 void logMemoryUsage()
 	{
@@ -191,6 +192,7 @@ void logMemoryUsage()
 		CAMsg::printMsg(LOG_DEBUG,"\t Size of the top-most releasable chunk that normally borders the end of the heap: %i\n",malli.keepcost);
 #endif
 	}
+#endif //ONLY_LOCAL_PROXY
 
 /** Gets the current Systemtime in milli seconds.
 	* @param bnTime - Big Number, in which the current time is placed
