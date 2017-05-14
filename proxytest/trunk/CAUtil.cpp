@@ -1326,7 +1326,7 @@ UINT8* readFile(const UINT8* const name,UINT32* size)
 
 SINT32 saveFile(const UINT8* const name,const UINT8* const buff,UINT32 buffSize)
 {
-	int handle=open((char*)name,O_BINARY|O_WRONLY|O_CREAT);
+	int handle=open((char*)name,O_BINARY|O_WRONLY|O_CREAT,S_IWRITE|S_IREAD);
 	if(handle<0)
 		return E_UNKNOWN;
 	if(myfilewrite(handle,buff,buffSize)!=buffSize)
