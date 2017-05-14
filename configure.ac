@@ -972,10 +972,10 @@ if test "x$onlymiddlemix" == "xtrue" ; then
 	CFLAGS="$CFLAGS -DONLY_MIDDLE_MIX"
 fi
 
-if test -z "$sconetoolcahin"; then
+if test -n "$sconetoolchain"; then
     CXX="$sconetoolchain/x86_64-linux-musl/bin/x86_64-linux-musl-g++"
     CC="$sconetoolchain/x86_64-linux-musl/bin/x86_64-linux-musl-gcc"
-    AC_SUBST(SCONE_TOOLCHAIN)
+    AC_SUBST(SCONE_TOOLCHAIN,"$sconetoolchain")
 fi
 
 AM_CONDITIONAL([DOTESTS], [test x$DOTHETESTS = xyes])
