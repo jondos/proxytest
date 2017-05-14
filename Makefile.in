@@ -626,6 +626,7 @@ LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+LT_SYS_LIBRARY_PATH = @LT_SYS_LIBRARY_PATH@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
@@ -648,6 +649,7 @@ PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
+SCONE_GCC = @SCONE_GCC@
 SCONE_TOOLCHAIN = @SCONE_TOOLCHAIN@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -699,6 +701,7 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -3454,14 +3457,15 @@ export SGXTOOLCHAIN=@SCONE_TOOLCHAIN@
 @ALL_FROM_SOURCE_TRUE@	mkdir -p $(top_srcdir)/build/mxml
 @ALL_FROM_SOURCE_TRUE@	wget https://github.com/michaelrsweet/mxml/releases/download/release-2.10/mxml-2.10.tar.gz -O $(top_srcdir)/build/mxml.tgz
 @ALL_FROM_SOURCE_TRUE@	tar -xzf $(top_srcdir)/build/mxml.tgz -C $(top_srcdir)/build/mxml --strip-components=1
-@ALL_FROM_SOURCE_TRUE@	cd $(top_srcdir)/build/mxml ; ./configure --enable-threads
-@ALL_FROM_SOURCE_TRUE@	cd $(top_srcdir)/build/mxml ; make
+@ALL_FROM_SOURCE_TRUE@@USE_SCONE_TRUE@	cd $(top_srcdir)/build/mxml ; CC=@SCONE_GCC@ ./configure --enable-threads
+@ALL_FROM_SOURCE_TRUE@@USE_SCONE_FALSE@	cd $(top_srcdir)/build/mxml ; ./configure --enable-threads
+@ALL_FROM_SOURCE_TRUE@	cd $(top_srcdir)/build/mxml ; make libmxml.a
 #Make OpenSSL
 @ALL_FROM_SOURCE_TRUE@	mkdir -p $(top_srcdir)/build/openssl
 @ALL_FROM_SOURCE_TRUE@	wget https://www.openssl.org/source/openssl-1.1.0e.tar.gz -O $(top_srcdir)/build/openssl.tgz
 @ALL_FROM_SOURCE_TRUE@	tar -xzf $(top_srcdir)/build/openssl.tgz -C $(top_srcdir)/build/openssl --strip-components=1
-@ALL_FROM_SOURCE_TRUE@	cd $(top_srcdir)/build/openssl ; ./config no-capieng no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
-#	cd $(top_srcdir)/build/openssl ; ./config 
+@ALL_FROM_SOURCE_TRUE@@USE_SCONE_TRUE@	cd $(top_srcdir)/build/openssl ; CC=@SCONE_GCC@ ./config no-async no-capieng no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
+@ALL_FROM_SOURCE_TRUE@@USE_SCONE_FALSE@	cd $(top_srcdir)/build/openssl ; ./config no-capieng no-async no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
 @ALL_FROM_SOURCE_TRUE@	cd $(top_srcdir)/build/openssl ; make
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
