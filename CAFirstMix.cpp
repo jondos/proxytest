@@ -411,11 +411,12 @@ SINT32 CAFirstMix::processKeyExchange()
 				return E_UNKNOWN;
 		CALibProxytest::getOptions()->setCascadeName(cascadeName);
 */
+#ifdef PAYMENT
 		if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
 		{
 			appendTermsAndConditionsExtension(doc, elemMixes);
 		}
-
+#endif
 		SINT32 extRet = handleKeyInfoExtensions(elemMixes);
 		if(extRet != E_SUCCESS)
 		{
@@ -495,13 +496,15 @@ SINT32 CAFirstMix::processKeyExchange()
 		DOMElement* elemOwnMix=NULL;
 		getDOMChildByName(elemMixesKey, "Mix", elemOwnMix, false);
 		elemOwnMix->appendChild(elemKey);
+#ifdef PAYMENT
 		CAMsg::printMsg(LOG_INFO,"before T&Cs1...\n");
 		if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
 		{
 			elemOwnMix->appendChild(termsAndConditionsInfoNode(docXmlKeyInfo));
 		}
 		CAMsg::printMsg(LOG_INFO,"after T&Cs1...\n");
-		elemOwnMix->appendChild(createDOMElement(docXmlKeyInfo,"SupportsEncrypedControlChannels"));
+#endif
+	elemOwnMix->appendChild(createDOMElement(docXmlKeyInfo,"SupportsEncrypedControlChannels"));
 	CAMsg::printMsg(LOG_INFO,"after SupportEncChannels...\n");
 	if (signXML(elemOwnMix) != E_SUCCESS)
 	{
