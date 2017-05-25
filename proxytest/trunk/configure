@@ -19064,6 +19064,15 @@ else
   USE_SCONE_FALSE=
 fi
 
+else
+     if false; then
+  USE_SCONE_TRUE=
+  USE_SCONE_FALSE='#'
+else
+  USE_SCONE_TRUE='#'
+  USE_SCONE_FALSE=
+fi
+
 fi
 
  if test x$DOTHETESTS = xyes; then
@@ -19249,6 +19258,10 @@ fi
 
 if test -z "${USE_MINIXML_TRUE}" && test -z "${USE_MINIXML_FALSE}"; then
   as_fn_error $? "conditional \"USE_MINIXML\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${USE_SCONE_TRUE}" && test -z "${USE_SCONE_FALSE}"; then
+  as_fn_error $? "conditional \"USE_SCONE\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_SCONE_TRUE}" && test -z "${USE_SCONE_FALSE}"; then

@@ -978,6 +978,8 @@ if test -n "$sconetoolchain"; then
     AC_SUBST(SCONE_TOOLCHAIN,"$sconetoolchain")
     AC_SUBST(SCONE_GCC,"$CC")
     AM_CONDITIONAL([USE_SCONE],true)
+else
+    AM_CONDITIONAL([USE_SCONE],false)
 fi
 
 AM_CONDITIONAL([DOTESTS], [test x$DOTHETESTS = xyes])
