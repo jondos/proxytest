@@ -303,6 +303,7 @@ SINT32 CALastMix::processKeyExchange()
 
 		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Offering -- SendInterval %u -- Receive Interval %u\n",u32KeepAliveSendInterval,u32KeepAliveRecvInterval);
 
+#ifdef PAYMENT
 		/* append the terms and conditions, if there are any, to the KeyInfo
 		 * Extensions, (nodes that can be removed from the KeyInfo without
 		 * destroying the signature of the "Mix"-node).
@@ -312,6 +313,7 @@ SINT32 CALastMix::processKeyExchange()
 			appendTermsAndConditionsExtension(doc, elemMixes);
 			elemMix->appendChild(termsAndConditionsInfoNode(doc));
 		}
+#endif
 
 		// create signature
 		if (signXML(elemMix) != E_SUCCESS)

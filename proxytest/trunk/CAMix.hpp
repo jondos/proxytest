@@ -151,6 +151,7 @@ class CAMix
 		SINT32 appendCompatibilityInfo(DOMNode* a_parent);
 		SINT32 addMixInfo(DOMNode* a_element, bool a_bForceFirstNode);
 
+#ifdef PAYMENT
 		/**
 		 * convenience function: returns an already prepared and signed TermsAndCondition node
 		 * which can be appended as a KeyInfoExtension.
@@ -166,6 +167,7 @@ class CAMix
 		 */
 		DOMNode *termsAndConditionsInfoNode(XERCES_CPP_NAMESPACE::DOMDocument *ownerDoc);
 
+#endif
 		// added by ronin <ronin2@web.de>
 		virtual SINT32 processKeyExchange()=0;
 		/*{
