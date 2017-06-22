@@ -99,8 +99,6 @@
     <ClCompile Include="TypeB\CAFirstMixB.cpp" />
     <ClCompile Include="TypeB\CALastMixB.cpp" />
     <ClCompile Include="TypeB\CALastMixBChannelList.cpp" />
-    <ClCompile Include="xml\dom\mxml\mxmlDOMDocument.cpp" />
-    <ClCompile Include="xml\dom\mxml\mxmlXercesDOMParser.cpp" />
     <ClCompile Include="xml\DOM_Output.cpp" />
     <ClCompile Include="gcm\gcm.cpp">
       <Filter>gcm</Filter>
@@ -108,8 +106,18 @@
     <ClCompile Include="gcm\prp.cpp">
       <Filter>gcm</Filter>
     </ClCompile>
-    <ClCompile Include="xml\dom\mxml\mxmlDOMImplementation.cpp" />
-    <ClCompile Include="xml\dom\mxml\mxmlDOMNode.cpp" />
+    <ClCompile Include="xml\dom\mxml\mxmlXercesDOMParser.cpp">
+      <Filter>xml</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\dom\mxml\mxmlDOMDocument.cpp">
+      <Filter>xml</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\dom\mxml\mxmlDOMImplementation.cpp">
+      <Filter>xml</Filter>
+    </ClCompile>
+    <ClCompile Include="xml\dom\mxml\mxmlDOMNode.cpp">
+      <Filter>xml</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basetypedefs.h" />
@@ -215,23 +223,6 @@
     <ClInclude Include="TypeB\CALastMixB.hpp" />
     <ClInclude Include="TypeB\CALastMixBChannelList.hpp" />
     <ClInclude Include="typedefs.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlDOM.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlDOMAttr.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlDOMDocument.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlDOMDocumentFragment.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlDOMElement.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlDOMImplementation.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlDOMNamedNodeMap.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlDOMNode.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlDOMNodeList.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlDOMText.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlDOMTypeDef.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlInputSource.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlMemBufInputSource.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlXercesDOMParser.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlXMLFormatTarget.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlXMLFormatter.hpp" />
-    <ClInclude Include="xml\dom\mxml\mxmlXMLString.hpp" />
     <ClInclude Include="xml\DOM_Output.hpp" />
     <ClInclude Include="gcm\gcm.h">
       <Filter>gcm</Filter>
@@ -240,6 +231,57 @@
       <Filter>gcm</Filter>
     </ClInclude>
     <ClInclude Include="CAMultiSignature.hpp" />
+    <ClInclude Include="xml\dom\mxml\mxmlInputSource.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlMemBufInputSource.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlXercesDOMParser.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlXMLFormatTarget.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlXMLFormatter.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlXMLString.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlDOM.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlDOMAttr.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlDOMDocument.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlDOMDocumentFragment.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlDOMElement.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlDOMImplementation.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlDOMNamedNodeMap.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlDOMNode.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlDOMNodeList.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlDOMText.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
+    <ClInclude Include="xml\dom\mxml\mxmlDOMTypeDef.hpp">
+      <Filter>xml</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="documentation\XML\FirstMixToInfoService.xml" />

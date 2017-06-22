@@ -1,4 +1,5 @@
 #include "../../../StdAfx.h"
+#ifdef MXML_DOM
 #include "mxmlDOMNode.hpp"
 #include "mxmlDOMNodeList.hpp"
 DOMNodeList* DOMNode::getChildNodes() const
@@ -12,3 +13,4 @@ DOMNodeList* DOMNode::getChildNodes() const
 			}
 		return pList;
 	}
+#endif //MXML_DOM

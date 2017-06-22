@@ -79,6 +79,8 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 			return E_SUCCESS;
 		if(buff==NULL)
 			return E_UNKNOWN;
+		if (m_bClosed)
+			return E_UNKNOWN;
 		m_pcsQueue->lock();
 		//if(m_pHeap==NULL)
 		//	incHeap();
@@ -205,8 +207,10 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize)
 	{
 		m_pconvarSize->lock();
-		while(m_Queue==NULL)
-			m_pconvarSize->wait();
+		while (m_Queue == NULL&&!m_bClosed)
+			{
+				m_pconvarSize->wait();
+			}
 		SINT32 ret=get(pbuff,psize);
 		m_pconvarSize->unlock();
 		return ret;
@@ -382,8 +386,6 @@ THREAD_RETURN consumer(void* param)
 THREAD_RETURN producer(void* param)
 	{
 	struct __queue_test* pTest = (struct __queue_test *)param;
-	UINT32 count = 0;
-	UINT32 aktSize;
 	UINT8 buff[992];
 	UINT8 b = 0;
 	UINT32 burst=1;
@@ -407,7 +409,6 @@ THREAD_RETURN producer(void* param)
 THREAD_RETURN consumer(void* param)
 	{
 	struct __queue_test* pTest = (struct __queue_test *)param;
-	UINT32 count = 0;
 	UINT32 aktSize=992;
 	UINT8 buff[992];
 	UINT8 b = 0;

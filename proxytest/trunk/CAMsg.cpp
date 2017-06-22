@@ -221,7 +221,13 @@ SINT32 CAMsg::setLogOptions(UINT32 opt)
 			delete[] strBuff;
 			return ret;
     }
-
+/**
+<summary>Writes a given message to the log.</summary>
+<param name="type">type of the log message (debug,info warning, error)</param>
+<param name="format">format string as in printf()</param>
+<return>E_SUCCESS, if log messages was successful written</return>
+<return>E_UNKNOWN, in case of some error</return>
+*/
 SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 	{
 		if(pMsg != NULL)

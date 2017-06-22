@@ -79,6 +79,12 @@ class CAQueue
 					m_pcsQueue->lock();
 					m_bClosed=true;
 					m_pcsQueue->unlock();
+					if (m_Queue == NULL) //signal possible reader that the queue ist closed...
+						{
+							m_pconvarSize->lock();
+							m_pconvarSize->signal();
+							m_pconvarSize->unlock();
+						}
 					return E_SUCCESS;
 				}
 			
