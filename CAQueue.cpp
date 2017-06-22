@@ -146,6 +146,7 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 	* @param psize on call contains the size of pbuff, on return contains 
 	*								the size of returned data
 	* @retval E_SUCCESS if succesful
+	* @retval E_CLOSED if the queue is empty and closed 
 	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
@@ -157,6 +158,10 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 		if(m_Queue==NULL)
 			{
 				*psize=0;
+				if ((m_bClosed))
+					{
+						return E_CLOSED;
+					}
 				return E_SUCCESS;
 			}
 		m_pcsQueue->lock();
@@ -202,6 +207,7 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 	* @param psize on call contains the size of pbuff, on return contains 
 	*								the size of returned data
 	* @retval E_SUCCESS if succesful
+	* @retval E_CLOSED if the queue is empty and closed 
 	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize)
