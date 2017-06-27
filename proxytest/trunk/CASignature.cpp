@@ -245,7 +245,7 @@ SINT32 CASignature::setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const ch
 					// found EC key
 					EC_KEY* tmpECKey = NULL;
 					#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
-						tmpECKey = EVP_PKEY_get1_EC(key);
+						tmpECKey = EVP_PKEY_get1_EC_KEY(key);
 					#else
 						tmpECKey =  EC_KEY_dup(key->pkey.ec);
 					#endif
