@@ -749,7 +749,7 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 			#endif
 			EVP_PKEY_free(key);
 			EC_KEY_free(m_pEC);
-			m_pEC = tmpEC;
+			m_pEC = tmpECKey;
 			return E_SUCCESS;
 #else
 			CAMsg::printMsg(LOG_ERR, "Found EC-Key but OpenSSL was built without ECC support!\n");
