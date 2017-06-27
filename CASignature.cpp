@@ -741,7 +741,12 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 		if(EVP_PKEY_type(keyType) == EVP_PKEY_EC)
 		{
 #ifdef HAVE_ECC
-			EC_KEY* tmpEC = EC_KEY_dup(key->pkey.ec);
+			EC_KEY* tmpECKey = NULL;
+			#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+				tmpECKey = EVP_PKEY_get1_EC_KEY(key);
+			#else
+				tmpECKey =  EC_KEY_dup(key->pkey.ec);
+			#endif
 			EVP_PKEY_free(key);
 			EC_KEY_free(m_pEC);
 			m_pEC = tmpEC;
