@@ -764,6 +764,10 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				UINT8* xmlbuff=new UINT8[size2];
 				ret=m_muxOut.getCASocket()->receiveFully(xmlbuff,size2);
 				delete[] xmlbuff;
+				if (ret != E_SUCCESS)
+					{
+						return E_UNKNOWN;
+					}
 				xmlbuff = NULL;
 				m_muxOut.setSendKey(linkKeys,32);
 				m_muxOut.setReceiveKey(linkKeys+32,32);
