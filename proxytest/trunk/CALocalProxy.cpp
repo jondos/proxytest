@@ -720,7 +720,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 			{
 				const char* XML_HEADER="<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 				const UINT32 XML_HEADER_SIZE=strlen(XML_HEADER);
-				const char* XML_JAP_KEY_TEMPLATE="<JAPKeyExchange version=\"0.1\"><LinkEncryption>%s</LinkEncryption><MixEncryption>%s</MixEncryption></JAPKeyExchange>";
+				const char* XML_JAP_KEY_TEMPLATE="<JAPKeyExchange version=\"0.1\"><LinkEncryption>%s</LinkEncryption><MixEncryption>%s</MixEncryption><AccessControlCredential>%s<AccessControlCredential/></JAPKeyExchange>";
 	      //DOM_Document doc=DOM_Document::createDocument();
    			//DOM_Element e = doc.createElement("JAPKeyExchange");
 				//doc.appendChild(e);
@@ -747,7 +747,14 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				outBuffMixKey[outlenMixKey]=0;
 				//setDOMElementValue(elemMixEnc,outBuff);
 				//e.appendChild(elemMixEnc);
-				sprintf((char*)buff,XML_JAP_KEY_TEMPLATE,outBuffLinkKey,outBuffMixKey);
+				CABase64::encode(mixKeys,32,outBuffMixKey,&outlenMixKey);
+				outBuffMixKey[outlenMixKey]=0;
+				UINT8 strCredential[512];
+				UINT32 strCredentialLen=512;
+				strCredential[0] = 0;
+				CALibProxytest::getOptions()->getCredential(strCredential, strCredentialLen);
+
+				sprintf((char*)buff,XML_JAP_KEY_TEMPLATE,outBuffLinkKey,outBuffMixKey,strCredential);
 				UINT32 encbufflen;
 				UINT8* encbuff=encryptXMLElement(buff,strlen((char*)buff),encbufflen,&m_arRSA[m_chainlen-1]);
 				UINT16 size2=htons((UINT16)(encbufflen+XML_HEADER_SIZE));
