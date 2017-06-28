@@ -1,11 +1,11 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.7
+VisualStudioVersion = 15.0.26430.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{54C687C4-A40F-4654-8DA3-66D2D382DDC8}"
 	ProjectSection(SolutionItems) = preProject
 		.clang-format = .clang-format
-		configure.in = configure.in
+		configure.ac = configure.ac
 		documentation\docMixConfig.template = documentation\docMixConfig.template
 		documentation\docPayment.template = documentation\docPayment.template
 		documentation\docPaymentSetup.template = documentation\docPaymentSetup.template
@@ -14,15 +14,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		documentation\XML\FirstMixToInfoService.xml = documentation\XML\FirstMixToInfoService.xml
 		documentation\XML\FirstMixToJAP.xml = documentation\XML\FirstMixToJAP.xml
 		documentation\XML\InterMix-KeyExchange-Answer.xml = documentation\XML\InterMix-KeyExchange-Answer.xml
-		documentation\XML\InterMix-LastMix-to-Succesor.xsd = documentation\XML\InterMix-LastMix-to-Succesor.xsd
 		documentation\XML\InterMix-LastMix-to-Successor.xml = documentation\XML\InterMix-LastMix-to-Successor.xml
-		localtestrun.testrunconfig = localtestrun.testrunconfig
 		Makefile.am = Makefile.am
 		Makefile.old = Makefile.old
 		documentation\XML\MixCascadeStatus.xml = documentation\XML\MixCascadeStatus.xml
 		documentation\XML\MixHELO.xml = documentation\XML\MixHELO.xml
-		proxytest.vsmdi = proxytest.vsmdi
-		proxytest_VC2017.gta.runsettings = proxytest_VC2017.gta.runsettings
 		proxytest_win_short.doxy = proxytest_win_short.doxy
 		documentation\XML\xmldoc.template = documentation\XML\xmldoc.template
 		documentation\XML\XMLSignature.xml = documentation\XML\XMLSignature.xml
