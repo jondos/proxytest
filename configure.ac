@@ -160,13 +160,12 @@ AC_ARG_ENABLE(pool,
 )
 
 dnl delay channels ??
-BANDWIDTH_LIMIT=""
-AC_ARG_ENABLE(bandwidth-limitation,
-	AS_HELP_STRING([--disable-bandwidth-limitation],
-			[Specify if to build without bandwidth limitation. The limitation parameters can be specified in the mix configuration file.]),
+BANDWIDTH_LIMIT="-DDELAY_CHANNELS -DDELAY_USERS"
+AC_ARG_ENABLE(	[bandwidth-limitation],
+				AS_HELP_STRING([--disable-bandwidth-limitation],[Specify if to build without bandwidth limitation. The limitation parameters can be specified in the mix configuration file.]),
 	[
-		if test "x$enableval" != "xno" ; then
-			BANDWIDTH_LIMIT="-DDELAY_CHANNELS -DDELAY_USERS"
+		if test "x$enableval" = "xno" ; then
+			BANDWIDTH_LIMIT=""
 dnl		    if test "x$enableval" != "xyes" ; then	
 dnl			BANDWIDTH_LIMIT="$BANDWIDTH_LIMIT -DDELAY_CHANNEL_TRAFFIC=$enableval"
 dnl		    fi	
