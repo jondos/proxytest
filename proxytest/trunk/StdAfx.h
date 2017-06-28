@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.11.19"
+#define MIX_VERSION "00.11.20"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -48,13 +48,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define DEBUG
 	#define _DEBUG
 #endif
-
-#ifndef DELAY_USERS
-	#ifndef PAYMENT
-		#define DELAY_USERS
-	#endif
-#endif
-
 
 //#define LOG_TRAFFIC_PER_USER //Log detail for traffic per user
 //#define LOG_CHANNEL //Log detail for traffic per channel
@@ -86,6 +79,22 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define INTEL_IPP_CRYPTO //define if you want to use the crypto routines of the Intel Performance Primitives
 //#define __UNIT_TEST__ //define if you want to compile the unit tests
 //#define EXPORT_ASYM_PRIVATE_KEY //define if you want to be able to export the private key of an assymetric key (only used for debugging purposes..)
+//#define LOG_CRIME
+//#define PAYMENT //to enable payment support, now use configure --enable-payment..
+//#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
+
+//#define USE_POOL
+//#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
+//#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
+#define NEW_FLOW_CONTROL //enable for the new flow control mechanism --> now enabled by default (i.e. can not be disbaled anymore!)
+#define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses RSA-OAEP for key transport and two keys for upstream/downstream channel cryption (--> now enabled by default (i.e. can not be disbaled anymore!)
+//#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
+
+//#define REPLAY_DETECTION // enable to prevent replay of mix packets
+//#define HAVE_ECC // define if you have (and wnat to use) ECC cryptography
+//#define SSL_HACK //???
+
+//#define ANON_DEBUG_MODE //if defined this Mix operates in AN.ON protocol debug mode, which means that a lot of things are logged which should not be logged in productive mode. So NEVER enable this in productive environments!
 
 
 #if !defined(PRINT_THREAD_STACK_TRACE) && defined (DEBUG)&& ! defined(ONLY_LOCAL_PROXY)
@@ -107,6 +116,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef COUNTRY_STATS
 	#define LOG_COUNTRIES_INTERVALL 6 //how often to log the country stats (multiplied by 10 seconds)
 #endif
+
+#if !defined DELAY_USERS && !defined HAVE_CONFIG_H
+	#ifndef PAYMENT
+		#define DELAY_USERS
+	#endif
+#endif
+
 
 #ifdef DELAY_CHANNELS
 	#ifndef DELAY_CHANNEL_TRAFFIC
@@ -139,35 +155,20 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define DELAY_USERS_BUCKET_GROW DELAY_USERS_PACKETS_PER_SECOND //Grow in bytes
 	#endif
 #endif
-#ifdef DELAY_CHANNELS_LATENCY
+
+#ifndef DELAY_CHANNELS_LATENCY
 	#define DELAY_CHANNEL_LATENCY 0 //min latency defaults to 0 milliseconds
 #endif
 
 #if defined LASTMIX_CHECK_MEMORY && ! defined(QUEUE_SIZE_LOG)
 	#define QUEUE_SIZE_LOG
 #endif
-//#define LOG_CRIME
-//#define PAYMENT //to enable payment support, now use configure --enable-payment..
-//#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
 
-//#define USE_POOL
-//#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
-//#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
-#define NEW_FLOW_CONTROL //enable for the new flow control mechanism --> now enabled by default (i.e. can not be disbaled anymore!)
-#define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses RSA-OAEP for key transport and two keys for upstream/downstream channel cryption (--> now enabled by default (i.e. can not be disbaled anymore!)
-//#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
-
-//#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 1 //How often (in minutes) should the current replay timestamps be propagate
 
 #define KEEP_ALIVE_TRAFFIC_RECV_WAIT_TIME  75000 //How long to wait for a Keep-Alive (or any other packet)
 																										 //before we believe that the connection is broken (in ms)
 #define KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME 65000 //How long to wait before we sent a dummy a Keep-Alive-Traffic
-
-//#define HAVE_ECC // define if you have (and wnat to use) ECC cryptography
-//#define SSL_HACK //???
-
-//#define ANON_DEBUG_MODE //if defined this Mix operates in AN.ON protocol debug mode, which means that a lot of things are logged which should not be logged in productive mode. So NEVER enable this in productive environments!
 
 #ifdef LOG_CRIME //Law Enforcement and AN.ON protocol debuggin cannot be done at the same time...
 	#undef ANON_DEBUG_MODE
