@@ -515,6 +515,8 @@ class CACmdLnOptions
 		}
 		SINT32 getLogDir(UINT8* name,UINT32 len);
 		SINT32 setLogDir(const UINT8* name,UINT32 len);
+		SINT32 getCredential(UINT8* name,UINT32 len);
+
 		SINT64 getMaxLogFileSize()
 		{
 			return m_maxLogFileSize;
@@ -745,6 +747,7 @@ class CACmdLnOptions
 		char*		m_strTargetHost; //only for the local proxy...
 		char*		m_strSOCKSHost;
 		UINT16	m_iSOCKSPort;
+		char*		m_strCredential; //credential for connection to cascade
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 		CAMultiSignature* 	m_pMultiSignature;
 		/* for mix certificate verification */

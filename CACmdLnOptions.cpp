@@ -112,6 +112,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bAutoReconnect=false;
 		m_strConfigFile=NULL;
 		m_strPidFile=NULL;
+		m_strCredential = NULL;
 #ifdef PAYMENT
 		m_pBI=NULL;
 		m_strDatabaseHost=NULL;
@@ -320,6 +321,9 @@ void CACmdLnOptions::clean()
 		delete[] m_strLogDir;
 		m_strLogDir=NULL;
 
+		delete[] m_strCredential;
+		m_strCredential=NULL;
+
 		delete[] m_strLogLevel;
 		m_strLogLevel=NULL;
 
@@ -452,6 +456,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	int iAutoReconnect=0;
 	char* strPidFile=NULL;
 	char* strCreateConf=NULL;
+	char* strCredential = NULL;
 #ifdef EXPORT_ASYM_PRIVATE_KEY
 	char* strImportKey=NULL;
 	char* strExportKey=NULL;
@@ -473,6 +478,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		{"version",'v',POPT_ARG_NONE,&iVersion,0,"show version",NULL},
 		{"pidfile",'r',POPT_ARG_STRING,&strPidFile,0,"file where the PID will be stored","<file>"},
 		{"createConf",0,POPT_ARG_STRING,&strCreateConf,0,"creates a generic configuration for MixOnCD","[<file>]"},
+		{"credential",0,POPT_ARG_STRING,&strCredential,0,"credntiual for connetion to cascade [only for local proxy]","<credential>"},
 #ifdef EXPORT_ASYM_PRIVATE_KEY
 		{"exportKey",0,POPT_ARG_STRING,&strExportKey,0,"export private encryption key to file","<file>"},
 		{"importKey",0,POPT_ARG_STRING,&strImportKey,0,"import private encryption key from file","<file>"},
@@ -627,6 +633,14 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			strcpy(m_strPidFile,strPidFile);
 			free(strPidFile);
 		}
+
+	if(strCredential!=NULL)
+			{
+					m_strCredential=new char[strlen(strCredential)+1];
+					strcpy(m_strCredential,strCredential);
+					free(strCredential);
+			}
+
 #ifdef EXPORT_ASYM_PRIVATE_KEY
 	if(strExportKey!=NULL)
 		{
@@ -1425,6 +1439,18 @@ SINT32 CACmdLnOptions::setLogDir(const UINT8* name,UINT32 len)
 		m_strLogDir=new char[len+1];
 		memcpy(m_strLogDir,name,len);
 		m_strLogDir[len]=0;
+		return E_SUCCESS;
+	}
+
+SINT32 CACmdLnOptions::getCredential(UINT8* credential,UINT32 len)
+	{
+		if(m_strCredential==NULL||credential==NULL)
+				return E_UNKNOWN;
+		if(len<=(UINT32)strlen(m_strCredential))
+				{
+					return E_SPACE;
+				}
+		strcpy((char*)credential,m_strCredential);
 		return E_SUCCESS;
 	}
 
