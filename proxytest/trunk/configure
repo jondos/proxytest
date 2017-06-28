@@ -1479,10 +1479,10 @@ Optional Features:
   --disable-epoll         do not use epoll
   --enable-pool=POOLSIZE  Specify if to build a pool mix and optionally the
                           poolsize
-  --enable-bandwidth-limitation
-                          Specify if to build with last mix bandwidth
-                          limitation. The limitation parameters can be
-                          specified in the mix configuration file.
+  --disable-bandwidth-limitation
+                          Specify if to build without bandwidth limitation.
+                          The limitation parameters can be specified in the
+                          mix configuration file.
   --enable-payment        Specify if to build with payment support
   --infoservice-serial    Use serial communication with infoservices
   --enable-server_monitoring
@@ -16662,12 +16662,12 @@ if test "${enable_pool+set}" = set; then :
 fi
 
 
-BANDWIDTH_LIMIT=""
+BANDWIDTH_LIMIT="-DDELAY_CHANNELS -DDELAY_USERS"
 # Check whether --enable-bandwidth-limitation was given.
 if test "${enable_bandwidth_limitation+set}" = set; then :
   enableval=$enable_bandwidth_limitation;
-		if test "x$enableval" != "xno" ; then
-			BANDWIDTH_LIMIT="-DDELAY_CHANNELS"
+		if test "x$enableval" = "xno" ; then
+			BANDWIDTH_LIMIT=""
 		fi
 
 
@@ -19033,8 +19033,8 @@ fi
 
 fi
 
-CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS"
-CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $DELAY_USERS $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS"
+CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT  $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS"
+CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS"
 LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB $GOOGLETEST_LIB"
 
 
