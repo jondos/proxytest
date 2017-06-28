@@ -720,7 +720,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 			{
 				const char* XML_HEADER="<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 				const UINT32 XML_HEADER_SIZE=strlen(XML_HEADER);
-				const char* XML_JAP_KEY_TEMPLATE="<JAPKeyExchange version=\"0.1\"><LinkEncryption>%s</LinkEncryption><MixEncryption>%s</MixEncryption><AccessControlCredential>%s<AccessControlCredential/></JAPKeyExchange>";
+				const char* XML_JAP_KEY_TEMPLATE="<JAPKeyExchange version=\"0.1\"><LinkEncryption>%s</LinkEncryption><MixEncryption>%s</MixEncryption><AccessControlCredential>%s</AccessControlCredential></JAPKeyExchange>";
 	      //DOM_Document doc=DOM_Document::createDocument();
    			//DOM_Element e = doc.createElement("JAPKeyExchange");
 				//doc.appendChild(e);
