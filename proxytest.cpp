@@ -754,6 +754,7 @@ exit(0);
 
 #ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
 		ProfilerStart("gperf.cpuprofiler.data");
+		ProfilerRegisterThread();
 #endif
 
 #ifndef _WIN32
