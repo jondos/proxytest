@@ -601,7 +601,11 @@ THREAD_RETURN lm_loopLog(void* param)
 */
 THREAD_RETURN lm_loopSendToMix(void* param)
 	{
-	CALastMix* pLastMix = static_cast<CALastMix*>(param);
+		#ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
+			ProfilerRegisterThread();
+		#endif
+
+		CALastMix* pLastMix = static_cast<CALastMix*>(param);
 		CAQueue* pQueue=pLastMix->m_pQueueSendToMix;
 		CAMuxSocket* pMuxSocket=pLastMix->m_pMuxIn;
 		SINT32 ret;
@@ -705,7 +709,10 @@ THREAD_RETURN lm_loopSendToMix(void* param)
  */
 THREAD_RETURN lm_loopReadFromMix(void *pParam)
 	{
-	CALastMix* pLastMix = static_cast<CALastMix*>(pParam);
+		#ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
+			ProfilerRegisterThread();
+		#endif
+		CALastMix* pLastMix = static_cast<CALastMix*>(pParam);
 		CAMuxSocket* pMuxSocket=pLastMix->m_pMuxIn;
 		CAQueue* pQueue=pLastMix->m_pQueueReadFromMix;
 		tQueueEntry* pQueueEntry=new tQueueEntry;
