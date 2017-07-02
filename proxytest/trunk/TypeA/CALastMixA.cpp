@@ -697,6 +697,9 @@ SINT32 CALastMixA::loop()
 										SINT32 len=MIXPACKET_SIZE;
 										ret=pChannelListEntry->pQueueSend->peek(tmpBuff,(UINT32*)&len);
 										len=pChannelListEntry->pSocket->send(tmpBuff,len);
+#ifdef _DEBUG
+										CAMsg::printMsg(LOG_DEBUG, "Channel %u: Wrote %i bytes to proxy\n", pChannelListEntry->channelIn, len);
+#endif
 										if(len>=0)
 											{
 												add64((UINT64&)m_logUploadedBytes,len);
