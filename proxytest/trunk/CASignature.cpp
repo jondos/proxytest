@@ -695,7 +695,7 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 				m_pRSA = NULL;
 			}
 #ifdef HAVE_ECC
-			else if (isECDSA());
+			else if (isECDSA())
 			{
 				EC_KEY_free(m_pEC);
 				m_pEC = NULL;
@@ -1151,20 +1151,31 @@ SINT32 CASignature::signECDSA(const UINT8* dgst, UINT32 dgstLen, UINT8* sig, UIN
 		return E_UNKNOWN;
 	}
 	memset(sig, 0, *sigLen);
+
+	BIGNUM * r = NULL;
+	BIGNUM * s = NULL;
+	#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+		ECDSA_SIG_get0(ecdsaSig,(const BIGNUM **) &r,(const BIGNUM **) &s);
+	#else
+		r = ecdsaSig->r;
+		s = ecdsaSig->s;
+	#endif
+
+
 	UINT32 rSize, sSize;
-	rSize = BN_num_bytes(ecdsaSig->r);
-	sSize = BN_num_bytes(ecdsaSig->s);
+	rSize = BN_num_bytes(r);
+	sSize = BN_num_bytes(s);
 
 	UINT32 rPos = (len/2)-rSize;
 	UINT32 sPos = len-sSize;
 
 	//CAMsg::printMsg(LOG_DEBUG, "Sig-Positions r: %d(size=%d), s: %d(size=%d)\n", rPos, rSize, sPos, sSize);
-	BN_bn2bin(ecdsaSig->r, sig + rPos);
-	BN_bn2bin(ecdsaSig->s, sig + sPos);
+	BN_bn2bin(r, sig + rPos);
+	BN_bn2bin(s, sig + sPos);
 	*sigLen = len;
 
 	UINT32 tmplen = 255;
-	UINT8 tmpbuff[tmplen];
+	UINT8 tmpbuff[255];
 	CABase64::encode(sig, *sigLen, tmpbuff, &tmplen);
 	ECDSA_SIG_free(ecdsaSig);
 
@@ -1236,8 +1247,17 @@ SINT32 CASignature::verifyECDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* 
 {
 	SINT32 len = sigLen / 2;
 	ECDSA_SIG* ecdsaSig = ECDSA_SIG_new();
-	ecdsaSig->r = BN_bin2bn(sig, len, ecdsaSig->r);
-	ecdsaSig->s = BN_bin2bn(sig+len, len, ecdsaSig->s);
+	BIGNUM * r = NULL;
+	BIGNUM * s = NULL;
+
+	r = BN_bin2bn(sig, len, r);
+	s = BN_bin2bn(sig+len, len, s);
+	#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+		ECDSA_SIG_set0(ecdsaSig,r,s);
+	#else
+		ecdsaSig->r = r;
+		ecdsaSig->s = s;
+	#endif
 
 	SINT32 ret = ECDSA_do_verify(dgst, dgstLen, ecdsaSig, m_pEC);
 	ECDSA_SIG_free(ecdsaSig);
