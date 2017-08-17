@@ -89,7 +89,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='VTune|Win32'">
     <ConfigurationType>Application</ConfigurationType>
@@ -168,8 +168,8 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">.\proxytest-lib\Debug-with-googleperftools\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">$(SolutionDir)\build\$(ProjectName)\$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug_with_unit_tests|Win32'">.\proxytest-lib\Debug\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\proxytest-lib\Release\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\proxytest-lib\Release\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\build\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\build\$(ProjectName)\$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='VTune|Win32'">.\proxytest___Win32_VTune\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='VTune|Win32'">.\proxytest___Win32_VTune\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='VTune|Win32'">proxytest</TargetName>
@@ -2762,10 +2762,12 @@
     <ClCompile Include="gcm\gcm.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-with-Mini-XML|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="gcm\prp.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-with-Mini-XML|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Hashtable.cpp" />
     <ClCompile Include="popt\popt.cpp">
@@ -3744,10 +3746,12 @@
     <ClCompile Include="xml\dom\mxml\mxmlDOMImplementation.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-with-Mini-XML|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="xml\dom\mxml\mxmlDOMNode.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-with-Mini-XML|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="xml\dom\mxml\mxmlXercesDOMParser.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

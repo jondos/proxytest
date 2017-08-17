@@ -52,6 +52,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_bSyslog=false;
 		m_bLogConsole = false;
 		m_bSocksSupport = false;
+		m_bVPNSupport = false;
 		m_bLocalProxy=m_bFirstMix=m_bLastMix=m_bMiddleMix=false;
 
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
@@ -478,7 +479,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		{"version",'v',POPT_ARG_NONE,&iVersion,0,"show version",NULL},
 		{"pidfile",'r',POPT_ARG_STRING,&strPidFile,0,"file where the PID will be stored","<file>"},
 		{"createConf",0,POPT_ARG_STRING,&strCreateConf,0,"creates a generic configuration for MixOnCD","[<file>]"},
-		{"credential",0,POPT_ARG_STRING,&strCredential,0,"credntiual for connetion to cascade [only for local proxy]","<credential>"},
+		{"credential",0,POPT_ARG_STRING,&strCredential,0,"credential for connetion to cascade [only for local proxy]","<credential>"},
 #ifdef EXPORT_ASYM_PRIVATE_KEY
 		{"exportKey",0,POPT_ARG_STRING,&strExportKey,0,"export private encryption key to file","<file>"},
 		{"importKey",0,POPT_ARG_STRING,&strImportKey,0,"import private encryption key from file","<file>"},
@@ -1670,30 +1671,33 @@ SINT32 CACmdLnOptions::setPaymentReminder(DOMElement* elemGeneral)
 
 SINT32 CACmdLnOptions::setAccessControlCredential(DOMElement* elemGeneral)
 	{
-	if (m_strAccessControlCredential != NULL)
-		{
-		delete[]m_strAccessControlCredential;
-		m_strAccessControlCredential = NULL;
-		}
+		if (m_strAccessControlCredential != NULL)
+			{
+				delete[]m_strAccessControlCredential;
+				m_strAccessControlCredential = NULL;
+			}
 
-	DOMElement* elemCredential = NULL;
-	UINT8 tmpBuff[TMP_BUFF_SIZE];
-	UINT32 tmpLen = TMP_BUFF_SIZE;
+		DOMElement* elemCredential = NULL;
+		UINT8 tmpBuff[TMP_BUFF_SIZE];
+		UINT32 tmpLen = TMP_BUFF_SIZE;
 
-	if (elemGeneral == NULL) return E_UNKNOWN;
-	ASSERT_GENERAL_OPTIONS_PARENT
-	(elemGeneral->getNodeName(), OPTIONS_NODE_CREDENTIAL);
+		if (elemGeneral == NULL)
+			return E_UNKNOWN;
+		ASSERT_GENERAL_OPTIONS_PARENT(elemGeneral->getNodeName(), OPTIONS_NODE_CREDENTIAL);
 
-	//get Run as Daemon
-	getDOMChildByName(elemGeneral, OPTIONS_NODE_CREDENTIAL, elemCredential, false);
+		//get Accesscontrol credentila
+		getDOMChildByName(elemGeneral, OPTIONS_NODE_CREDENTIAL, elemCredential, false);
 
-	if (getDOMElementValue(elemCredential, tmpBuff, &tmpLen) == E_SUCCESS)
-		{	
-			m_strAccessControlCredential = new UINT8[tmpLen + 1]; 
-			memcpy(m_strAccessControlCredential,tmpBuff,tmpLen);
-			m_strAccessControlCredential[tmpLen] = 0;
-		}
-	return E_SUCCESS;
+		if (getDOMElementValue(elemCredential, tmpBuff, &tmpLen) == E_SUCCESS)
+			{	
+				m_strAccessControlCredential = new UINT8[tmpLen + 1]; 
+				memcpy(m_strAccessControlCredential,tmpBuff,tmpLen);
+				m_strAccessControlCredential[tmpLen] = 0;
+				DOMElement* elemMixType=NULL;
+				getDOMChildByName(m_docMixInfo, "MixType", elemMixType, true);
+				setDOMElementAttribute(elemMixType, "accessControlled", true);
+			}
+		return E_SUCCESS;
 	}
 
 SINT32 CACmdLnOptions::getAccessControlCredential(UINT8* outbuff, UINT32* inoutsize)
@@ -3567,19 +3571,16 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 	m_cnTargets=0;
 
 	if(elemNetwork == NULL) return E_UNKNOWN;
-	ASSERT_NETWORK_OPTIONS_PARENT
-		(elemNetwork->getNodeName(), OPTIONS_NODE_NEXT_MIX);
+	ASSERT_NETWORK_OPTIONS_PARENT(elemNetwork->getNodeName(), OPTIONS_NODE_NEXT_MIX);
 
 	//NextMix --> only one!!
-	getDOMChildByName
-		(elemNetwork, OPTIONS_NODE_NEXT_MIX, elemNextMix, false);
+	getDOMChildByName(elemNetwork, OPTIONS_NODE_NEXT_MIX, elemNextMix, false);
 	if(elemNextMix != NULL)
 	{
 		NetworkType type=RAW_TCP;
 		CASocketAddr* addr = NULL;
 		DOMElement* elemType = NULL;
-		getDOMChildByName
-			(elemNextMix, OPTIONS_NODE_NETWORK_PROTOCOL, elemType, false);
+		getDOMChildByName(elemNextMix, OPTIONS_NODE_NETWORK_PROTOCOL, elemType, false);
 
 		bool bAddrIsSet = false;
 
@@ -3696,7 +3697,6 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 			CASocketAddr* addr=NULL;
 			UINT16 port;
 			bool bHttpProxyFound = false;
-			bool bVPNProxyFound = false;
 			for(UINT32 i=0; i < nlTargetInterfaces->getLength(); i++)
 			{
 				delete addr;
@@ -3704,8 +3704,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 				DOMNode* elemTargetInterface=NULL;
 				elemTargetInterface=nlTargetInterfaces->item(i);
 				DOMElement* elemType;
-				getDOMChildByName
-					(elemTargetInterface, OPTIONS_NODE_NETWORK_PROTOCOL, elemType,false);
+				getDOMChildByName	(elemTargetInterface, OPTIONS_NODE_NETWORK_PROTOCOL, elemType,false);
 				tmpLen = TMP_BUFF_SIZE;
 				if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
 					continue;
@@ -3732,8 +3731,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 				}
 				//ProxyType
 				elemType=NULL;
-				getDOMChildByName
-					(elemTargetInterface, OPTIONS_NODE_PROXY_TYPE, elemType, false);
+				getDOMChildByName	(elemTargetInterface, OPTIONS_NODE_PROXY_TYPE, elemType, false);
 				tmpLen = TMP_BUFF_SIZE;
 				if(getDOMElementValue(elemType,tmpBuff,&tmpLen)!=E_SUCCESS)
 					continue;
@@ -3851,7 +3849,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 					}
 					else if (proxy_type == TARGET_VPN_PROXY)
 						{
-							bVPNProxyFound = true;
+							m_bVPNSupport = true;
 						}
 				}
 
@@ -3871,7 +3869,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 				addr=NULL;
 			}
 
-			if (!bHttpProxyFound&&!bVPNProxyFound)
+			if (!bHttpProxyFound&&!m_bVPNSupport)
 			{
 				CAMsg::printMsg(LOG_CRIT, "No valid HTTP or VPN proxy was specified! Please install and configure an HTTP or VPN  proxy like Squid or the ANONVPN proxy before starting the mix.\n");
 				for (UINT32 i = 0; i < aktInterface; i++)
@@ -3914,6 +3912,10 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 			if (m_bSocksSupport)
 			{
 				setDOMElementAttribute(elemProxies, "socks5Support", (UINT8*)"true");
+			}
+			if (m_bVPNSupport)
+			{
+				setDOMElementAttribute(elemProxies, "vpnSupport", (UINT8*)"true");
 			}
 			DOMElement* elemProxy=createDOMElement(m_docMixInfo,"Proxy");
 			DOMElement* elemVisAddresses=createDOMElement(m_docMixInfo,"VisibleAddresses");

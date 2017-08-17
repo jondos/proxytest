@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.11.20"
+#define MIX_VERSION "00.11.21"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -676,7 +676,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 
 #ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
-	#include <google/profiler.h>
+	#include <gperftools/profiler.h>
 #endif
 
 #ifdef INTEL_IPP_CRYPTO
