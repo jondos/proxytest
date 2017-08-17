@@ -207,14 +207,14 @@ SINT32 CALocalProxy::init()
 
 SINT32 CALocalProxy::loop()
 	{
-		CASocketList  oSocketList;
-		CASocketGroup oSocketGroup(false);
-		oSocketGroup.add(m_socketIn);
+		CASocketList*  pSocketList = new CASocketList();
+		CASocketGroup* pSocketGroup=new CASocketGroup(false);
+		pSocketGroup->add(m_socketIn);
 		UINT16 socksPort=CALibProxytest::getOptions()->getSOCKSServerPort();
 		bool bHaveSocks=(socksPort!=0xFFFF);
 		if(bHaveSocks)
-			oSocketGroup.add(m_socketSOCKSIn);
-		oSocketGroup.add(m_muxOut);
+			pSocketGroup->add(m_socketSOCKSIn);
+		pSocketGroup->add(m_muxOut);
 		MIXPACKET* pMixPacket=new MIXPACKET;
 
 		memset(pMixPacket,0,MIXPACKET_SIZE);
@@ -234,7 +234,7 @@ SINT32 CALocalProxy::loop()
 		for(;;)
 			{
 				// Add timeout to select to allow for a replay attack to take place.
-				if((countRead=oSocketGroup.select(100))==SOCKET_ERROR)
+				if((countRead=pSocketGroup->select(100))==SOCKET_ERROR)
 					{
 						sSleep(1);
 						continue;
@@ -266,7 +266,7 @@ SINT32 CALocalProxy::loop()
 					bReplayPackets = false;
 				}
 
-				if(oSocketGroup.isSignaled(m_socketIn))
+				if(pSocketGroup->isSignaled(m_socketIn))
 					{
 						countRead--;
 						#ifdef _DEBUG
@@ -284,11 +284,11 @@ SINT32 CALocalProxy::loop()
 						else
 							{
 								newCipher=new CASymCipher[m_chainlen];
-								oSocketList.add(newSocket,newCipher);
-								oSocketGroup.add(*newSocket);
+								pSocketList->add(newSocket,newCipher);
+								pSocketGroup->add(*newSocket);
 							}
 					}
-				if(bHaveSocks&&oSocketGroup.isSignaled(m_socketSOCKSIn))
+				if(bHaveSocks&&pSocketGroup->isSignaled(m_socketSOCKSIn))
 					{
 						countRead--;
 						#ifdef _DEBUG
@@ -306,12 +306,12 @@ SINT32 CALocalProxy::loop()
 						else
 							{
 								newCipher=new CASymCipher[m_chainlen];
-								oSocketList.add(newSocket,newCipher);
-								oSocketGroup.add(*newSocket);
+								pSocketList->add(newSocket,newCipher);
+								pSocketGroup->add(*newSocket);
 							}
 					}
-				//Recevie from next Mix
-				if(oSocketGroup.isSignaled(m_muxOut))
+				//Receive from next Mix
+				if(pSocketGroup->isSignaled(m_muxOut))
 						{
 							countRead--;
 							ret=m_muxOut.receive(pMixPacket);
@@ -322,17 +322,17 @@ SINT32 CALocalProxy::loop()
 									goto MIX_CONNECTION_ERROR;
 								}
 
-							if(oSocketList.get(pMixPacket->channel,&oConnection)==E_SUCCESS)
+							if(pSocketList->get(pMixPacket->channel,&oConnection)==E_SUCCESS)
 								{
 									if(pMixPacket->flags==CHANNEL_CLOSE)
 										{
 											#ifdef _DEBUG
 												CAMsg::printMsg(LOG_DEBUG,"Closing Channel: %u ... ",pMixPacket->channel);
 											#endif
-											/*tmpSocket=*/oSocketList.remove(pMixPacket->channel);
+											/*tmpSocket=*/pSocketList->remove(pMixPacket->channel);
 											if(oConnection.pSocket!=NULL)
 												{
-													oSocketGroup.remove(*oConnection.pSocket);
+													pSocketGroup->remove(*oConnection.pSocket);
 													oConnection.pSocket->close();
 													#ifdef _DEBUG
 														CAMsg::printMsg(LOG_DEBUG,"closed!\n");
@@ -376,11 +376,11 @@ SINT32 CALocalProxy::loop()
 														#ifdef _DEBUG
 															CAMsg::printMsg(LOG_DEBUG,"sent sendme!\n");
 														#endif
-														oSocketList.addSendMeCounter(oConnection.outChannel,-(m_nFlowControlDownstreamSendMe-1));
+														pSocketList->addSendMeCounter(oConnection.outChannel,-(m_nFlowControlDownstreamSendMe-1));
 													}
 													else
 													{
-														oSocketList.addSendMeCounter(oConnection.outChannel,1);
+														pSocketList->addSendMeCounter(oConnection.outChannel,1);
 													}
 											}
 										}
@@ -388,25 +388,24 @@ SINT32 CALocalProxy::loop()
 						}
 				if(countRead>0)
 					{
-						CONNECTION* tmpCon;
-						tmpCon=oSocketList.getFirst();
+						CONNECTION* tmpCon=NULL;
+						tmpCon=pSocketList->getFirst();
 						while(tmpCon!=NULL&&countRead>0)
 							{
-								if(oSocketGroup.isSignaled(*tmpCon->pSocket))
+								if(pSocketGroup->isSignaled(*tmpCon->pSocket))
 									{
 										countRead--;
-										getRandom(pMixPacket->payload.data,PAYLOAD_SIZE);
-										if(!tmpCon->pCiphers[0].isKeyValid())
+											if(!tmpCon->pCiphers[0].isKeyValid())
 											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE-m_chainlen*m_SymChannelEncryptedKeySize);
 										else
 											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
 										if(len==SOCKET_ERROR||len==0)
 											{
 												CAMsg::printMsg(LOG_DEBUG,"client side close channel - upstream sent: %u\n",tmpCon->upstreamBytes);
-												CASocket* tmpSocket=oSocketList.remove(tmpCon->outChannel);
+												CASocket* tmpSocket=pSocketList->remove(tmpCon->outChannel);
 												if(tmpSocket!=NULL)
 													{
-														oSocketGroup.remove(*tmpSocket);
+														pSocketGroup->remove(*tmpSocket);
 														pMixPacket->flags=CHANNEL_CLOSE;
 														pMixPacket->channel=tmpCon->outChannel;
 														getRandom(pMixPacket->data,DATA_SIZE);
@@ -420,6 +419,7 @@ SINT32 CALocalProxy::loop()
 											}
 										else
 											{
+												getRandom(pMixPacket->payload.data+len,PAYLOAD_SIZE-len); //fill 'empty' packet payload with random values
 												pMixPacket->channel=tmpCon->outChannel;
 												tmpCon->upstreamBytes+=len;
 												pMixPacket->payload.len=htons((UINT16)len);
@@ -525,12 +525,12 @@ SINT32 CALocalProxy::loop()
 											}
 										break;
 									}
-								tmpCon=oSocketList.getNext();
+								tmpCon=pSocketList->getNext();
 							}
 					}
 			}
 MIX_CONNECTION_ERROR:
-		CONNECTION* tmpCon=oSocketList.getFirst();
+		CONNECTION* tmpCon=pSocketList->getFirst();
 		while(tmpCon!=NULL)
 			{
 				delete [] tmpCon->pCiphers;
@@ -541,6 +541,8 @@ MIX_CONNECTION_ERROR:
 			}
 		delete pMixPacket;
 		pMixPacket = NULL;
+		delete pSocketGroup;
+		delete pSocketList;
 		if(ret==E_SUCCESS)
 			return E_SUCCESS;
 		if(CALibProxytest::getOptions()->getAutoReconnect())

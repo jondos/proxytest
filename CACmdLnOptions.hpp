@@ -810,6 +810,7 @@ class CACmdLnOptions
 		char*		m_strEncryptedLogDir;
 		bool		m_bCompressedLogs;
 		bool 		m_bSocksSupport;
+		bool 		m_bVPNSupport;
 		bool		m_bSyslog;
 		bool		m_bLogConsole;
 		char*		m_strUser;

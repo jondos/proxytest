@@ -89,7 +89,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>MultiByte</CharacterSet>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='VTune|Win32'">
     <ConfigurationType>Application</ConfigurationType>
@@ -199,8 +199,8 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug_with_unit_tests|Win32'">true</LinkIncremental>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\Release\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\build\$(ProjectName)\$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\build\$(ProjectName)\$(Configuration)\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">proxytest</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.exe</TargetExt>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
@@ -284,7 +284,7 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>proxytest-lib.lib;ws2_32.lib;pthreadVC2.lib;xerces-c_3D.lib;mxml1.lib;libcrypto.lib;libssl.lib</AdditionalDependencies>
+      <AdditionalDependencies>proxytest-lib.lib;ws2_32.lib;pthreadVC2.lib;xerces-c_3D.lib;minixml-2.10.lib;libcrypto.lib;libssl.lib</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>C:\data\vld\bin\Win32\Debug;$(SolutionDir)\build\proxytest-lib\Debug;$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_MXML);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -484,9 +484,9 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>ws2_32.lib;ssleay32.lib;libeay32.lib;pthreadvc2.lib;xerces-c_3.lib</AdditionalDependencies>
+      <AdditionalDependencies>proxytest-lib.lib;ws2_32.lib;pthreadVC2.lib;xerces-c_3D.lib;minixml-2.10.lib;libcrypto.lib;libssl.lib</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>.\proxytest-lib\Release;$(LIB_XERCES_C_RELEASE);$(LIB_OPENSSL);$(LIB_PTHREADS);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\build\proxytest-lib\Release;$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_MXML);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(OutDir)proxytest.pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
