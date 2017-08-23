@@ -36,14 +36,14 @@ libmix_la_SOURCES = CAAbstractControlChannel.cpp\
 		    CADataRetentionLogFile.cpp\
 		    CADynaNetworking.cpp \
 		    CADynamicCascadeConfigurator.cpp \
-			CAFileSystemDirectory.cpp \
+		    CAFileSystemDirectory.cpp \
 		    CAFirstMix.cpp \
 		    CAFirstMixChannelList.cpp \
 		    CAHttpClient.cpp \
 		    CAInfoService.cpp \
 		    CAInfoServiceAware.cpp \
 		    CAIPList.cpp \
-			CAIPAddrWithNetmask.cpp \
+		    CAIPAddrWithNetmask.cpp \
 		    CALastMix.cpp \
 		    CALastMixChannelList.cpp\
 		    CAListenerInterface.cpp\
@@ -89,8 +89,8 @@ libmix_la_SOURCES = CAAbstractControlChannel.cpp\
 		    TermsAndConditions.cpp \
 		    packetintro.cpp \
 		    StdAfx.cpp \
-			InnerMiddleMix.cpp\
-			InnerMiddleMix.hpp\
+		    InnerMiddleMix.cpp\
+		    InnerMiddleMix.hpp\
 		    CAAbstractControlChannel.hpp\
 		    CAAbstractXMLEncodable.hpp\
 		    CAAbstractXMLSignable.hpp\
@@ -259,6 +259,8 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    TermsAndConditions.cpp \
 		    packetintro.cpp \
 		    StdAfx.cpp \
+		    InnerMiddleMix.cpp\
+		    InnerMiddleMix.hpp\
 		    CAAbstractControlChannel.hpp\
 		    CAAbstractXMLEncodable.hpp\
 		    CAAbstractXMLSignable.hpp\
