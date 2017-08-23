@@ -212,8 +212,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define MAX_SIGNATURE_ELEMENTS 10  // maximum of interpreted XML signature elements
 
-#define FLOW_CONTROL_SENDME_HARD_LIMIT 160 //last mix stops sending after this unacked packets
-#define FLOW_CONTROL_SENDME_SOFT_LIMIT 80 //last mix expect to get a 'SENDME' after this unacked packets
+#define FLOW_CONTROL_SENDME_HARD_LIMIT 16000 //last mix stops sending after this unacked packets
+#define FLOW_CONTROL_SENDME_SOFT_LIMIT 8000 //last mix expect to get a 'SENDME' after this unacked packets
 
 #if defined(PAYMENT) || defined(MANIOQ)
 	#define MAX_READ_FROM_PREV_MIX_QUEUE_SIZE 10000000
@@ -222,10 +222,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define MAX_NEXT_MIX_QUEUE_SIZE 10000000
 #else
 	//EXPERIMENTAL: reduce intermix-buffers for free mixes by factor 10
-	#define MAX_READ_FROM_PREV_MIX_QUEUE_SIZE 1000000
-	#define MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE 1000000 //How many bytes could be in the incoming queue ??
-	#define MAX_MIXIN_SEND_QUEUE_SIZE 1000000
-	#define MAX_NEXT_MIX_QUEUE_SIZE 1000000
+	#define MAX_READ_FROM_PREV_MIX_QUEUE_SIZE 100000000
+	#define MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE 100000000 //How many bytes could be in the incoming queue ??
+	#define MAX_MIXIN_SEND_QUEUE_SIZE 100000000
+	#define MAX_NEXT_MIX_QUEUE_SIZE 100000000
 #endif
 //#define FORCED_DELAY
 //#define MIN_LATENCY 250
