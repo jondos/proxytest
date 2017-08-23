@@ -598,7 +598,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(INCLUDE_MXML);$(INCLUDE_OPENSSL);$(INCLUDE_PTHREADS);$(INCLUDE_ZLIB);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_CONSOLE;_DEBUG;MXML_DOM;ONLY_LOCAL_PROXY;INCLUDE_MIDDLE_MIX;WITH_INTEGRITY_CHECK;_REENTRANT;__MIX_TEST;__CLEANUP_C;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_CONSOLE;_DEBUG;MXML_DOM;ONLY_MIDDLE_MIX;WITH_INTEGRITY_CHECK;_REENTRANT;__MIX_TEST;__CLEANUP_C;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -2770,6 +2770,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Hashtable.cpp" />
+    <ClCompile Include="InnerMiddleMix.cpp" />
     <ClCompile Include="popt\popt.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">Disabled</Optimization>
@@ -3941,6 +3942,7 @@
     <ClInclude Include="gcm\gcm.h" />
     <ClInclude Include="gcm\prp.h" />
     <ClInclude Include="Hashtable.hpp" />
+    <ClInclude Include="InnerMiddleMix.hpp" />
     <ClInclude Include="popt\popt.h" />
     <ClInclude Include="popt\poptint.h" />
     <ClInclude Include="popt\system.h" />

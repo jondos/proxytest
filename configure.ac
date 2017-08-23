@@ -917,7 +917,7 @@ AC_ARG_ENABLE(build-only-lib,
 
 onlymiddlemix="false"
 AC_ARG_ENABLE(only-middle-mix,
-	AS_HELP_STRING([--enable-only-middle-mix],[Build just the code for operating a middle mix]),
+	AS_HELP_STRING([--enable-only-middle-mix],[Build just the code for operating a last or middle mix]),
 	[
 		if test "x$enableval" != "xno" ; then
 			onlymiddlemix="true"
@@ -977,6 +977,8 @@ if test -n "$sconetoolchain"; then
     AC_SUBST(SCONE_TOOLCHAIN,"$sconetoolchain")
     AC_SUBST(SCONE_GCC,"$CC")
     AM_CONDITIONAL([USE_SCONE],true)
+	CXXFLAGS="$CXXFLAGS -DWITH_SGX"
+	CFLAGS="$CFLAGS -DWITH_SGX"
 else
     AM_CONDITIONAL([USE_SCONE],false)
 fi

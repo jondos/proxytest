@@ -37,6 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAThreadList.hpp"
 #include "CAStatusManager.hpp"
 #include "CALibProxytest.hpp"
+#include "InnerMiddleMix.hpp"
 
 #ifdef _DEBUG //For FreeBSD memory checking functionality
 	const char* _malloc_options="AX";
@@ -46,10 +47,31 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAReplayDatabase.hpp"
 #endif
 
-#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
-	#include "CAMiddleMix.hpp"
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INLUDE_LAST_MIX
+
+#ifdef INCLUDE_MIDDLE_MIX
+#include "CAMiddleMix.hpp"
+InnerMiddleMix* pIMix =NULL;
+bool bIsInnerMiddleMix=false;
+#endif
+
+#ifdef INCLUDE_LAST_MIX
+	#ifdef NEW_MIX_TYPE
+		/* use TypeB mixes */
+		#include "TypeB/CAFirstMixB.hpp"
+		#include "TypeB/CALastMixB.hpp"
+	#else
+		#include "TypeA/CAFirstMixA.hpp"
+		#include "TypeA/CALastMixA.hpp"
+	#endif
+#endif
+
+
 // The Mix....
 CAMix* pMix=NULL;
+
+
+
 #endif
 
 #ifndef ONLY_LOCAL_PROXY
@@ -456,7 +478,7 @@ See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 int main(int argc, const char* argv[])
 	{
 		SINT32 exitCode=0;
-#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INLUDE_LAST_MIX
 		pMix=NULL;
 #endif
 		UINT32 lLogOpts = 0;
@@ -834,7 +856,7 @@ exit(0);
 				//		goto EXIT;
 				//	}
 				//else
-#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INCLUDE_LAST_MIX 
 			SINT32 s32MaxSockets=CASocket::getMaxOpenSockets();
 			CAMsg::printMsg(LOG_INFO,"Max Number of sockets we can open: %i\n",s32MaxSockets);
 			
@@ -866,7 +888,7 @@ exit(0);
 					pMix=new CAMiddleMix();
 					MONITORING_FIRE_NET_EVENT(ev_net_middleMixInited);
 				}
-#if !defined ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX 
 				else
 				{
 					CAMsg::printMsg(LOG_INFO,"I am the Last MIX...\n");
@@ -878,12 +900,24 @@ exit(0);
 					MONITORING_FIRE_NET_EVENT(ev_net_lastMixInited);
 				}
 #endif
+#ifdef WITH_SGX
+				else 
+				{
+					bIsInnerMiddleMix=true;
+					pIMix=new InnerMiddleMix();
+					CAMsg::printMsg(LOG_INFO, "Starting Inner Middle Mix");
+					pIMix->start();
+					if(pIMix!=NULL) delete pIMix;
+					pIMix=NULL;
+					goto EXIT;
+				}
+#endif // WTIH_SGX
 #else
 				CAMsg::printMsg(LOG_ERR,"this Mix is compiled to work only as local proxy!\n");
 				exit(EXIT_FAILURE);
 #endif
 			}
-#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INCLUDE_LAST_MIX 
 #ifndef DYNAMIC_MIX
 	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
 		if(pMix->start()!=E_SUCCESS)

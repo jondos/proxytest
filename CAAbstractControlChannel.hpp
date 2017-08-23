@@ -29,7 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAABSTRACTCONTROLCHANNEL__
 #define __CAABSTRACTCONTROLCHANNEL__
 
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX 
 #include "CAControlChannelDispatcher.hpp"
 #include "xml/DOM_Output.hpp"
 

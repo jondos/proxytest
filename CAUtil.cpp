@@ -172,7 +172,7 @@ char* strins(const char* src,const char * pos,const char* ins)
 		return strins(src,pos-src,ins);
 	}
 
-#if !defined ONLY_LOCAL_PROXY 
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX 
 /** Log information about the current memory (heap) usage. */
 void logMemoryUsage()
 	{

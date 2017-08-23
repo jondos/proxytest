@@ -52,8 +52,12 @@ class CAMiddleMix:public
 					m_pMultiSignature=NULL;
 					m_pInfoService=NULL;
 					m_pQueueSendToMixBefore=m_pQueueSendToMixAfter=NULL;
+					upstreamPreBuffer=NULL;
+					upstreamPostBuffer=NULL;
+					m_bShMemConfigured=false;
 #ifdef DYNAMIC_MIX
 					m_bBreakNeeded = false;
+
 #endif
 				}
 			virtual ~CAMiddleMix(){clean();};
@@ -99,6 +103,26 @@ private:
 			CAMiddleMixChannelList* m_pMiddleMixChannelList;
 			//CAInfoService* m_pInfoService;
 //			friend THREAD_RETURN mm_loopDownStream(void *p);
+
+
+			/*shared memory*/
+			const char *upstreamMemoryPreName="upstreamshmempre";
+			const char *upstreamMemoryPostName="upstreamshmempost";
+			const char *downstreamMemoryPreName="downstreamshmempre";
+			const char *downstreamMemoryPostName="downstreamshmempost";
+
+			void* upstreamPreBuffer;
+			void* upstreamPostBuffer;
+			void* downstreamPreBuffer;
+			void* downstreamPostBuffer;
+		
+			/*shared memory semaphors*/
+			int upstreamSemPreId, upstreamSemPostId;
+			int downstreamSemPreId, downstreamSemPostId;
+			bool m_bShMemConfigured;
+			
+			int accessSharedMemory(int semId, tPoolEntry* destination, tPoolEntry* source);
+			
 protected:
 			CAQueue* m_pQueueSendToMixBefore;
 			CAQueue* m_pQueueSendToMixAfter;
