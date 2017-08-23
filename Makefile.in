@@ -152,7 +152,8 @@ am__libproxytest_a_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CAThreadPool.cpp CAThreadList.cpp CAUtil.cpp CAXMLBI.cpp \
 	CAXMLCostConfirmation.cpp CAXMLErrorMessage.cpp \
 	CAXMLPriceCert.cpp Hashtable.cpp TermsAndConditions.cpp \
-	packetintro.cpp StdAfx.cpp CAAbstractControlChannel.hpp \
+	packetintro.cpp StdAfx.cpp InnerMiddleMix.cpp \
+	InnerMiddleMix.hpp CAAbstractControlChannel.hpp \
 	CAAbstractXMLEncodable.hpp CAAbstractXMLSignable.hpp \
 	CAAccountingBIInterface.hpp CAAccountingControlChannel.hpp \
 	CAAccountingDBInterface.hpp CAAccountingInstance.hpp \
@@ -258,7 +259,8 @@ am__libproxytest_a_SOURCES_DIST = CAAbstractControlChannel.cpp \
 @ONLY_LIB_FALSE@	libproxytest_a-Hashtable.$(OBJEXT) \
 @ONLY_LIB_FALSE@	libproxytest_a-TermsAndConditions.$(OBJEXT) \
 @ONLY_LIB_FALSE@	libproxytest_a-packetintro.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-StdAfx.$(OBJEXT)
+@ONLY_LIB_FALSE@	libproxytest_a-StdAfx.$(OBJEXT) \
+@ONLY_LIB_FALSE@	libproxytest_a-InnerMiddleMix.$(OBJEXT)
 libproxytest_a_OBJECTS = $(am_libproxytest_a_OBJECTS)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -746,14 +748,14 @@ mix_LDADD = $(am__append_1) $(am__append_2)
 @ONLY_LIB_TRUE@		    CADataRetentionLogFile.cpp\
 @ONLY_LIB_TRUE@		    CADynaNetworking.cpp \
 @ONLY_LIB_TRUE@		    CADynamicCascadeConfigurator.cpp \
-@ONLY_LIB_TRUE@			CAFileSystemDirectory.cpp \
+@ONLY_LIB_TRUE@		    CAFileSystemDirectory.cpp \
 @ONLY_LIB_TRUE@		    CAFirstMix.cpp \
 @ONLY_LIB_TRUE@		    CAFirstMixChannelList.cpp \
 @ONLY_LIB_TRUE@		    CAHttpClient.cpp \
 @ONLY_LIB_TRUE@		    CAInfoService.cpp \
 @ONLY_LIB_TRUE@		    CAInfoServiceAware.cpp \
 @ONLY_LIB_TRUE@		    CAIPList.cpp \
-@ONLY_LIB_TRUE@			CAIPAddrWithNetmask.cpp \
+@ONLY_LIB_TRUE@		    CAIPAddrWithNetmask.cpp \
 @ONLY_LIB_TRUE@		    CALastMix.cpp \
 @ONLY_LIB_TRUE@		    CALastMixChannelList.cpp\
 @ONLY_LIB_TRUE@		    CAListenerInterface.cpp\
@@ -799,8 +801,8 @@ mix_LDADD = $(am__append_1) $(am__append_2)
 @ONLY_LIB_TRUE@		    TermsAndConditions.cpp \
 @ONLY_LIB_TRUE@		    packetintro.cpp \
 @ONLY_LIB_TRUE@		    StdAfx.cpp \
-@ONLY_LIB_TRUE@			InnerMiddleMix.cpp\
-@ONLY_LIB_TRUE@			InnerMiddleMix.hpp\
+@ONLY_LIB_TRUE@		    InnerMiddleMix.cpp\
+@ONLY_LIB_TRUE@		    InnerMiddleMix.hpp\
 @ONLY_LIB_TRUE@		    CAAbstractControlChannel.hpp\
 @ONLY_LIB_TRUE@		    CAAbstractXMLEncodable.hpp\
 @ONLY_LIB_TRUE@		    CAAbstractXMLSignable.hpp\
@@ -967,6 +969,8 @@ mix_LDADD = $(am__append_1) $(am__append_2)
 @ONLY_LIB_FALSE@		    TermsAndConditions.cpp \
 @ONLY_LIB_FALSE@		    packetintro.cpp \
 @ONLY_LIB_FALSE@		    StdAfx.cpp \
+@ONLY_LIB_FALSE@		    InnerMiddleMix.cpp\
+@ONLY_LIB_FALSE@		    InnerMiddleMix.hpp\
 @ONLY_LIB_FALSE@		    CAAbstractControlChannel.hpp\
 @ONLY_LIB_FALSE@		    CAAbstractXMLEncodable.hpp\
 @ONLY_LIB_FALSE@		    CAAbstractXMLSignable.hpp\
@@ -1365,6 +1369,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAXMLErrorMessage.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAXMLPriceCert.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-Hashtable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-InnerMiddleMix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-StdAfx.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-TermsAndConditions.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-packetintro.Po@am__quote@
@@ -2471,6 +2476,20 @@ libproxytest_a-StdAfx.obj: StdAfx.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='StdAfx.cpp' object='libproxytest_a-StdAfx.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-StdAfx.obj `if test -f 'StdAfx.cpp'; then $(CYGPATH_W) 'StdAfx.cpp'; else $(CYGPATH_W) '$(srcdir)/StdAfx.cpp'; fi`
+
+libproxytest_a-InnerMiddleMix.o: InnerMiddleMix.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-InnerMiddleMix.o -MD -MP -MF $(DEPDIR)/libproxytest_a-InnerMiddleMix.Tpo -c -o libproxytest_a-InnerMiddleMix.o `test -f 'InnerMiddleMix.cpp' || echo '$(srcdir)/'`InnerMiddleMix.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-InnerMiddleMix.Tpo $(DEPDIR)/libproxytest_a-InnerMiddleMix.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='InnerMiddleMix.cpp' object='libproxytest_a-InnerMiddleMix.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-InnerMiddleMix.o `test -f 'InnerMiddleMix.cpp' || echo '$(srcdir)/'`InnerMiddleMix.cpp
+
+libproxytest_a-InnerMiddleMix.obj: InnerMiddleMix.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-InnerMiddleMix.obj -MD -MP -MF $(DEPDIR)/libproxytest_a-InnerMiddleMix.Tpo -c -o libproxytest_a-InnerMiddleMix.obj `if test -f 'InnerMiddleMix.cpp'; then $(CYGPATH_W) 'InnerMiddleMix.cpp'; else $(CYGPATH_W) '$(srcdir)/InnerMiddleMix.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-InnerMiddleMix.Tpo $(DEPDIR)/libproxytest_a-InnerMiddleMix.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='InnerMiddleMix.cpp' object='libproxytest_a-InnerMiddleMix.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-InnerMiddleMix.obj `if test -f 'InnerMiddleMix.cpp'; then $(CYGPATH_W) 'InnerMiddleMix.cpp'; else $(CYGPATH_W) '$(srcdir)/InnerMiddleMix.cpp'; fi`
 
 libmix_la-CAAbstractControlChannel.lo: CAAbstractControlChannel.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAAbstractControlChannel.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAAbstractControlChannel.Tpo -c -o libmix_la-CAAbstractControlChannel.lo `test -f 'CAAbstractControlChannel.cpp' || echo '$(srcdir)/'`CAAbstractControlChannel.cpp
