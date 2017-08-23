@@ -526,7 +526,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		m_bAutoReconnect=true;
 
 		/* LERNGRUPPE: Also try to use default config file for Mix Category 1 */
-		if(configfile == NULL)
+	if(configfile == NULL)
 		{
 				configfile = (char*) malloc(sizeof(char) * (strlen(DEFAULT_CONFIG_FILE)+1));
 				strncpy(configfile, DEFAULT_CONFIG_FILE, (strlen(DEFAULT_CONFIG_FILE)+1));
