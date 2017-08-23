@@ -322,7 +322,8 @@ am__libmix_la_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CAThreadPool.cpp CAThreadList.cpp CAUtil.cpp CAXMLBI.cpp \
 	CAXMLCostConfirmation.cpp CAXMLErrorMessage.cpp \
 	CAXMLPriceCert.cpp Hashtable.cpp TermsAndConditions.cpp \
-	packetintro.cpp StdAfx.cpp CAAbstractControlChannel.hpp \
+	packetintro.cpp StdAfx.cpp InnerMiddleMix.cpp \
+	InnerMiddleMix.hpp CAAbstractControlChannel.hpp \
 	CAAbstractXMLEncodable.hpp CAAbstractXMLSignable.hpp \
 	CAAccountingBIInterface.hpp CAAccountingControlChannel.hpp \
 	CAAccountingDBInterface.hpp CAAccountingInstance.hpp \
@@ -423,7 +424,8 @@ am__libmix_la_SOURCES_DIST = CAAbstractControlChannel.cpp \
 @ONLY_LIB_TRUE@	libmix_la-CAXMLPriceCert.lo \
 @ONLY_LIB_TRUE@	libmix_la-Hashtable.lo \
 @ONLY_LIB_TRUE@	libmix_la-TermsAndConditions.lo \
-@ONLY_LIB_TRUE@	libmix_la-packetintro.lo libmix_la-StdAfx.lo
+@ONLY_LIB_TRUE@	libmix_la-packetintro.lo libmix_la-StdAfx.lo \
+@ONLY_LIB_TRUE@	libmix_la-InnerMiddleMix.lo
 libmix_la_OBJECTS = $(am_libmix_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -626,6 +628,7 @@ LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+LT_SYS_LIBRARY_PATH = @LT_SYS_LIBRARY_PATH@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
@@ -700,6 +703,7 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -795,6 +799,8 @@ mix_LDADD = $(am__append_1) $(am__append_2)
 @ONLY_LIB_TRUE@		    TermsAndConditions.cpp \
 @ONLY_LIB_TRUE@		    packetintro.cpp \
 @ONLY_LIB_TRUE@		    StdAfx.cpp \
+@ONLY_LIB_TRUE@			InnerMiddleMix.cpp\
+@ONLY_LIB_TRUE@			InnerMiddleMix.hpp\
 @ONLY_LIB_TRUE@		    CAAbstractControlChannel.hpp\
 @ONLY_LIB_TRUE@		    CAAbstractXMLEncodable.hpp\
 @ONLY_LIB_TRUE@		    CAAbstractXMLSignable.hpp\
@@ -1281,6 +1287,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAXMLErrorMessage.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAXMLPriceCert.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-Hashtable.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-InnerMiddleMix.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-StdAfx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-TermsAndConditions.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-packetintro.Plo@am__quote@
@@ -3003,6 +3010,13 @@ libmix_la-StdAfx.lo: StdAfx.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='StdAfx.cpp' object='libmix_la-StdAfx.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-StdAfx.lo `test -f 'StdAfx.cpp' || echo '$(srcdir)/'`StdAfx.cpp
+
+libmix_la-InnerMiddleMix.lo: InnerMiddleMix.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-InnerMiddleMix.lo -MD -MP -MF $(DEPDIR)/libmix_la-InnerMiddleMix.Tpo -c -o libmix_la-InnerMiddleMix.lo `test -f 'InnerMiddleMix.cpp' || echo '$(srcdir)/'`InnerMiddleMix.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-InnerMiddleMix.Tpo $(DEPDIR)/libmix_la-InnerMiddleMix.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='InnerMiddleMix.cpp' object='libmix_la-InnerMiddleMix.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-InnerMiddleMix.lo `test -f 'InnerMiddleMix.cpp' || echo '$(srcdir)/'`InnerMiddleMix.cpp
 
 mostlyclean-libtool:
 	-rm -f *.lo

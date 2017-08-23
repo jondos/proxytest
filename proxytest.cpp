@@ -857,7 +857,7 @@ exit(0);
 				//	}
 				//else
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INCLUDE_LAST_MIX 
-			SINT32 s32MaxSockets=CASocket::getMaxOpenSockets();
+			SINT32 s32MaxSockets=10000;//CASocket::getMaxOpenSockets();
 			CAMsg::printMsg(LOG_INFO,"Max Number of sockets we can open: %i\n",s32MaxSockets);
 			
 #ifdef SERVER_MONITORING
