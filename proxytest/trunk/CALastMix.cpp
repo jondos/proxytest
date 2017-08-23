@@ -26,7 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX
 #include "CALastMix.hpp"
 #ifdef NEW_MIX_TYPE // TypeB mixes
 	#include "TypeB/typedefsb.hpp"
@@ -47,6 +47,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAPool.hpp"
 #include "xml/DOM_Output.hpp"
 #include "CAStatusManager.hpp"
+#include "CAControlChannelDispatcher.hpp"
 /*******************************************************************************/
 // ----------START NEW VERSION -----------------------
 //---------------------------------------------------------
@@ -72,8 +73,11 @@ SINT32 CALastMix::initOnce()
 				CAMsg::printMsg(LOG_CRIT,"No ListenerInterfaces specified!\n");
 				return E_UNKNOWN;
 			}
+#ifndef INCLUDE_LAST_MIX
+/// TODO: Check what is done her and if this is important for any last mix or only in case of dynamic mixes...
 		if(CALibProxytest::getOptions()->getCascadeXML() != NULL)
 			initMixCascadeInfo(CALibProxytest::getOptions()->getCascadeXML());
+#endif
 		return E_SUCCESS;
 	}
 

@@ -89,6 +89,8 @@ libmix_la_SOURCES = CAAbstractControlChannel.cpp\
 		    TermsAndConditions.cpp \
 		    packetintro.cpp \
 		    StdAfx.cpp \
+			InnerMiddleMix.cpp\
+			InnerMiddleMix.hpp\
 		    CAAbstractControlChannel.hpp\
 		    CAAbstractXMLEncodable.hpp\
 		    CAAbstractXMLSignable.hpp\

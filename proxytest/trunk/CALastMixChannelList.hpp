@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CALASTMIXCHANNELLIST__
 #define __CALASTMIXCHANNELLIST__
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX 
 #include "CASocket.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAQueue.hpp"

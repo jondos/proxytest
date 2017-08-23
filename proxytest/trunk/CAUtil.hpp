@@ -546,7 +546,7 @@ SINT32 parseS64(const UINT8 * str, SINT64& value);
 	*/
 SINT32 readPasswd(UINT8* buff,UINT32 len);
 
-#if !defined ONLY_LOCAL_PROXY 
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX
 void logMemoryUsage();
 #endif //ONLY_LOCAL_PROXY
 

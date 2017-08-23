@@ -90,6 +90,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses RSA-OAEP for key transport and two keys for upstream/downstream channel cryption (--> now enabled by default (i.e. can not be disbaled anymore!)
 //#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
 
+//define WITH_SGX //should the Intel SGX support be enabled
+
 //#define REPLAY_DETECTION // enable to prevent replay of mix packets
 //#define HAVE_ECC // define if you have (and wnat to use) ECC cryptography
 //#define SSL_HACK //???
@@ -267,6 +269,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef ONLY_MIDDLE_MIX
 	#define ONLY_LOCAL_PROXY
 	#define INCLUDE_MIDDLE_MIX
+	#define INCLUDE_LAST_MIX
 #endif
 
 #if defined (_WIN32) &&!defined(__CYGWIN__)
@@ -434,6 +437,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <fnmatch.h>
 	#include <dirent.h>
 	#include <ctype.h>
+
+#ifdef WITH_SGX
+	#include "shm_header.h"
+#endif
 	typedef struct sockaddr SOCKADDR;
 	typedef SOCKADDR* LPSOCKADDR;
 	#define SOCKET int
