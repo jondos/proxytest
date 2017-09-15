@@ -1229,7 +1229,7 @@ SINT32 CASignature::verifyDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* si
 	BIGNUM * s = NULL;
 	r = BN_bin2bn(sig, 20, r);
 	s = BN_bin2bn(sig+20, 20, s);
-	#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+	#if OPENSSL_VERSION_NUMBER	> 0x100020cfL
 		DSA_SIG_set0(dsaSig,r,s);
 	#else
 		dsaSig->r = r;
