@@ -190,7 +190,7 @@ inline DSA* DSA_clone(DSA* dsa)
 		if(dsa==NULL)
 			return NULL;
 		DSA* tmpDSA=DSA_new();
-#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+#if  OPENSSL_VERSION_NUMBER > 0x100020cfL
 		BIGNUM* p = NULL;
 		BIGNUM* q = NULL;
 		BIGNUM* g = NULL;
