@@ -783,7 +783,7 @@ SINT32 CAASymCipher::getPublicKeyAsDOMElement(DOMElement *&elemRoot, XERCES_CPP_
 	elemRoot = createDOMElement(docOwner, "RSAKeyValue");
 	BIGNUM* n = NULL;
 	BIGNUM* e = NULL;
-#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+#if  OPENSSL_VERSION_NUMBER > 0x100020cfL
 	RSA_get0_key(m_pRSA,(const BIGNUM**) &n,(const BIGNUM**) &e, NULL );
 #else
 	n = m_pRSA->n;
