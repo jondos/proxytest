@@ -79,7 +79,7 @@ SINT32 CABase64::decode(const UINT8*in, UINT32 inlen, UINT8*out, UINT32*outlen)
 			(*outlen) += len;
 			ret = E_SUCCESS;
 			}
-#if OPENSSL_VERSION_NUMBER >= 0x1000204fL
+#if OPENSSL_VERSION_NUMBER > 0x100020cfL
 		EVP_ENCODE_CTX_free(pCTX);
 #else
 		delete pCTX;
