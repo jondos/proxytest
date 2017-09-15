@@ -1154,7 +1154,7 @@ SINT32 CASignature::signECDSA(const UINT8* dgst, UINT32 dgstLen, UINT8* sig, UIN
 
 	BIGNUM * r = NULL;
 	BIGNUM * s = NULL;
-	#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+	#if OPENSSL_VERSION_NUMBER	> 0x100020cfL
 		ECDSA_SIG_get0(ecdsaSig,(const BIGNUM **) &r,(const BIGNUM **) &s);
 	#else
 		r = ecdsaSig->r;
@@ -1252,7 +1252,7 @@ SINT32 CASignature::verifyECDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* 
 
 	r = BN_bin2bn(sig, len, r);
 	s = BN_bin2bn(sig+len, len, s);
-	#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+	#if OPENSSL_VERSION_NUMBER	> 0x100020cfL
 		ECDSA_SIG_set0(ecdsaSig,r,s);
 	#else
 		ecdsaSig->r = r;
