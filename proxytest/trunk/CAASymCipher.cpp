@@ -592,7 +592,7 @@ SINT32 CAASymCipher::setPublicKeyAsDOMNode(DOMNode *node)
 							if (m_pRSA != NULL)
 								RSA_free(m_pRSA);
 							m_pRSA = tmpRSA;
-							#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+							#if  OPENSSL_VERSION_NUMBER > 0x100020cfL
 								RSA_set0_key(m_pRSA,n,e, NULL );
 							#else
 								m_pRSA->n=n;
