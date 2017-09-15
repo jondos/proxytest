@@ -419,7 +419,7 @@ SINT32 CACertificate::verify(const CACertificate* a_cert) const
 
 bool CACertificate::isValid() const
 {
-#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+#if  OPENSSL_VERSION_NUMBER > 0x100020cfL
 	const ASN1_TIME* pValidNotBefore=X509_get0_notBefore(m_pCert);
 	const ASN1_TIME* pValidNotAfter=X509_get0_notAfter(m_pCert);
 #else
