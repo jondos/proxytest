@@ -64,7 +64,7 @@ void setRSAFlags(RSA *pRSA)
 {
 	if (pRSA == NULL)
 		return;
-	#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+	#if  OPENSSL_VERSION_NUMBER > 0x100020cfL
 		RSA_set_flags(pRSA,RSA_FLAG_THREAD_SAFE | RSA_FLAG_NO_BLINDING );
 	#else
 			pRSA->flags |= RSA_FLAG_THREAD_SAFE;
