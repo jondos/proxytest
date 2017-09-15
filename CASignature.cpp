@@ -92,7 +92,7 @@ SINT32 CASignature::generateSignKey(UINT32 size)
 		if(m_pDSA!=NULL)
 			DSA_free(m_pDSA);
 		m_pDSA=NULL;
-#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+#if  OPENSSL_VERSION_NUMBER > 0x100020cfL
 		m_pDSA = DSA_new();
 		SINT32 ret=DSA_generate_parameters_ex(m_pDSA,size,NULL,0,NULL,NULL,NULL);
 		if (ret != 1)
@@ -196,7 +196,7 @@ SINT32 CASignature::setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const ch
 				}
 				PKCS12_free(tmpPKCS12);
 				int keyType = 0;
-				#if  OPENSSL_VERSION_NUMBER >= 0x1000204fL
+				#if  OPENSSL_VERSION_NUMBER > 0x100020cfL
 					keyType = EVP_PKEY_id(key);
 				#else
 					keyType = key->type;
@@ -205,7 +205,7 @@ SINT32 CASignature::setSignKey(const UINT8* buff,UINT32 len,UINT32 type,const ch
 				{
 					// found DSA key
 					DSA* tmpDSA = NULL;
-					#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+					#if OPENSSL_VERSION_NUMBER	> 0x100020cfL
 						tmpDSA = DSA_clone(EVP_PKEY_get1_DSA(key));
 					#else
 						tmpDSA = DSA_clone(key->pkey.dsa);
@@ -347,7 +347,7 @@ SINT32 CASignature::parseSignKeyXML(const UINT8* buff,UINT32 len)
 				XMLString::release(&name);
 				child=child->getNextSibling();
 			}
-#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL			
+#if OPENSSL_VERSION_NUMBER	> 0x100020cfL			
 		DSA_set0_pqg(tmpDSA, p, q, g);
 		DSA_set0_key(tmpDSA, pub_key, priv_key);
 #else
@@ -707,7 +707,7 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 		EVP_PKEY *key=X509_get_pubkey(pCert->m_pCert);
 
 		int keyType = 0;
-#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+#if OPENSSL_VERSION_NUMBER	> 0x100020cfL
 		keyType=EVP_PKEY_id(key);
 #else		
 		keyType=key->type;
@@ -715,7 +715,7 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 		if(EVP_PKEY_type(keyType) == EVP_PKEY_DSA)
 		{
 			DSA* tmpDSA = NULL;
-#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+#if OPENSSL_VERSION_NUMBER	> 0x100020cfL
 			tmpDSA=DSA_clone(EVP_PKEY_get1_DSA(key));
 #else
 			tmpDSA=DSA_clone(key->pkey.dsa);
@@ -728,7 +728,7 @@ SINT32 CASignature::setVerifyKey(CACertificate* pCert)
 		if(EVP_PKEY_type(keyType) == EVP_PKEY_RSA)
 		{
 			RSA* tmpRSA = NULL;
-#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+#if OPENSSL_VERSION_NUMBER	> 0x100020cfL
 			tmpRSA=RSA_clone(EVP_PKEY_get1_RSA(key));
 #else
 			tmpRSA=RSA_clone(key->pkey.rsa);
