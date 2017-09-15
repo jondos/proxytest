@@ -900,7 +900,7 @@ SINT32 CASignature::setVerifyKey(const DOMElement* xmlKey)
 		{
 			DSA_free(m_pDSA);
 		}
-#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+#if OPENSSL_VERSION_NUMBER	> 0x100020cfL
 		DSA_set0_pqg(tmpDSA, p, q, g);
 		DSA_set0_key(tmpDSA, pub_key, NULL);
 #else
@@ -1097,7 +1097,7 @@ SINT32 CASignature::encodeRS(UINT8* out,UINT32* outLen,const DSA_SIG* const pdsa
 											//(Due to be compatible to the standarad r and s must be 20 bytes each)
 		BIGNUM * r = NULL;
 		BIGNUM * s = NULL;
-		#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+		#if OPENSSL_VERSION_NUMBER	> 0x100020cfL
 			DSA_SIG_get0(pdsaSig,(const BIGNUM **) &r,(const BIGNUM **) &s);
 		#else
 			r = pdsaSig->r;
@@ -1118,7 +1118,7 @@ SINT32 CASignature::decodeRS(const UINT8* const in, const UINT32 inLen, DSA_SIG*
 	ASSERT(inLen>20, "Inbuffer is <=20 bytes");
 		BIGNUM * r = BN_bin2bn(in, 20, NULL);
 		BIGNUM * s = BN_bin2bn(in+20, inLen-20, NULL);
-		#if OPENSSL_VERSION_NUMBER	>= 0x1000204fL
+		#if OPENSSL_VERSION_NUMBER	> 0x100020cfL
 			DSA_SIG_set0(pDsaSig,r,s);
 		#else
 			pDsaSig->r=r ;
