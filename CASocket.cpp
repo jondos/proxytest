@@ -704,6 +704,41 @@ SINT32 CASocket::receiveLine(UINT8* line, UINT32 maxLen, UINT32 msTimeOut)
 	return ret;
 }
 
+/** Will peek some bytes from the socket read queue. May block or not depending on whatever this socket
+	* was set to blocking or non-blocking mode.
+	* Warning: If socket is in blocking mode and peek() is called, peek() will block until some
+	* data is available, EVEN IF AN OTHER THREAD WILL CLOSE THIS SOCKET!
+	*
+	* @param buff the buffer which get the peeked data
+	* @param len size of buff
+	*	@return SOCKET_ERROR if an error occured
+	* @retval E_AGAIN, if socket was in non-blocking mode and
+	*                  receive would block or a timeout was reached
+	* @retval 0 if socket was gracefully closed
+	* @return the number of bytes received (always >0)
+***/
+SINT32 CASocket::peek(UINT8* buff,UINT32 len)
+	{
+		int ret;
+	  int ef=0;
+	  do
+			{
+				ret=::recv(m_Socket,(char*)buff,len,MSG_NOSIGNAL|MSG_PEEK);
+			}
+	  while(ret==SOCKET_ERROR&&(ef=GET_NET_ERROR)==EINTR);
+		if(ret==SOCKET_ERROR)
+			{
+				if(ef==ERR_INTERN_WOULDBLOCK)
+					return E_AGAIN;
+			}
+#ifdef _DEBUG
+		if(ret==SOCKET_ERROR)
+	      CAMsg::printMsg(LOG_DEBUG,"CASocket peek() error %d (%s)\n",ef,GET_NET_ERROR_STR(ef));
+#endif
+	  return ret;
+	}
+
+
 /**
  * LERNGRUPPE
  * Returns the source address of the socket
