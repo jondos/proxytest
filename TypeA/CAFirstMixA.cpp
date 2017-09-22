@@ -724,9 +724,10 @@ NEXT_USER:
 ////Step 5
 ////Writing to users...
 				bAktiv = sendToUsers();
-
+#ifndef FAST_PROCESSING
 				if(!bAktiv)
 				  msSleep(100);
+#endif
 			}
 //ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seems that we are restarting now!!\n");
