@@ -918,8 +918,10 @@ SINT32 CALastMixA::loop()
 // Now in a separate Thread!
 //
 //end step 4
+#ifndef FAST_PROCESSING
 				if(!bAktiv)
 					msSleep(100);
+#endif
 			}
 
 
