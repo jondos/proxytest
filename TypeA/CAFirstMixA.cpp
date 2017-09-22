@@ -726,7 +726,7 @@ NEXT_USER:
 				bAktiv = sendToUsers();
 #ifndef FAST_PROCESSING
 				if(!bAktiv)
-				  msSleep(100);
+				  msSleep(1);
 #endif
 			}
 //ERR:

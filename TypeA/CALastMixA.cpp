@@ -920,7 +920,7 @@ SINT32 CALastMixA::loop()
 //end step 4
 #ifndef FAST_PROCESSING
 				if(!bAktiv)
-					msSleep(100);
+					msSleep(1);
 #endif
 			}
 
