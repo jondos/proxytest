@@ -411,7 +411,7 @@ dnl Checks for libraries.
 
 if test "x$allfromsource" != "xtrue" ; then
 
-if test "x$CROSSCOMPILE" !="xtrue" ; then
+if test "x$CROSSCOMPILE" != "xtrue" ; then
 
 dnl Check for OpenSSL libs and includes. Adopted from OpenSSH configure.in
 dnl default place to look for OpenSSL --> may be overwriten by the option below!
