@@ -18676,7 +18676,7 @@ fi
 
 if test "x$allfromsource" != "xtrue" ; then
 
-if test "x$CROSSCOMPILE" !="xtrue" ; then
+if test "x$CROSSCOMPILE" != "xtrue" ; then
 
 tryssldir="/usr/local/openssl /usr/lib/openssl \
 						 /usr/local/ssl /usr/lib/ssl /usr/local /usr/pkg \
