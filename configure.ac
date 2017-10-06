@@ -411,6 +411,8 @@ dnl Checks for libraries.
 
 if test "x$allfromsource" != "xtrue" ; then
 
+if test "x$CROSSCOMPILE" !="xtrue" ; then
+
 dnl Check for OpenSSL libs and includes. Adopted from OpenSSH configure.in
 dnl default place to look for OpenSSL --> may be overwriten by the option below!
 tryssldir="/usr/local/openssl /usr/lib/openssl \
@@ -505,6 +507,12 @@ LIBS="-lcrypto -lssl $saved_LIBS"
 		#include "openssl/ec.h"
 		], [EC_KEY_free(0);])],[AC_DEFINE([HAVE_ECC],[],[Elliptic curve cryptography supported])],
 		[AC_MSG_WARN([Elliptic curve cryptography disabled])],[AC_MSG_RESULT([skip ECC test because of cross compiling])])
+
+else
+	dnl we do cross compile --> just do some simple checks...
+	AC_CHECK_HEADERS([openssl/aes.h], [],[AC_MSG_ERROR([Could not find working SSLeay / OpenSSL headers (>=0.9.7), please install])])
+	AC_CHECK_LIB(crypto, BF_ecb_encrypt,[LIBS='-lcrypto -lssl $LIBS'],[AC_MSG_ERROR([Could not find working SSLeay / OpenSSL libraries (>=0.9.7), please install])])
+fi
 
 else
 dnl build all form source
