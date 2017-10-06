@@ -16,6 +16,9 @@ AC_CONFIG_MACRO_DIR([m4])
 m4_ifndef([PKG_CHECK_MODULES],
 		  [m4_fatal([must install pkg-config before running autoconf])])
 
+dnl Do we cross compile?
+AC_RUN_IFELSE([], [], [], [CROSSCOMPILE="true"; AC_MSG_NOTICE([We do cross compile])])
+
 dnl Checks for programs.
 AM_PROG_AR
 
