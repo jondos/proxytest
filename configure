@@ -19193,9 +19193,9 @@ rm -f core conftest.err conftest.$ac_objext \
 	done
 
 	else
-		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for  in -lxerces-c" >&5
-$as_echo_n "checking for  in -lxerces-c... " >&6; }
-if ${ac_cv_lib_xerces_c_+:} false; then :
+		{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for printf  in -lxerces-c" >&5
+$as_echo_n "checking for printf  in -lxerces-c... " >&6; }
+if ${ac_cv_lib_xerces_c_printf_+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   ac_check_lib_save_LIBS=$LIBS
@@ -19209,27 +19209,27 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 #ifdef __cplusplus
 extern "C"
 #endif
-char  ();
+char printf  ();
 int
 main ()
 {
-return  ();
+return printf  ();
   ;
   return 0;
 }
 _ACEOF
 if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_lib_xerces_c_=yes
+  ac_cv_lib_xerces_c_printf_=yes
 else
-  ac_cv_lib_xerces_c_=no
+  ac_cv_lib_xerces_c_printf_=no
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
 LIBS=$ac_check_lib_save_LIBS
 fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_xerces_c_" >&5
-$as_echo "$ac_cv_lib_xerces_c_" >&6; }
-if test "x$ac_cv_lib_xerces_c_" = xyes; then :
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_xerces_c_printf_" >&5
+$as_echo "$ac_cv_lib_xerces_c_printf_" >&6; }
+if test "x$ac_cv_lib_xerces_c_printf_" = xyes; then :
   LIBS='-lxerces-c $LIBS'
 else
   as_fn_error $? "Could not find working Xerces-C libraries, please install" "$LINENO" 5
