@@ -613,8 +613,8 @@ else
 
 	else
 	dnl Cross Compile
-	CFLAGS="$saved_CFLAGS -I/usr/include/xercesc"
-	CXXFLAGS="$saved_CXXFLAGS -I/usr/include/xercesc"
+	CFLAGS="$saved_CFLAGS -I$SYSROOT/usr/include/xercesc"
+	CXXFLAGS="$saved_CXXFLAGS -I$SYSROOT/usr/include/xercesc"
 	AC_CHECK_HEADERS([dom/DOM.hpp], [found_xmldir=1],[AC_MSG_ERROR([Could not find working Xerces-C headers, please install])])
 	fi
 fi	
