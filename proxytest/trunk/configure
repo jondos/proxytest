@@ -19235,7 +19235,7 @@ else
   as_fn_error $? "Could not find working Xerces-C libraries, please install" "$LINENO" 5
 fi
 
-
+	found_xmllib=1
 	fi
 
 fi
