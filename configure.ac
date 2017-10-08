@@ -681,7 +681,7 @@ else
 
 	else
 	dnl Cross Compile
-	AC_CHECK_LIB(xerces-c, ,[LIBS='-lxerces-c $LIBS'],[AC_MSG_ERROR([Could not find working Xerces-C libraries, please install])])
+	AC_CHECK_LIB(xerces-c,printf ,[LIBS='-lxerces-c $LIBS'],[AC_MSG_ERROR([Could not find working Xerces-C libraries, please install])])
 
 	fi
 
