@@ -19082,8 +19082,8 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 	done
 
 	else
-		CFLAGS="$saved_CFLAGS -I/usr/include/xercesc"
-	CXXFLAGS="$saved_CXXFLAGS -I/usr/include/xercesc"
+		CFLAGS="$saved_CFLAGS -I$SYSROOT/usr/include/xercesc"
+	CXXFLAGS="$saved_CXXFLAGS -I$SYSROOT/usr/include/xercesc"
 	for ac_header in dom/DOM.hpp
 do :
   ac_fn_cxx_check_header_mongrel "$LINENO" "dom/DOM.hpp" "ac_cv_header_dom_DOM_hpp" "$ac_includes_default"
