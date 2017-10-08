@@ -19084,14 +19084,14 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 	else
 		CFLAGS="$saved_CFLAGS -I/usr/include/xercesc"
 	CXXFLAGS="$saved_CXXFLAGS -I/usr/include/xercesc"
-	for ac_header in xercesc/dom/DOM.hpp
+	for ac_header in dom/DOM.hpp
 do :
-  ac_fn_cxx_check_header_mongrel "$LINENO" "xercesc/dom/DOM.hpp" "ac_cv_header_xercesc_dom_DOM_hpp" "$ac_includes_default"
-if test "x$ac_cv_header_xercesc_dom_DOM_hpp" = xyes; then :
+  ac_fn_cxx_check_header_mongrel "$LINENO" "dom/DOM.hpp" "ac_cv_header_dom_DOM_hpp" "$ac_includes_default"
+if test "x$ac_cv_header_dom_DOM_hpp" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_XERCESC_DOM_DOM_HPP 1
+#define HAVE_DOM_DOM_HPP 1
 _ACEOF
-
+ found_xmldir=1
 else
   as_fn_error $? "Could not find working Xerces-C headers, please install" "$LINENO" 5
 fi
