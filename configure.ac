@@ -588,6 +588,7 @@ if test "x$useminixml" == "xtrue" ; then
 else
 	AC_MSG_CHECKING([for xerces-c includes])
 
+	if test "x$CROSSCOMPILE" != "xtrue" ; then
 	for xmldir in "" $tryxmlincludedir ; do
 		CFLAGS="$saved_CFLAGS -I$xmldir -I$xmldir/xercesc"
 		CXXFLAGS="$saved_CXXFLAGS -I$xmldir -I$xmldir/xercesc"
@@ -609,6 +610,11 @@ else
 				  fi
 				])
 	done
+
+	else
+	dnl Cross Compile
+	AC_CHECK_HEADERS([dom/DOM.hpp], [],[AC_MSG_ERROR([Could not find working Xerces-C headers, please install])])
+	fi
 fi	
 if test -z "$found_xmldir"; then
 	AC_MSG_ERROR([Mini-XML/Xerces-C includes NOT found - please use --with-xml-include])
@@ -651,7 +657,7 @@ else
 	AC_MSG_CHECKING([for libxerces-c])
 
 
-
+	if test "x$CROSSCOMPILE" != "xtrue" ; then
 	dnl Note: the order is import for compiling on TUDOS
 	LIBS="-lxerces-c $saved_LIBS"
 	for xmllibdir in "" $tryxmllibdir ; do
@@ -670,6 +676,13 @@ else
 				AC_MSG_RESULT([skip xml lib run test because of cross compiling])
 				])
 	done
+
+	else
+	dnl Cross Compile
+	AC_CHECK_LIB(xerces-c, ,[LIBS='-lxerces-c $LIBS'],[AC_MSG_ERROR([Could not find working Xerces-C libraries, please install])])
+
+	fi
+
 fi
 if test -z "$found_xmllib"; then
 	AC_MSG_ERROR([Mini-XML/Xerces-C libs NOT found - please use --with-xml-lib])
