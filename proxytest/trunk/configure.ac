@@ -511,7 +511,7 @@ LIBS="-lcrypto -lssl $saved_LIBS"
 else
 	dnl we do cross compile --> just do some simple checks...
 	AC_CHECK_HEADERS([openssl/aes.h], [],[AC_MSG_ERROR([Could not find working SSLeay / OpenSSL headers (>=0.9.7), please install])])
-	AC_CHECK_LIB(crypto, BF_ecb_encrypt,[LIBS='-lcrypto -lssl $LIBS'],[AC_MSG_ERROR([Could not find working SSLeay / OpenSSL libraries (>=0.9.7), please install])])
+	AC_CHECK_LIB(crypto, BF_ecb_encrypt,[LIBS="-lcrypto -lssl $LIBS"],[AC_MSG_ERROR([Could not find working SSLeay / OpenSSL libraries (>=0.9.7), please install])])
 fi
 
 else
@@ -681,7 +681,7 @@ else
 
 	else
 	dnl Cross Compile
-	AC_CHECK_LIB(xerces-c,printf ,[LIBS='-lxerces-c $LIBS'],[AC_MSG_ERROR([Could not find working Xerces-C libraries, please install])])
+	AC_CHECK_LIB(xerces-c,printf ,[LIBS="-lxerces-c $LIBS"],[AC_MSG_ERROR([Could not find working Xerces-C libraries, please install])])
 
 	fi
 
