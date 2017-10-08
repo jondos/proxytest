@@ -30,6 +30,9 @@
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
+/* Define to 1 if you have the <dom/DOM.hpp> header file. */
+#undef HAVE_DOM_DOM_HPP
+
 /* Elliptic curve cryptography supported */
 #undef HAVE_ECC
 
@@ -153,9 +156,6 @@
 
 /* Define to 1 if you have the `vsnprintf' function. */
 #undef HAVE_VSNPRINTF
-
-/* Define to 1 if you have the <xercesc/dom/DOM.hpp> header file. */
-#undef HAVE_XERCESC_DOM_DOM_HPP
 
 /* This is the value, which is returned from inet_addr(), in case of an error
    */
