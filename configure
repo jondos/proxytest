@@ -18956,7 +18956,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_crypto_BF_ecb_encrypt" >&5
 $as_echo "$ac_cv_lib_crypto_BF_ecb_encrypt" >&6; }
 if test "x$ac_cv_lib_crypto_BF_ecb_encrypt" = xyes; then :
-  LIBS='-lcrypto -lssl $LIBS'
+  LIBS="-lcrypto -lssl $LIBS"
 else
   as_fn_error $? "Could not find working SSLeay / OpenSSL libraries (>=0.9.7), please install" "$LINENO" 5
 fi
@@ -19230,7 +19230,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_xerces_c_printf_" >&5
 $as_echo "$ac_cv_lib_xerces_c_printf_" >&6; }
 if test "x$ac_cv_lib_xerces_c_printf_" = xyes; then :
-  LIBS='-lxerces-c $LIBS'
+  LIBS="-lxerces-c $LIBS"
 else
   as_fn_error $? "Could not find working Xerces-C libraries, please install" "$LINENO" 5
 fi
