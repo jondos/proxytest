@@ -22,18 +22,6 @@
 #ifndef TRIO_TRIO_H
 #define TRIO_TRIO_H
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <stdlib.h>
-
-/*
- * Use autoconf defines if present. Packages using trio must define
- * HAVE_CONFIG_H as a compiler option themselves.
- */
-#if defined(HAVE_CONFIG_H)
-# include "../config.h"
-#endif
-
 #if !defined(WITHOUT_TRIO)
 
 //#ifdef __cplusplus

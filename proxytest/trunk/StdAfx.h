@@ -346,7 +346,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 
 	#ifdef HAVE_CONFIG_H
-		#include "config.h"
+		#include <config.h>
 		#ifndef HAVE_SOCKLEN_T
 			typedef int socklen_t;
 		#endif
