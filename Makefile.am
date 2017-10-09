@@ -172,11 +172,11 @@ libmix_la_SOURCES = CAAbstractControlChannel.cpp\
 		    StdAfx.h\
 		    basetypedefs.h
 
-libmix_la_LIBADD = $(top_srcdir)/xml/libxml.a \
-	    $(top_srcdir)/popt/libpopt.a \
-	    $(top_srcdir)/trio/libtrio.a \
-	    $(top_srcdir)/tre/libtre.a \
-	    $(top_srcdir)/gcm/libgcm.a
+libmix_la_LIBADD = $(top_builddir)/xml/libxml.a \
+	    $(top_builddir)/popt/libpopt.a \
+	    $(top_builddir)/trio/libtrio.a \
+	    $(top_builddir)/tre/libtre.a \
+	    $(top_builddir)/gcm/libgcm.a
 else
 
 noinst_LIBRARIES = libproxytest.a
@@ -345,13 +345,13 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 
 mix_SOURCES = proxytest.cpp
 
-mix_LDADD += $(top_srcdir)/libproxytest.a \
-	    $(top_srcdir)/xml/libxml.a \
-	    $(top_srcdir)/popt/libpopt.a \
-	    $(top_srcdir)/trio/libtrio.a \
-	    $(top_srcdir)/tre/libtre.a \
-	    $(top_srcdir)/gcm/libgcm.a \
-	    $(top_srcdir)/TypeA/libmixa.a
+mix_LDADD += $(top_builddir)/libproxytest.a \
+	    $(top_builddir)/xml/libxml.a \
+	    $(top_builddir)/popt/libpopt.a \
+	    $(top_builddir)/trio/libtrio.a \
+	    $(top_builddir)/tre/libtre.a \
+	    $(top_builddir)/gcm/libgcm.a \
+	    $(top_builddir)/TypeA/libmixa.a
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
@@ -369,8 +369,8 @@ if ALL_FROM_SOURCE
 BUILT_SOURCES = external.h
 
 mix_LDADD += $(top_srcdir)/build/mxml/libmxml.a \
-	$(top_srcdir)/build/openssl/libssl.a \
-	$(top_srcdir)/build/openssl/libcrypto.a 
+	$(top_builddir)/build/openssl/libssl.a \
+	$(top_builddir)/build/openssl/libcrypto.a 
 
 external.h:
 #Make MXML
