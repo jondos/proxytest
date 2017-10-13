@@ -772,7 +772,8 @@ exit(0);
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test2: Anon proxy started!\n");
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test3: Anon proxy started!\n");
 
-		CAMsg::printMsg(LOG_INFO,"Anon proxy started!\n");
+		CAMsg::printMsg(LOG_CRIT,"Anon proxy started!\n");
+		CAMsg::printMsg(LOG_CRIT, "LogLevel: %s\n", CAMsg::getLogLevelStr());
 
 #ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
 		ProfilerStart("gperf.cpuprofiler.data");
