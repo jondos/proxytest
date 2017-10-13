@@ -42,6 +42,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #include "doxygen.h"
 
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
+
+
+
 #if defined(DEBUG)|| defined(_DEBUG)
 	#undef DEBUG
 	#undef _DEBUG

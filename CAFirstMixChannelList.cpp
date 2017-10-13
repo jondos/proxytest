@@ -243,7 +243,8 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 		fmHashTableEntry* pHashTableEntry=m_HashTable[hashkey];
 		if(pHashTableEntry->pMuxSocket==NULL||pHashTableEntry->cNumberOfChannels>=MAX_NUMBER_OF_CHANNELS)
 			{
-				CAMsg::printMsg(LOG_DEBUG,"More than 50 channels!\n");
+				#define ERR_MSG_TO_MANY_CHANNELS "More than " STR(MAX_NUMBER_OF_CHANNELS) " channels!\n"
+				CAMsg::printMsg(LOG_DEBUG,ERR_MSG_TO_MANY_CHANNELS);
 				m_Mutex.unlock();
 				return E_UNKNOWN;
 			}
