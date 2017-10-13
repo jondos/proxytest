@@ -62,6 +62,7 @@ class CAMsg
 		private:
 			CAMsg(); //Singleton!
 			static CAMsg* pMsg;
+			static const char* const ms_arStrLogLevels[5];
 		public:
 			~CAMsg();
 			static SINT32 init()
@@ -84,6 +85,7 @@ class CAMsg
 			}
 			static SINT32 setLogOptions(UINT32 options);
 			static SINT32 setLogLevel(UINT32 a_logLevel);
+			static const char* const getLogLevelStr();
 			static SINT32 setMaxLogFileSize(UINT64 size)
 				{
 					if(pMsg!=NULL)

@@ -138,6 +138,24 @@ SINT32 CAMsg::setLogLevel(UINT32 a_logLevel)
 	return E_UNKNOWN;
 }
 
+const char* const CAMsg::ms_arStrLogLevels[5] = { "CRITICAL","ERROR","WARNING","INFO","DEBUG" };
+
+const char* const CAMsg::getLogLevelStr()
+		{
+			switch (pMsg->m_uLogType)
+				{
+					case LOG_CRIT:
+						return ms_arStrLogLevels[0];
+					case LOG_ERR:
+						return ms_arStrLogLevels[1];
+					case LOG_WARNING:
+						return ms_arStrLogLevels[2];
+					case LOG_INFO:
+						return ms_arStrLogLevels[3];
+					case LOG_DEBUG:
+						return ms_arStrLogLevels[4];
+				}
+		}
 SINT32 CAMsg::setLogOptions(UINT32 opt)
     {
 			SINT32 ret; 
