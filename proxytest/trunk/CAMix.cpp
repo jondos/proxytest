@@ -311,6 +311,8 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
 			{
 			setDOMElementAttribute(elemRoot,"maxUsers", maxUsers);
 			}
+		setDOMElementAttribute(elemRoot, "maxOpenChannels", CHANNELS_PER_CLIENT);
+
 #ifdef MANIOQ
 		setDOMElementAttribute(elemRoot,"context", (UINT8*) "jondonym.business");
 #else
