@@ -464,6 +464,7 @@ SINT32 CAFirstMix::processKeyExchange()
 		XERCES_CPP_NAMESPACE::DOMDocument* docXmlKeyInfo=createDOMDocument();
 		DOMElement* elemRootKey=createDOMElement(docXmlKeyInfo,"MixCascade");
 		setDOMElementAttribute(elemRootKey,"version",(UINT8*)"0.2"); //set the Version of the XML to 0.2
+		setDOMElementAttribute(elemRootKey, "maxOpenChannels", CHANNELS_PER_CLIENT);
 #ifdef LOG_DIALOG
 		setDOMElementAttribute(elemRootKey,"study",(UINT8*)"true");
 #endif
