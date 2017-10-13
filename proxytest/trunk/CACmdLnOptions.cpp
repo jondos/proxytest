@@ -1563,6 +1563,10 @@ SINT32 CACmdLnOptions::initLogging()
 			{
 			CAMsg::setLogLevel(LOG_CRIT);
 			}
+		else if (strcmp(m_strLogLevel,"debug") == 0)
+			{
+			CAMsg::setLogLevel(LOG_DEBUG);
+			}
 		}	
 #endif
 #if!defined ONLY_LOCAL_PROXY
