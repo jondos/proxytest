@@ -117,7 +117,38 @@ class DOMNode
 					return NULL;
 				}
 
-			DOMNode* replaceChild(DOMNode* newChild, DOMNode* oldChild);
+			DOMNode* replaceChild(DOMNode* newChild, DOMNode* oldChild)
+				{
+					if (oldChild == NULL)
+						return oldChild;
+					DOMNode* child = m_nodeFirstChild;
+					while (child != NULL)
+						{
+							if (child == oldChild)
+								{
+									if (oldChild->m_nodePrev != NULL) //repalce middle or last element
+										{
+											oldChild->m_nodePrev->m_nodeNext = newChild;
+											newChild->m_nodePrev = oldChild->m_nodePrev;
+											newChild->m_nodeNext = oldChild->m_nodeNext;
+										}
+									else //replace first element
+										{
+											m_nodeFirstChild = newChild;
+											newChild->m_nodePrev = oldChild->m_nodePrev;
+											newChild->m_nodeNext = oldChild->m_nodeNext;
+										}
+									if (oldChild->m_nodeNext != NULL)
+										{
+											oldChild->m_nodeNext->m_nodePrev = newChild;
+										}
+									return oldChild;
+								}
+							child = child->m_nodeNext;
+						}
+					return NULL;
+
+				}
 			DOMNode* removeChild(DOMNode* oldChild)
 				{
 					if (oldChild == NULL)
