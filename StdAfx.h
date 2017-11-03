@@ -275,6 +275,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define ONLY_LOCAL_PROXY
 	#define INCLUDE_MIDDLE_MIX
 	#define INCLUDE_LAST_MIX
+	#define INCLUDE_FIRST_MIX
 #endif
 
 #if defined (_WIN32) &&!defined(__CYGWIN__)
@@ -576,6 +577,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <openssl/x509v3.h>
 	#include <openssl/pkcs12.h>
 	#include <openssl/dsa.h>
+#endif
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
+	#include <openssl/md5.h>
 #endif
 #ifndef ONLY_LOCAL_PROXY
 	#include <openssl/asn1.h>

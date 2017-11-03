@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef __CAFIRSTMIXA__
 #define __CAFIRSTMIXA__
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
 #include "../CAFirstMix.hpp"
 #include "../CASocketAddrINet.hpp"
 #include "../CAIPAddrWithNetmask.hpp"

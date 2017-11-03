@@ -26,7 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
 #include "CAFirstMix.hpp"
 #include "CASocketGroup.hpp"
 #include "CASingleSocketGroup.hpp"
@@ -854,7 +854,7 @@ SINT32 CAFirstMix::handleTermsAndConditionsExtension(DOMElement *extensionsRoot)
 	m_tnCDefs = new TermsAndConditions *[m_nrOfTermsAndConditionsDefs];
 	memset(m_tnCDefs, 0, (sizeof(TermsAndConditions*)*m_nrOfTermsAndConditionsDefs) );
 
-	for (XMLSize_t i = 0; i < m_nrOfTermsAndConditionsDefs; i++)
+	for (SINT32 i = 0; i < m_nrOfTermsAndConditionsDefs; i++)
 	{
 		currentTnCList = (DOMElement *) tncDefList->item(i);
 		DOMNodeList *tncDefEntryList = getElementsByTagName(currentTnCList, OPTIONS_NODE_TNCS_TRANSLATION);
@@ -862,7 +862,7 @@ SINT32 CAFirstMix::handleTermsAndConditionsExtension(DOMElement *extensionsRoot)
 
 		m_tnCDefs[i] = new TermsAndConditions(currentTnC_id, tncDefEntryList->getLength());
 
-		for (XMLSize_t j = 0; j < tncDefEntryList->getLength(); j++)
+		for (SINT32 j = 0; j < tncDefEntryList->getLength(); j++)
 		{
 			currentTnCEntry = (DOMElement *) tncDefEntryList->item(j);
 
@@ -1555,7 +1555,7 @@ termsAndConditionMixAnswer_t *CAFirstMix::handleTermsAndConditionsLogin(XERCES_C
 			answer->result = TC_FAILED;
 		}
 
-		for (XMLSize_t i = 0; i < requestedResources->getLength(); i++)
+		for (SINT32 i = 0; i < requestedResources->getLength(); i++)
 		{
 			idLen = TMP_BUFF_SIZE;
 			localeLen = TMP_LOCALE_SIZE;
@@ -1584,7 +1584,7 @@ termsAndConditionMixAnswer_t *CAFirstMix::handleTermsAndConditionsLogin(XERCES_C
 				if(requestedTnC != NULL)
 				{
 					requestedResourceItems = getElementsByTagName((DOMElement *)currentNode, TNC_REQ_TRANSLATION);
-					for(XMLSize_t j = 0; j < requestedResourceItems->getLength(); j++)
+					for(SINT32 j = 0; j < requestedResourceItems->getLength(); j++)
 					{
 						validResource = false;
 						localeLen = TMP_LOCALE_SIZE;

@@ -1197,7 +1197,7 @@ UINT8* encryptXMLElement(UINT8* inbuff,UINT32 inlen,UINT32& outlen,CAASymCipher*
 	return msgoutbuff;
 }
 
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
 SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 {
 	XERCES_CPP_NAMESPACE::DOMDocument* doc=node->getOwnerDocument();
@@ -1302,7 +1302,7 @@ SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 	}
 	return E_SUCCESS;
 }
-#endif //ONLY_LOCAL_PROXY
+#endif //!ONLY_LOCAL_PROXY or first
 
 UINT8* readFile(const UINT8* const name,UINT32* size)
 {

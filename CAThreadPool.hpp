@@ -10,7 +10,7 @@
 #define __CATHREADPOOL__
 
 #include "CAMutex.hpp"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
 #include "CAThread.hpp"
 #include "CAConditionVariable.hpp"
 

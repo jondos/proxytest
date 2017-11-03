@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef _CASYNCCONTROLCHANNEL_
 #define _CASYNCCONTROLCHANNEL_
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
 #include "CAAbstractControlChannel.hpp"
 
 /** A synchronous control channel. This means, that every control message

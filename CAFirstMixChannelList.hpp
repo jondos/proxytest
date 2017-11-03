@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAFRISTMIXCHANNELLIST__
 #define __CAFRISTMIXCHANNELLIST__
 #include "doxygen.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
 #include "CAMuxSocket.hpp"
 #include "CAQueue.hpp"
 #include "CASymCipher.hpp"

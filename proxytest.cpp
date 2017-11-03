@@ -478,7 +478,7 @@ See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 int main(int argc, const char* argv[])
 	{
 		SINT32 exitCode=0;
-#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INLUDE_LAST_MIX
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INLUDE_LAST_MIX|| defined INLUDE_FIRST_MIX
 		pMix=NULL;
 #endif
 		UINT32 lLogOpts = 0;
@@ -870,7 +870,7 @@ exit(0);
 				CASocket::setMaxNormalSockets(s32MaxSockets-10);
 				}
 				MONITORING_FIRE_SYS_EVENT(ev_sys_start);
-#if !defined ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX 
 				if(CALibProxytest::getOptions()->isFirstMix())
 				{
 					CAMsg::printMsg(LOG_INFO,"I am the First MIX...\n");
@@ -918,7 +918,7 @@ exit(0);
 				exit(EXIT_FAILURE);
 #endif
 			}
-#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INCLUDE_LAST_MIX 
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INCLUDE_LAST_MIX || defined INCLUDE_FIRST_MIX 
 #ifndef DYNAMIC_MIX
 	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
 		if(pMix->start()!=E_SUCCESS)

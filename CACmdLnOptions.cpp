@@ -80,7 +80,6 @@ CACmdLnOptions::CACmdLnOptions()
 		m_pCascadeXML=NULL;
 		m_docOpTnCs=NULL; //Operator Terms and Conditions (if any)
 		m_maxNrOfUsers = 0;
-		m_strAccessControlCredential = NULL;
 #ifdef PAYMENT		
 		m_PaymentReminderProbability= -1;
 #else
@@ -93,6 +92,11 @@ CACmdLnOptions::CACmdLnOptions()
 		m_termsAndConditionsTemplates = NULL;
 		m_nrOfTermsAndConditionsTemplates = 0;
 #endif //ONLY_LOCAL_PROXY
+
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
+		m_strAccessControlCredential = NULL;
+#endif
+
 		m_iTargetPort=m_iSOCKSPort=m_iSOCKSServerPort=0xFFFF;
 		m_strTargetHost=m_strSOCKSHost=NULL;
 		m_strUser=NULL;
@@ -388,11 +392,7 @@ void CACmdLnOptions::clean()
 			m_docOpTnCs=NULL;
 		}
 
-		if (m_strAccessControlCredential != NULL)
-			{
-			delete[]m_strAccessControlCredential;
-			m_strAccessControlCredential = NULL;
-			}
+
 
 #ifdef COUNTRY_STATS
 		delete[] m_dbCountryStatsHost;
@@ -419,6 +419,15 @@ void CACmdLnOptions::clean()
 
 
 #endif //ONLY_LOCAL_PROXY
+
+		
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
+		if (m_strAccessControlCredential != NULL)
+			{
+			delete[]m_strAccessControlCredential;
+			m_strAccessControlCredential = NULL;
+			}
+#endif
 #ifdef SERVER_MONITORING
 		if(m_strMonitoringListenerHost != NULL)
 		{
@@ -1591,6 +1600,52 @@ SINT32 CACmdLnOptions::initLogging()
 	}
 
 
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
+SINT32 CACmdLnOptions::setAccessControlCredential(DOMElement* elemGeneral)
+	{
+		if (m_strAccessControlCredential != NULL)
+			{
+				delete[]m_strAccessControlCredential;
+				m_strAccessControlCredential = NULL;
+			}
+
+		DOMElement* elemCredential = NULL;
+		UINT8 tmpBuff[TMP_BUFF_SIZE];
+		UINT32 tmpLen = TMP_BUFF_SIZE;
+
+		if (elemGeneral == NULL)
+			return E_UNKNOWN;
+		ASSERT_GENERAL_OPTIONS_PARENT(elemGeneral->getNodeName(), OPTIONS_NODE_CREDENTIAL);
+
+		//get Accesscontrol credentila
+		getDOMChildByName(elemGeneral, OPTIONS_NODE_CREDENTIAL, elemCredential, false);
+
+		if (getDOMElementValue(elemCredential, tmpBuff, &tmpLen) == E_SUCCESS)
+			{	
+				m_strAccessControlCredential = new UINT8[tmpLen + 1]; 
+				memcpy(m_strAccessControlCredential,tmpBuff,tmpLen);
+				m_strAccessControlCredential[tmpLen] = 0;
+				DOMElement* elemMixType=NULL;
+				getDOMChildByName(m_docMixInfo, "MixType", elemMixType, true);
+				setDOMElementAttribute(elemMixType, "accessControlled", true);
+			}
+		return E_SUCCESS;
+	}
+
+SINT32 CACmdLnOptions::getAccessControlCredential(UINT8* outbuff, UINT32* inoutsize)
+	{
+	
+	if (outbuff== NULL || inoutsize == NULL || m_strAccessControlCredential==NULL || *inoutsize<=strlen((char*)m_strAccessControlCredential))
+		return E_UNKNOWN;
+	strcpy((char*)outbuff, (char*)m_strAccessControlCredential);
+	*inoutsize = strlen((char*)m_strAccessControlCredential);
+	return E_SUCCESS;
+	}
+
+
+#endif
+
+
 #ifndef ONLY_LOCAL_PROXY
 
 
@@ -1671,48 +1726,6 @@ SINT32 CACmdLnOptions::setPaymentReminder(DOMElement* elemGeneral)
 		}
 	return E_SUCCESS;
 }
-
-
-SINT32 CACmdLnOptions::setAccessControlCredential(DOMElement* elemGeneral)
-	{
-		if (m_strAccessControlCredential != NULL)
-			{
-				delete[]m_strAccessControlCredential;
-				m_strAccessControlCredential = NULL;
-			}
-
-		DOMElement* elemCredential = NULL;
-		UINT8 tmpBuff[TMP_BUFF_SIZE];
-		UINT32 tmpLen = TMP_BUFF_SIZE;
-
-		if (elemGeneral == NULL)
-			return E_UNKNOWN;
-		ASSERT_GENERAL_OPTIONS_PARENT(elemGeneral->getNodeName(), OPTIONS_NODE_CREDENTIAL);
-
-		//get Accesscontrol credentila
-		getDOMChildByName(elemGeneral, OPTIONS_NODE_CREDENTIAL, elemCredential, false);
-
-		if (getDOMElementValue(elemCredential, tmpBuff, &tmpLen) == E_SUCCESS)
-			{	
-				m_strAccessControlCredential = new UINT8[tmpLen + 1]; 
-				memcpy(m_strAccessControlCredential,tmpBuff,tmpLen);
-				m_strAccessControlCredential[tmpLen] = 0;
-				DOMElement* elemMixType=NULL;
-				getDOMChildByName(m_docMixInfo, "MixType", elemMixType, true);
-				setDOMElementAttribute(elemMixType, "accessControlled", true);
-			}
-		return E_SUCCESS;
-	}
-
-SINT32 CACmdLnOptions::getAccessControlCredential(UINT8* outbuff, UINT32* inoutsize)
-	{
-	
-	if (outbuff== NULL || inoutsize == NULL || m_strAccessControlCredential==NULL || *inoutsize<=strlen((char*)m_strAccessControlCredential))
-		return E_UNKNOWN;
-	strcpy((char*)outbuff, (char*)m_strAccessControlCredential);
-	*inoutsize = strlen((char*)m_strAccessControlCredential);
-	return E_SUCCESS;
-	}
 
 
 
@@ -3501,13 +3514,17 @@ void CACmdLnOptions::initGeneralOptionSetters()
 		&CACmdLnOptions::setMinCascadeLength;
 	generalOptionSetters[++count]=
 		&CACmdLnOptions::setCascadeNameFromOptions;
+
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
+	generalOptionSetters[++count] =
+		&CACmdLnOptions::setAccessControlCredential;
+#endif
 #if !defined ONLY_LOCAL_PROXY 
 	generalOptionSetters[++count]=
 		&CACmdLnOptions::setMaxUsers;
 	generalOptionSetters[++count]=
 		&CACmdLnOptions::setPaymentReminder;
-	generalOptionSetters[++count] =
-		&CACmdLnOptions::setAccessControlCredential;
+	
 #endif
 	}
 
@@ -5182,8 +5199,9 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 			CAMsg::printMsg(LOG_CRIT,"Could not find any valid (non-virtual) listener interface!\n");
 		}
 		else if (ret == E_SUCCESS)
-		{
-			for (UINT32 iHiddenPort = 0; iHiddenPort < iHiddenPortsLen; iHiddenPort++)
+		{ // This check is rather stupi as it does not reflect more complicated networking settings.
+			//Only re-enable if you are really know what you are doing!
+	/*		for (UINT32 iHiddenPort = 0; iHiddenPort < iHiddenPortsLen; iHiddenPort++)
 			{
 				bool bVirtualFound = false;
 				for (UINT32 iVirtualPort = 0; iVirtualPort < iVirtualPortsLen; iVirtualPort++)
@@ -5213,8 +5231,9 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 						break;
 					}
 				}
+
 			}
-		}
+*/		}
 		
 		if (ret == E_SUCCESS && a_bMessages)
 		{
