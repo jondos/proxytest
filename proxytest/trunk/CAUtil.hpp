@@ -296,18 +296,22 @@ SINT32 setDOMElementValue(DOMElement* pElem, bool value);
 
 SINT32 setCurrentTimeMilliesAsDOMAttribute(DOMNode *pElem);
 
-//if not null the returned char pointer must be explicitely freed by the caller with 'delete []'
-UINT8 *getTermsAndConditionsTemplateRefId(DOMNode *tcTemplateRoot);
 
 SINT32 integrateDOMNode(const DOMNode *srcNode, DOMNode *dstNode, bool recursive, bool replace);
 
 /** Replaces a DOM element with an encrypted version of this element*/
 SINT32 encryptXMLElement(DOMNode* pElem , CAASymCipher* pRSA);
 
+#endif //ONLY_LOCAL_PROXY
+
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
+
 /** Replaces a DOM element with a deencrypted version of this element*/
 SINT32 decryptXMLElement(DOMNode* pelem , CAASymCipher* pRSA);
+//if not null the returned char pointer must be explicitely freed by the caller with 'delete []'
+UINT8 *getTermsAndConditionsTemplateRefId(DOMNode *tcTemplateRoot);
 
-#endif //ONLY_LOCAL_PROXY
+#endif //!ONLY_LOCAL_PROXY or first
 
 UINT8* encryptXMLElement(UINT8* inbuff,UINT32 inlen,UINT32& outlen,CAASymCipher* pRSA);
 

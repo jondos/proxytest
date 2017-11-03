@@ -5,7 +5,7 @@
  *     O'Reilly & Associates, Inc.
  */
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
 #include "CAThreadPool.hpp"
 #include "CAMsg.hpp"
 void *tpool_thread(void *);

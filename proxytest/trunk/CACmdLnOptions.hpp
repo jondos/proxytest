@@ -499,7 +499,9 @@ class CACmdLnOptions
 		XERCES_CPP_NAMESPACE::DOMDocument **getAllTermsAndConditionsTemplates();
 		XERCES_CPP_NAMESPACE::DOMElement *getTermsAndConditions();
 
+#endif //ONLY_LOCAL_PROXY
 
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
 
 		SINT32 getAccessControlCredential(UINT8* outbuff, UINT32* outbuffsize);
 
@@ -508,7 +510,7 @@ class CACmdLnOptions
 			return m_strAccessControlCredential != NULL;
 			}
 
-#endif //ONLY_LOCAL_PROXY
+#endif //!ONLY_LOCAL_PROXY or first mix
 		bool getCompressLogs()
 		{
 			return m_bCompressedLogs;
@@ -796,9 +798,12 @@ class CACmdLnOptions
 
 
 		bool m_perfTestEnabled;
+#endif //ONLY_LOCAL_PROXY
+
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
 
 		UINT8* m_strAccessControlCredential;
-#endif //ONLY_LOCAL_PROXY
+#endif //!ONLY_LOCAL_PROXY or first
 
 		bool		m_bLocalProxy,m_bFirstMix,m_bMiddleMix,m_bLastMix;
 		bool		m_bAutoReconnect; //auto reconnect if connection to first mix lost ??
@@ -953,9 +958,11 @@ class CACmdLnOptions
 		SINT32 setDaemonMode(DOMElement* elemGeneral);
 		SINT32 setLoggingOptions(DOMElement* elemGeneral);
 
-#if !defined ONLY_LOCAL_PROXY || defined INLUCDE_MIDDLE_MIX
-		SINT32 setPaymentReminder(DOMElement* elemGeneral);
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
 		SINT32 setAccessControlCredential(DOMElement* elemGeneral);
+#endif
+#if !defined ONLY_LOCAL_PROXY 
+		SINT32 setPaymentReminder(DOMElement* elemGeneral);
 		SINT32 setMaxUsers(DOMElement* elemGeneral);
 #endif
 		/* Certificate Options */
