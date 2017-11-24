@@ -139,19 +139,19 @@ SINT32 CALocalProxy::init()
 				pSocketAddrIn = NULL;
 				return E_UNKNOWN;
 			}
-		delete pSocketAddrIn;
-		pSocketAddrIn = NULL;
-/*		if(CALibProxytest::getOptions()->getSOCKSServerPort()!=(UINT16)-1)
+		if(CALibProxytest::getOptions()->getSOCKSServerPort()!=(UINT16)-1)
 			{
-				socketAddrIn.setAddr((UINT8*)"127.0.0.1",CALibProxytest::getOptions()->getSOCKSServerPort());
+				pSocketAddrIn->setAddr((UINT8*)"127.0.0.1",CALibProxytest::getOptions()->getSOCKSServerPort());
 				m_socketSOCKSIn.create();
 				m_socketSOCKSIn.setReuseAddr(true);
-				if(m_socketSOCKSIn.listen(socketAddrIn)!=E_SUCCESS)
+				if(m_socketSOCKSIn.listen(*pSocketAddrIn)!=E_SUCCESS)
 					{
 						CAMsg::printMsg(LOG_CRIT,"Cannot listen (2)\n");
 						return E_UNKNOWN;
 					}
-			}*/
+			}
+		delete pSocketAddrIn;
+		pSocketAddrIn = NULL;
 		CASocketAddrINet addrNext;
 		UINT8 strTarget[255];
 		CALibProxytest::getOptions()->getMixHost(strTarget,255);

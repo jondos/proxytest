@@ -155,7 +155,9 @@ const char* const CAMsg::getLogLevelStr()
 					case LOG_DEBUG:
 						return ms_arStrLogLevels[4];
 				}
+			return NULL;
 		}
+
 SINT32 CAMsg::setLogOptions(UINT32 opt)
     {
 			SINT32 ret; 
