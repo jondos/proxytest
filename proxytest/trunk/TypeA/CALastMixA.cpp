@@ -781,7 +781,7 @@ SINT32 CALastMixA::loop()
 				UINT64 current_time_millis;
 				getcurrentTimeMillis(current_time_millis);
 #endif
-				if(countRead>0&&m_pQueueSendToMix->getSize()<MAX_MIXIN_SEND_QUEUE_SIZE)
+				if(countRead>0&&m_pQueueSendToMix->getSizeLookFree()<MAX_MIXIN_SEND_QUEUE_SIZE)
 					{
 #ifdef HAVE_EPOLL
 						pChannelListEntry=(lmChannelListEntry*)psocketgroupCacheRead->getFirstSignaledSocketData();

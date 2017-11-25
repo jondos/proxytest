@@ -81,6 +81,12 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 			return E_UNKNOWN;
 		if (m_bClosed)
 			return E_UNKNOWN;
+		QUEUE* newEntry = new QUEUE;
+		newEntry->pBuff=new UINT8[size];
+		newEntry->next=NULL;
+		newEntry->size=size;
+		newEntry->index=0;
+		memcpy(newEntry->pBuff,buff,size);
 		m_pcsQueue->lock();
 		//if(m_pHeap==NULL)
 		//	incHeap();
@@ -100,12 +106,7 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 						delete[] m_Queue->pBuff;
 						m_Queue->pBuff=new UINT8[size];
 					}*/
-				m_Queue=new QUEUE;
-				m_Queue->pBuff=new UINT8[size];
-				m_Queue->next=NULL;
-				m_Queue->index=0;
-				m_Queue->size=size;
-				memcpy(m_Queue->pBuff,buff,size);
+				m_Queue=newEntry;
 				m_lastElem=m_Queue;
 			}
 		else
@@ -118,13 +119,8 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 						delete[] m_lastElem->pBuff;
 						m_lastElem->pBuff=new UINT8[size];
 					}*/
-				m_lastElem->next=new QUEUE;
-				m_lastElem=m_lastElem->next;
-				m_lastElem->pBuff=new UINT8[size];
-				m_lastElem->next=NULL;
-				m_lastElem->size=size;
-				m_lastElem->index=0;
-				memcpy(m_lastElem->pBuff,buff,size);
+				m_lastElem->next=newEntry;
+				m_lastElem=newEntry;
 			}
 		m_nQueueSize+=size;
 #ifdef QUEUE_SIZE_LOG
