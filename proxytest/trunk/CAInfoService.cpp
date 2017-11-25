@@ -1070,16 +1070,16 @@ return sendMixHelo(REQUEST_COMMAND_MIXINFO,pMixID, NULL);
  * @retval a list with all Terms and conditions object which has to be freed explicitly
  * 			by calling delete []
  */
-UINT8 **CAInfoService::getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrOfTnCs)
+UINT8 **CAInfoService::getOperatorTnCsAsStrings(UINT32 **lengths, UINT32 *nrOfTnCs)
 {
 
-	XERCES_CPP_NAMESPACE::DOMElement *tnCs = CALibProxytest::getOptions()->getTermsAndConditions();
+ DOMElement *tnCs = CALibProxytest::getOptions()->getTermsAndConditions();
 	if (tnCs == NULL)
 		{
 			return NULL;
 		}
 
-	XERCES_CPP_NAMESPACE::DOMNodeList *docTnCsList =
+	DOMNodeList *docTnCsList =
 	  getElementsByTagName(tnCs, OPTIONS_NODE_TNCS_TRANSLATION);
 
 	if (docTnCsList == NULL)
@@ -1089,7 +1089,7 @@ UINT8 **CAInfoService::getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrO
 
 	UINT8 **elementList = NULL;
 	DOMNode *iterator = NULL;
-	XMLSize_t i = 0;
+	UINT32 i = 0;
 
 	UINT8 tmpOpSKIBuff[TMP_BUFF_SIZE];
 	UINT32 tmpOpSKILen = TMP_BUFF_SIZE;

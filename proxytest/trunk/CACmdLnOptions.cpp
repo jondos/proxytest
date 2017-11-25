@@ -211,6 +211,7 @@ CACmdLnOptions::~CACmdLnOptions()
 #ifndef ONLY_LOCAL_PROXY
 
 
+#ifdef PAYMENT
 void CACmdLnOptions::initTermsAndConditionsOptionSetters()
 {
 
@@ -220,7 +221,7 @@ void CACmdLnOptions::initTermsAndConditionsOptionSetters()
 	m_arpTermsAndConditionsOptionSetters[++count]=& CACmdLnOptions::setTermsAndConditionsTemplates;
 	m_arpTermsAndConditionsOptionSetters[++count]=	&CACmdLnOptions::setTermsAndConditionsList;
 }
-
+#endif
 #ifdef LOG_CRIME
 void CACmdLnOptions::initCrimeDetectionOptionSetters()
 {
@@ -1662,7 +1663,7 @@ XERCES_CPP_NAMESPACE::DOMDocument **CACmdLnOptions::getAllTermsAndConditionsTemp
 /* a reference to the Terms and conditions document stored by this class.
  * this method does not return a copy of the doc so don't release it.
  */
-XERCES_CPP_NAMESPACE::DOMElement* CACmdLnOptions::getTermsAndConditions()
+DOMElement* CACmdLnOptions::getTermsAndConditions()
 {
 	//DOMElement *docElement = NULL;
 	if(m_docOpTnCs == NULL)
@@ -2144,7 +2145,7 @@ SINT32 CACmdLnOptions::setAccountingDatabase(DOMElement *elemAccounting)
 
 
 
-
+#ifdef PAYMENT
 // *************************************************
 // * terms and condition option setter function(s) *
 // *************************************************
@@ -2200,7 +2201,7 @@ SINT32 CACmdLnOptions::setTermsAndConditionsTemplates(DOMElement *elemTnCs)
 			UINT32 len = TMP_BUFF_SIZE;
 			memset(currentTemplateURL, 0, len);
 
-			for (XMLSize_t i = 0; i < templateList->getLength(); i++)
+			for (UINT32 i = 0; i < templateList->getLength(); i++)
 			{
 				getDOMElementValue(templateList->item(i), currentTemplateURL, &len);
 				m_termsAndConditionsTemplates[i] = parseDOMDocument(currentTemplateURL);
@@ -2214,7 +2215,7 @@ SINT32 CACmdLnOptions::setTermsAndConditionsTemplates(DOMElement *elemTnCs)
 				if(refId != NULL)
 				{
 					loadedTemplateRefIds[i] = refId;
-					for(XMLSize_t j = 0; j < i; j++)
+					for(UINT32 j = 0; j < i; j++)
 					{
 						if(strncmp((char *)refId, (char *) loadedTemplateRefIds[j], TEMPLATE_REFID_MAXLEN) == 0 )
 						{
@@ -2244,7 +2245,7 @@ SINT32 CACmdLnOptions::setTermsAndConditionsTemplates(DOMElement *elemTnCs)
 		}
 		if(loadedTemplateRefIds != NULL)
 		{
-			for(XMLSize_t j = 0; j < m_nrOfTermsAndConditionsTemplates; j++)
+			for(UINT32 j = 0; j < m_nrOfTermsAndConditionsTemplates; j++)
 			{
 				delete [] loadedTemplateRefIds[j];
 				loadedTemplateRefIds[j] = NULL;
@@ -2326,7 +2327,7 @@ SINT32 CACmdLnOptions::setTermsAndConditionsList(DOMElement *elemTnCs)
 	// validity check for every definition: are all necessary attributes set (referenceId, locale), length ok
 	// * and is there EXACTLY ONE default language specified?
 	//
-	for (XMLSize_t j = 0; j < tncDefEntryList->getLength(); j++)
+	for (UINT32 j = 0; j < tncDefEntryList->getLength(); j++)
 	{
 		attrCheckLen = TMP_BUFF_SIZE;
 		localeLen = TMP_LOCALE_SIZE;
@@ -2396,7 +2397,7 @@ SINT32 CACmdLnOptions::setTermsAndConditionsList(DOMElement *elemTnCs)
 
 	return E_SUCCESS;
 }
-
+#endif
 // *******************************************
 // * crime detection option setter functions *
 // *******************************************

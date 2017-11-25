@@ -497,7 +497,7 @@ class CACmdLnOptions
 
 		UINT32 getNumberOfTermsAndConditionsTemplates();
 		XERCES_CPP_NAMESPACE::DOMDocument **getAllTermsAndConditionsTemplates();
-		XERCES_CPP_NAMESPACE::DOMElement *getTermsAndConditions();
+		DOMElement *getTermsAndConditions();
 
 #endif //ONLY_LOCAL_PROXY
 
@@ -997,10 +997,11 @@ class CACmdLnOptions
 		SINT32 setKeepAliveTraffic(DOMElement *elemNetwork);
 
 		/* Terms & Conditions options */
+#ifdef PAYMENT
 #define TERMS_AND_CONDITIONS_OPTIONS_NR 2
 		SINT32 setTermsAndConditionsTemplates(DOMElement *elemTnCs);
 		SINT32 setTermsAndConditionsList(DOMElement *elemTnCs);
-
+#endif
 
 		SINT32 appendMixInfo_internal(DOMNode* a_node, bool with_subtree);
 		inline SINT32 addMixIdToMixInfo();

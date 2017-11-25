@@ -512,7 +512,7 @@ SINT32 getSignatureElements(DOMNode* parent, DOMNode** signatureNodes, UINT32* l
  *  TODO 1. test for XERCES >= 3.0.1
  *  	 2. specification
  */
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY && defined PAYMENT
 SINT32 integrateDOMNode(const DOMNode *srcNode, DOMNode *dstNode, bool recursive, bool replace)
 {
 	if( (srcNode->getNodeType() != DOMNode::ELEMENT_NODE) ||
@@ -658,7 +658,7 @@ XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const buff, UIN
 /**
  * parses a file via path or URL
  */
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY && defined PAYMENT
 XERCES_CPP_NAMESPACE::DOMDocument* parseDOMDocument(const UINT8* const pathOrURL)
 {
 	theParseDOMDocumentLock->lock();
