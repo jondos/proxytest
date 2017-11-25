@@ -46,7 +46,11 @@ SINT32 CALibProxytest::init()
 #endif
 		initDOMParser();
 #if !defined ONLY_LOCAL_PROXY || defined INLUDE_MIDDLE_MIX
-		SSL_library_init();
+	#if OPENSSL_VERSION_NUMBER < 0x10100000L 
+			SSL_library_init();
+	#else
+			OPENSSL_init_ssl(0, NULL);
+	#endif
 #endif
 #if OPENSSL_VERSION_NUMBER < 0x10100000L 
 		OpenSSL_add_all_algorithms();
