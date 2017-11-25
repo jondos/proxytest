@@ -103,6 +103,10 @@ SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
 	*/
 SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 {
+#ifdef NO_ENCRYPTION
+	memmove(out, in, len);
+	return E_SUCCESS;
+#endif
 #ifdef INTEL_IPP_CRYPTO
 	UINT32 k=len&0xFFFFFFF0;
 	ippsRijndael128EncryptOFB(in,out,k,16, m_keyAES1,m_iv1);
@@ -179,6 +183,10 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 	*/
 SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 {
+#ifdef NO_ENCRYPTION
+	memmove(out, in, len);
+	return E_SUCCESS;
+#endif
 	UINT32 i=0;
 	while(i+15<len)
 		{
@@ -363,6 +371,11 @@ void CASymCipher::setGCMKeys(UINT8* keyRecv, UINT8* keySend)
 
 SINT32 CASymCipher::encryptMessage(const UINT8* const in, UINT32 inlen, UINT8* out)
 {
+	#ifdef NO_ENCRYPTION
+	memmove(out, in, inlen);
+	return E_SUCCESS;
+#endif
+
 	//m_pcsEnc->lock();
 	m_pEncMsgIV[2] = htonl(m_nEncMsgCounter);
 	m_nEncMsgCounter++;
@@ -379,6 +392,11 @@ SINT32 CASymCipher::encryptMessage(const UINT8* const in, UINT32 inlen, UINT8* o
 
 SINT32 CASymCipher::decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bool integrityCheck)
 {
+#ifdef NO_ENCRYPTION
+	memmove(out, in, inlen);
+	return E_SUCCESS;
+#endif
+
 	SINT32 ret = E_UNKNOWN;
 	//m_pcsDec->lock();
 	m_pDecMsgIV[2] = htonl(m_nDecMsgCounter);

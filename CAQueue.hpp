@@ -110,6 +110,14 @@ class CAQueue
 					return 0;
 				}
 			
+			/** Returns the size of stored data in byte. This is the look free version which might return a slighty wrong result due to concurrent changes in the queue.
+				* @return size of Queue
+				*/
+			UINT32 getSizeLookFree()
+				{
+					return m_nQueueSize;
+				}
+
 			/** Returns true, if the Queue is empty
 				* @retval true, if Queue is empty
 				* @retval false, if Queue contains data
