@@ -41,7 +41,7 @@ unsigned long openssl_get_thread_id(void)
 /**do necessary initialisations of libraries etc.*/
 SINT32 CALibProxytest::init()
 	{
-#if (!defined ONLY_LOCAL_PROXY || (defined INCLUDE_MIDDLE_MIX && !defined MXML_DOM)) 
+#if !defined MXML_DOM 
 		XMLPlatformUtils::Initialize();
 #endif
 		initDOMParser();
@@ -98,7 +98,7 @@ SINT32 CALibProxytest::cleanup()
 		CAStatusManager::cleanup();
 #endif
 		releaseDOMParser();
-#ifndef ONLY_LOCAL_PROXY
+#if !defined MXML_DOM 
 		XMLPlatformUtils::Terminate();
 #endif
 

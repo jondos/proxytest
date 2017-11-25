@@ -121,7 +121,7 @@ class CAInfoService
 			UINT8* getCascadeHeloXMLAsString(UINT32& len);
 			SINT32 sendCascadeHelo(const UINT8* xml,UINT32 len,const CASocketAddrINet* a_socketAddress) const;
 
-			UINT8 **getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrOfTnCs);
+			UINT8 **getOperatorTnCsAsStrings(UINT32 **lengths, UINT32 *nrOfTnCs);
 			SINT32 sendOperatorTnCData();
 
 
