@@ -972,7 +972,7 @@ SINT32 CALastMixA::loop()
 		UINT32 numThreads = 10;
 		CAQueue**pIncomingPacketQueues= new CAQueue*[numThreads];
 		CAThreadPool* pPacketProcessingThreads = new CAThreadPool(numThreads, numThreads, true);
-		for (int i = 0; i < numThreads; i++)
+		for (UINT32 i = 0; i < numThreads; i++)
 			{
 				pIncomingPacketQueues[i]= new CAQueue();
 				tPacketProcessingLoopArgs* pPacketProcessingArgs = new tPacketProcessingLoopArgs;
@@ -1369,7 +1369,7 @@ THREAD_RETURN lm_loopPacketProcessing(void *params)
 #endif
 																										);
 #ifdef HAVE_EPOLL
-															psocketgroupCacheRead->add(*tmpSocket,m_pChannelList->get(pMixPacket->channel));
+															psocketgroupCacheRead->add(*tmpSocket,pChannelList->get(pMixPacket->channel));
 #else
 															psocketgroupCacheRead->add(*tmpSocket);
 #endif
