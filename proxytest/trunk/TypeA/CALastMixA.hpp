@@ -34,6 +34,9 @@ class CALastMixA:public CALastMix
 	{
 		protected:
 			SINT32 loop();
+#ifdef MULTI_THREADED_PACKET_PROCESSING
+			friend THREAD_RETURN lm_loopPacketProcessing(void* params);
+#endif
 	};
 
 #endif
