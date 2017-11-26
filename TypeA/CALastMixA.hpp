@@ -30,6 +30,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #include "../CALastMix.hpp"
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX
+
+#ifdef MULTI_THREADED_PACKET_PROCESSING
+	THREAD_RETURN lm_loopPacketProcessing(void* params);
+#endif
+
+
 class CALastMixA:public CALastMix
 	{
 		protected:
