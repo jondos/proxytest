@@ -111,6 +111,82 @@ class tUINT32withLock
 	};
 #endif
 
+typedef struct t_FirstMixChannelToQueueList_entry
+	{
+		HCHANNEL channel;
+		CAQueue* pQueue;
+		t_FirstMixChannelToQueueList_entry* next;
+	} tFirstMixChannelToQueueListEntry;
+
+class CAFirstMixChannelToQueueList
+	{
+		public:
+			CAFirstMixChannelToQueueList()
+				{
+					m_pMutex = new CAMutex();
+					m_pHead = NULL;
+				}
+
+			SINT32 add(HCHANNEL channel, CAQueue* pQueue)
+				{
+					m_pMutex->lock();
+					tFirstMixChannelToQueueListEntry* pNewEntry = new tFirstMixChannelToQueueListEntry;
+					pNewEntry->channel = channel;
+					pNewEntry->pQueue = pQueue;
+					pNewEntry->next = m_pHead;
+					m_pHead = pNewEntry;
+					m_pMutex->unlock();
+					return E_SUCCESS;
+				}
+
+			CAQueue* get(HCHANNEL channel)
+				{
+					m_pMutex->lock();
+					tFirstMixChannelToQueueListEntry* pEntry = m_pHead;
+					while (pEntry != NULL)
+						{
+							if (pEntry->channel == channel)
+								{
+									CAQueue* pQueue = pEntry->pQueue;
+									m_pMutex->unlock();
+									return pQueue;
+								}
+						}
+					m_pMutex->unlock();
+					return NULL;
+				}
+
+			SINT32 removeChannel(HCHANNEL channel)
+				{
+					m_pMutex->lock();
+					tFirstMixChannelToQueueListEntry* pEntry = m_pHead;
+					tFirstMixChannelToQueueListEntry* pLastEntry = NULL;
+					while (pEntry != NULL)
+						{
+							if (pEntry->channel == channel)
+								{
+									if (pLastEntry != NULL)
+										{
+										pLastEntry->next = pEntry->next;
+										}
+									else
+										{
+										m_pHead = pEntry->next;
+										}
+									delete pEntry;
+									m_pMutex->unlock();
+									return E_SUCCESS;
+								}
+						}
+					m_pMutex->unlock();
+					return E_UNKNOWN;
+				}
+		private:
+			CAMutex* m_pMutex;
+			tFirstMixChannelToQueueListEntry* m_pHead;
+	};
+
+
 class CAFirstMix:public
 #ifdef REPLAY_DETECTION
 	CAMixWithReplayDB
@@ -142,9 +218,11 @@ public:
 					m_arrSocketsIn=NULL;
 					m_pRSA=NULL;
 					m_pInfoService=NULL;
+#ifndef MULTI_THREADED_PACKET_PROCESSING
 					m_psocketgroupUsersRead=NULL;
 					m_psocketgroupUsersWrite=NULL;
 					m_pChannelList=NULL;
+#endif
 					m_pMuxOut=NULL;
 					m_docMixCascadeInfo=NULL;
 					m_xmlKeyInfoBuff=NULL;
@@ -333,7 +411,6 @@ protected:
 				CALogPacketStats* m_pLogPacketStats;
 #endif
 
-			CAFirstMixChannelList* m_pChannelList;
 			volatile UINT32 m_nUser;
 			UINT32 m_nSocketsIn; //number of usable ListenerInterface (non 'virtual')
 			volatile bool m_bRestart;
@@ -343,6 +420,8 @@ protected:
 			//stores the mix parameters for each mix
 			tMixParameters* m_arMixParameters;
 
+#ifndef MULTI_THREADED_PACKET_PROCESSING
+			CAFirstMixChannelList* m_pChannelList;
 #ifdef HAVE_EPOLL
 
 			CASocketGroupEpoll* m_psocketgroupUsersRead;
@@ -351,6 +430,23 @@ protected:
 
 			CASocketGroup* m_psocketgroupUsersRead;
 			CASocketGroup* m_psocketgroupUsersWrite;
+#endif
+#else // with MULTI_THREADED_PACKET_PROCESSING
+			UINT32 m_numThreads;
+			CAThreadPool* m_pthreadsPacketProccessingLoop;
+			CAFirstMixChannelList** m_arpChannelList;
+			CAFirstMixChannelToQueueList* m_pChannelToQueueList;
+#ifdef HAVE_EPOLL
+
+			CASocketGroupEpoll* m_arpsocketgroupUsersRead;
+			CASocketGroupEpoll* m_arpsocketgroupUsersWrite;
+#else
+
+			CASocketGroup** m_arpsocketgroupUsersRead;
+			CASocketGroup** m_arpsocketgroupUsersWrite;
+#endif
+
+
 #endif
     // moved to CAMix
     //CAInfoService* m_pInfoService;
