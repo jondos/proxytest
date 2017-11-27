@@ -2405,8 +2405,13 @@ loop_break:
 		incUsers();
 #endif
 #ifdef HAVE_EPOLL
+#ifndef MULTI_THREADED_PACKET_PROCESSING
 		m_psocketgroupUsersRead->add(*pNewUser,m_pChannelList->get(pNewUser)); // add user socket to the established ones that we read data from.
 		m_psocketgroupUsersWrite->add(*pNewUser,m_pChannelList->get(pNewUser));
+#else
+		m_arpsocketgroupUsersRead[threadID]->add(*pNewUser,m_pChannelList->get(pNewUser)); // add user socket to the established ones that we read data from.
+		m_arpsocketgroupUsersWrite[threadID]->add(*pNewUser,m_pChannelList->get(pNewUser));
+#endif
 #else
 #ifndef MULTI_THREADED_PACKET_PROCESSING
 		if(m_psocketgroupUsersRead->add(*pNewUser)!=E_SUCCESS)// add user socket to the established ones that we read data from.
