@@ -61,6 +61,7 @@ class CAFirstMixA:public CAFirstMix
 #else
 		bool sendToUsers(CASocketGroup* psocketgroupUsersWrite,CASocketGroup* psocketgroupUsersRead, CAFirstMixChannelList* pChannelList);
 #endif
+#endif
 			void notifyAllUserChannels(fmHashTableEntry *pfmHashEntry, UINT16 flags);
 #ifdef SSL_HACK
 			void finishPacket(fmHashTableEntry *pfmHashEntry);
