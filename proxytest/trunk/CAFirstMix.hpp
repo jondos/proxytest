@@ -222,6 +222,8 @@ public:
 					m_psocketgroupUsersRead=NULL;
 					m_psocketgroupUsersWrite=NULL;
 					m_pChannelList=NULL;
+#else
+					m_numThreads = 10;
 #endif
 					m_pMuxOut=NULL;
 					m_docMixCascadeInfo=NULL;
