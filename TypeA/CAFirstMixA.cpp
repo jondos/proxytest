@@ -1353,9 +1353,13 @@ THREAD_RETURN fm_loopPacketProcessing(void *params)
 	{
 #ifndef NEW_MIX_TYPE
 		CAFirstMixA* pMix = static_cast<tPacketProcessingLoopArgs*>(params)->pFirstMix;
-
+#ifdef HAVE_EPOLL
+		CASocketGroupEpoll* psocketgroupUsersRead = static_cast<tPacketProcessingLoopArgs*>(params)->psocketgroupUsersRead;
+		CASocketGroupEpoll* psocketgroupUsersWrite= static_cast<tPacketProcessingLoopArgs*>(params)->psocketgroupUsersWrite;
+#else
 		CASocketGroup* psocketgroupUsersRead = static_cast<tPacketProcessingLoopArgs*>(params)->psocketgroupUsersRead;
 		CASocketGroup* psocketgroupUsersWrite= static_cast<tPacketProcessingLoopArgs*>(params)->psocketgroupUsersWrite;
+#endif
 		CAQueue* pQueueReadFromMix = static_cast<tPacketProcessingLoopArgs*>(params)->pIncomingPacketQueue;
 		CAFirstMixChannelList* pChannelList = static_cast<tPacketProcessingLoopArgs*>(params)->pChannelList;
 
