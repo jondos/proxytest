@@ -226,8 +226,8 @@ SINT32 CAFirstMix::init()
 
 		m_arpChannelList = new CAFirstMixChannelList*[m_numThreads];
 #ifdef HAVE_EPOLL
-		m_arpsocketgroupUsersRead=new CASocketGroupEpoll[numThreads];
-		m_arpsocketgroupUsersWrite=new CASocketGroupEpoll[numThreads];
+		m_arpsocketgroupUsersRead=new CASocketGroupEpoll*[numThreads];
+		m_arpsocketgroupUsersWrite=new CASocketGroupEpoll*[numThreads];
 #else
 		m_arpsocketgroupUsersRead=new CASocketGroup*[m_numThreads];
 		m_arpsocketgroupUsersWrite=new CASocketGroup*[m_numThreads];
