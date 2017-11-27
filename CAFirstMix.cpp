@@ -212,6 +212,7 @@ SINT32 CAFirstMix::init()
 #endif
 		m_pQueueSendToMix=new CAQueue(sizeof(tQueueEntry));
 		m_pQueueReadFromMix=new CAQueue(sizeof(tQueueEntry));
+#ifndef MULTI_THREADED_PACKET_PROCESSING
 		m_pChannelList=new CAFirstMixChannelList();
 #ifdef HAVE_EPOLL
 		m_psocketgroupUsersRead=new CASocketGroupEpoll(false);
@@ -220,6 +221,31 @@ SINT32 CAFirstMix::init()
 		m_psocketgroupUsersRead=new CASocketGroup(false);
 		m_psocketgroupUsersWrite=new CASocketGroup(true);
 #endif
+#else // with MULTI_THREADED_PACKET_PROCESSING
+		m_pChannelToQueueList=new CAFirstMixChannelToQueueList() ;
+
+		m_arpChannelList = new CAFirstMixChannelList*[m_numThreads];
+#ifdef HAVE_EPOLL
+		m_arpsocketgroupUsersRead=new CASocketGroupEpoll[numThreads];
+		m_arpsocketgroupUsersWrite=new CASocketGroupEpoll[numThreads];
+#else
+		m_arpsocketgroupUsersRead=new CASocketGroup*[m_numThreads];
+		m_arpsocketgroupUsersWrite=new CASocketGroup*[m_numThreads];
+#endif
+		for (UINT32 i = 0; i < m_numThreads; i++)
+			{
+				m_arpChannelList[i] = new CAFirstMixChannelList();
+#ifdef HAVE_EPOLL
+			m_arpsocketgroupUsersRead[i] = new CASocketGroupEpoll(false);
+			m_arpsocketgroupUsersWrite[i] = new CASocketGroupEpoll(true);
+#else
+			m_arpsocketgroupUsersRead[i] = new CASocketGroup(false);
+			m_arpsocketgroupUsersWrite[i] = new CASocketGroup(true);
+#endif
+			}
+
+
+#endif //with MULTI_THREADED_PACKET_PROCESSING
 
 		m_pMuxOutControlChannelDispatcher=new CAControlChannelDispatcher(m_pQueueSendToMix,NULL,NULL);
 #ifdef REPLAY_DETECTION
@@ -2153,7 +2179,13 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 #ifdef LOG_DIALOG
 		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue,strDialog);
 #else
+#ifndef MULTI_THREADED_PACKET_PROCESSING
 		fmHashTableEntry* pHashEntry=m_pChannelList->add(pNewUser,peerIP,tmpQueue,controlchannelSentKey,controlchannelRecvKey);
+#else
+		UINT32 threadID = pNewUser->getHashKey()%m_numThreads;
+		CAFirstMixChannelList* pChannelList = m_arpChannelList[threadID];
+		fmHashTableEntry* pHashEntry=pChannelList->add(pNewUser,peerIP,tmpQueue,controlchannelSentKey,controlchannelRecvKey);
+#endif
 #endif
 		if( (pHashEntry == NULL) ||
 			(pHashEntry->pControlMessageQueue == NULL) )// adding user connection to mix->JAP channel list (stefan: sollte das nicht connection list sein? --> es handelt sich um eine Datenstruktu fr Connections/Channels ).
@@ -2164,8 +2196,14 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 				doc = NULL;
 			}
 			CAMsg::printMsg(LOG_ERR,"User login: Could not add new socket to connection list!\n");
-			if(pHashEntry!=NULL)
-				m_pChannelList->remove(pNewUser);
+			if (pHashEntry != NULL)
+				{
+#ifndef MULTI_THREADED_PACKET_PROCESSING
+					m_pChannelList->remove(pNewUser);
+#else
+					pChannelList->remove(pNewUser);
+#endif
+				}
 			m_pIPList->removeIP(peerIP);
 			delete tmpQueue;
 			tmpQueue = NULL;
@@ -2370,6 +2408,7 @@ loop_break:
 		m_psocketgroupUsersRead->add(*pNewUser,m_pChannelList->get(pNewUser)); // add user socket to the established ones that we read data from.
 		m_psocketgroupUsersWrite->add(*pNewUser,m_pChannelList->get(pNewUser));
 #else
+#ifndef MULTI_THREADED_PACKET_PROCESSING
 		if(m_psocketgroupUsersRead->add(*pNewUser)!=E_SUCCESS)// add user socket to the established ones that we read data from.
 		{
 			CAMsg::printMsg(LOG_DEBUG,"User login: Adding to m_psocketgroupUsersRead failed!\n");
@@ -2378,6 +2417,16 @@ loop_break:
 		{
 			CAMsg::printMsg(LOG_DEBUG,"User login: Adding to m_psocketgroupUsersWrite failed!\n");
 		}
+#else
+		if(m_arpsocketgroupUsersRead[threadID]->add(*pNewUser)!=E_SUCCESS)// add user socket to the established ones that we read data from.
+		{
+			CAMsg::printMsg(LOG_DEBUG,"User login: Adding to m_psocketgroupUsersRead failed!\n");
+		}
+		if(	m_arpsocketgroupUsersWrite[threadID]->add(*pNewUser)!=E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_DEBUG,"User login: Adding to m_psocketgroupUsersWrite failed!\n");
+		}
+#endif
 #endif
 
 #ifndef LOG_DIALOG
@@ -2649,6 +2698,7 @@ SINT32 CAFirstMix::clean()
 			delete m_pQueueReadFromMix;
 		m_pQueueReadFromMix=NULL;
 
+#ifndef MULTI_THREADED_PACKET_PROCESSING
 		if(m_pChannelList!=NULL)
 			{
 				CAMsg::printMsg(LOG_CRIT,"Before deleting CAFirstMixChannelList()!\n");
@@ -2680,17 +2730,20 @@ SINT32 CAFirstMix::clean()
 		if(m_pChannelList!=NULL)
 			delete m_pChannelList;
 		m_pChannelList=NULL;
+#endif
 		CAMsg::printMsg	(LOG_CRIT,"Memory usage after: %u\n",getMemoryUsage());
 #ifdef PAYMENT
 	CAAccountingInstance::clean();
 	CAAccountingDBInterface::cleanup();
 #endif
+#ifndef MULTI_THREADED_PACKET_PROCESSING
 		if(m_psocketgroupUsersRead!=NULL)
 			delete m_psocketgroupUsersRead;
 		m_psocketgroupUsersRead=NULL;
 		if(m_psocketgroupUsersWrite!=NULL)
 			delete m_psocketgroupUsersWrite;
 		m_psocketgroupUsersWrite=NULL;
+#endif
 		if(m_pRSA!=NULL)
 			delete m_pRSA;
 		m_pRSA=NULL;
@@ -2753,10 +2806,12 @@ SINT32 CAFirstMix::reconfigure()
 		CAMsg::printMsg(LOG_DEBUG,"Reconfiguring First Mix\n");
 #ifdef DELAY_USERS
 		CAMsg::printMsg(LOG_DEBUG,"Set new ressources limitation parameters\n");
+#ifndef MULTI_THREADED_PACKET_PROCESSING
 		if(m_pChannelList!=NULL)
 			m_pChannelList->setDelayParameters(	CALibProxytest::getOptions()->getDelayChannelUnlimitTraffic(),
 																					CALibProxytest::getOptions()->getDelayChannelBucketGrow(),
 																					CALibProxytest::getOptions()->getDelayChannelBucketGrowIntervall());
+#endif
 #endif
 		return E_SUCCESS;
 	}

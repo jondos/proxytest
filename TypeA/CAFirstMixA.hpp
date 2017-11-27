@@ -32,6 +32,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "../CAFirstMix.hpp"
 #include "../CASocketAddrINet.hpp"
 #include "../CAIPAddrWithNetmask.hpp"
+
+THREAD_RETURN fm_loopPacketProcessing(void *params);
+
 class CAFirstMixA:public CAFirstMix
 {
 		public:
@@ -39,10 +42,18 @@ class CAFirstMixA:public CAFirstMix
 
 		protected:
 			SINT32 loop();
+#ifndef MULTI_THREADED_PACKET_PROCESSING
 			SINT32 closeConnection(fmHashTableEntry* pHashEntry);
+#else
+			SINT32 closeConnection(fmHashTableEntry* pHashEntry, CASocketGroup* psocketgroupUsersRead, CASocketGroup* psocketgroupUsersWrite, CAFirstMixChannelList* pChannelList);
+#endif
 		
 		private:
+#ifndef MULTI_THREADED_PACKET_PROCESSING
 			bool sendToUsers();
+#else
+		bool sendToUsers(CASocketGroup* psocketgroupUsersWrite,CASocketGroup* psocketgroupUsersRead, CAFirstMixChannelList* pChannelList);
+#endif
 			void notifyAllUserChannels(fmHashTableEntry *pfmHashEntry, UINT16 flags);
 #ifdef SSL_HACK
 			void finishPacket(fmHashTableEntry *pfmHashEntry);
@@ -55,7 +66,7 @@ class CAFirstMixA:public CAFirstMix
 	#ifdef LOG_CRIME
 			void crimeSurveillance(CAIPAddrWithNetmask* surveillanceIPs, UINT32 nrOfSureveillanceIPs,	UINT8 *peerIP, SINT32 peerPort,MIXPACKET *pMixPacket);
 	#endif
-
+			friend THREAD_RETURN fm_loopPacketProcessing(void *params);
 };
 
 #endif

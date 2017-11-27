@@ -104,7 +104,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define ANON_DEBUG_MODE //if defined this Mix operates in AN.ON protocol debug mode, which means that a lot of things are logged which should not be logged in productive mode. So NEVER enable this in productive environments!
 //#define NO_ENCRYPTION //!!!WARNING!! if defined, no encryption will happen! Only use in BSL-4 laboratory!
 //#define FAST_PROCESSING //make all polling as fast as possible, may lead to very high processor utilisation in case of low traffic/workload; usefull for performance measurements
-//#define MULTI_THREADED_PACKET_PROCESSING //utilise multiple threads for packet processing, which could lead to a performacne improvement on multi core machines
+#define MULTI_THREADED_PACKET_PROCESSING //utilise multiple threads for packet processing, which could lead to a performacne improvement on multi core machines
 
 
 #if !defined(PRINT_THREAD_STACK_TRACE) && defined (DEBUG)&& ! defined(ONLY_LOCAL_PROXY)
