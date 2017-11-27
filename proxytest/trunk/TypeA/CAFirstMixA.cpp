@@ -1142,8 +1142,11 @@ void CAFirstMixA::crimeSurveillance(CAIPAddrWithNetmask* surveillanceIPs, UINT32
 
 
 
-
+#ifdef HAVE_EPOLL
+SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry, CASocketGroupEpoll* psocketgroupUsersRead,CASocketGroupEpoll* psocketgroupUsersWrite, CAFirstMixChannelList* pChannelList)
+#else
 SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry, CASocketGroup* psocketgroupUsersRead,CASocketGroup* psocketgroupUsersWrite, CAFirstMixChannelList* pChannelList)
+#endif
 {
 	if (pHashEntry == NULL)
 	{
@@ -1942,7 +1945,11 @@ NEXT_USER:
  * return true if the loop when at least one packet was sent
  * or false otherwise.
  */
+#ifdef HAVE_EPOLL
+bool CAFirstMixA::sendToUsers(CASocketGroupEpoll* psocketgroupUsersWrite,CASocketGroupEpoll* psocketgroupUsersRead,CAFirstMixChannelList* pChannelList)
+#else
 bool CAFirstMixA::sendToUsers(CASocketGroup* psocketgroupUsersWrite,CASocketGroup* psocketgroupUsersRead,CAFirstMixChannelList* pChannelList)
+#endif
 {
 	SINT32 countRead = psocketgroupUsersWrite->select(/*true,*/0);
 	tQueueEntry *packetToSend = NULL;
