@@ -45,12 +45,19 @@ class CAFirstMixA:public CAFirstMix
 #ifndef MULTI_THREADED_PACKET_PROCESSING
 			SINT32 closeConnection(fmHashTableEntry* pHashEntry);
 #else
+#ifdef HAVE_EPOLL
+			SINT32 closeConnection(fmHashTableEntry* pHashEntry, CASocketGroupEpoll* psocketgroupUsersRead, CASocketGroupEpoll* psocketgroupUsersWrite, CAFirstMixChannelList* pChannelList);
+#else
 			SINT32 closeConnection(fmHashTableEntry* pHashEntry, CASocketGroup* psocketgroupUsersRead, CASocketGroup* psocketgroupUsersWrite, CAFirstMixChannelList* pChannelList);
+#endif
 #endif
 		
 		private:
 #ifndef MULTI_THREADED_PACKET_PROCESSING
 			bool sendToUsers();
+#else
+#ifdef HAVE_EPOLL
+		bool sendToUsers(CASocketGroupEpoll* psocketgroupUsersWrite,CASocketGroupEpoll* psocketgroupUsersRead, CAFirstMixChannelList* pChannelList);
 #else
 		bool sendToUsers(CASocketGroup* psocketgroupUsersWrite,CASocketGroup* psocketgroupUsersRead, CAFirstMixChannelList* pChannelList);
 #endif
