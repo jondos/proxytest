@@ -151,6 +151,7 @@ class CAFirstMixChannelToQueueList
 									m_pMutex->unlock();
 									return pQueue;
 								}
+							pEntry=pEntry->next;
 						}
 					m_pMutex->unlock();
 					return NULL;
@@ -167,17 +168,18 @@ class CAFirstMixChannelToQueueList
 								{
 									if (pLastEntry != NULL)
 										{
-										pLastEntry->next = pEntry->next;
+											pLastEntry->next = pEntry->next;
 										}
 									else
 										{
-										m_pHead = pEntry->next;
+											m_pHead = pEntry->next;
 										}
 									delete pEntry;
 									m_pMutex->unlock();
 									return E_SUCCESS;
 								}
-						}
+						pEntry=pEntry->next;
+				}
 					m_pMutex->unlock();
 					return E_UNKNOWN;
 				}
