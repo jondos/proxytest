@@ -1433,7 +1433,7 @@ THREAD_RETURN fm_loopPacketProcessing(void *params)
 						//if we have epoll we do not need to search the whole list
 						//of connected JAPs to find the ones who have sent data
 						//as epoll will return ONLY these connections.
-						fmHashTableEntry* pHashEntry=(fmHashTableEntry*)m_psocketgroupUsersRead->getFirstSignaledSocketData();
+						fmHashTableEntry* pHashEntry=(fmHashTableEntry*)psocketgroupUsersRead->getFirstSignaledSocketData();
 						while(pHashEntry!=NULL)
 							{
 								CAMuxSocket* pMuxSocket=pHashEntry->pMuxSocket;
@@ -1707,7 +1707,7 @@ THREAD_RETURN fm_loopPacketProcessing(void *params)
 #endif*/
 								#ifdef HAVE_EPOLL
 NEXT_USER:
-									pHashEntry=(fmHashTableEntry*)m_psocketgroupUsersRead->getNextSignaledSocketData();
+									pHashEntry=(fmHashTableEntry*)psocketgroupUsersRead->getNextSignaledSocketData();
 								#else
 									}//if is signaled
 NEXT_USER:
