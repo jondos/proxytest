@@ -1228,7 +1228,7 @@ struct fm_packet_proccessing_loop_args_t
 		CAFirstMixChannelList* pChannelList;
 #ifdef HAVE_EPOLL
 		CASocketGroupEpoll* psocketgroupUsersRead;
-		CASocketGroupEpoll* socketgroupUsersWrite;
+		CASocketGroupEpoll* psocketgroupUsersWrite;
 #else
 		CASocketGroup* psocketgroupUsersRead;
 		CASocketGroup* psocketgroupUsersWrite;
@@ -1252,13 +1252,12 @@ SINT32 CAFirstMixA::loop()
 		tPacketProcessingLoopArgs* params = new tPacketProcessingLoopArgs;
 		params->pFirstMix = this;
 		params->pChannelList = m_arpChannelList[i];
-		params->psocketgroupUsersRead = m_arpsocketgroupUsersRead[i];
+		params->psocketgroupUsersRead =  m_arpsocketgroupUsersRead[i];
 		params->psocketgroupUsersWrite = m_arpsocketgroupUsersWrite[i];
 		params->pIncomingPacketQueue = new CAQueue();
 		m_pthreadsPacketProccessingLoop->addRequest(fm_loopPacketProcessing, params);
 		}
 	//	CASingleSocketGroup osocketgroupMixOut;
-		SINT32 countRead=0;
 		//#ifdef LOG_PACKET_TIMES
 		//	tPoolEntry* pPoolEntry=new tPoolEntry;
 		//	MIXPACKET* pMixPacket=&pPoolEntry->mixpacket;
@@ -1273,7 +1272,6 @@ SINT32 CAFirstMixA::loop()
 		UINT8* tmpBuff=new UINT8[sizeof(tQueueEntry)];
 		CAMsg::printMsg(LOG_DEBUG,"Starting Message Loop... \n");
 		bool bAktiv;
-		UINT8 rsaBuff[RSA_SIZE];
 
 #ifdef LOG_TRAFFIC_PER_USER
 		UINT64 current_time;
