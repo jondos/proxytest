@@ -1969,7 +1969,7 @@ bool CAFirstMixA::sendToUsers(CASocketGroup* psocketgroupUsersWrite,CASocketGrou
  */
 #ifdef HAVE_EPOLL
 	fmHashTableEntry* pfmHashEntry=
-		(fmHashTableEntry*) m_psocketgroupUsersWrite->getFirstSignaledSocketData();
+		(fmHashTableEntry*) psocketgroupUsersWrite->getFirstSignaledSocketData();
 
 	while(pfmHashEntry != NULL)
 	{
@@ -2087,7 +2087,7 @@ bool CAFirstMixA::sendToUsers(CASocketGroup* psocketgroupUsersWrite,CASocketGrou
 			}
 
 #ifdef HAVE_EPOLL
-		pfmHashEntry=(fmHashTableEntry*)m_psocketgroupUsersWrite->getNextSignaledSocketData();
+		pfmHashEntry=(fmHashTableEntry*)psocketgroupUsersWrite->getNextSignaledSocketData();
 	}
 #else
 		}//if is socket signaled
