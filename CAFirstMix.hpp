@@ -423,7 +423,6 @@ protected:
 #ifndef MULTI_THREADED_PACKET_PROCESSING
 			CAFirstMixChannelList* m_pChannelList;
 #ifdef HAVE_EPOLL
-
 			CASocketGroupEpoll* m_psocketgroupUsersRead;
 			CASocketGroupEpoll* m_psocketgroupUsersWrite;
 #else
@@ -437,11 +436,9 @@ protected:
 			CAFirstMixChannelList** m_arpChannelList;
 			CAFirstMixChannelToQueueList* m_pChannelToQueueList;
 #ifdef HAVE_EPOLL
-
-			CASocketGroupEpoll* m_arpsocketgroupUsersRead;
-			CASocketGroupEpoll* m_arpsocketgroupUsersWrite;
+			CASocketGroupEpoll** m_arpsocketgroupUsersRead;
+			CASocketGroupEpoll** m_arpsocketgroupUsersWrite;
 #else
-
 			CASocketGroup** m_arpsocketgroupUsersRead;
 			CASocketGroup** m_arpsocketgroupUsersWrite;
 #endif
