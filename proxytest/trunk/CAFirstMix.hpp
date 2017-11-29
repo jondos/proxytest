@@ -118,6 +118,8 @@ typedef struct t_FirstMixChannelToQueueList_entry
 		t_FirstMixChannelToQueueList_entry* next;
 	} tFirstMixChannelToQueueListEntry;
 
+//#define LOCK_FREE_LIST
+
 class CAFirstMixChannelToQueueList
 	{
 		public:
@@ -141,19 +143,25 @@ class CAFirstMixChannelToQueueList
 
 			CAQueue* get(HCHANNEL channel)
 				{
+#ifndef LOCK_FREE_LIST
 					m_pMutex->lock();
+#endif
 					tFirstMixChannelToQueueListEntry* pEntry = m_pHead;
 					while (pEntry != NULL)
 						{
 							if (pEntry->channel == channel)
 								{
 									CAQueue* pQueue = pEntry->pQueue;
+#ifndef LOCK_FREE_LIST
 									m_pMutex->unlock();
+#endif
 									return pQueue;
 								}
 							pEntry=pEntry->next;
 						}
+#ifndef LOCK_FREE_LIST
 					m_pMutex->unlock();
+#endif
 					return NULL;
 				}
 
@@ -182,6 +190,33 @@ class CAFirstMixChannelToQueueList
 				}
 					m_pMutex->unlock();
 					return E_UNKNOWN;
+				}
+
+			void performanceTest()
+				{
+					UINT32 nrChannels = 10000;
+					UINT32 nrAccess = 10000000;
+					HCHANNEL* pChannels = new HCHANNEL[nrChannels];
+					printf("%u Channel test - %u accesses\n",nrChannels,nrAccess);
+					for (UINT32 i = 0; i < nrChannels; i++)
+						{
+							getRandom(&pChannels[i]);
+							add(pChannels[i], NULL);
+						}
+
+					UINT64 startTime;
+					getcurrentTimeMillis(startTime);
+					for (UINT32 i = 0; i < nrAccess; i++)
+						{
+							UINT32 r;
+							getRandom(&r);
+							r %= 10000;
+							get(pChannels[r]);
+						}
+					UINT64 endTime;
+					getcurrentTimeMillis(endTime);
+					
+					printf("Duration: %u ms\n", diff64(endTime, startTime));
 				}
 		private:
 			CAMutex* m_pMutex;
@@ -326,7 +361,7 @@ public:
 		friend THREAD_RETURN fm_loopSendToMix(void*);
 		friend THREAD_RETURN fm_loopReadFromMix(void*);
 		friend THREAD_RETURN fm_loopAcceptUsers(void*);
-		friend THREAD_RETURN fm_loopReadFromUsers(void*);
+		//friend THREAD_RETURN fm_loopReadFromUsers(void*);
 		friend THREAD_RETURN fm_loopDoUserLogin(void* param);
 #ifdef CH_LOG_STUDY
 		friend THREAD_RETURN fm_loopLogChannelsOpened(void* param);
