@@ -477,9 +477,9 @@ See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 
 int main(int argc, const char* argv[])
 	{
-	CAFirstMixChannelToQueueList oL;
-	oL.performanceTest();
-	exit(0);
+	//CAFirstMixChannelToQueueList oL;
+	//oL.performanceTest();
+	//exit(0);
 		
 
 		SINT32 exitCode=0;
