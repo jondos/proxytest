@@ -126,7 +126,8 @@ class CAFirstMixChannelToQueueList
 			CAFirstMixChannelToQueueList()
 				{
 					m_pMutex = new CAMutex();
-					m_pHead = NULL;
+					m_pHeads = new t_FirstMixChannelToQueueList_entry*[0x10000];
+					memset(m_pHeads, 0, sizeof(t_FirstMixChannelToQueueList_entry*) * 0x10000);
 				}
 
 			SINT32 add(HCHANNEL channel, CAQueue* pQueue)
@@ -135,8 +136,9 @@ class CAFirstMixChannelToQueueList
 					tFirstMixChannelToQueueListEntry* pNewEntry = new tFirstMixChannelToQueueListEntry;
 					pNewEntry->channel = channel;
 					pNewEntry->pQueue = pQueue;
-					pNewEntry->next = m_pHead;
-					m_pHead = pNewEntry;
+					UINT32 hashkey = channel & 0x0FFFF;
+					pNewEntry->next = m_pHeads[hashkey];
+					m_pHeads[hashkey] = pNewEntry;
 					m_pMutex->unlock();
 					return E_SUCCESS;
 				}
@@ -146,7 +148,7 @@ class CAFirstMixChannelToQueueList
 #ifndef LOCK_FREE_LIST
 					m_pMutex->lock();
 #endif
-					tFirstMixChannelToQueueListEntry* pEntry = m_pHead;
+					tFirstMixChannelToQueueListEntry* pEntry = m_pHeads[channel & 0x0FFFF ];
 					while (pEntry != NULL)
 						{
 							if (pEntry->channel == channel)
@@ -168,7 +170,7 @@ class CAFirstMixChannelToQueueList
 			SINT32 removeChannel(HCHANNEL channel)
 				{
 					m_pMutex->lock();
-					tFirstMixChannelToQueueListEntry* pEntry = m_pHead;
+					tFirstMixChannelToQueueListEntry* pEntry = m_pHeads[channel & 0x0FFFF];
 					tFirstMixChannelToQueueListEntry* pLastEntry = NULL;
 					while (pEntry != NULL)
 						{
@@ -180,7 +182,7 @@ class CAFirstMixChannelToQueueList
 										}
 									else
 										{
-											m_pHead = pEntry->next;
+											m_pHeads[channel & 0x0FFFF] = pEntry->next;
 										}
 									delete pEntry;
 									m_pMutex->unlock();
@@ -220,7 +222,7 @@ class CAFirstMixChannelToQueueList
 				}
 		private:
 			CAMutex* m_pMutex;
-			tFirstMixChannelToQueueListEntry* m_pHead;
+			tFirstMixChannelToQueueListEntry** m_pHeads;
 	};
 
 
