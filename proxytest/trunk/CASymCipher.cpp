@@ -29,6 +29,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASymCipher.hpp"
 //AES
 
+
+#ifdef AES_NI
+extern "C"
+	{
+		int aesni_set_encrypt_key(const unsigned char *userKey, int bits,AES_KEY *key);
+		void aesni_encrypt(const unsigned char *in, unsigned char *out,
+                   const AES_KEY *key);
+	}
+#endif
+
 /** Sets the key1 and key2 used for encryption/decryption. Also resets the IVs to zero!
 	* @param key 16 random bytes used as key
 	* @retval E_SUCCESS
@@ -51,8 +61,18 @@ SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
 #else
 	if(bEncrypt)
 		{
+#ifdef AES_NI
+	//m_ctxAES1=EVP_CIPHER_CTX_new();
+	//m_ctxAES2=EVP_CIPHER_CTX_new();
+	//EVP_EncryptInit_ex(m_ctxAES1,EVP_aes_128_ecb(), NULL, key, NULL);
+	//EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ecb(), NULL, key, NULL);
+	aesni_set_encrypt_key(key,128,m_keyAES1);
+	aesni_set_encrypt_key(key,128,m_keyAES2);
+
+#else
 			AES_set_encrypt_key(key,128,m_keyAES1);
 			AES_set_encrypt_key(key,128,m_keyAES2);
+#endif
 		}
 	else
 		{
@@ -122,7 +142,13 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 #ifdef INTEL_IPP_CRYPTO
 			ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES1, IppsCPPaddingNONE);
 #else
+#ifdef AES_NI
+//		int outlen = 16;
+//		EVP_EncryptUpdate(m_ctxAES1, m_iv1, &outlen, m_iv1, 16);
+			aesni_encrypt(m_iv1,m_iv1,m_keyAES1);
+#else
 			AES_encrypt(m_iv1,m_iv1,m_keyAES1);
+#endif
 #endif
 			out[i]=in[i]^m_iv1[0];
 			i++;
@@ -162,7 +188,14 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 #ifdef INTEL_IPP_CRYPTO
 			ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES1, IppsCPPaddingNONE);
 #else
+#ifdef AES_NI
+		//int outlen = 16;
+		//EVP_EncryptUpdate(m_ctxAES1, m_iv1, &outlen, m_iv1, 16);
+			aesni_encrypt(m_iv1,m_iv1,m_keyAES1);
+
+#else
 			AES_encrypt(m_iv1,m_iv1,m_keyAES1);
+#endif
 #endif
 			len-=i;
 			for(UINT32 k=0; k<len; k++)

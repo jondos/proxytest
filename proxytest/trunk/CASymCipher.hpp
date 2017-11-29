@@ -39,6 +39,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	* This class has a 2-in-1 feature: Two independent IVs are available. Therefore
 	* we have crypt1() and crypt2() depending on the used IV.
 	*/
+//#define AES_NI
 class CASymCipher
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 	:public CALockAble
@@ -183,6 +184,11 @@ class CASymCipher
 #else
 			AES_KEY* m_keyAES1;
 			AES_KEY* m_keyAES2;
+#endif
+
+#ifdef AES_NI
+//			EVP_CIPHER_CTX *m_ctxAES1;
+//			EVP_CIPHER_CTX *m_ctxAES2;
 #endif
 
 			UINT8* m_iv1;

@@ -284,7 +284,7 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>proxytest-lib.lib;ws2_32.lib;pthreadVC2.lib;xerces-c_3D.lib;minixml-2.10.lib;libcrypto.lib;libssl.lib</AdditionalDependencies>
+      <AdditionalDependencies>proxytest-lib.lib;ws2_32.lib;pthreadVC2.lib;xerces-c_3D.lib;minixml-2.10.lib;libcrypto.lib;libssl.lib;AdvAPI32.lib;crypt32.lib;gdi32.lib;user32.lib</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>C:\data\vld\bin\Win32\Debug;$(SolutionDir)\build\proxytest-lib\Debug;$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_MXML);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -484,7 +484,7 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>proxytest-lib.lib;ws2_32.lib;pthreadVC2.lib;xerces-c_3D.lib;minixml-2.10.lib;libcrypto.lib;libssl.lib</AdditionalDependencies>
+      <AdditionalDependencies>proxytest-lib.lib;ws2_32.lib;pthreadVC2.lib;xerces-c_3D.lib;minixml-2.10.lib;libcrypto.lib;libssl.lib;AdvAPI32.lib;crypt32.lib;gdi32.lib;user32.lib</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>$(SolutionDir)\build\proxytest-lib\Release;$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_MXML);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ProgramDatabaseFile>$(OutDir)proxytest.pdb</ProgramDatabaseFile>
@@ -753,7 +753,7 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>proxytest-lib.lib;MiniXML-2.10.lib;ws2_32.lib;libcrypto.lib;libssl.lib;pthreadVC2.lib</AdditionalDependencies>
+      <AdditionalDependencies>proxytest-lib.lib;MiniXML-2.10.lib;ws2_32.lib;libcrypto.lib;libssl.lib;pthreadVC2.lib;</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>.\Debug-with-Mini-XML;$(LIB_MXML);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_ZLIB);$(LIB_POSTGRES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
