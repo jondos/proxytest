@@ -1818,7 +1818,7 @@ THREAD_RETURN lm_loopPacketProcessing(void *params)
 															pChannelListEntry->trafficOutToUser+=ret;
 														#endif
 														#ifdef DELAY_CHANNELS
-															m_pChannelList->reduceDelayBuckets(pChannelListEntry->delayBucketID, ret);
+															pChannelList->reduceDelayBuckets(pChannelListEntry->delayBucketID, ret);
 														#endif
 														pMixPacket->channel=pChannelListEntry->channelIn;
 														pMixPacket->flags=CHANNEL_DATA;
