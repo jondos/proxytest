@@ -477,6 +477,11 @@ See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 
 int main(int argc, const char* argv[])
 	{
+	CAFirstMixChannelToQueueList oL;
+	oL.performanceTest();
+	exit(0);
+		
+
 		SINT32 exitCode=0;
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INLUDE_LAST_MIX|| defined INLUDE_FIRST_MIX
 		pMix=NULL;
