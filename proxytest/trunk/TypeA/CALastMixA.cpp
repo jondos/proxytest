@@ -1024,17 +1024,18 @@ SINT32 CALastMixA::loop()
 
 THREAD_RETURN lm_loopPacketProcessing(void *params)
 	{
-	CALastMixA* pMix = static_cast<tPacketProcessingLoopArgs*>(params)->pLastMix;
-	CAQueue* pIncomingPacketsQueue = static_cast<tPacketProcessingLoopArgs*>(params)->pIncomingPacketQueue;
+		CALastMixA* pMix = static_cast<tPacketProcessingLoopArgs*>(params)->pLastMix;
+		CAQueue* pIncomingPacketsQueue = static_cast<tPacketProcessingLoopArgs*>(params)->pIncomingPacketQueue;
+		CALastMixChannelList* pChannelList=new CALastMixChannelList();
 #ifndef NEW_MIX_TYPE
 		//CASocketList  oSocketList;
 #ifdef DELAY_CHANNELS
-		m_pChannelList->setDelayParameters(	CALibProxytest::getOptions()->getDelayChannelUnlimitTraffic(),
+		pChannelList->setDelayParameters(	CALibProxytest::getOptions()->getDelayChannelUnlimitTraffic(),
 																			CALibProxytest::getOptions()->getDelayChannelBucketGrow(),
 																			CALibProxytest::getOptions()->getDelayChannelBucketGrowIntervall());
 #endif
 #ifdef DELAY_CHANNELS_LATENCY
-		m_pChannelList->setDelayLatencyParameters(	CALibProxytest::getOptions()->getDelayChannelLatency());
+		pChannelList->setDelayLatencyParameters(	CALibProxytest::getOptions()->getDelayChannelLatency());
 #endif
 #ifdef HAVE_EPOLL
 		CASocketGroupEpoll* psocketgroupCacheRead=new CASocketGroupEpoll(false);
@@ -1045,7 +1046,6 @@ THREAD_RETURN lm_loopPacketProcessing(void *params)
 #endif
 		tQueueEntry* pQueueEntry=new tQueueEntry;
 		MIXPACKET* pMixPacket=&pQueueEntry->packet;
-		CALastMixChannelList* pChannelList=new CALastMixChannelList();
 		SINT32 ret;
 		SINT32 countRead;
 		lmChannelListEntry* pChannelListEntry;
