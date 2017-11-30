@@ -34,8 +34,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 extern "C"
 	{
 		int aesni_set_encrypt_key(const unsigned char *userKey, int bits,AES_KEY *key);
+		int aesni_set_decrypt_key(const unsigned char *userKey, int bits,AES_KEY *key);
 		void aesni_encrypt(const unsigned char *in, unsigned char *out,
                    const AES_KEY *key);
+		void aesni_cbc_encrypt(const unsigned char *in,
+                       unsigned char *out,
+                       size_t length,
+                       const AES_KEY *key, unsigned char *ivec, int enc);
 	}
 #endif
 
@@ -76,8 +81,13 @@ SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
 		}
 	else
 		{
+#ifdef AES_NI
+			aesni_set_decrypt_key(key,128,m_keyAES1);
+			aesni_set_decrypt_key(key,128,m_keyAES2);
+#else
 			AES_set_decrypt_key(key,128,m_keyAES1);
 			AES_set_decrypt_key(key,128,m_keyAES2);
+#endif
 		}
 #endif
 	memset(m_iv1,0,16);
@@ -98,8 +108,13 @@ SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
 			ippsRijndael128Init(key, IppsRijndaelKey128,m_keyAES1);
 			ippsRijndael128Init(key+KEY_SIZE, IppsRijndaelKey128,m_keyAES2);
 #else
+#ifdef AES_NI
+			aesni_set_encrypt_key(key,128,m_keyAES1);
+			aesni_set_encrypt_key(key+KEY_SIZE,128,m_keyAES2);
+#else
 			AES_set_encrypt_key(key,128,m_keyAES1);
 			AES_set_encrypt_key(key+KEY_SIZE,128,m_keyAES2);
+#endif
 #endif
 			memset(m_iv1,0,16);
 			memset(m_iv2,0,16);
@@ -226,7 +241,11 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 #ifdef INTEL_IPP_CRYPTO
 			ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES2, IppsCPPaddingNONE);
 #else
+#ifdef AES_NI
+			aesni_encrypt(m_iv2,m_iv2,m_keyAES2);
+#else
 			AES_encrypt(m_iv2,m_iv2,m_keyAES2);
+#endif
 #endif
 			out[i]=in[i]^m_iv2[0];
 			i++;
@@ -266,7 +285,11 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 #ifdef INTEL_IPP_CRYPTO
 			ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES2, IppsCPPaddingNONE);
 #else
+#ifdef AES_NI
+			aesni_encrypt(m_iv2,m_iv2,m_keyAES2);
+#else
 			AES_encrypt(m_iv2,m_iv2,m_keyAES2);
+#endif
 #endif
 			len-=i;
 			for(UINT32 k=0; k<len; k++)
@@ -293,7 +316,11 @@ SINT32 CASymCipher::decrypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len)
 		return E_UNKNOWN;
 #ifdef INTEL_IPP_CRYPTO
 #else
+#ifndef AES_NI
 	AES_cbc_encrypt(in,out,*len,m_keyAES1,m_iv1,AES_DECRYPT);
+#else
+	aesni_cbc_encrypt(in,out,*len,m_keyAES1,m_iv1,AES_DECRYPT);
+#endif
 	//Now remove padding
 	UINT32 pad=out[*len-1];
 	if(pad>16||pad>*len)
@@ -330,7 +357,11 @@ SINT32 CASymCipher::encrypt1CBCwithPKCS7(const UINT8* in,UINT32 inlen,UINT8* out
 		{
 			tmp[i]=(UINT8)padlen;
 		}
+#ifndef AES_NI
 	AES_cbc_encrypt(tmp,out,inlen+padlen,m_keyAES1,m_iv1,AES_ENCRYPT);
+#else
+	aesni_cbc_encrypt(tmp,out,inlen+padlen,m_keyAES1,m_iv1,AES_ENCRYPT);
+#endif
 	delete[] tmp;
 	tmp = NULL;
 	*len=inlen+padlen;
@@ -343,16 +374,52 @@ SINT32 CASymCipher::testSpeed()
 {
 	const UINT32 runs=1000000;
 	CASymCipher* pCipher=new CASymCipher();
+	CASymCipher* pCipher1=new CASymCipher();
+	CASymCipher* pCipher2=new CASymCipher();
+	CASymCipher* pCipher3=new CASymCipher();
 	UINT8 key[16];
 	UINT8* inBuff=new UINT8[1024];
+	UINT8* outBuff=new UINT8[1024];
 	getRandom(key,16);
 	getRandom(inBuff,1024);
+	UINT8* checkBuff=new UINT8[1024];
+	memcpy(checkBuff, inBuff, 1024);
 	pCipher->setKey(key);
+	pCipher1->setKey(key);
+	pCipher2->setKey(key);
+	pCipher3->setKey(key,false);
 	UINT64 start,end;
+
+	AES_KEY* aeskey = new AES_KEY;
+	AES_set_decrypt_key(key,128,aeskey);
+	UINT8 iv[16];
+	memset(iv, 0, 16);
+
 	getcurrentTimeMillis(start);
 	for(UINT32 i=0; i<runs; i++)
 		{
 			pCipher->crypt1(inBuff,inBuff,1023);
+			pCipher1->crypt1(inBuff,inBuff,1023);
+			if (memcmp(inBuff, checkBuff, 1023) != 0)
+				{
+						printf("CASymCiper::testSpeed() -- enc / dec mismatch!\n");
+				}
+			UINT32 outlen = 1024;
+			pCipher2->encrypt1CBCwithPKCS7(inBuff, 1023, outBuff, &outlen);
+			//pCipher3->decrypt1CBCwithPKCS7(outBuff, inBuff, &outlen);
+			
+			
+			
+				AES_cbc_encrypt(outBuff,inBuff,outlen,aeskey,iv,AES_DECRYPT);
+			
+			
+			
+			
+			
+			if (memcmp(inBuff, checkBuff, 1023) != 0)
+				{
+						printf("CASymCiper::testSpeed() -- CBC enc / dec mismatch!\n");
+				}
 		}
 	getcurrentTimeMillis(end);
 	UINT32 d=diff64(end,start);

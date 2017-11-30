@@ -479,8 +479,8 @@ int main(int argc, const char* argv[])
 	{
 	//CAFirstMixChannelToQueueList oL;
 	//oL.performanceTest();
-	CASymCipher::testSpeed();
-	exit(0);
+	//CASymCipher::testSpeed();
+	//exit(0);
 		
 
 		SINT32 exitCode=0;
