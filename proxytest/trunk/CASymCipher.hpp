@@ -59,6 +59,11 @@ class CASymCipher
 					m_keyAES1=new AES_KEY;
 					m_keyAES2=new AES_KEY;
 #endif
+#ifdef SYM_CIPPHER_CTR
+					m_ctxAES1=EVP_CIPHER_CTX_new();
+					m_ctxAES2=EVP_CIPHER_CTX_new();
+#endif
+
 					m_iv1=new UINT8[16];
 					m_iv2=new UINT8[16];
 
