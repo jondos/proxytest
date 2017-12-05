@@ -74,6 +74,9 @@ SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
 	m_ctxAES2=EVP_CIPHER_CTX_new();
 	EVP_EncryptInit_ex(m_ctxAES1,EVP_aes_128_ctr(), NULL, key, m_iv1);
 	EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key, m_iv2);
+	memcpy(key1, key, 16);
+	memcpy(key2, key, 16);
+
 #endif
 #ifdef AES_NI
 	aesni_set_encrypt_key(key,128,m_keyAES1);
@@ -126,6 +129,8 @@ SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
 	m_ctxAES2=EVP_CIPHER_CTX_new();
 	EVP_EncryptInit_ex(m_ctxAES1,EVP_aes_128_ctr(), NULL, key, m_iv1);
 	EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key+KEY_SIZE, m_iv2);
+	memcpy(key1, key, 16);
+	memcpy(key2, key + KEY_SIZE, 16);
 #endif
 			m_bKeySet=true;
 			return E_SUCCESS;
