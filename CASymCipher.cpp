@@ -60,17 +60,22 @@ SINT32 CASymCipher::setKey(const UINT8* key)
 	*/
 SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
 {
+	memset(m_iv1,0,16);
+	memset(m_iv2,0,16);
+
 #ifdef INTEL_IPP_CRYPTO
 	ippsRijndael128Init(key, IppsRijndaelKey128,m_keyAES1);
 	ippsRijndael128Init(key, IppsRijndaelKey128,m_keyAES2);
 #else
 	if(bEncrypt)
 		{
+#ifdef SYM_CIPHER_CTR
+	m_ctxAES1=EVP_CIPHER_CTX_new();
+	m_ctxAES2=EVP_CIPHER_CTX_new();
+	EVP_EncryptInit_ex(m_ctxAES1,EVP_aes_128_ctr(), NULL, key, m_iv1);
+	EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key, m_iv2);
+#endif
 #ifdef AES_NI
-	//m_ctxAES1=EVP_CIPHER_CTX_new();
-	//m_ctxAES2=EVP_CIPHER_CTX_new();
-	//EVP_EncryptInit_ex(m_ctxAES1,EVP_aes_128_ecb(), NULL, key, NULL);
-	//EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ecb(), NULL, key, NULL);
 	aesni_set_encrypt_key(key,128,m_keyAES1);
 	aesni_set_encrypt_key(key,128,m_keyAES2);
 
@@ -90,8 +95,6 @@ SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
 #endif
 		}
 #endif
-	memset(m_iv1,0,16);
-	memset(m_iv2,0,16);
 	m_bKeySet=true;
 	return E_SUCCESS;
 }
@@ -118,6 +121,12 @@ SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
 #endif
 			memset(m_iv1,0,16);
 			memset(m_iv2,0,16);
+#ifdef SYM_CIPHER_CTR
+	m_ctxAES1=EVP_CIPHER_CTX_new();
+	m_ctxAES2=EVP_CIPHER_CTX_new();
+	EVP_EncryptInit_ex(m_ctxAES1,EVP_aes_128_ctr(), NULL, key, m_iv1);
+	EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key+KEY_SIZE, m_iv2);
+#endif
 			m_bKeySet=true;
 			return E_SUCCESS;
 		}
@@ -142,6 +151,28 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 	memmove(out, in, len);
 	return E_SUCCESS;
 #endif
+#ifdef SYM_CIPHER_CTR
+	if ((len % 16) == 0)
+		{
+		UINT32 i=len;
+		EVP_EncryptUpdate(m_ctxAES1, out, (int*)&i, in, len);
+		}
+	else
+		{
+			UINT32 len1=len&0x0FFFFFF0;
+			UINT32 i=len1;
+			EVP_EncryptUpdate(m_ctxAES1, out, (int*)&i, in, len1);
+			UINT32 index = len1;
+			len1=len-len1;
+			UINT8 tmpBuff[16];
+			memcpy(tmpBuff,in+index, len1);
+			EVP_EncryptUpdate(m_ctxAES1, out+index,(int*)&i, tmpBuff, 16);
+			memcpy(out+index,tmpBuff, len1);
+			
+		}
+	return E_SUCCESS;
+#endif
+
 #ifdef INTEL_IPP_CRYPTO
 	UINT32 k=len&0xFFFFFFF0;
 	ippsRijndael128EncryptOFB(in,out,k,16, m_keyAES1,m_iv1);
@@ -235,6 +266,28 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 	memmove(out, in, len);
 	return E_SUCCESS;
 #endif
+#ifdef SYM_CIPHER_CTR
+	if ((len % 16) == 0)
+		{
+		UINT32 i=len;
+		EVP_EncryptUpdate(m_ctxAES2, out, (int*)&i, in, len);
+		}
+	else
+		{
+			UINT32 len1=len&0x0FFFFFF0;
+			UINT32 i=len1;
+			EVP_EncryptUpdate(m_ctxAES2, out, (int*)&i, in, len1);
+			UINT32 index = len1;
+			len1=len-len1;
+			UINT8 tmpBuff[16];
+			memcpy(tmpBuff,in+index, len1);
+			EVP_EncryptUpdate(m_ctxAES2, out+index,(int*)&i, tmpBuff, 16);
+			memcpy(out+index,tmpBuff, len1);
+			
+		}
+	return E_SUCCESS;
+#endif
+
 	UINT32 i=0;
 	while(i+15<len)
 		{

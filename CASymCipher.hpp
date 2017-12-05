@@ -40,6 +40,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	* we have crypt1() and crypt2() depending on the used IV.
 	*/
 #define AES_NI
+#define SYM_CIPHER_CTR
 class CASymCipher
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 	:public CALockAble
@@ -186,10 +187,11 @@ class CASymCipher
 			AES_KEY* m_keyAES2;
 #endif
 
-#ifdef AES_NI
-//			EVP_CIPHER_CTX *m_ctxAES1;
-//			EVP_CIPHER_CTX *m_ctxAES2;
+#ifdef SYM_CIPHER_CTR
+			EVP_CIPHER_CTX *m_ctxAES1;
+			EVP_CIPHER_CTX *m_ctxAES2;
 #endif
+
 
 			UINT8* m_iv1;
 			UINT8* m_iv2;
