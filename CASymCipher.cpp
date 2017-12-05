@@ -70,8 +70,6 @@ SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
 	if(bEncrypt)
 		{
 #ifdef SYM_CIPHER_CTR
-	m_ctxAES1=EVP_CIPHER_CTX_new();
-	m_ctxAES2=EVP_CIPHER_CTX_new();
 	EVP_EncryptInit_ex(m_ctxAES1,EVP_aes_128_ctr(), NULL, key, m_iv1);
 	EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key, m_iv2);
 	memcpy(key1, key, 16);
@@ -125,8 +123,6 @@ SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
 			memset(m_iv1,0,16);
 			memset(m_iv2,0,16);
 #ifdef SYM_CIPHER_CTR
-	m_ctxAES1=EVP_CIPHER_CTX_new();
-	m_ctxAES2=EVP_CIPHER_CTX_new();
 	EVP_EncryptInit_ex(m_ctxAES1,EVP_aes_128_ctr(), NULL, key, m_iv1);
 	EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key+KEY_SIZE, m_iv2);
 	memcpy(key1, key, 16);
