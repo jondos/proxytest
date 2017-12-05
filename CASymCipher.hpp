@@ -138,6 +138,10 @@ class CASymCipher
 				{
 					memcpy(m_iv1,p_iv,16);
 					memcpy(m_iv2,p_iv,16);
+#ifdef SYM_CIPHER_CTR
+					EVP_EncryptInit_ex(m_ctxAES1, EVP_aes_128_ctr(), NULL, key1, m_iv1);
+					EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key2, m_iv2);
+#endif
 					return E_SUCCESS;
 				}
 
@@ -148,6 +152,9 @@ class CASymCipher
 			SINT32 setIV2(const UINT8* p_iv)
 				{
 					memcpy(m_iv2,p_iv,16);
+#ifdef SYM_CIPHER_CTR
+					EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key2, m_iv2);
+#endif
 					return E_SUCCESS;
 				}
 
@@ -190,6 +197,8 @@ class CASymCipher
 #ifdef SYM_CIPHER_CTR
 			EVP_CIPHER_CTX *m_ctxAES1;
 			EVP_CIPHER_CTX *m_ctxAES2;
+			UINT8 key1[16];
+			UINT8 key2[16];
 #endif
 
 
