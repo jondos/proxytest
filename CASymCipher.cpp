@@ -157,13 +157,15 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 #ifdef SYM_CIPHER_CTR
 	if (1/*(len % 16) == 0*/)
 		{
-			UINT32 i=len;
-			int ret=EVP_DecryptUpdate(m_ctxAES1, out, (int*)&i, in, len);
+			UINT32 i=2000;
+			UINT8 tmpBuff[2000];
+			int ret=EVP_DecryptUpdate(m_ctxAES1, tmpBuff, (int*)&i, in, len);
 			if (ret != 1)
 				{
 					CAMsg::printMsg(LOG_ERR, "Error in CASymCipher::crypt1()\n ");
 					return E_UNKNOWN;
 				}
+			memcpy(out, tmpBuff, len);
 		}
 	else
 		{
@@ -276,8 +278,11 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 #ifdef SYM_CIPHER_CTR
 	if (1/*(len % 16) == 0*/)
 		{
-			UINT32 i=len;
-			EVP_EncryptUpdate(m_ctxAES2, out, (int*)&i, in, len);
+			UINT32 i=2000;
+			UINT8 tmpBuff[2000];
+
+			EVP_EncryptUpdate(m_ctxAES2, tmpBuff, (int*)&i, in, len);
+			memcpy(out, tmpBuff, len);
 		}
 	else
 		{
