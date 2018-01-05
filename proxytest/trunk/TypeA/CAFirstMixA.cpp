@@ -1696,7 +1696,7 @@ THREAD_RETURN fm_loopPacketProcessing(void *params)
 															#endif*/
 															pMix->incMixedPackets();
 															#ifdef _DEBUG
-//																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
+																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u for in channel: %u\n",pMixPacket->channel,inChannel);
 															#endif
 														}
 													}
