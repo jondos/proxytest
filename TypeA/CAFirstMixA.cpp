@@ -412,6 +412,14 @@ SINT32 CAFirstMixA::loop()
 													else if(pEntry==NULL&&pMixPacket->flags==CHANNEL_OPEN)  // open a new mix channel
 													{ // stefan: muesste das nicht vor die behandlung von CHANNEL_DATA? oder gilt OPEN => !DATA ?
 														//es gilt: open -> data
+
+														//log symcrypto
+														UINT8* tmpstr=bytes2hex(pMixPacket->data, DATA_SIZE);
+														CAMsg::printMsg(LOG_DEBUG, "Plain Packet recevied form user: %s\n", tmpstr);
+														delete tmpstr;
+														//end log symcrpyto
+		
+
 														pHashEntry->pSymCipher->crypt1(pMixPacket->data,rsaBuff,FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 														#ifdef REPLAY_DETECTION
 														// replace time(NULL) with the real timestamp ()
@@ -422,6 +430,9 @@ SINT32 CAFirstMixA::loop()
 																continue;
 															}
 														#endif
+
+
+		
 														pCipher= new CASymCipher();
 														pCipher->setKeys(rsaBuff,FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 														for(int i=0;i<16;i++)
@@ -487,7 +498,13 @@ SINT32 CAFirstMixA::loop()
 																		pEntry->bDebug = true;
 																	}
 #endif
-															m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
+														//log symcrypto
+														UINT8* tmpstr=bytes2hex(pMixPacket->data, DATA_SIZE);
+														CAMsg::printMsg(LOG_DEBUG, "Plain Packet sent to next mix: %s\n", tmpstr);
+														delete tmpstr;
+														//end log symcrpyto
+
+																m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
 															/* Don't delay upstream
 															#ifdef DELAY_USERS
 															m_pChannelList->decDelayBuckets(pHashEntry->delayBucketID);

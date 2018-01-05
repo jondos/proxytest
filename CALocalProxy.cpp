@@ -457,12 +457,22 @@ SINT32 CALocalProxy::loop()
 																#endif
 																if(m_bWithFirstMixSymmetric&&c==m_chainlen-1)
 																	{
+																	  //log symcrypto
+																		UINT8* tmpstr=bytes2hex(pMixPacket->data, DATA_SIZE);
+																		CAMsg::printMsg(LOG_DEBUG, "Plain Packet for LastMix: %s\n", tmpstr);
+																		delete tmpstr;
+																		//end log symcrpyto
 																		memcpy(buff+m_SymChannelKeySize,pMixPacket->data,DATA_SIZE-m_SymChannelKeySize);
 																		m_pSymCipher->crypt1(buff,buff,m_SymChannelKeySize);
 																		UINT8 iv[16];
 																		memset(iv,0xFF,16);
 																		tmpCon->pCiphers[c].setIV2(iv);
 																		tmpCon->pCiphers[c].crypt1(buff+m_SymChannelKeySize,buff+m_SymChannelKeySize,DATA_SIZE-m_SymChannelKeySize);
+																	  //log symcrypto
+																		tmpstr=bytes2hex(buff, DATA_SIZE);
+																		CAMsg::printMsg(LOG_DEBUG, "Plain Packet for FirstMix: %s\n", tmpstr);
+																		delete tmpstr;
+																		//end log symcrpyto
 																	}
 																else
 																	{
