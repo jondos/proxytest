@@ -70,7 +70,7 @@ SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
 	if(bEncrypt)
 		{
 #ifdef SYM_CIPHER_CTR
-	EVP_EncryptInit_ex(m_ctxAES1,EVP_aes_128_ctr(), NULL, key, m_iv1);
+	EVP_DecryptInit_ex(m_ctxAES1,EVP_aes_128_ctr(), NULL, key, m_iv1);
 	EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key, m_iv2);
 	memcpy(key1, key, 16);
 	memcpy(key2, key, 16);
@@ -123,7 +123,7 @@ SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
 			memset(m_iv1,0,16);
 			memset(m_iv2,0,16);
 #ifdef SYM_CIPHER_CTR
-	EVP_EncryptInit_ex(m_ctxAES1,EVP_aes_128_ctr(), NULL, key, m_iv1);
+	EVP_DecryptInit_ex(m_ctxAES1,EVP_aes_128_ctr(), NULL, key, m_iv1);
 	EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key+KEY_SIZE, m_iv2);
 	memcpy(key1, key, 16);
 	memcpy(key2, key + KEY_SIZE, 16);
@@ -156,18 +156,18 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 	if ((len % 16) == 0)
 		{
 			UINT32 i=len;
-			EVP_EncryptUpdate(m_ctxAES1, out, (int*)&i, in, len);
+			EVP_DecryptUpdate(m_ctxAES1, out, (int*)&i, in, len);
 		}
 	else
 		{
 			UINT32 len1=len&0x0FFFFFF0;
 			UINT32 i=len1;
-			EVP_EncryptUpdate(m_ctxAES1, out, (int*)&i, in, len1);
+			EVP_DecryptUpdate(m_ctxAES1, out, (int*)&i, in, len1);
 			UINT32 index = len1;
 			len1=len-len1;
 			UINT8 tmpBuff[16];
 			memcpy(tmpBuff,in+index, len1);
-			EVP_EncryptUpdate(m_ctxAES1, tmpBuff,(int*)&i, tmpBuff, 16);
+			EVP_DecryptUpdate(m_ctxAES1, tmpBuff,(int*)&i, tmpBuff, 16);
 			memcpy(out+index,tmpBuff, len1);			
 		}
 	return E_SUCCESS;
