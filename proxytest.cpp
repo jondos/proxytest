@@ -500,7 +500,7 @@ UINT8 out2[992];
 	memset(out2, 1, 992);
 	c.crypt2(in, out2,17);
 	c.crypt2(in+17, out2+17,17);
-	exit(0);
+//	exit(0);
 		
 
 		SINT32 exitCode=0;
