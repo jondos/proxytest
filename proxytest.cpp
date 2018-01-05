@@ -493,6 +493,12 @@ UINT8 out2[992];
 
 	c.crypt1(in, out, 17);
 	c.crypt1(in + 17, out + 17, 15);
+
+		c.setKey(key);
+
+	c.crypt1(in, out2, 32);
+
+
 	memset(key, 0x00, 16);
 	UINT8 iv[16];
 	memset(iv,0xFF,16);

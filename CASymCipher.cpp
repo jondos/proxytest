@@ -153,7 +153,7 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 	return E_SUCCESS;
 #endif
 #ifdef SYM_CIPHER_CTR
-	if ((len % 16) == 0)
+	if (1/*(len % 16) == 0*/)
 		{
 			UINT32 i=len;
 			EVP_DecryptUpdate(m_ctxAES1, out, (int*)&i, in, len);
@@ -267,7 +267,7 @@ SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 	return E_SUCCESS;
 #endif
 #ifdef SYM_CIPHER_CTR
-	if ((len % 16) == 0)
+	if (1/*(len % 16) == 0*/)
 		{
 			UINT32 i=len;
 			EVP_EncryptUpdate(m_ctxAES2, out, (int*)&i, in, len);
