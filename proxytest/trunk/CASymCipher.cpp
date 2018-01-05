@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #include "StdAfx.h"
 #include "CASymCipher.hpp"
+#include "CAMsg.hpp"
 //AES
 
 
@@ -157,7 +158,12 @@ SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 	if (1/*(len % 16) == 0*/)
 		{
 			UINT32 i=len;
-			EVP_DecryptUpdate(m_ctxAES1, out, (int*)&i, in, len);
+			int ret=EVP_DecryptUpdate(m_ctxAES1, out, (int*)&i, in, len);
+			if (ret != 1)
+				{
+					CAMsg::printMsg(LOG_ERR, "Error in CASymCipher::crypt1()\n ");
+					return E_UNKNOWN;
+				}
 		}
 	else
 		{
