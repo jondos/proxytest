@@ -414,9 +414,10 @@ SINT32 CAFirstMixA::loop()
 														//es gilt: open -> data
 
 														//log symcrypto
-														UINT8* tmpstr=bytes2hex(pMixPacket->data, DATA_SIZE);
-														CAMsg::printMsg(LOG_DEBUG, "Plain Packet recevied form user: %s\n", tmpstr);
-														delete tmpstr;
+														//UINT8* tmpstr=bytes2hex(pMixPacket->data, DATA_SIZE);
+														//CAMsg::printMsg(LOG_DEBUG, "Plain Packet recevied form user: %s\n", tmpstr);
+														//delete tmpstr;
+														//tmpstr = NULL;
 														//end log symcrpyto
 		
 
@@ -499,9 +500,9 @@ SINT32 CAFirstMixA::loop()
 																	}
 #endif
 														//log symcrypto
-														UINT8* tmpstr=bytes2hex(pMixPacket->data, DATA_SIZE);
-														CAMsg::printMsg(LOG_DEBUG, "Plain Packet sent to next mix: %s\n", tmpstr);
-														delete tmpstr;
+														//tmpstr=bytes2hex(pMixPacket->data, DATA_SIZE);
+														//CAMsg::printMsg(LOG_DEBUG, "Plain Packet sent to next mix: %s\n", tmpstr);
+														//delete tmpstr;
 														//end log symcrpyto
 
 																m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
