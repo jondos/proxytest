@@ -494,7 +494,7 @@ SINT32 CAFirstMixA::loop()
 															#endif*/
 															incMixedPackets();
 															#ifdef _DEBUG
-//																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u\n",pMixPacket->channel);
+																			CAMsg::printMsg(LOG_DEBUG,"Added out channel: %u for in channel: %u\n",pMixPacket->channel,inChannel);
 															#endif
 														}
 													}
