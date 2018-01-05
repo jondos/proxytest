@@ -149,6 +149,7 @@ SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
 SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 {
 #ifdef NO_ENCRYPTION
+	CAMsg::printMsg(LOG_ERR,"Warning: - DO NULL encryption!\n");
 	memmove(out, in, len);
 	return E_SUCCESS;
 #endif
