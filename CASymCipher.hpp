@@ -144,7 +144,7 @@ class CASymCipher
 					memcpy(m_iv1,p_iv,16);
 					memcpy(m_iv2,p_iv,16);
 #ifdef SYM_CIPHER_CTR
-					EVP_EncryptInit_ex(m_ctxAES1, EVP_aes_128_ctr(), NULL, key1, m_iv1);
+					EVP_DecryptInit_ex(m_ctxAES1, EVP_aes_128_ctr(), NULL, key1, m_iv1);
 					EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key2, m_iv2);
 #endif
 					return E_SUCCESS;
