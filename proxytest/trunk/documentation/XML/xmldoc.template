@@ -36,5 +36,11 @@ This is the index of all XML structs used in the project.
 
 \anchor XMLSignature
 \verbinclude XMLSignature.xml
+
+\par 8. Mix description
+
+\anchor XSDMixType
+\verbinclude MixType.xsd
+
 */
 
