@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EncryptedData xmlns="http://www.w3.org/2001/04/xmlenc#"
+	xmlns:ds="http://www.w3.org/2000/09/xmldsig#" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.w3.org/2001/04/xmlenc# 
+	http://www.w3.org/TR/xmlenc-core/xenc-schema.xsd
+	http://www.w3.org/2000/09/xmldsig# 
+	http://www.w3.org/TR/xmldsig-core/xmldsig-core-schema.xsd"
+	Type="http://www.w3.org/2001/04/xmlenc#Element">
+	<EncryptionMethod
+		Algorithm="http://www.w3.org/2001/04/xmlenc#aes128-cbc">
+	</EncryptionMethod>
+	<ds:KeyInfo>
+		<EncryptedKey>
+			<EncryptionMethod
+				Algorithm=
+				  "http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p">
+			</EncryptionMethod>
+			<CipherData>
+				<CipherValue>
+kKdywi8p7x2tVvyq8WWPRUVubrBHKUfht5KPE6SKzAXyfwvwbbQQNWwTWHIhG7
+deqs3JshvmAJmO7v9oKlb/Fa75L7crVyDJoTONNtV6zxmLEfrS4HtHEAfdGDer
+5PiWr1mfELrU+e/LB//j/X5twZaDd9MIpazamSOHtmbDw/M=
+				</CipherValue>
+			</CipherData>
+		</EncryptedKey>
+	</ds:KeyInfo>
+	<CipherData>
+		<CipherValue>
+3hbvRGV5Z10NeJ7uKPwORtyFaw1rgk7Pk2Yhf5j2ddGdfkx8KIiozsYWO8NZG4g/
+k6/6bYpWKR8PS+qJQ4Du6AKJrBK+R/H1W0HtEqT/Ldc0GdXsQXs/X5F+PImiMGq6
+C/PDnB+YY0Ioho2rbq649CrFX13JKEdSAcoAjGj76HGRdtpfirpIAA8+8+TZokjh
+MMtez5lwjtSNjMXaH8d73rn+f/bxaTr/fIdDptIV8e/AXufihYx7CVxqoqE0wHZf
+o0+z8OT4azNyMMOA+62IKA3hVdmjRAhFLFwj22+ZpeHwJcm+DkQMKtyZGAyUrNCp
+Sqw/nDc39RyxIFUzDG3kEQBZLWlUnTb6kc9Ezef8M9/1bT4Z7k1oRf2E8PsxnxaI
+h/yYVFk6iMUzsKjcx9jHRygccC/luUNUbQv4+wB5FmjLmIOFOYIaMe4yOASXk1MU
++2fqQpNFQShwes/UZ1d2hQONzS22F1KoDvNbP3hw6gTKdwkMv1MkzUrD3SZsWVtl
+		</CipherValue>
+	</CipherData>
+</EncryptedData>

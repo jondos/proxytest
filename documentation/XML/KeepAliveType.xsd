@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="anon" elementFormDefault="unqualified">
+<complexType name="KeepAliveType">
+    <all>
+      <element name="SendInterval" type="integer" />
+      <element name="ReceiveInterval" type="integer" />
+    </all>
+  </complexType>
+</schema>

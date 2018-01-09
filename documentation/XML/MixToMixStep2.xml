@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<anon:EncryptedKey xmlns:anon="anon"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="anon MixToMixStep2.xsd" xmlns:xmlenc="http://www.w3.org/2001/04/xmlenc#">
+	<xmlenc:EncryptionMethod Algorithm="RSA" />
+		<xmlenc:CipherData>
+			<xmlenc:CipherValue>bIL3fOVnG4LFHIRUCBpsKdesDAagEB/XZ+tOGm31X/KU+f19QHoni7T7XOT1AxoC
+				QD11KdA4A6wLPaDwnJ9TNmyNCZP+DZvaryIvqutt4CfRWSBO+uFWbT/h4pLlt22R
+				4OpVxoWzh0Ww10U9s/X0GL5BdtqYVgXMdsX+JmDdFBk=
+			</xmlenc:CipherValue>
+		</xmlenc:CipherData>
+	<Nonce>hOEHxE1tZOqcH43JJmxeTgMn4Dc=
+</Nonce>
+	<KeepAlive>
+		<SendInterval>60000</SendInterval>
+		<ReceiveInterval>75000</ReceiveInterval>
+	</KeepAlive>
+	<Signature>
+		<SignedInfo>
+			<Reference URI="">
+				<DigestValue>hcBEX4R1Q4haq5J/UBJoC2bD110=
+</DigestValue>
+			</Reference>
+		</SignedInfo>
+		<SignatureValue>QMCKzsxlLmV/gHaUntE8C49bIXUz3WLxsMxv+jfuMDjnYZGxl9OnxA==
+</SignatureValue>
+	</Signature>
+</anon:EncryptedKey>

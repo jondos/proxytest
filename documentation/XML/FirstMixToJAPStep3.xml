@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Signature xmlns="anon"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="anon FirstMixToJAPStep3.xsd">
+	<Nonce>34674ABCD</Nonce>
+	<SignatureValue>
+		i47z9IfLdZf3adA/30bwxZN4ttfC0pKM1aipYB7wniUtV+0GFzSfZQ==
+	</SignatureValue>
+</Signature>

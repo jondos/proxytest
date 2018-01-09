@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<anon:Mixes xmlns:anon="anon" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+xsi:schemaLocation="anon MixToMixStep1.xsd"
+count="1">
+<Mix id="40DCA906C49D60A13B55E4BD0AA665657136BC4D" serial="1252671659280"><MixType>LastMix</MixType><Name>Mix 3</Name>
+        <Operator>
+            <Organisation>test</Organisation>
+            <OrganisationalUnit>test</OrganisationalUnit>
+            <EMail>test@test.in</EMail>
+        </Operator>
+        <Location>
+            <City>test</City>
+            <State>test</State>
+            <Country>ad</Country>
+        </Location>
+    <ListenerInterfaces>
+            <ListenerInterface>
+                <NetworkProtocol>RAW/TCP</NetworkProtocol>
+                <Host>141.76.46.171</Host>
+                <Port>6545</Port>
+            </ListenerInterface>
+        </ListenerInterfaces><Proxies><Proxy><VisibleAddresses></VisibleAddresses></Proxy></Proxies><Software><Version>00.08.76</Version></Software><LastUpdate>1252671678375</LastUpdate><MixProtocolVersion>0.3</MixProtocolVersion><RSAKeyValue><Modulus>sTE+MGrEQ0AnK9k8myN7Yunglgh3yDtYgk+SUCO5/Rq95a29SizHBapr13FjqzqI
+ET7K4q8dT3qWSYWzU0fCM7FBY8UZV+BtGXy0xSmGFNf8SYntdjwPHIccJzYpzbe6
+hrKqZvJam5iD62LsHyH3J+yTTVY4VzHCgF8rNGnwGd8=
+</Modulus><Exponent>AQAB
+</Exponent></RSAKeyValue><Nonce>GGAAoTB7nA0e7MGS85S39w==
+</Nonce><KeepAlive><SendInterval>60000</SendInterval><ReceiveInterval>75000</ReceiveInterval></KeepAlive><Signature><SignedInfo><Reference URI=""><DigestValue>h4CfsAVvqZP4CLZakK070PBqwXQ=
+</DigestValue></Reference></SignedInfo><SignatureValue>XrJ5CXh/HAJXhPz1Hma95cRsZ9c5l1zg1KT843FRt5JzgNAWO5pb4A==
+</SignatureValue><KeyInfo><X509Data><X509Certificate>MIIDHTCCAtygAwIBAgIBATAJBgcqhkjOOAQDMGAxDTALBgNVBAoTBHRlc3QxGzAZ
+BgkqhkiG9w0BCQEWDHRlc3RAdGVzdC5pbjEjMCEGA1UEAxMaQU4uT04gT3BlcmF0
+b3IgQ2VydGlmaWNhdGUxDTALBgNVBAsTBHRlc3QwHhcNMDgwMTIxMjIyNDExWhcN
+MDkwMTIxMjIyNDExWjBoMQ0wCwYDVQQIEwR0ZXN0MQ0wCwYDVQQHEwR0ZXN0MQsw
+CQYDVQQGEwJhZDE7MDkGA1UEAwwyPE1peCBpZD00MERDQTkwNkM0OUQ2MEExM0I1
+NUU0QkQwQUE2NjU2NTcxMzZCQzRELz4wggG2MIIBKwYHKoZIzjgEATCCAR4CgYEA
+gBUiev2jT71RImRRiWuCelw+KMWKJjU7Yr5EcL7gpRWechGPST+oINHYbxyh1tZs
+kNz0x0l8oOfitDpUsK5P7tPrXYoYDiirM0CqXj9g8Fnj/gGxxmyUfW15+e4beQlp
+QlkBjfUTnZIqmaubr/K42KN/HBcjHReWyHDc6k+LINUCFQCYta+R2YIeoC3Umdye
+dH+0IGRT8QKBgEQT48/zUVMdgIT8N7nV6yQDFqmObId2GKTwHP0vcy7AbXKIF36y
+qA4e5P9GLTF6iZU/ii22vRZK5Zpo0DwHJvl+c8CCFthF/qzJMNBpZJAio6P2ObRF
+C6peoUG6DKhS7lNKXTFQjiMj3gkSPN2ZWESIbCktbtobVxImxXrA8NZgA4GEAAKB
+gCd8zeRbFGEmkwtAOQ7h/Hq20OAKwN35anGIHSQVsF3sJidTDw8TDtDLnoXhuPgT
+qQ5yMQRD1rfQdkTjBQa7/yyP51OhiH2Ft/sKe9Ebx7K9cVGQ63TSWXK7G3y2R9TM
+ZPy/cbKPjyUTCC2a3MM4F8XjFFpVxZJgf4TOrE3oSta5oyEwHzAdBgNVHQ4EFgQU
+QNypBsSdYKE7VeS9CqZlZXE2vE0wCQYHKoZIzjgEAwMwADAtAhUAq4oshdMgzPEi
+Xp8OczvumgyF9jgCFFcSS2aT8vFoclGAb+4s3yzwv7sv
+</X509Certificate><X509Certificate>MIIDMDCCAvCgAwIBAgIBATAJBgcqhkjOOAQDMGAxDTALBgNVBAoTBHRlc3QxGzAZ
+BgkqhkiG9w0BCQEWDHRlc3RAdGVzdC5pbjEjMCEGA1UEAxMaQU4uT04gT3BlcmF0
+b3IgQ2VydGlmaWNhdGUxDTALBgNVBAsTBHRlc3QwHhcNMDgwMTIxMjIyMzU1WhcN
+MDkwMTIxMjIyMzU1WjBgMQ0wCwYDVQQKEwR0ZXN0MRswGQYJKoZIhvcNAQkBFgx0
+ZXN0QHRlc3QuaW4xIzAhBgNVBAMTGkFOLk9OIE9wZXJhdG9yIENlcnRpZmljYXRl
+MQ0wCwYDVQQLEwR0ZXN0MIIBtzCCASwGByqGSM44BAEwggEfAoGBALQKWEH7DJ0S
+zF/twW315SpZJ45ckFtrJ9OM7pvwXRjB52q7sPLU91iZoAG0FmD6BoxrFpONkjxL
+dvtqeK1LFo+cIB3aY2YjIq5UdjD+1cWDqMJ1KODqNf4zovnYXG1nlrjJ9jVZB4rA
+D9JFg9u+sMGWKdjBaQ6YzOvgXHuYJA+PAhUAzto0Vq9DhoTWyVlByfsdSialm0sC
+gYEAscIeS8okPz44aAGzPUKMEyGyEeGKItg2z7UYogGTqOhV7WPuZwzuJGHCjCto
+polHrPYQhmM/7chQ29hgc8hikVqwW3RS88HA7JbZ8wbfC+SEtPNfDPXEDF3W/Q1W
+EHXCrpP/vrsHkIaz9lNFNw4X8htOyG8vtWwhGW3EjCl/7WgDgYQAAoGAEAPAf0uZ
+C4jJbXs12US5ABIdXg8RJjvUDfon7EuFNVTTXhoPnMWIJiNkc8rXa+KP3Bv5U3x0
+aKH6UxmPv63b6rSYpwkLxXepJt1vWEIIzpZDAEG5iRvhh2cIZb5REb5bmI+zvC9k
+mIkeAo/VikR5oX+ZF16XL3o0bPoxzK/ZdAOjPDA6MBkGA1UdEQQSMBChDgQMdGVz
+dEB0ZXN0LmluMB0GA1UdDgQWBBT7k/+6b8HVJg+zZL/oA985c1+uxzAJBgcqhkjO
+OAQDAy8AMCwCFBo5MbFRqfZPruRzTG8J5C+Wzu8IAhQk0qV3B1phzdHHYhb+wmMq
+2XuL5w==
+</X509Certificate></X509Data></KeyInfo></Signature></Mix></anon:Mixes>
