@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="anon" elementFormDefault="unqualified">
+  <complexType name="RSAKeyType">
+    <all>
+      <element name="Modulus" type="base64Binary" />
+      <element name="Exponent" type="base64Binary" />
+    </all>
+  </complexType>
+</schema>

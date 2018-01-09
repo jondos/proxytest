@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="anon" xmlns:anon="anon">
+	<include schemaLocation="MixType.xsd" />
+	<element name="MixCascade">
+		<complexType>
+			<all>
+				<element name="MixProtocolVersion" type="string" />
+				<element name="Mixes">
+					<complexType>
+						<sequence minOccurs="2" maxOccurs="unbounded">
+							<element name="Mix" type="anon:MixType" />
+						</sequence>
+						<attribute name="count">
+							<simpleType>
+								<restriction base="int">
+									<minInclusive value="2" />
+								</restriction>
+							</simpleType>
+						</attribute>
+					</complexType>
+				</element>
+				<element name="Payment">
+					<complexType>
+						<attribute name="required" type="boolean" />
+					</complexType>
+				</element>
+				<element name="Signature" type="anon:SignatureType" />
+			</all>
+			<attribute name="version" type="string" />
+		</complexType>
+	</element>
+</schema>

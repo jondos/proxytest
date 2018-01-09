@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="anon" xmlns:anon="anon">
+	<include schemaLocation="MixType.xsd" />
+	<element name="Mixes">
+		<complexType>
+			<sequence minOccurs="1" maxOccurs="unbounded">
+				<element name="Mix" type="anon:MixType" />
+			</sequence>
+			<attribute name="count" type="integer" />
+		</complexType>
+	</element>
+</schema>

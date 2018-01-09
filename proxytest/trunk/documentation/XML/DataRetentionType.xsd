@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="anon" elementFormDefault="unqualified">
+  <complexType name="DataRetentionType">
+    <all>
+      <element name="LoggedElements">
+        <complexType>
+          <all>
+            <element name="InputTime" type="boolean" />
+            <element name="OutputTime" type="boolean" />
+            <element name="InputChannelID" type="boolean" />
+            <element name="OutputChannelID" type="boolean" />
+            <element name="InputSourceIPAddress" type="boolean" />
+            <element name="OutputSourceIPAddress" type="boolean" />
+            <element name="InputSourceIPPort" type="boolean" />
+            <element name="OutputSourceIPPort" type="boolean" />
+          </all>
+        </complexType>
+      </element>
+      <element name="RetentionPeriod" type="duration" />
+    </all>
+  </complexType>
+</schema>

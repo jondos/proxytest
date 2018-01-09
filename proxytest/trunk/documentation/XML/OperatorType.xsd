@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="anon" elementFormDefault="unqualified">
+	<complexType name="OperatorType">
+		<all>
+			<element name="Organisation" type="string" />
+			<element name="OrganisationalUnit" type="string" />
+			<element name="URL" type="anyURI" />
+			<element name="EMail" type="string" />
+			<element name="Country" type="string" />
+			</all>
+	</complexType>
+</schema>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="anon" elementFormDefault="unqualified">
+	<complexType name="LocationType">
+		<all>
+			<element name="City" type="string" />
+			<element name="State" type="string" />
+			<element name="Country" type="string" />
+			<element name="Position">
+				<complexType>
+					<all>
+						<element name="Geo">
+							<complexType>
+								<all>
+									<element name="Longitude" type="decimal" />
+									<element name="Latitude" type="decimal" />
+								</all>
+							</complexType>
+						</element>
+					</all>
+				</complexType>
+			</element>
+		</all>
+	</complexType>
+</schema>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="anon" elementFormDefault="unqualified"
+	xmlns="http://www.w3.org/2001/XMLSchema" xmlns:anon="anon">
+	<complexType name="SignatureType">
+		<all>
+			<element name="SignedInfo">
+				<complexType>
+					<all>
+						<element name="Reference">
+							<complexType>
+								<all>
+									<element name="DigestValue" />
+								</all>
+								<attribute name="URI" type="anyURI" />
+							</complexType>
+						</element>
+					</all>
+				</complexType>
+			</element>
+			<element name="SignatureValue" type="base64Binary" />
+			<element name="KeyInfo">
+				<complexType>
+					<all>
+						<element name="X509Data">
+							<complexType>
+								<sequence>
+									<element name="X509Certificate" type="base64Binary"
+										maxOccurs="unbounded" />
+								</sequence>
+							</complexType>
+						</element>
+					</all>
+				</complexType>
+			</element>
+		</all>
+	</complexType>
+</schema>

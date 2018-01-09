@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="anon" elementFormDefault="unqualified"
+	xmlns:anon="anon">
+	<include schemaLocation="Signature.xsd" />
+	<include schemaLocation="LocationType.xsd" />
+	<include schemaLocation="OperatorType.xsd" />
+	<include schemaLocation="ListenerInterfaceType.xsd" />
+	<include schemaLocation="DataRetentionType.xsd" />
+	<include schemaLocation="KeepAliveType.xsd" />
+	<include schemaLocation="RSAKeyType.xsd" />
+	<include schemaLocation="ProxyType.xsd" />
+	<include schemaLocation="SoftwareType.xsd" />
+
+	<complexType name="MixType">
+		<all>
+			<element name="MixProtocolVersion" type="string"
+				minOccurs="0" />
+			<element name="MixType">
+				<simpleType>
+					<restriction base="string">
+						<enumeration value="FirstMix" />
+						<enumeration value="MiddleMix" />
+						<enumeration value="LastMix" />
+					</restriction>
+				</simpleType>
+			</element>
+			<element name="Name" type="string" />
+			<element name="Location" type="anon:LocationType" />
+			<element name="Operator" type="anon:OperatorType" />
+			<element name="Software" type="anon:SoftwareType" />
+			<element name="DataRetention" type="anon:DataRetentionType" />
+			<element name="KeepAlive" type="anon:KeepAliveType"
+				minOccurs="0" />
+			<element name="RSAKeyValue" type="anon:RSAKeyType" />
+			<element name="ChannelSymmetricChipher"> <!-- The symmetric cipher used by the Mix for symmetric channel recoding -->
+				<simpleType>
+					<restriction base="string">
+						<enumeration value="AES/OFB/ANON" /> <!-- The original cipher, AES128-OFB with some AN.ON specific data handling (this is the default) --> 
+						<enumeration value="AES/CTR" /> <!-- AES128-CTR -->
+					</restriction>
+				</simpleType>
+			</element>	
+			<element name="LastUpdate" type="integer" />
+			<element name="ListenerInterfaces">
+				<complexType>
+					<sequence minOccurs="1" maxOccurs="unbounded">
+						<element name="ListenerInterface" 
+						type="anon:ListenerInterfaceType" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="Proxies" minOccurs="0">
+				<complexType>
+					<sequence minOccurs="1" maxOccurs="unbounded">
+						<element name="Proxy" type="anon:ProxyType" />
+					</sequence>
+				</complexType>
+			</element>
+			<element name="Nonce" type="string" minOccurs="0" />
+			<element name="SupportsEncrypedControlChannels"
+				type="boolean" minOccurs="0" />
+			<element name="Signature" type="anon:SignatureType" />
+		</all>
+		<attribute name="id" type="string" />
+		<attribute name="serial" type="integer" />
+	</complexType>
+</schema>
