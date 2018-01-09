@@ -1,36 +1,40 @@
-/**  \page XMLStructs XML structs
+/*!  \page pagexmlstructs XML structs
 	
 This is the index of all XML structs used in the project.
 
-\par \anchor XMLInterMixInitSendFromLast	
-1. XML Message send from LastMix to Mix \e n-1 during cascade init
-	\verbinclude InterMix-LastMix-to-Successor.xml
+\par 1. XML Message send from LastMix to Mix \e n-1 during cascade init 
 
-\par \anchor XMLInterMixInitAnswer
-2. Answer send from Mix \e n-1 to Mix \e n during cascade init
-	\verbinclude InterMix-KeyExchange-Answer.xml
+\anchor XMLInterMixInitSendFromLast 
+\verbinclude InterMix-LastMix-to-Successor.xml
 
-\par \anchor XMLFirstMixToInfoService
-3. Mix-Cascade info (and info about the FirstMix) send from the
-FirstMix to the InfoService.
+\par 2. Answer send from Mix \e n-1 to Mix \e n during cascade init 
+
+\anchor XMLInterMixInitAnswer
+\verbinclude InterMix-KeyExchange-Answer.xml
+
+\par 3. Mix-Cascade info (and info about the FirstMix) send from the FirstMix to the InfoService.
+
+\anchor XMLFirstMixToInfoService
 \verbinclude FirstMixToInfoService.xml 
 
-\par \anchor XMLMixCascadeStatus
-4. Mix-Cascade status send from the
-FirstMix to the InfoService.
+\par 4. Mix-Cascade status send from the FirstMix to the InfoService.
+
+\anchor XMLMixCascadeStatus
 \verbinclude MixCascadeStatus.xml 
 
-\par \anchor XMLMixHELO
-5. Mix-HELO send from the
-Middle- or LastMix to the InfoService to announce itself.
+\par 5. Mix-HELO send from the Middle- or LastMix to the InfoService to announce itself.
+
+\anchor XMLMixHELO
 \verbinclude MixHELO.xml 
 
-\par \anchor XMLMixKeyInfo
-6. Mix-KeyInfo send from the
-FirstMix to the JAP.
+\par 6. Mix-KeyInfo send from the FirstMix to the JAP.
+
+\anchor XMLMixKeyInfo
 \verbinclude FirstMixToJAP.xml 
 
-\par \anchor XMLSignature
-7. Signature Element
+\par 7. Signature Element
+
+\anchor XMLSignature
 \verbinclude XMLSignature.xml
 */
+
