@@ -33,7 +33,7 @@
 #define __CALASTMIXBCHANNELLIST__
 
 #include "../CAMuxSocket.hpp"
-#include "../CASymCipher.hpp"
+#include "../CASymChannelCipher.hpp"
 #include "../CAMutex.hpp"
 #include "CAChain.hpp"
 
@@ -44,7 +44,7 @@ struct t_deadlineEntry {
 
 struct t_lastMixBChannelListEntry {
   HCHANNEL channelId;   
-  CASymCipher* channelCipher;
+  CASymChannelCipher* channelCipher;
   class CAChain* associatedChain;
   UINT16 remainingDownstreamPackets;
 
@@ -62,7 +62,7 @@ class CALastMixBChannelList {
     CALastMixBChannelList();
     ~CALastMixBChannelList();
 
-    t_lastMixBChannelListEntry* add(HCHANNEL a_channelId, CASymCipher* a_channelCipher, CAChain* a_associatedChain);
+    t_lastMixBChannelListEntry* add(HCHANNEL a_channelId, CASymChannelCipher* a_channelCipher, CAChain* a_associatedChain);
     t_lastMixBChannelListEntry* get(HCHANNEL a_channelId);
     void removeFromTable(t_lastMixBChannelListEntry* a_channelEntry);
 

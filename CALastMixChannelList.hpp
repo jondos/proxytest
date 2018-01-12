@@ -31,7 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASocket.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAQueue.hpp"
-#include "CASymCipher.hpp"
+#include "CASymChannelCipher.hpp"
 #include "CAMutex.hpp"
 #include "CAMsg.hpp"
 #include "CAThread.hpp"
@@ -45,7 +45,7 @@ struct t_lastmixchannellist
 
 			HCHANNEL channelIn;
 		
-			CASymCipher*  pCipher;
+			CASymChannelCipher*  pCipher;
 			CASocket*			pSocket;
 			CAQueue*			pQueueSend;
 			SINT32				sendmeCounterDownstream; //this counts how many packets are sent to the user without an ack recevied yet.
@@ -103,7 +103,7 @@ class CALastMixChannelList
 			~CALastMixChannelList();
 
 
-			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue
+			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymChannelCipher* pCipher,CAQueue* pQueue
 #ifdef LOG_CHANNEL
 									,UINT64 timecreated,UINT32 trafficIn
 #endif

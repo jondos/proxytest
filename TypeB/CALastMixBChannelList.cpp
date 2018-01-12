@@ -49,7 +49,7 @@ CALastMixBChannelList::~CALastMixBChannelList() {
   m_pChannelTable = NULL;
 }
 
-t_lastMixBChannelListEntry* CALastMixBChannelList::add(HCHANNEL a_channelId, CASymCipher* a_channelCipher, CAChain* a_associatedChain) {
+t_lastMixBChannelListEntry* CALastMixBChannelList::add(HCHANNEL a_channelId, CASymChannelCipher* a_channelCipher, CAChain* a_associatedChain) {
   m_pMutex->lock();
   /* check whether we have not already an entry with the same ID */
   if (getEntryInternal(a_channelId) != NULL) {

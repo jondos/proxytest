@@ -35,6 +35,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMutex.hpp"
 #include "CAMsg.hpp"
 #include "CAControlChannelDispatcher.hpp"
+#include "CASymChannelCipher.hpp"
 #ifdef DELAY_USERS
 	#include "CAThread.hpp"
 #endif
@@ -69,7 +70,7 @@ struct t_fmhashtableentry
 #endif
 			UINT64				id;
 
-			CASymCipher*  pSymCipher;
+			CASymChannelCipher*  pSymCipher;
 			UINT8					peerIP[4]; //needed for flooding control
 #if defined(DATA_RETENTION_LOG) || defined(LOG_CRIME)
 			UINT32				peerPort;
@@ -137,7 +138,7 @@ struct t_firstmixchannellist
 			HCHANNEL channelIn;
 			HCHANNEL channelOut;
 
-			CASymCipher* pCipher;
+			CASymChannelCipher* pCipher;
 			bool bIsSuspended;
 
 #ifdef LOG_CHANNEL
@@ -233,7 +234,7 @@ class CAFirstMixChannelList
 #else
 			fmHashTableEntry* add(CAMuxSocket* pMuxSocket,const UINT8 peerIP[4],CAQueue* pQueueSend,UINT8* strDialog);
 #endif
-			SINT32 addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
+			SINT32 addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,CASymChannelCipher* pCipher,HCHANNEL* channelOut);
 
 			fmChannelListEntry* get(CAMuxSocket* pMuxSocket,HCHANNEL channelIn);
 

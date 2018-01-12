@@ -45,6 +45,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAStatusManager.hpp"
 #include "CALibProxytest.hpp"
 #include "CAControlChannelDispatcher.hpp"
+#include "CASymChannelCipher.hpp"
+#include "CASymCipherOFB.hpp"
 
 SINT32 CAMiddleMix::initOnce()
 	{
@@ -1038,7 +1040,7 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 
 		CAQueue* pQueue=pMix->m_pQueueSendToMixAfter;
 
-		CASymCipher* pCipher;
+		CASymChannelCipher* pCipher;
 		SINT32 ret;
 		UINT8* tmpRSABuff=new UINT8[RSA_SIZE];
 		UINT32 rsaOutLen=RSA_SIZE;
@@ -1167,7 +1169,7 @@ SGX MIX							unlocksem(pMix->upstreamSemPreId, SN_FULL);
 											}
 									#endif
 
-									pCipher=new CASymCipher();
+									pCipher=new CASymCipherOFB();
 									pCipher->setKeys(tmpRSABuff,MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS);
 									pCipher->crypt1(pMixPacket->data+RSA_SIZE,
 												pMixPacket->data+rsaOutLen-MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS,
@@ -1234,7 +1236,7 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 	{
 	CAMiddleMix* pMix = static_cast<CAMiddleMix*>(param);
 		HCHANNEL channelIn;
-		CASymCipher* pCipher=NULL;
+		CASymChannelCipher* pCipher=NULL;
 
 		tPoolEntry* pPoolEntry=new tPoolEntry;
 		MIXPACKET* pMixPacket=&pPoolEntry->packet;

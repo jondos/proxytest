@@ -480,7 +480,8 @@ int main(int argc, const char* argv[])
 	//CAFirstMixChannelToQueueList oL;
 	//oL.performanceTest();
 	//CASymCipher::testSpeed();
-	CASymCipher c;
+/*
+	CASymChannelCipher c;
 	UINT8 key[64];
 	memset(key, 0, 64);
 	c.setKey(key);
@@ -513,7 +514,7 @@ UINT8 out2[992];
 	c.crypt2(in+17, out2+17,17);
 //	exit(0);
 		
-
+*/
 		SINT32 exitCode=0;
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INLUDE_LAST_MIX|| defined INLUDE_FIRST_MIX
 		pMix=NULL;

@@ -1100,7 +1100,7 @@ SINT32 encryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 	pBuff = NULL;
 	CASymCipher *pSymCipher=new CASymCipher();
 	pSymCipher->setKey(key,true);
-	pSymCipher->setIVs(key+16);
+	pSymCipher->setIV(key+16);
 	elemCipherData=createDOMElement(doc,"CipherData");
 	elemRoot->appendChild(elemCipherData);
 	elemCipherValue=createDOMElement(doc,"CipherValue");
@@ -1108,7 +1108,7 @@ SINT32 encryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 	UINT8* b=DOM_Output::dumpToMem(node,&bufflen);
 	outbufflen=bufflen+1000;
 	pOutBuff=new UINT8[outbufflen];
-	pSymCipher->encrypt1CBCwithPKCS7(b,bufflen,pOutBuff,&outbufflen);
+	pSymCipher->encryptCBCwithPKCS7(b,bufflen,pOutBuff,&outbufflen);
 	delete[] b;
 	b = NULL;
 	bufflen=outbufflen*3/2+1000;
@@ -1176,10 +1176,10 @@ UINT8* encryptXMLElement(UINT8* inbuff,UINT32 inlen,UINT32& outlen,CAASymCipher*
 	keyoutbuff[keyoutbufflen]=0;
 	CASymCipher* pSymCipher=new CASymCipher();
 	pSymCipher->setKey(key,true);
-	pSymCipher->setIVs(key+16);
+	pSymCipher->setIV(key+16);
 	UINT32 msgoutbufflen=inlen+1000;
 	UINT8* msgoutbuff=new UINT8[msgoutbufflen];
-	pSymCipher->encrypt1CBCwithPKCS7(inbuff,inlen,msgoutbuff,&msgoutbufflen);
+	pSymCipher->encryptCBCwithPKCS7(inbuff,inlen,msgoutbuff,&msgoutbufflen);
 	delete pSymCipher;
 	pSymCipher = NULL;
 	UINT32 encmsgoutbufflen=msgoutbufflen*3/2+1000;
@@ -1227,7 +1227,7 @@ SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 	}
 	CASymCipher *pSymCipher=new CASymCipher();
 	pSymCipher->setKey(cipherValue,false);
-	pSymCipher->setIVs(cipherValue+16);
+	pSymCipher->setIV(cipherValue+16);
 
 	DOMNode* elemCipherData=NULL;
 	getDOMChildByName(node,"CipherData",elemCipherData,false);
@@ -1249,7 +1249,7 @@ SINT32 decryptXMLElement(DOMNode* node, CAASymCipher* pRSA)
 			cipherValue = NULL;
 			return E_UNKNOWN;
 		}
-	SINT32 ret=pSymCipher->decrypt1CBCwithPKCS7(cipherValue,cipherValue,&len);
+	SINT32 ret=pSymCipher->decryptCBCwithPKCS7(cipherValue,cipherValue,&len);
 	delete pSymCipher;
 	pSymCipher = NULL;
 	if(ret!=E_SUCCESS)

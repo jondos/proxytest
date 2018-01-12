@@ -35,7 +35,7 @@ CAMiddleMixChannelList::~CAMiddleMixChannelList()
 	* @param channelOut on return holds a newly created random outgoing Channel-ID
 	* @retval E_SUCCESS if Channel was successfully added to the list
 	**/
-SINT32 CAMiddleMixChannelList::add(HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut)
+SINT32 CAMiddleMixChannelList::add(HCHANNEL channelIn,CASymChannelCipher* pCipher,HCHANNEL* channelOut)
 	{
 		m_Mutex.lock();
 		mmChannelListEntry* pEntry=new mmChannelListEntry;
@@ -65,7 +65,7 @@ SINT32 CAMiddleMixChannelList::add(HCHANNEL channelIn,CASymCipher* pCipher,HCHAN
 		return E_SUCCESS;
 	}
 			
-SINT32 CAMiddleMixChannelList::getInToOut(HCHANNEL channelIn, HCHANNEL* channelOut,CASymCipher** ppCipher)
+SINT32 CAMiddleMixChannelList::getInToOut(HCHANNEL channelIn, HCHANNEL* channelOut,CASymChannelCipher** ppCipher)
 	{
 		m_Mutex.lock();
 		mmChannelListEntry* pEntry=m_pHashTableIn[channelIn&0x0000FFFF];

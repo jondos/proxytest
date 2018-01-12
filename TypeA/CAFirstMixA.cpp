@@ -39,7 +39,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef HAVE_EPOLL
 	#include "../CASocketGroupEpoll.hpp"
 #endif
-
+#include "../CASymCipherOFB.hpp"
 void CAFirstMixA::shutDown()
 {
 	m_bIsShuttingDown = true;
@@ -376,7 +376,7 @@ SINT32 CAFirstMixA::loop()
 												}
 												else		                                     // finally! a normal mix packet
 												{
-													CASymCipher* pCipher=NULL;
+													CASymChannelCipher* pCipher=NULL;
 													fmChannelListEntry* pEntry;
 													pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
 													if (pEntry != NULL&&pMixPacket->flags == CHANNEL_DATA)
@@ -434,7 +434,7 @@ SINT32 CAFirstMixA::loop()
 
 
 		
-														pCipher= new CASymCipher();
+														pCipher= new CASymCipherOFB();
 														pCipher->setKeys(rsaBuff,FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 														for(int i=0;i<16;i++)
 															rsaBuff[i]=0xFF;

@@ -1618,7 +1618,7 @@ SINT32 CACmdLnOptions::setAccessControlCredential(DOMElement* elemGeneral)
 			return E_UNKNOWN;
 		ASSERT_GENERAL_OPTIONS_PARENT(elemGeneral->getNodeName(), OPTIONS_NODE_CREDENTIAL);
 
-		//get Accesscontrol credentila
+		//get Accesscontrol credential
 		getDOMChildByName(elemGeneral, OPTIONS_NODE_CREDENTIAL, elemCredential, false);
 
 		if (getDOMElementValue(elemCredential, tmpBuff, &tmpLen) == E_SUCCESS)
@@ -1643,6 +1643,29 @@ SINT32 CACmdLnOptions::getAccessControlCredential(UINT8* outbuff, UINT32* inouts
 	return E_SUCCESS;
 	}
 
+
+SINT32 CACmdLnOptions::setSymChannelCipher(CASymChannelCipher::ALGORITHM cipherAlgorithm)
+	{
+		m_algSymChannelCipher = cipherAlgorithm;
+
+		//Append if to MixInfo
+		DOMElement* elemRoot=m_docMixInfo->getDocumentElement();
+		DOMElement* elemChannelSymmetricChipher=NULL;
+		getDOMChildByName(elemRoot, "ChannelSymmetricChipher",elemChannelSymmetricChipher,false);
+		if (elemChannelSymmetricChipher == NULL)
+			{
+				elemChannelSymmetricChipher = createDOMElement(m_docMixInfo, "ChannelSymmetricChipher");
+				elemRoot->appendChild(elemChannelSymmetricChipher);
+			}
+		const UINT8* const algName=CASymChannelCipher::getAlgorithmName(cipherAlgorithm);
+		setDOMElementValue(elemChannelSymmetricChipher, algName);
+		return E_SUCCESS;
+	}
+
+CASymChannelCipher::ALGORITHM CACmdLnOptions::getSymChannelCipher() const
+	{
+		return m_algSymChannelCipher;
+	}
 
 #endif
 
@@ -4761,7 +4784,7 @@ SINT32 CACmdLnOptions::appendMixInfo_internal(DOMNode* a_node, bool with_subtree
 	DOMNode *importedNode = NULL;
 	DOMNode *appendedNode = NULL;
 
-	if(a_node == NULL)
+if(a_node == NULL)
 	{
 		CAMsg::printMsg(LOG_CRIT,"No node specified!\n");
 		return E_UNKNOWN;
@@ -5071,8 +5094,17 @@ SINT32 CACmdLnOptions::setGeneralOptions(DOMElement* elemRoot)
 		return E_UNKNOWN;
 	}
 
-	return invokeOptionSetters
-		(generalOptionSetters, elemGeneral, GENERAL_OPTIONS_NR);
+	SINT32 ret=invokeOptionSetters(generalOptionSetters, elemGeneral, GENERAL_OPTIONS_NR);
+	
+	///TODO: Mabe make the SymChannelCipher configurable at runtime....
+	#ifdef SYM_CHANNEL_CIPHER_CTR
+		setSymChannelCipher(CASymChannelCipher::ALGORITHM::CTR);
+	#else
+		setSymChannelCipher(CASymChannelCipher::ALGORITHM::OFB);
+	#endif
+	///end TODO
+
+	return ret;
 }
 
 SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UINT32 a_socketsLen)

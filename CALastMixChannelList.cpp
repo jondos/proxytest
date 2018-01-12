@@ -82,7 +82,7 @@ CALastMixChannelList::~CALastMixChannelList()
 		m_HashTable = NULL;
 	}
 
-SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCipher,CAQueue* pQueue
+SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymChannelCipher* pCipher,CAQueue* pQueue
 #ifdef LOG_CHANNEL
 																	,UINT64 timecreated,UINT32 trafficInFromUser
 #endif

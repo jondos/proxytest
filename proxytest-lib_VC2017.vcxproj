@@ -2632,6 +2632,9 @@
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug-IntelCrypto|Win32'">EnableFastChecks</BasicRuntimeChecks>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug-IntelCrypto|Win32'">true</BrowseInformation>
     </ClCompile>
+    <ClCompile Include="CASymCipherCTR.cpp" />
+    <ClCompile Include="CASymCipherGCM.cpp" />
+    <ClCompile Include="CASymCipherOFB.cpp" />
     <ClCompile Include="CASyncControlChannel.cpp" />
     <ClCompile Include="CATempIPBlockList.cpp" />
     <ClCompile Include="CAThread.cpp">
@@ -3924,7 +3927,11 @@
     <ClInclude Include="CASocketGroup.hpp" />
     <ClInclude Include="CASocketGroupEpoll.hpp" />
     <ClInclude Include="CASocketList.hpp" />
+    <ClInclude Include="CASymChannelCipher.hpp" />
     <ClInclude Include="CASymCipher.hpp" />
+    <ClInclude Include="CASymCipherCTR.hpp" />
+    <ClInclude Include="CASymCipherGCM.hpp" />
+    <ClInclude Include="CASymCipherOFB.hpp" />
     <ClInclude Include="CASyncControlChannel.hpp" />
     <ClInclude Include="CATargetInterface.hpp" />
     <ClInclude Include="CATempIPBlockList.hpp" />

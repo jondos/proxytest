@@ -36,6 +36,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CABase64.hpp"
 #include "CALibProxytest.hpp"
 #include "xml/DOM_Output.hpp"
+#include "CASymChannelCipher.hpp"
+#include "CASymCipherOFB.hpp"
 #ifndef NEW_MIX_TYPE
 
 // signals the main loop whether to capture or replay packets
@@ -220,7 +222,7 @@ SINT32 CALocalProxy::loop()
 		memset(pMixPacket,0,MIXPACKET_SIZE);
 		SINT32 len,ret;
 		CASocket* newSocket;//,*tmpSocket;
-		CASymCipher* newCipher;
+		CASymChannelCipher* newCipher;
 		int countRead;
 		CONNECTION oConnection;
 
@@ -283,7 +285,7 @@ SINT32 CALocalProxy::loop()
 							}
 						else
 							{
-								newCipher=new CASymCipher[m_chainlen];
+								newCipher=new CASymCipherOFB[m_chainlen];
 								pSocketList->add(newSocket,newCipher);
 								pSocketGroup->add(*newSocket);
 							}
@@ -305,7 +307,7 @@ SINT32 CALocalProxy::loop()
 							}
 						else
 							{
-								newCipher=new CASymCipher[m_chainlen];
+								newCipher=new CASymCipherOFB[m_chainlen];
 								pSocketList->add(newSocket,newCipher);
 								pSocketGroup->add(*newSocket);
 							}
@@ -750,7 +752,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				//DOM_Element elemMixEnc = doc.createElement("MixEncryption");
 				UINT8 mixKeys[32];
 				getRandom(mixKeys,32);
-				m_pSymCipher=new CASymCipher();
+				m_pSymCipher=new CASymCipherOFB();
 				m_pSymCipher->setKey(mixKeys);
 				m_pSymCipher->setIVs(mixKeys+16);
 				UINT8 outBuffMixKey[512];

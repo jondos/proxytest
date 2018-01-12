@@ -37,6 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "../CASocketGroupEpoll.hpp"
 #endif
 #include "../CAControlChannelDispatcher.hpp"
+#include "../CASymCipherOFB.hpp"
 
 #ifdef LOG_CHANNEL
 //CAMsg::printMsg(LOG_DEBUG,"Channel time log format is as follows: Channel-ID,Channel Start [micros], Channel End [micros], Upload (bytes), Download (bytes), DataAndOpenAndClosePacketsFromUser, DataAndClosePacketsToUser\n");
@@ -187,7 +188,7 @@ SINT32 CALastMixA::loop()
 														continue;
 													}
 											#endif
-											CASymCipher* newCipher = new CASymCipher();
+											CASymChannelCipher* newCipher = new CASymCipherOFB();
 											#ifdef WITH_INTEGRITY_CHECK
 												newCipher->setGCMKeys(rsaBuff, rsaBuff + KEY_SIZE);
 
