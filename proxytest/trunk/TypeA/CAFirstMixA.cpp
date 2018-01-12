@@ -39,7 +39,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef HAVE_EPOLL
 	#include "../CASocketGroupEpoll.hpp"
 #endif
-#include "../CASymCipherOFB.hpp"
+#include "../CASymChannelCipherFactory.hpp"
+
 void CAFirstMixA::shutDown()
 {
 	m_bIsShuttingDown = true;
@@ -434,7 +435,7 @@ SINT32 CAFirstMixA::loop()
 
 
 		
-														pCipher= new CASymCipherOFB();
+														pCipher= CASymChannelCipherFactory::createCipher(CALibProxytest::getOptions()->getSymChannelCipherAlgorithm());
 														pCipher->setKeys(rsaBuff,FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 														for(int i=0;i<16;i++)
 															rsaBuff[i]=0xFF;

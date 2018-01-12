@@ -1644,7 +1644,7 @@ SINT32 CACmdLnOptions::getAccessControlCredential(UINT8* outbuff, UINT32* inouts
 	}
 
 
-SINT32 CACmdLnOptions::setSymChannelCipher(CASymChannelCipher::ALGORITHM cipherAlgorithm)
+SINT32 CACmdLnOptions::setSymChannelCipherAlgorithm(CASymChannelCipher::ALGORITHM cipherAlgorithm)
 	{
 		m_algSymChannelCipher = cipherAlgorithm;
 
@@ -1662,7 +1662,7 @@ SINT32 CACmdLnOptions::setSymChannelCipher(CASymChannelCipher::ALGORITHM cipherA
 		return E_SUCCESS;
 	}
 
-CASymChannelCipher::ALGORITHM CACmdLnOptions::getSymChannelCipher() const
+CASymChannelCipher::ALGORITHM CACmdLnOptions::getSymChannelCipherAlgorithm() const
 	{
 		return m_algSymChannelCipher;
 	}
@@ -5098,9 +5098,9 @@ SINT32 CACmdLnOptions::setGeneralOptions(DOMElement* elemRoot)
 	
 	///TODO: Mabe make the SymChannelCipher configurable at runtime....
 	#ifdef SYM_CHANNEL_CIPHER_CTR
-		setSymChannelCipher(CASymChannelCipher::ALGORITHM::CTR);
+		setSymChannelCipherAlgorithm(CASymChannelCipher::ALGORITHM::CTR);
 	#else
-		setSymChannelCipher(CASymChannelCipher::ALGORITHM::OFB);
+		setSymChannelCipherAlgorithm(CASymChannelCipher::ALGORITHM::OFB);
 	#endif
 	///end TODO
 

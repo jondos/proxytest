@@ -510,6 +510,8 @@ class CACmdLnOptions
 			return m_strAccessControlCredential != NULL;
 			}
 
+		CASymChannelCipher::ALGORITHM getSymChannelCipherAlgorithm() const;
+
 #endif //!ONLY_LOCAL_PROXY or first mix
 		bool getCompressLogs()
 		{
@@ -958,8 +960,7 @@ class CACmdLnOptions
 		SINT32 setNrOfFileDescriptors(DOMElement* elemGeneral);
 		SINT32 setDaemonMode(DOMElement* elemGeneral);
 		SINT32 setLoggingOptions(DOMElement* elemGeneral);
-		SINT32 setSymChannelCipher(CASymChannelCipher::ALGORITHM cipherAlgorithm);
-		CASymChannelCipher::ALGORITHM getSymChannelCipher() const;
+		SINT32 setSymChannelCipherAlgorithm(CASymChannelCipher::ALGORITHM cipherAlgorithm);
 
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
 		SINT32 setAccessControlCredential(DOMElement* elemGeneral);
