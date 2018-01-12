@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAMIDDLEMIXCHANNELLIST__
 #define __CAMIDDLEMIXCHANNELLIST__
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
-#include "CASymCipher.hpp"
+#include "CASymChannelCipher.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAMutex.hpp"
 
@@ -37,7 +37,7 @@ struct t_middlemixchannellist
 	{
 		HCHANNEL channelIn;
 		HCHANNEL channelOut;
-		CASymCipher* pCipher;
+		CASymChannelCipher* pCipher;
 		struct dl_in
 			{
 				struct t_middlemixchannellist* next,*prev;
@@ -111,13 +111,13 @@ class CAMiddleMixChannelList
 			
 			~CAMiddleMixChannelList();
 		
-			SINT32 add(HCHANNEL channelIn,CASymCipher* pCipher,HCHANNEL* channelOut);
+			SINT32 add(HCHANNEL channelIn,CASymChannelCipher* pCipher,HCHANNEL* channelOut);
 			
-			SINT32 getInToOut(HCHANNEL channelIn, HCHANNEL* channelOut,CASymCipher** ppCipher);
+			SINT32 getInToOut(HCHANNEL channelIn, HCHANNEL* channelOut,CASymChannelCipher** ppCipher);
 			SINT32 remove(HCHANNEL channelIn);
 			static SINT32 test();  
 		private:
-			SINT32 getOutToIn_intern_without_lock(HCHANNEL* channelIn, HCHANNEL channelOut,CASymCipher** ppCipher)
+			SINT32 getOutToIn_intern_without_lock(HCHANNEL* channelIn, HCHANNEL channelOut,CASymChannelCipher** ppCipher)
 				{
 					mmChannelListEntry* pEntry=m_pHashTableOut[channelOut&0x0000FFFF];
 					while(pEntry!=NULL)
@@ -138,7 +138,7 @@ class CAMiddleMixChannelList
 					return E_UNKNOWN;
 				}
 		public:
-			SINT32 getOutToIn(HCHANNEL* channelIn, HCHANNEL channelOut,CASymCipher** ppCipher)
+			SINT32 getOutToIn(HCHANNEL* channelIn, HCHANNEL channelOut,CASymChannelCipher** ppCipher)
 				{
 					m_Mutex.lock();
 					SINT32 ret=getOutToIn_intern_without_lock(channelIn,channelOut,ppCipher);

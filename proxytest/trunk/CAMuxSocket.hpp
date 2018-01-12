@@ -29,7 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAMUXSOCKET__
 #define __CAMUXSOCKET__
 #include "CASocket.hpp"
-#include "CASymCipher.hpp"
+#include "CASymChannelCipher.hpp"
 #include "CAMutex.hpp"
 #include "CATLSClientSocket.hpp"
 
@@ -103,13 +103,13 @@ class CAMuxSocket
 				{
 					if(keyLen==16)
 						{
-							m_oCipherIn.setKey(key);
-							m_oCipherOut.setKey(key);
+							m_pCipherIn->setKey(key);
+							m_pCipherOut->setKey(key);
 						}
 					else if(keyLen==32)
 						{
-							m_oCipherOut.setKey(key);
-							m_oCipherIn.setKey(key+16);
+							m_pCipherOut->setKey(key);
+							m_pCipherIn->setKey(key+16);
 						}
 				else
 						return E_UNKNOWN;
@@ -120,12 +120,12 @@ class CAMuxSocket
 				{
 					if(keyLen==16)
 						{
-							m_oCipherOut.setKey(key);
+							m_pCipherOut->setKey(key);
 						}
 					else if(keyLen==32)
 						{
-							m_oCipherOut.setKey(key);
-							m_oCipherOut.setIVs(key+16);
+							m_pCipherOut->setKey(key);
+							m_pCipherOut->setIVs(key+16);
 						}
 					else
 						return E_UNKNOWN;
@@ -136,12 +136,12 @@ class CAMuxSocket
 			{
 				if(keyLen==16)
 				{
-					m_oCipherIn.setKey(key);
+					m_pCipherIn->setKey(key);
 				}
 				else if(keyLen==32)
 				{
-					m_oCipherIn.setKey(key);
-					m_oCipherIn.setIVs(key+16);
+					m_pCipherIn->setKey(key);
+					m_pCipherIn->setIVs(key+16);
 				}
 				else
 				{
@@ -173,8 +173,8 @@ class CAMuxSocket
 				CASocket		m_Socket;
 				UINT32			m_aktBuffPos;
 				UINT8*			m_Buff;
-				CASymCipher		m_oCipherIn;
-				CASymCipher		m_oCipherOut;
+				CASymCipherMuxSocket*		m_pCipherIn;
+				CASymCipherMuxSocket*		m_pCipherOut;
 				bool			m_bIsCrypted;
 				CAMutex			m_csSend;
 				CAMutex			m_csReceive;

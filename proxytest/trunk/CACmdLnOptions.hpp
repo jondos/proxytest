@@ -46,7 +46,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#ifdef LOG_CRIME
 	#include "tre/tre.h"
 //#endif
-
+#include "CASymChannelCipher.hpp"
 #define REGEXP_BUFF_SIZE 4096
 
 
@@ -803,6 +803,7 @@ class CACmdLnOptions
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
 
 		UINT8* m_strAccessControlCredential;
+		CASymChannelCipher::ALGORITHM m_algSymChannelCipher;
 #endif //!ONLY_LOCAL_PROXY or first
 
 		bool		m_bLocalProxy,m_bFirstMix,m_bMiddleMix,m_bLastMix;
@@ -957,6 +958,8 @@ class CACmdLnOptions
 		SINT32 setNrOfFileDescriptors(DOMElement* elemGeneral);
 		SINT32 setDaemonMode(DOMElement* elemGeneral);
 		SINT32 setLoggingOptions(DOMElement* elemGeneral);
+		SINT32 setSymChannelCipher(CASymChannelCipher::ALGORITHM cipherAlgorithm);
+		CASymChannelCipher::ALGORITHM getSymChannelCipher() const;
 
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX
 		SINT32 setAccessControlCredential(DOMElement* elemGeneral);

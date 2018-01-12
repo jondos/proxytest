@@ -25,6 +25,9 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
+#ifndef __CALOCKABLE__
+#define __CALOCKABLE__
+
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "CAConditionVariable.hpp"
 /** From this class other classes could be derived, which need some kind from "locking" in memory. Imagine for
@@ -92,3 +95,5 @@ class CALockAble
 			UINT32 m_nLockCount;
 	};
 #endif //ONLY_LOCAL_PROXY
+
+#endif //__CALOCABLE__

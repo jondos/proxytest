@@ -31,6 +31,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
+#include "CASymChannelCipher.hpp"
 
 // How many packets do you want to replay at a time?
 #define REPLAY_COUNT 16
@@ -65,7 +66,7 @@ class CALocalProxy
 			UINT32 m_chainlen;
 			UINT32 m_MixCascadeProtocolVersion;
 			CAASymCipher* m_arRSA;
-			CASymCipher* m_pSymCipher;
+			CASymChannelCipher* m_pSymCipher;
 			UINT32 m_nFlowControlDownstreamSendMe;
 			bool m_bWithNewFlowControl;
 			bool m_bWithEnhancedChannelEncryption;

@@ -232,7 +232,7 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channelIn,
-																	CASymCipher* pCipher,HCHANNEL* channelOut)
+																	CASymChannelCipher* pCipher,HCHANNEL* channelOut)
 	{
 		if(pMuxSocket==NULL||channelOut==NULL)
 			return E_UNKNOWN;

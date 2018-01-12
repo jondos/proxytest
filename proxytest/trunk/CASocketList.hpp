@@ -28,13 +28,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CASOCKETLIST__
 #define __CASOCKETLIST__
 #include "CAMuxSocket.hpp"
-#include "CASymCipher.hpp"
+#include "CASymChannelCipher.hpp"
 #include "CAMutex.hpp"
 #include "CAQueue.hpp"
 
 typedef struct connlist
 	{
-		CASymCipher* pCiphers;
+		CASymChannelCipher* pCiphers;
 		CASocket* pSocket;
 		connlist* next;
 		HCHANNEL outChannel;
@@ -50,7 +50,7 @@ class CASocketList
 			CASocketList();
 			CASocketList(bool bThreadSafe);
 			~CASocketList();
-			SINT32 add(CASocket* pSocket,CASymCipher* pCiphers);
+			SINT32 add(CASocket* pSocket,CASymChannelCipher* pCiphers);
 			SINT32 get(HCHANNEL in,CONNECTION* out);
 			
 			CASocket* remove(HCHANNEL id);
