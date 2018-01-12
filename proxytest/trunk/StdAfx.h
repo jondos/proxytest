@@ -193,8 +193,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //Some constants
 #define MAX_POLLFD 8192 //How many sockets to support at max
 
-#define CLIENTS_PER_IP 10 //how many jap connections per IP are allowed?
-#define CHANNELS_PER_CLIENT 50 //how many channels per jap client are allowed?
+#define CLIENTS_PER_IP 100 //how many jap connections per IP are allowed?
+#define CHANNELS_PER_CLIENT 500 //how many channels per jap client are allowed?
 
 #define FIRST_MIX_RECEIVE_SYM_KEY_FROM_JAP_TIME_OUT 40000 //Timout in waiting for login information to receive from JAP (10 seconds)
 #define LAST_MIX_TO_PROXY_CONNECT_TIMEOUT 2000 //Connection timeout for last mix to proxy connections 2 Seconds...
