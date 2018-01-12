@@ -91,17 +91,17 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @ONLY_LIB_FALSE@sbin_PROGRAMS = mix$(EXEEXT)
-@ONLY_LIB_FALSE@am__append_1 = $(top_srcdir)/libproxytest.a \
-@ONLY_LIB_FALSE@	    $(top_srcdir)/xml/libxml.a \
-@ONLY_LIB_FALSE@	    $(top_srcdir)/popt/libpopt.a \
-@ONLY_LIB_FALSE@	    $(top_srcdir)/trio/libtrio.a \
-@ONLY_LIB_FALSE@	    $(top_srcdir)/tre/libtre.a \
-@ONLY_LIB_FALSE@	    $(top_srcdir)/gcm/libgcm.a \
-@ONLY_LIB_FALSE@	    $(top_srcdir)/TypeA/libmixa.a
+@ONLY_LIB_FALSE@am__append_1 = $(top_builddir)/libproxytest.a \
+@ONLY_LIB_FALSE@	    $(top_builddir)/xml/libxml.a \
+@ONLY_LIB_FALSE@	    $(top_builddir)/popt/libpopt.a \
+@ONLY_LIB_FALSE@	    $(top_builddir)/trio/libtrio.a \
+@ONLY_LIB_FALSE@	    $(top_builddir)/tre/libtre.a \
+@ONLY_LIB_FALSE@	    $(top_builddir)/gcm/libgcm.a \
+@ONLY_LIB_FALSE@	    $(top_builddir)/TypeA/libmixa.a
 
 @ALL_FROM_SOURCE_TRUE@am__append_2 = $(top_srcdir)/build/mxml/libmxml.a \
-@ALL_FROM_SOURCE_TRUE@	$(top_srcdir)/build/openssl/libssl.a \
-@ALL_FROM_SOURCE_TRUE@	$(top_srcdir)/build/openssl/libcrypto.a 
+@ALL_FROM_SOURCE_TRUE@	$(top_builddir)/build/openssl/libssl.a \
+@ALL_FROM_SOURCE_TRUE@	$(top_builddir)/build/openssl/libcrypto.a 
 
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -148,6 +148,7 @@ am__libproxytest_a_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CASocket.cpp CASocketAddrINet.cpp CASocketAddrUnix.cpp \
 	CASocketGroup.cpp CASocketGroupEpoll.cpp CASocketList.cpp \
 	CAStatusManager.cpp CATLSClientSocket.cpp CASymCipher.cpp \
+	CASymCipherCTR.cpp CASymCipherGCM.cpp CASymCipherOFB.cpp \
 	CASyncControlChannel.cpp CATempIPBlockList.cpp CAThread.cpp \
 	CAThreadPool.cpp CAThreadList.cpp CAUtil.cpp CAXMLBI.cpp \
 	CAXMLCostConfirmation.cpp CAXMLErrorMessage.cpp \
@@ -177,9 +178,10 @@ am__libproxytest_a_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CASocket.hpp CASocketAddr.hpp CASocketAddrINet.hpp \
 	CASocketAddrUnix.hpp CASocketGroup.hpp CASocketGroupEpoll.hpp \
 	CASocketList.hpp CAStatusManager.hpp CATLSClientSocket.hpp \
-	CAClientSocket.hpp CASymCipher.hpp CASyncControlChannel.hpp \
-	CATempIPBlockList.hpp CAThread.hpp CAThreadPool.hpp \
-	CAThreadList.hpp CAUtil.hpp CAXMLBI.hpp \
+	CAClientSocket.hpp CASymCipher.hpp CASymChannelCipher.hpp \
+	CASymCipherCTR.hpp CASymCipherGCM.hpp CASymCipherOFB.hpp \
+	CASyncControlChannel.hpp CATempIPBlockList.hpp CAThread.hpp \
+	CAThreadPool.hpp CAThreadList.hpp CAUtil.hpp CAXMLBI.hpp \
 	CAXMLCostConfirmation.hpp CAXMLErrorMessage.hpp \
 	CAXMLPriceCert.hpp Hashtable.hpp TermsAndConditions.hpp \
 	packetintro.h StdAfx.h basetypedefs.h
@@ -246,6 +248,9 @@ am__libproxytest_a_SOURCES_DIST = CAAbstractControlChannel.cpp \
 @ONLY_LIB_FALSE@	libproxytest_a-CAStatusManager.$(OBJEXT) \
 @ONLY_LIB_FALSE@	libproxytest_a-CATLSClientSocket.$(OBJEXT) \
 @ONLY_LIB_FALSE@	libproxytest_a-CASymCipher.$(OBJEXT) \
+@ONLY_LIB_FALSE@	libproxytest_a-CASymCipherCTR.$(OBJEXT) \
+@ONLY_LIB_FALSE@	libproxytest_a-CASymCipherGCM.$(OBJEXT) \
+@ONLY_LIB_FALSE@	libproxytest_a-CASymCipherOFB.$(OBJEXT) \
 @ONLY_LIB_FALSE@	libproxytest_a-CASyncControlChannel.$(OBJEXT) \
 @ONLY_LIB_FALSE@	libproxytest_a-CATempIPBlockList.$(OBJEXT) \
 @ONLY_LIB_FALSE@	libproxytest_a-CAThread.$(OBJEXT) \
@@ -291,11 +296,11 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(sbindir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-@ONLY_LIB_TRUE@libmix_la_DEPENDENCIES = $(top_srcdir)/xml/libxml.a \
-@ONLY_LIB_TRUE@	$(top_srcdir)/popt/libpopt.a \
-@ONLY_LIB_TRUE@	$(top_srcdir)/trio/libtrio.a \
-@ONLY_LIB_TRUE@	$(top_srcdir)/tre/libtre.a \
-@ONLY_LIB_TRUE@	$(top_srcdir)/gcm/libgcm.a
+@ONLY_LIB_TRUE@libmix_la_DEPENDENCIES = $(top_builddir)/xml/libxml.a \
+@ONLY_LIB_TRUE@	$(top_builddir)/popt/libpopt.a \
+@ONLY_LIB_TRUE@	$(top_builddir)/trio/libtrio.a \
+@ONLY_LIB_TRUE@	$(top_builddir)/tre/libtre.a \
+@ONLY_LIB_TRUE@	$(top_builddir)/gcm/libgcm.a
 am__libmix_la_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CAAbstractXMLEncodable.cpp CAAbstractXMLSignable.cpp \
 	CAAccountingBIInterface.cpp CAAccountingControlChannel.cpp \
@@ -320,6 +325,7 @@ am__libmix_la_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CASocket.cpp CASocketAddrINet.cpp CASocketAddrUnix.cpp \
 	CASocketGroup.cpp CASocketGroupEpoll.cpp CASocketList.cpp \
 	CAStatusManager.cpp CATLSClientSocket.cpp CASymCipher.cpp \
+	CASymCipherCTR.cpp CASymCipherGCM.cpp CASymCipherOFB.cpp \
 	CASyncControlChannel.cpp CATempIPBlockList.cpp CAThread.cpp \
 	CAThreadPool.cpp CAThreadList.cpp CAUtil.cpp CAXMLBI.cpp \
 	CAXMLCostConfirmation.cpp CAXMLErrorMessage.cpp \
@@ -349,9 +355,10 @@ am__libmix_la_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CASocket.hpp CASocketAddr.hpp CASocketAddrINet.hpp \
 	CASocketAddrUnix.hpp CASocketGroup.hpp CASocketGroupEpoll.hpp \
 	CASocketList.hpp CAStatusManager.hpp CATLSClientSocket.hpp \
-	CAClientSocket.hpp CASymCipher.hpp CASyncControlChannel.hpp \
-	CATempIPBlockList.hpp CAThread.hpp CAThreadPool.hpp \
-	CAThreadList.hpp CAUtil.hpp CAXMLBI.hpp \
+	CAClientSocket.hpp CASymChannelCipher.hpp CASymCipher.hpp \
+	CASymCipherCTR.hpp CASymCipherGCM.hpp CASymCipherOFB.hpp \
+	CASyncControlChannel.hpp CATempIPBlockList.hpp CAThread.hpp \
+	CAThreadPool.hpp CAThreadList.hpp CAUtil.hpp CAXMLBI.hpp \
 	CAXMLCostConfirmation.hpp CAXMLErrorMessage.hpp \
 	CAXMLPriceCert.hpp Hashtable.hpp TermsAndConditions.hpp \
 	packetintro.h StdAfx.h basetypedefs.h
@@ -416,6 +423,9 @@ am__libmix_la_SOURCES_DIST = CAAbstractControlChannel.cpp \
 @ONLY_LIB_TRUE@	libmix_la-CAStatusManager.lo \
 @ONLY_LIB_TRUE@	libmix_la-CATLSClientSocket.lo \
 @ONLY_LIB_TRUE@	libmix_la-CASymCipher.lo \
+@ONLY_LIB_TRUE@	libmix_la-CASymCipherCTR.lo \
+@ONLY_LIB_TRUE@	libmix_la-CASymCipherGCM.lo \
+@ONLY_LIB_TRUE@	libmix_la-CASymCipherOFB.lo \
 @ONLY_LIB_TRUE@	libmix_la-CASyncControlChannel.lo \
 @ONLY_LIB_TRUE@	libmix_la-CATempIPBlockList.lo \
 @ONLY_LIB_TRUE@	libmix_la-CAThread.lo libmix_la-CAThreadPool.lo \
@@ -787,6 +797,9 @@ mix_LDADD = $(am__append_1) $(am__append_2)
 @ONLY_LIB_TRUE@		    CAStatusManager.cpp \
 @ONLY_LIB_TRUE@		    CATLSClientSocket.cpp\
 @ONLY_LIB_TRUE@		    CASymCipher.cpp \
+@ONLY_LIB_TRUE@			CASymCipherCTR.cpp \
+@ONLY_LIB_TRUE@			CASymCipherGCM.cpp \
+@ONLY_LIB_TRUE@			CASymCipherOFB.cpp \
 @ONLY_LIB_TRUE@		    CASyncControlChannel.cpp\
 @ONLY_LIB_TRUE@		    CATempIPBlockList.cpp\
 @ONLY_LIB_TRUE@		    CAThread.cpp \
@@ -867,7 +880,11 @@ mix_LDADD = $(am__append_1) $(am__append_2)
 @ONLY_LIB_TRUE@		    CAStatusManager.hpp \
 @ONLY_LIB_TRUE@		    CATLSClientSocket.hpp\
 @ONLY_LIB_TRUE@		    CAClientSocket.hpp\
+@ONLY_LIB_TRUE@		    CASymChannelCipher.hpp \
 @ONLY_LIB_TRUE@		    CASymCipher.hpp \
+@ONLY_LIB_TRUE@			CASymCipherCTR.hpp \
+@ONLY_LIB_TRUE@			CASymCipherGCM.hpp \
+@ONLY_LIB_TRUE@			CASymCipherOFB.hpp \
 @ONLY_LIB_TRUE@		    CASyncControlChannel.hpp \
 @ONLY_LIB_TRUE@		    CATempIPBlockList.hpp\
 @ONLY_LIB_TRUE@		    CAThread.hpp \
@@ -884,11 +901,11 @@ mix_LDADD = $(am__append_1) $(am__append_2)
 @ONLY_LIB_TRUE@		    StdAfx.h\
 @ONLY_LIB_TRUE@		    basetypedefs.h
 
-@ONLY_LIB_TRUE@libmix_la_LIBADD = $(top_srcdir)/xml/libxml.a \
-@ONLY_LIB_TRUE@	    $(top_srcdir)/popt/libpopt.a \
-@ONLY_LIB_TRUE@	    $(top_srcdir)/trio/libtrio.a \
-@ONLY_LIB_TRUE@	    $(top_srcdir)/tre/libtre.a \
-@ONLY_LIB_TRUE@	    $(top_srcdir)/gcm/libgcm.a
+@ONLY_LIB_TRUE@libmix_la_LIBADD = $(top_builddir)/xml/libxml.a \
+@ONLY_LIB_TRUE@	    $(top_builddir)/popt/libpopt.a \
+@ONLY_LIB_TRUE@	    $(top_builddir)/trio/libtrio.a \
+@ONLY_LIB_TRUE@	    $(top_builddir)/tre/libtre.a \
+@ONLY_LIB_TRUE@	    $(top_builddir)/gcm/libgcm.a
 
 @ONLY_LIB_FALSE@noinst_LIBRARIES = libproxytest.a
 @ONLY_LIB_FALSE@libproxytest_a_CPPFLAGS = -DSOMEFLAG
@@ -955,6 +972,9 @@ mix_LDADD = $(am__append_1) $(am__append_2)
 @ONLY_LIB_FALSE@		    CAStatusManager.cpp \
 @ONLY_LIB_FALSE@		    CATLSClientSocket.cpp\
 @ONLY_LIB_FALSE@		    CASymCipher.cpp \
+@ONLY_LIB_FALSE@			CASymCipherCTR.cpp \
+@ONLY_LIB_FALSE@			CASymCipherGCM.cpp \
+@ONLY_LIB_FALSE@			CASymCipherOFB.cpp \
 @ONLY_LIB_FALSE@		    CASyncControlChannel.cpp\
 @ONLY_LIB_FALSE@		    CATempIPBlockList.cpp\
 @ONLY_LIB_FALSE@		    CAThread.cpp \
@@ -1036,6 +1056,11 @@ mix_LDADD = $(am__append_1) $(am__append_2)
 @ONLY_LIB_FALSE@		    CATLSClientSocket.hpp\
 @ONLY_LIB_FALSE@		    CAClientSocket.hpp\
 @ONLY_LIB_FALSE@		    CASymCipher.hpp \
+@ONLY_LIB_FALSE@		    CASymChannelCipher.hpp \
+@ONLY_LIB_FALSE@		    CASymCipher.hpp \
+@ONLY_LIB_FALSE@			CASymCipherCTR.hpp \
+@ONLY_LIB_FALSE@			CASymCipherGCM.hpp \
+@ONLY_LIB_FALSE@			CASymCipherOFB.hpp \
 @ONLY_LIB_FALSE@		    CASyncControlChannel.hpp \
 @ONLY_LIB_FALSE@		    CATempIPBlockList.hpp\
 @ONLY_LIB_FALSE@		    CAThread.hpp \
@@ -1279,6 +1304,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASocketList.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAStatusManager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASymCipher.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASymCipherCTR.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASymCipherGCM.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASymCipherOFB.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASyncControlChannel.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CATLSClientSocket.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CATempIPBlockList.Plo@am__quote@
@@ -1357,6 +1385,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CASocketList.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAStatusManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CASymCipher.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CASymCipherCTR.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CASymCipherGCM.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CASymCipherOFB.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CASyncControlChannel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CATLSClientSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CATempIPBlockList.Po@am__quote@
@@ -2281,6 +2312,48 @@ libproxytest_a-CASymCipher.obj: CASymCipher.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-CASymCipher.obj `if test -f 'CASymCipher.cpp'; then $(CYGPATH_W) 'CASymCipher.cpp'; else $(CYGPATH_W) '$(srcdir)/CASymCipher.cpp'; fi`
 
+libproxytest_a-CASymCipherCTR.o: CASymCipherCTR.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-CASymCipherCTR.o -MD -MP -MF $(DEPDIR)/libproxytest_a-CASymCipherCTR.Tpo -c -o libproxytest_a-CASymCipherCTR.o `test -f 'CASymCipherCTR.cpp' || echo '$(srcdir)/'`CASymCipherCTR.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-CASymCipherCTR.Tpo $(DEPDIR)/libproxytest_a-CASymCipherCTR.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASymCipherCTR.cpp' object='libproxytest_a-CASymCipherCTR.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-CASymCipherCTR.o `test -f 'CASymCipherCTR.cpp' || echo '$(srcdir)/'`CASymCipherCTR.cpp
+
+libproxytest_a-CASymCipherCTR.obj: CASymCipherCTR.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-CASymCipherCTR.obj -MD -MP -MF $(DEPDIR)/libproxytest_a-CASymCipherCTR.Tpo -c -o libproxytest_a-CASymCipherCTR.obj `if test -f 'CASymCipherCTR.cpp'; then $(CYGPATH_W) 'CASymCipherCTR.cpp'; else $(CYGPATH_W) '$(srcdir)/CASymCipherCTR.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-CASymCipherCTR.Tpo $(DEPDIR)/libproxytest_a-CASymCipherCTR.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASymCipherCTR.cpp' object='libproxytest_a-CASymCipherCTR.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-CASymCipherCTR.obj `if test -f 'CASymCipherCTR.cpp'; then $(CYGPATH_W) 'CASymCipherCTR.cpp'; else $(CYGPATH_W) '$(srcdir)/CASymCipherCTR.cpp'; fi`
+
+libproxytest_a-CASymCipherGCM.o: CASymCipherGCM.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-CASymCipherGCM.o -MD -MP -MF $(DEPDIR)/libproxytest_a-CASymCipherGCM.Tpo -c -o libproxytest_a-CASymCipherGCM.o `test -f 'CASymCipherGCM.cpp' || echo '$(srcdir)/'`CASymCipherGCM.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-CASymCipherGCM.Tpo $(DEPDIR)/libproxytest_a-CASymCipherGCM.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASymCipherGCM.cpp' object='libproxytest_a-CASymCipherGCM.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-CASymCipherGCM.o `test -f 'CASymCipherGCM.cpp' || echo '$(srcdir)/'`CASymCipherGCM.cpp
+
+libproxytest_a-CASymCipherGCM.obj: CASymCipherGCM.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-CASymCipherGCM.obj -MD -MP -MF $(DEPDIR)/libproxytest_a-CASymCipherGCM.Tpo -c -o libproxytest_a-CASymCipherGCM.obj `if test -f 'CASymCipherGCM.cpp'; then $(CYGPATH_W) 'CASymCipherGCM.cpp'; else $(CYGPATH_W) '$(srcdir)/CASymCipherGCM.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-CASymCipherGCM.Tpo $(DEPDIR)/libproxytest_a-CASymCipherGCM.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASymCipherGCM.cpp' object='libproxytest_a-CASymCipherGCM.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-CASymCipherGCM.obj `if test -f 'CASymCipherGCM.cpp'; then $(CYGPATH_W) 'CASymCipherGCM.cpp'; else $(CYGPATH_W) '$(srcdir)/CASymCipherGCM.cpp'; fi`
+
+libproxytest_a-CASymCipherOFB.o: CASymCipherOFB.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-CASymCipherOFB.o -MD -MP -MF $(DEPDIR)/libproxytest_a-CASymCipherOFB.Tpo -c -o libproxytest_a-CASymCipherOFB.o `test -f 'CASymCipherOFB.cpp' || echo '$(srcdir)/'`CASymCipherOFB.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-CASymCipherOFB.Tpo $(DEPDIR)/libproxytest_a-CASymCipherOFB.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASymCipherOFB.cpp' object='libproxytest_a-CASymCipherOFB.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-CASymCipherOFB.o `test -f 'CASymCipherOFB.cpp' || echo '$(srcdir)/'`CASymCipherOFB.cpp
+
+libproxytest_a-CASymCipherOFB.obj: CASymCipherOFB.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-CASymCipherOFB.obj -MD -MP -MF $(DEPDIR)/libproxytest_a-CASymCipherOFB.Tpo -c -o libproxytest_a-CASymCipherOFB.obj `if test -f 'CASymCipherOFB.cpp'; then $(CYGPATH_W) 'CASymCipherOFB.cpp'; else $(CYGPATH_W) '$(srcdir)/CASymCipherOFB.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-CASymCipherOFB.Tpo $(DEPDIR)/libproxytest_a-CASymCipherOFB.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASymCipherOFB.cpp' object='libproxytest_a-CASymCipherOFB.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-CASymCipherOFB.obj `if test -f 'CASymCipherOFB.cpp'; then $(CYGPATH_W) 'CASymCipherOFB.cpp'; else $(CYGPATH_W) '$(srcdir)/CASymCipherOFB.cpp'; fi`
+
 libproxytest_a-CASyncControlChannel.o: CASyncControlChannel.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-CASyncControlChannel.o -MD -MP -MF $(DEPDIR)/libproxytest_a-CASyncControlChannel.Tpo -c -o libproxytest_a-CASyncControlChannel.o `test -f 'CASyncControlChannel.cpp' || echo '$(srcdir)/'`CASyncControlChannel.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-CASyncControlChannel.Tpo $(DEPDIR)/libproxytest_a-CASyncControlChannel.Po
@@ -2931,6 +3004,27 @@ libmix_la-CASymCipher.lo: CASymCipher.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASymCipher.cpp' object='libmix_la-CASymCipher.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASymCipher.lo `test -f 'CASymCipher.cpp' || echo '$(srcdir)/'`CASymCipher.cpp
+
+libmix_la-CASymCipherCTR.lo: CASymCipherCTR.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASymCipherCTR.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASymCipherCTR.Tpo -c -o libmix_la-CASymCipherCTR.lo `test -f 'CASymCipherCTR.cpp' || echo '$(srcdir)/'`CASymCipherCTR.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASymCipherCTR.Tpo $(DEPDIR)/libmix_la-CASymCipherCTR.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASymCipherCTR.cpp' object='libmix_la-CASymCipherCTR.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASymCipherCTR.lo `test -f 'CASymCipherCTR.cpp' || echo '$(srcdir)/'`CASymCipherCTR.cpp
+
+libmix_la-CASymCipherGCM.lo: CASymCipherGCM.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASymCipherGCM.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASymCipherGCM.Tpo -c -o libmix_la-CASymCipherGCM.lo `test -f 'CASymCipherGCM.cpp' || echo '$(srcdir)/'`CASymCipherGCM.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASymCipherGCM.Tpo $(DEPDIR)/libmix_la-CASymCipherGCM.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASymCipherGCM.cpp' object='libmix_la-CASymCipherGCM.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASymCipherGCM.lo `test -f 'CASymCipherGCM.cpp' || echo '$(srcdir)/'`CASymCipherGCM.cpp
+
+libmix_la-CASymCipherOFB.lo: CASymCipherOFB.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASymCipherOFB.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASymCipherOFB.Tpo -c -o libmix_la-CASymCipherOFB.lo `test -f 'CASymCipherOFB.cpp' || echo '$(srcdir)/'`CASymCipherOFB.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASymCipherOFB.Tpo $(DEPDIR)/libmix_la-CASymCipherOFB.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASymCipherOFB.cpp' object='libmix_la-CASymCipherOFB.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASymCipherOFB.lo `test -f 'CASymCipherOFB.cpp' || echo '$(srcdir)/'`CASymCipherOFB.cpp
 
 libmix_la-CASyncControlChannel.lo: CASyncControlChannel.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASyncControlChannel.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASyncControlChannel.Tpo -c -o libmix_la-CASyncControlChannel.lo `test -f 'CASyncControlChannel.cpp' || echo '$(srcdir)/'`CASyncControlChannel.cpp
