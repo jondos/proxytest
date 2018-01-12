@@ -3928,6 +3928,7 @@
     <ClInclude Include="CASocketGroupEpoll.hpp" />
     <ClInclude Include="CASocketList.hpp" />
     <ClInclude Include="CASymChannelCipher.hpp" />
+    <ClInclude Include="CASymChannelCipherFactory.hpp" />
     <ClInclude Include="CASymCipher.hpp" />
     <ClInclude Include="CASymCipherCTR.hpp" />
     <ClInclude Include="CASymCipherGCM.hpp" />

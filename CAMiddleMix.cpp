@@ -46,7 +46,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CALibProxytest.hpp"
 #include "CAControlChannelDispatcher.hpp"
 #include "CASymChannelCipher.hpp"
-#include "CASymCipherOFB.hpp"
+#include "CASymChannelCipherFactory.hpp"
 
 SINT32 CAMiddleMix::initOnce()
 	{
@@ -1169,7 +1169,7 @@ SGX MIX							unlocksem(pMix->upstreamSemPreId, SN_FULL);
 											}
 									#endif
 
-									pCipher=new CASymCipherOFB();
+									pCipher=CASymChannelCipherFactory::createCipher(CALibProxytest::getOptions()->getSymChannelCipherAlgorithm());
 									pCipher->setKeys(tmpRSABuff,MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS);
 									pCipher->crypt1(pMixPacket->data+RSA_SIZE,
 												pMixPacket->data+rsaOutLen-MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS,

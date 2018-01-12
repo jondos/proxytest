@@ -58,7 +58,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAReplayControlChannel.hpp"
 #include "CAStatusManager.hpp"
 #include "CALibProxytest.hpp"
-#include "CASymCipherOFB.hpp"
+#include "CASymChannelCipherFactory.hpp"
 const UINT32 CAFirstMix::MAX_CONCURRENT_NEW_CONNECTIONS = NUM_LOGIN_WORKER_TRHEADS * 2;
 
 bool CAFirstMix::isShuttingDown()
@@ -2221,7 +2221,7 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		pHashEntry->pControlChannelDispatcher->registerControlChannel(new CAAccountingControlChannel(pHashEntry));
 		SAVE_STACK("CAFirstMix::doUserLogin", "payment registered");
 #endif
-		pHashEntry->pSymCipher=new CASymCipherOFB();
+		pHashEntry->pSymCipher=CASymChannelCipherFactory::createCipher(CALibProxytest::getOptions()->getSymChannelCipherAlgorithm());
 		pHashEntry->pSymCipher->setKey(mixKey);
 		pHashEntry->pSymCipher->setIVs(mixKey+16);
 		pNewUser->setReceiveKey(linkKey,32);

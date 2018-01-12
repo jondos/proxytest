@@ -37,73 +37,25 @@ ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE
 */
-#ifndef __CAASYMCHANNELCIPHER__
-#define __CAASYMCHANNELCIPHER__
-#include "CALockAble.hpp"
-/*
-#ifdef SYM_CHANNEL_CIPHER_CTR
-#define CASymChannelCipher CASymCipherCTR
+#ifndef __CAASYMCHANNELCIPHERFACTORY__
+#define __CAASYMCHANNELCIPHERFACTROY__
 #include "CASymCipherCTR.hpp"
-
-
-#else
-#define CASymChannelCipher CASymCipherOFB
-#endif
-
-#define CASymCipherMuxSocket CASymCipherOFB
 #include "CASymCipherOFB.hpp"
-*/
-
-const UINT8* const SYMCHANNELCIPHER_ALG_NAME_OFB = (const UINT8* const) "AES/OFB/ANON";
-const UINT8* const SYMCHANNELCIPHER_ALG_NAME_CTR = (const UINT8* const) "AES/CTR";
-
-class CASymChannelCipher
-	#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
-	:public CALockAble
-#endif
+class CASymChannelCipherFactory
 	{
 		public:
-			enum ALGORITHM { OFB,CTR };
-
-			static const UINT8* const getAlgorithmName(ALGORITHM alg)
+		static CASymChannelCipher* createCipher(CASymChannelCipher::ALGORITHM alg)
 				{
 					switch (alg)
 						{
-							case OFB:
-								return SYMCHANNELCIPHER_ALG_NAME_OFB;
-							case CTR:
-								return SYMCHANNELCIPHER_ALG_NAME_CTR;
+							case CASymChannelCipher::ALGORITHM::OFB:
+								return new CASymCipherOFB();
+							case CASymChannelCipher::ALGORITHM::CTR:
+								return new CASymCipherCTR();
 						}	
 					return NULL;
 				}
-
-			virtual	SINT32 crypt1(const UINT8* in,UINT8* out,UINT32 len)=0;
-			virtual SINT32 crypt2(const UINT8* in,UINT8* out,UINT32 len)=0;
-			/** Sets the keys for crypt1() and crypt2() to the same key*/
-			virtual SINT32 setKey(const UINT8* key)=0;	
-					/** Sets the keys for crypt1() and crypt2() either to the same key (if keysize==KEY_SIZE) or to
-			 * different values, if keysize==2* KEY_SIZE*/
-			virtual SINT32 setKeys(const UINT8* key,UINT32 keysize)=0;	
-
-				/** Sets iv1 and iv2 to p_iv.
-				* @param p_iv 16 random bytes used for new iv1 and iv2.
-				* @retval E_SUCCESS
-				*/
-			virtual SINT32 setIVs(const UINT8* p_iv) = 0;
-
-			/** Sets iv2 to p_iv.
-				* @param p_iv 16 random bytes used for new iv2.
-				* @retval E_SUCCESS
-				*/
-			virtual SINT32 setIV2(const UINT8* p_iv) = 0;
-
-			virtual bool isKeyValid()=0;
-
 	};
 
 
-#define CASymCipherMuxSocket CASymChannelCipher
-
-
-
-#endif //__CAASYMCHANNELCIPHER__
+#endif //__CASYMCHANNELCIPHERFACTORY__
