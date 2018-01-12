@@ -75,6 +75,9 @@ libmix_la_SOURCES = CAAbstractControlChannel.cpp\
 		    CAStatusManager.cpp \
 		    CATLSClientSocket.cpp\
 		    CASymCipher.cpp \
+			CASymCipherCTR.cpp \
+			CASymCipherGCM.cpp \
+			CASymCipherOFB.cpp \
 		    CASyncControlChannel.cpp\
 		    CATempIPBlockList.cpp\
 		    CAThread.cpp \
@@ -155,7 +158,11 @@ libmix_la_SOURCES = CAAbstractControlChannel.cpp\
 		    CAStatusManager.hpp \
 		    CATLSClientSocket.hpp\
 		    CAClientSocket.hpp\
+		    CASymChannelCipher.hpp \
 		    CASymCipher.hpp \
+			CASymCipherCTR.hpp \
+			CASymCipherGCM.hpp \
+			CASymCipherOFB.hpp \
 		    CASyncControlChannel.hpp \
 		    CATempIPBlockList.hpp\
 		    CAThread.hpp \
@@ -245,6 +252,9 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CAStatusManager.cpp \
 		    CATLSClientSocket.cpp\
 		    CASymCipher.cpp \
+			CASymCipherCTR.cpp \
+			CASymCipherGCM.cpp \
+			CASymCipherOFB.cpp \
 		    CASyncControlChannel.cpp\
 		    CATempIPBlockList.cpp\
 		    CAThread.cpp \
@@ -326,6 +336,11 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CATLSClientSocket.hpp\
 		    CAClientSocket.hpp\
 		    CASymCipher.hpp \
+		    CASymChannelCipher.hpp \
+		    CASymCipher.hpp \
+			CASymCipherCTR.hpp \
+			CASymCipherGCM.hpp \
+			CASymCipherOFB.hpp \
 		    CASyncControlChannel.hpp \
 		    CATempIPBlockList.hpp\
 		    CAThread.hpp \
