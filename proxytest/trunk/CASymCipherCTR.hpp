@@ -47,10 +47,8 @@ class CASymCipherCTR:public CASymChannelCipher
 			CASymCipherCTR()
 				{
 					m_bKeySet=false;
-#ifdef SYM_CIPHER_CTR
 					m_ctxAES1=EVP_CIPHER_CTX_new();
 					m_ctxAES2=EVP_CIPHER_CTX_new();
-#endif
 
 					m_iv1=new UINT8[16];
 					m_iv2=new UINT8[16];
@@ -69,12 +67,6 @@ class CASymCipherCTR:public CASymChannelCipher
 					delete[] m_iv2;
 					m_iv2 = NULL;
 
-					delete [] m_pEncMsgIV;
-					m_pEncMsgIV = NULL;
-					delete [] m_pDecMsgIV;
-					m_pDecMsgIV = NULL;
-
-
 					delete m_pcsEnc;
 					m_pcsEnc = NULL;
 					delete m_pcsDec;
@@ -92,8 +84,6 @@ class CASymCipherCTR:public CASymChannelCipher
 			 * different values, if keysize==2* KEY_SIZE*/
 			SINT32 setKeys(const UINT8* key,UINT32 keysize);	
 			
-			SINT32 setKey(const UINT8* key,bool bEncrypt);	
-
 			/** Sets iv1 and iv2 to p_iv.
 				* @param p_iv 16 random bytes used for new iv1 and iv2.
 				* @retval E_SUCCESS
@@ -102,10 +92,8 @@ class CASymCipherCTR:public CASymChannelCipher
 				{
 					memcpy(m_iv1,p_iv,16);
 					memcpy(m_iv2,p_iv,16);
-#ifdef SYM_CIPHER_CTR
 					EVP_DecryptInit_ex(m_ctxAES1, EVP_aes_128_ctr(), NULL, key1, m_iv1);
 					EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key2, m_iv2);
-#endif
 					return E_SUCCESS;
 				}
 
@@ -116,9 +104,7 @@ class CASymCipherCTR:public CASymChannelCipher
 			SINT32 setIV2(const UINT8* p_iv)
 				{
 					memcpy(m_iv2,p_iv,16);
-#ifdef SYM_CIPHER_CTR
 					EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key2, m_iv2);
-#endif
 					return E_SUCCESS;
 				}
 
@@ -128,10 +114,6 @@ class CASymCipherCTR:public CASymChannelCipher
 		private:
 			CAMutex* m_pcsEnc;
 			CAMutex* m_pcsDec;
-			UINT32 m_nEncMsgCounter;
-			UINT32* m_pEncMsgIV;
-			UINT32 m_nDecMsgCounter;
-			UINT32* m_pDecMsgIV;
 
 		protected:
 
