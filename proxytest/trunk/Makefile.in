@@ -179,9 +179,10 @@ am__libproxytest_a_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CASocketAddrUnix.hpp CASocketGroup.hpp CASocketGroupEpoll.hpp \
 	CASocketList.hpp CAStatusManager.hpp CATLSClientSocket.hpp \
 	CAClientSocket.hpp CASymCipher.hpp CASymChannelCipher.hpp \
-	CASymCipherCTR.hpp CASymCipherGCM.hpp CASymCipherOFB.hpp \
-	CASyncControlChannel.hpp CATempIPBlockList.hpp CAThread.hpp \
-	CAThreadPool.hpp CAThreadList.hpp CAUtil.hpp CAXMLBI.hpp \
+	CASymChannelCipherFactory.hpp CASymCipherCTR.hpp \
+	CASymCipherGCM.hpp CASymCipherOFB.hpp CASyncControlChannel.hpp \
+	CATempIPBlockList.hpp CAThread.hpp CAThreadPool.hpp \
+	CAThreadList.hpp CAUtil.hpp CAXMLBI.hpp \
 	CAXMLCostConfirmation.hpp CAXMLErrorMessage.hpp \
 	CAXMLPriceCert.hpp Hashtable.hpp TermsAndConditions.hpp \
 	packetintro.h StdAfx.h basetypedefs.h
@@ -355,7 +356,8 @@ am__libmix_la_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CASocket.hpp CASocketAddr.hpp CASocketAddrINet.hpp \
 	CASocketAddrUnix.hpp CASocketGroup.hpp CASocketGroupEpoll.hpp \
 	CASocketList.hpp CAStatusManager.hpp CATLSClientSocket.hpp \
-	CAClientSocket.hpp CASymChannelCipher.hpp CASymCipher.hpp \
+	CAClientSocket.hpp CASymChannelCipher.hpp \
+	CASymChannelCipherFactory.hpp CASymCipher.hpp \
 	CASymCipherCTR.hpp CASymCipherGCM.hpp CASymCipherOFB.hpp \
 	CASyncControlChannel.hpp CATempIPBlockList.hpp CAThread.hpp \
 	CAThreadPool.hpp CAThreadList.hpp CAUtil.hpp CAXMLBI.hpp \
@@ -881,6 +883,7 @@ mix_LDADD = $(am__append_1) $(am__append_2)
 @ONLY_LIB_TRUE@		    CATLSClientSocket.hpp\
 @ONLY_LIB_TRUE@		    CAClientSocket.hpp\
 @ONLY_LIB_TRUE@		    CASymChannelCipher.hpp \
+@ONLY_LIB_TRUE@		    CASymChannelCipherFactory.hpp \
 @ONLY_LIB_TRUE@		    CASymCipher.hpp \
 @ONLY_LIB_TRUE@			CASymCipherCTR.hpp \
 @ONLY_LIB_TRUE@			CASymCipherGCM.hpp \
@@ -1057,6 +1060,7 @@ mix_LDADD = $(am__append_1) $(am__append_2)
 @ONLY_LIB_FALSE@		    CAClientSocket.hpp\
 @ONLY_LIB_FALSE@		    CASymCipher.hpp \
 @ONLY_LIB_FALSE@		    CASymChannelCipher.hpp \
+@ONLY_LIB_FALSE@		    CASymChannelCipherFactory.hpp \
 @ONLY_LIB_FALSE@		    CASymCipher.hpp \
 @ONLY_LIB_FALSE@			CASymCipherCTR.hpp \
 @ONLY_LIB_FALSE@			CASymCipherGCM.hpp \
