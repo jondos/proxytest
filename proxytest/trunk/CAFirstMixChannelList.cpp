@@ -1140,7 +1140,7 @@ fmChannelListEntry* CAFirstMixChannelList::getNextChannel(fmChannelListEntry* pE
 SINT32 CAFirstMixChannelList::test()
 	{
 		CAFirstMixChannelList* pList=new CAFirstMixChannelList();
-		CAMuxSocket *pMuxSocket=new CAMuxSocket();
+		CAMuxSocket *pMuxSocket=new CAMuxSocket(CASymChannelCipher::ALGORITHM::OFB);
 		pMuxSocket->getCASocket()->create();
 		UINT8 peerIP[4];
 #ifndef LOG_DIALOG

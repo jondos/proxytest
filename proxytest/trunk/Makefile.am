@@ -159,6 +159,7 @@ libmix_la_SOURCES = CAAbstractControlChannel.cpp\
 		    CATLSClientSocket.hpp\
 		    CAClientSocket.hpp\
 		    CASymChannelCipher.hpp \
+		    CASymChannelCipherFactory.hpp \
 		    CASymCipher.hpp \
 			CASymCipherCTR.hpp \
 			CASymCipherGCM.hpp \
@@ -337,6 +338,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CAClientSocket.hpp\
 		    CASymCipher.hpp \
 		    CASymChannelCipher.hpp \
+		    CASymChannelCipherFactory.hpp \
 		    CASymCipher.hpp \
 			CASymCipherCTR.hpp \
 			CASymCipherGCM.hpp \

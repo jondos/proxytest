@@ -33,13 +33,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 #include "CASingleSocketGroup.hpp"
 #include "CAUtil.hpp"
-#include "CASymCipherOFB.hpp"
+#include "CASymChannelCipherFactory.hpp"
 
 t_hashkeylistEntry* CAMuxSocket::ms_phashkeylistAvailableHashKeys=NULL;
 SINT32 CAMuxSocket::ms_nMaxHashKeyValue=0;
 CAMutex* CAMuxSocket::ms_pcsHashKeyList=NULL;
 
-CAMuxSocket::CAMuxSocket()
+CAMuxSocket::CAMuxSocket(CASymChannelCipher::ALGORITHM algCipher)
 	{
 		m_Buff=new UINT8[MIXPACKET_SIZE];
 		m_aktBuffPos=0;
@@ -58,8 +58,8 @@ CAMuxSocket::CAMuxSocket()
 		m_pHashKeyEntry=ms_phashkeylistAvailableHashKeys;
 		ms_phashkeylistAvailableHashKeys=m_pHashKeyEntry->next;
 		ms_pcsHashKeyList->unlock();
-		m_pCipherIn = new CASymCipherOFB();
-		m_pCipherOut = new CASymCipherOFB();
+		m_pCipherIn = CASymChannelCipherFactory::createCipher(algCipher);
+		m_pCipherOut = CASymChannelCipherFactory::createCipher(algCipher);
 	}
 	
 CAMuxSocket::~CAMuxSocket()
