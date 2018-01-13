@@ -60,10 +60,10 @@ SINT32 CASymCipherCTR::setKeys(const UINT8* key,UINT32 keysize)
 		{
 			memset(m_iv1,0,16);
 			memset(m_iv2,0,16);
-	EVP_DecryptInit_ex(m_ctxAES1,EVP_aes_128_ctr(), NULL, key, m_iv1);
-	EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key+KEY_SIZE, m_iv2);
-	memcpy(key1, key, 16);
-	memcpy(key2, key + KEY_SIZE, 16);
+			EVP_DecryptInit_ex(m_ctxAES1,EVP_aes_128_ctr(), NULL, key, m_iv1);
+			EVP_EncryptInit_ex(m_ctxAES2, EVP_aes_128_ctr(), NULL, key+KEY_SIZE, m_iv2);
+			memcpy(key1, key, 16);
+			memcpy(key2, key + KEY_SIZE, 16);
 			m_bKeySet=true;
 			return E_SUCCESS;
 		}
