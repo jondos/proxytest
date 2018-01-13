@@ -160,16 +160,16 @@ SINT32 CALocalProxy::init()
 		addrNext.setAddr(strTarget,CALibProxytest::getOptions()->getMixPort());
 		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix...\n");
 
-		m_muxOut.getCASocket()->create();
-		m_muxOut.getCASocket()->setSendBuff(MIXPACKET_SIZE*50);
-		m_muxOut.getCASocket()->setRecvBuff(MIXPACKET_SIZE*50);
-		if(m_muxOut.connect(addrNext)==E_SUCCESS)
+		m_pmuxOut->getCASocket()->create();
+		m_pmuxOut->getCASocket()->setSendBuff(MIXPACKET_SIZE*50);
+		m_pmuxOut->getCASocket()->setRecvBuff(MIXPACKET_SIZE*50);
+		if(m_pmuxOut->connect(addrNext)==E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_INFO," connected!\n");
 				UINT16 size;
 				UINT8 byte;
-				m_muxOut.getCASocket()->receiveFully((UINT8*)&size,2);
-				m_muxOut.getCASocket()->receiveFully((UINT8*)&byte,1);
+				m_pmuxOut->getCASocket()->receiveFully((UINT8*)&size,2);
+				m_pmuxOut->getCASocket()->receiveFully((UINT8*)&byte,1);
 				CAMsg::printMsg(LOG_INFO,"Received Key Info!\n");
 				size=ntohs(size);
 #ifdef _DEBUG
@@ -182,7 +182,7 @@ SINT32 CALocalProxy::init()
 #endif
 						UINT8* buff=new UINT8[size+1];
 						buff[0]=byte;
-						m_muxOut.getCASocket()->receiveFully(buff+1,size-1);
+						m_pmuxOut->getCASocket()->receiveFully(buff+1,size-1);
 						buff[size]=0;
 #ifdef _DEBUG
 						CAMsg::printMsg(LOG_INFO,"Key Info is:\n");
@@ -216,7 +216,7 @@ SINT32 CALocalProxy::loop()
 		bool bHaveSocks=(socksPort!=0xFFFF);
 		if(bHaveSocks)
 			pSocketGroup->add(m_socketSOCKSIn);
-		pSocketGroup->add(m_muxOut);
+		pSocketGroup->add(*m_pmuxOut);
 		MIXPACKET* pMixPacket=new MIXPACKET;
 
 		memset(pMixPacket,0,MIXPACKET_SIZE);
@@ -251,7 +251,7 @@ SINT32 CALocalProxy::loop()
 									{
 										memcpy(pMixPacket,&pReplayMixPackets[i],MIXPACKET_SIZE);
 										CAMsg::printMsg(LOG_DEBUG,"Replaying packet #%d: %X %X %X %X\n", (i+1), *pMixPacket->data, *(pMixPacket->data+1), *(pMixPacket->data+2), *(pMixPacket->data+3));
-										if(m_muxOut.send(pMixPacket)==SOCKET_ERROR)
+										if(m_pmuxOut->send(pMixPacket)==SOCKET_ERROR)
 											{
 												CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");
 												ret=E_UNKNOWN;
@@ -313,10 +313,10 @@ SINT32 CALocalProxy::loop()
 							}
 					}
 				//Receive from next Mix
-				if(pSocketGroup->isSignaled(m_muxOut))
+				if(pSocketGroup->isSignaled(*m_pmuxOut))
 						{
 							countRead--;
-							ret=m_muxOut.receive(pMixPacket);
+							ret=m_pmuxOut->receive(pMixPacket);
 							if(ret==SOCKET_ERROR)
 								{
 									CAMsg::printMsg(LOG_CRIT,"Mux-Channel Receiving Data Error - Exiting!\n");
@@ -374,7 +374,7 @@ SINT32 CALocalProxy::loop()
 														pMixPacket->payload.type=MIX_PAYLOAD_HTTP;
 														for(UINT32 c=0;c<m_chainlen;c++)
 															oConnection.pCiphers[c].crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-														m_muxOut.send(pMixPacket);
+														m_pmuxOut->send(pMixPacket);
 														#ifdef _DEBUG
 															CAMsg::printMsg(LOG_DEBUG,"sent sendme!\n");
 														#endif
@@ -411,7 +411,7 @@ SINT32 CALocalProxy::loop()
 														pMixPacket->flags=CHANNEL_CLOSE;
 														pMixPacket->channel=tmpCon->outChannel;
 														getRandom(pMixPacket->data,DATA_SIZE);
-														m_muxOut.send(pMixPacket);
+														m_pmuxOut->send(pMixPacket);
 														tmpSocket->close();
 														delete tmpSocket;
 														tmpSocket = NULL;
@@ -528,7 +528,7 @@ SINT32 CALocalProxy::loop()
 														bCapturePackets = false;
 													}
 
-												if(m_muxOut.send(pMixPacket)==SOCKET_ERROR)
+												if(m_pmuxOut->send(pMixPacket)==SOCKET_ERROR)
 													{
 														CAMsg::printMsg(LOG_CRIT,"Mux-Channel Sending Data Error - Exiting!\n");
 														ret=E_UNKNOWN;
@@ -567,7 +567,8 @@ SINT32 CALocalProxy::clean()
 	{
 		m_socketIn.close();
 		m_socketSOCKSIn.close();
-		m_muxOut.close();
+		m_pmuxOut->close();
+		delete m_pmuxOut;
 
 		delete[] m_arRSA;
 		m_arRSA=NULL;
@@ -722,13 +723,13 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				oPacket.channel=0;
 				UINT8 keys[32];
 				getRandom(keys,32);
-				m_muxOut.setReceiveKey(keys,16);
-				m_muxOut.setSendKey(keys+16,16);
+				m_pmuxOut->setReceiveKey(keys,16);
+				m_pmuxOut->setSendKey(keys+16,16);
 				memcpy(oPacket.data,"KEYPACKET",9);
 				memcpy(oPacket.data+9,keys,32);
 				m_arRSA[m_chainlen-1].encrypt(oPacket.data,oPacket.data);
-				m_muxOut.send(&oPacket);
-				m_muxOut.setCrypt(true);
+				m_pmuxOut->send(&oPacket);
+				m_pmuxOut->setCrypt(true);
 			}
 		else
 			{
@@ -772,27 +773,27 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				UINT32 encbufflen;
 				UINT8* encbuff=encryptXMLElement(buff,strlen((char*)buff),encbufflen,&m_arRSA[m_chainlen-1]);
 				UINT16 size2=htons((UINT16)(encbufflen+XML_HEADER_SIZE));
-				SINT32 ret=m_muxOut.getCASocket()->send((UINT8*)&size2,2);
-				ret=m_muxOut.getCASocket()->send((UINT8*)XML_HEADER,XML_HEADER_SIZE);
-				ret=m_muxOut.getCASocket()->send(encbuff,encbufflen);
+				SINT32 ret=m_pmuxOut->getCASocket()->send((UINT8*)&size2,2);
+				ret=m_pmuxOut->getCASocket()->send((UINT8*)XML_HEADER,XML_HEADER_SIZE);
+				ret=m_pmuxOut->getCASocket()->send(encbuff,encbufflen);
 				delete[] encbuff;
 				encbuff = NULL;
 				delete[] buff;
 				buff = NULL;
 				// Checking Signature send from Mix
-				ret=m_muxOut.getCASocket()->receiveFully((UINT8*)&size2,2);
+				ret=m_pmuxOut->getCASocket()->receiveFully((UINT8*)&size2,2);
 				size2=ntohs(size2);
 				UINT8* xmlbuff=new UINT8[size2];
-				ret=m_muxOut.getCASocket()->receiveFully(xmlbuff,size2);
+				ret=m_pmuxOut->getCASocket()->receiveFully(xmlbuff,size2);
 				delete[] xmlbuff;
 				if (ret != E_SUCCESS)
 					{
 						return E_UNKNOWN;
 					}
 				xmlbuff = NULL;
-				m_muxOut.setSendKey(linkKeys,32);
-				m_muxOut.setReceiveKey(linkKeys+32,32);
-				m_muxOut.setCrypt(true);
+				m_pmuxOut->setSendKey(linkKeys,32);
+				m_pmuxOut->setReceiveKey(linkKeys+32,32);
+				m_pmuxOut->setCrypt(true);
 			}
 		if (doc != NULL)
 		{

@@ -154,7 +154,7 @@ SINT32 CAFirstMix::init()
 				CAMsg::printMsg(LOG_CRIT,"No next Mix specified! Please insert the address of a next mix into your configuration.\n");
 				return E_UNKNOWN;
 			}
-		m_pMuxOut=new CAMuxSocket();
+		m_pMuxOut = new CAMuxSocket(CASymChannelCipher::ALGORITHM::OFB);
 		if(m_pMuxOut->getCASocket()->create(pAddrNext->getType())!=E_SUCCESS)
 			{
 				CAMsg::printMsg(LOG_CRIT,
@@ -1360,7 +1360,11 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"New direct Connection from Client!\n");
 						#endif
-						pNewMuxSocket=new CAMuxSocket;
+						#ifdef SYM_CHANNEL_CIPHER_CTR
+							pNewMuxSocket=new CAMuxSocket(CASymChannelCipher::ALGORITHM::CTR);
+						#else
+							pNewMuxSocket=new CAMuxSocket(CASymChannelCipher::ALGORITHM::OFB);
+						#endif
 						ret=socketsIn[i]->accept(*(pNewMuxSocket->getCASocket()));
 						pFirstMix->incNewConnections();
 
