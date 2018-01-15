@@ -57,15 +57,17 @@ DAMAGE
 const UINT8* const SYMCHANNELCIPHER_ALG_NAME_OFB = (const UINT8* const) "AES/OFB/ANON";
 const UINT8* const SYMCHANNELCIPHER_ALG_NAME_CTR = (const UINT8* const) "AES/CTR";
 
+enum SYMCHANNELCIPHER_ALGORITHM { OFB,CTR };
+
 class CASymChannelCipher
 	#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 	:public CALockAble
 #endif
 	{
 		public:
-			enum ALGORITHM { OFB,CTR };
+			
 
-			static const UINT8* const getAlgorithmName(ALGORITHM alg)
+			static const UINT8* const getAlgorithmName(SYMCHANNELCIPHER_ALGORITHM alg)
 				{
 					switch (alg)
 						{

@@ -45,7 +45,7 @@ typedef struct __t_hash_key_entry__ t_hashkeylistEntry;
 class CAMuxSocket
 	{
 		public:
-			CAMuxSocket(CASymChannelCipher::ALGORITHM algCipher);
+			CAMuxSocket(SYMCHANNELCIPHER_ALGORITHM algCipher);
 			~CAMuxSocket();
 
 			/** Returns a Hashkey which uniquely identifies this socket*/
