@@ -803,7 +803,7 @@ SINT32 CAMiddleMix::init()
 				return E_UNKNOWN;
 			}
 
-		m_pMuxOut=new CAMuxSocket(SYMCHANNELCIPHER_ALGORITHM::OFB);
+		m_pMuxOut=new CAMuxSocket(OFB);
 
 		if(m_pMuxOut->getCASocket()->create(pAddrNext->getType())!=E_SUCCESS)
 			{
@@ -838,7 +838,7 @@ SINT32 CAMiddleMix::init()
 		pAddr->toString(buff,255);
 		CAMsg::printMsg(LOG_INFO,"Waiting for connection from previous Mix on %s...\n", buff);
 
-		m_pMuxIn=new CAMuxSocket(SYMCHANNELCIPHER_ALGORITHM::OFB);
+		m_pMuxIn=new CAMuxSocket(OFB);
 #ifdef DYNAMIC_MIX
 		// LERNGRUPPE Do not block if we are currently reconfiguring
 		if(m_bBreakNeeded != m_bReconfigured)
