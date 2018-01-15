@@ -39,6 +39,7 @@ DAMAGE
 */
 #ifndef __CAASYMCHANNELCIPHERFACTORY__
 #define __CAASYMCHANNELCIPHERFACTROY__
+#include "CASymChannelCipher.hpp"
 #include "CASymCipherCTR.hpp"
 #include "CASymCipherOFB.hpp"
 class CASymChannelCipherFactory
