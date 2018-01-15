@@ -5098,9 +5098,9 @@ SINT32 CACmdLnOptions::setGeneralOptions(DOMElement* elemRoot)
 	
 	///TODO: Mabe make the SymChannelCipher configurable at runtime....
 	#ifdef SYM_CHANNEL_CIPHER_CTR
-		setSymChannelCipherAlgorithm(SYMCHANNELCIPHER_ALGORITHM::CTR);
+		setSymChannelCipherAlgorithm(CTR);
 	#else
-		setSymChannelCipherAlgorithm(SYMCHANNELCIPHER_ALGORITHM::OFB);
+		setSymChannelCipherAlgorithm(OFB);
 	#endif
 	///end TODO
 
