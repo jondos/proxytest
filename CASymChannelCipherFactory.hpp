@@ -49,9 +49,9 @@ class CASymChannelCipherFactory
 				{
 					switch (alg)
 						{
-							case SYMCHANNELCIPHER_ALGORITHM::OFB:
+							case OFB:
 								return new CASymCipherOFB();
-							case SYMCHANNELCIPHER_ALGORITHM::CTR:
+							case CTR:
 								return new CASymCipherCTR();
 						}	
 					return NULL;
