@@ -39,7 +39,7 @@ t_hashkeylistEntry* CAMuxSocket::ms_phashkeylistAvailableHashKeys=NULL;
 SINT32 CAMuxSocket::ms_nMaxHashKeyValue=0;
 CAMutex* CAMuxSocket::ms_pcsHashKeyList=NULL;
 
-CAMuxSocket::CAMuxSocket(CASymChannelCipher::ALGORITHM algCipher)
+CAMuxSocket::CAMuxSocket(SYMCHANNELCIPHER_ALGORITHM algCipher)
 	{
 		m_Buff=new UINT8[MIXPACKET_SIZE];
 		m_aktBuffPos=0;

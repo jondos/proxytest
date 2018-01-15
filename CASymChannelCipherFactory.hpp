@@ -45,13 +45,13 @@ DAMAGE
 class CASymChannelCipherFactory
 	{
 		public:
-		static CASymChannelCipher* createCipher(CASymChannelCipher::ALGORITHM alg)
+		static CASymChannelCipher* createCipher(SYMCHANNELCIPHER_ALGORITHM alg)
 				{
 					switch (alg)
 						{
-							case CASymChannelCipher::ALGORITHM::OFB:
+							case SYMCHANNELCIPHER_ALGORITHM::OFB:
 								return new CASymCipherOFB();
-							case CASymChannelCipher::ALGORITHM::CTR:
+							case SYMCHANNELCIPHER_ALGORITHM::CTR:
 								return new CASymCipherCTR();
 						}	
 					return NULL;
