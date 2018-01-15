@@ -143,7 +143,7 @@ SINT32 CALastMix::init()
 
 		CAMsg::printMsg(LOG_INFO,"Waiting for connection from previous Mix on %s...\n", buff);
 
-		m_pMuxIn=new CAMuxSocket(SYMCHANNELCIPHER_ALGORITHM::OFB);
+		m_pMuxIn=new CAMuxSocket(OFB);
 		SINT32 ret=m_pMuxIn->accept(*pAddr);
 		delete pAddr;
 		pAddr = NULL;
