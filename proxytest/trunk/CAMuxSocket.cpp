@@ -58,8 +58,13 @@ CAMuxSocket::CAMuxSocket(SYMCHANNELCIPHER_ALGORITHM algCipher)
 		m_pHashKeyEntry=ms_phashkeylistAvailableHashKeys;
 		ms_phashkeylistAvailableHashKeys=m_pHashKeyEntry->next;
 		ms_pcsHashKeyList->unlock();
+#ifndef MUXSOCKET_CIPHER_NO_ENCRYPTION
 		m_pCipherIn = CASymChannelCipherFactory::createCipher(algCipher);
 		m_pCipherOut = CASymChannelCipherFactory::createCipher(algCipher);
+#else
+		m_pCipherIn = CASymChannelCipherFactory::createCipher(NULL_CIPHER);
+		m_pCipherOut = CASymChannelCipherFactory::createCipher(NULL_CIPHER);
+#endif
 	}
 	
 CAMuxSocket::~CAMuxSocket()

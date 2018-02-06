@@ -83,23 +83,18 @@ SINT32 CASymCipherCTR::setKeys(const UINT8* key,UINT32 keysize)
 	* @retval E_SUCCESS
 	*/
 SINT32 CASymCipherCTR::crypt1(const UINT8* in,UINT8* out,UINT32 len)
-{
-#ifdef NO_ENCRYPTION
-	CAMsg::printMsg(LOG_ERR,"Warning: - DO NULL encryption!\n");
-	memmove(out, in, len);
-	return E_SUCCESS;
-#endif
-			UINT32 i=2000;
-			UINT8 tmpBuff[2000];
-			int ret=EVP_DecryptUpdate(m_ctxAES1, tmpBuff, (int*)&i, in, len);
-			/*if (ret != 1)
-				{
-					CAMsg::printMsg(LOG_ERR, "Error in CASymCipher::crypt1()\n ");
-					return E_UNKNOWN;
-				}*/
-			memcpy(out, tmpBuff, len);
-	return E_SUCCESS;
-}
+	{
+		UINT32 i=2000;
+		UINT8 tmpBuff[2000];
+		int ret=EVP_DecryptUpdate(m_ctxAES1, tmpBuff, (int*)&i, in, len);
+		/*if (ret != 1)
+			{
+				CAMsg::printMsg(LOG_ERR, "Error in CASymCipher::crypt1()\n ");
+				return E_UNKNOWN;
+			}*/
+		memcpy(out, tmpBuff, len);
+		return E_SUCCESS;
+	}
 
 /** Decryptes in to out using iv2 and key2.
 	* @param in input (encrypted) bytes
@@ -110,10 +105,6 @@ SINT32 CASymCipherCTR::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 	*/
 SINT32 CASymCipherCTR::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 {
-#ifdef NO_ENCRYPTION
-	memmove(out, in, len);
-	return E_SUCCESS;
-#endif
 			UINT32 i=2000;
 			UINT8 tmpBuff[2000];
 

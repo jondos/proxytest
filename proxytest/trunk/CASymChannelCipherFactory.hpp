@@ -42,20 +42,23 @@ DAMAGE
 #include "CASymChannelCipher.hpp"
 #include "CASymCipherCTR.hpp"
 #include "CASymCipherOFB.hpp"
+#include "CASymCipherNull.hpp"
 class CASymChannelCipherFactory
 	{
 		public:
-		static CASymChannelCipher* createCipher(SYMCHANNELCIPHER_ALGORITHM alg)
-				{
-					switch (alg)
-						{
-							case OFB:
-								return new CASymCipherOFB();
-							case CTR:
-								return new CASymCipherCTR();
-						}	
-					return NULL;
-				}
+			static CASymChannelCipher* createCipher(SYMCHANNELCIPHER_ALGORITHM alg)
+					{
+						switch (alg)
+							{
+								case OFB:
+									return new CASymCipherOFB();
+								case CTR:
+									return new CASymCipherCTR();
+								case NULL_CIPHER:
+									return new CASymCipherNull();
+							}	
+						return NULL;
+					}
 	};
 
 
