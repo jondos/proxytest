@@ -132,11 +132,6 @@ SINT32 CASymCipherOFB::setKeys(const UINT8* key,UINT32 keysize)
 	*/
 SINT32 CASymCipherOFB::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 {
-#ifdef NO_ENCRYPTION
-	CAMsg::printMsg(LOG_ERR,"Warning: - DO NULL encryption!\n");
-	memmove(out, in, len);
-	return E_SUCCESS;
-#endif
 #ifdef INTEL_IPP_CRYPTO
 	UINT32 k=len&0xFFFFFFF0;
 	ippsRijndael128EncryptOFB(in,out,k,16, m_keyAES1,m_iv1);
@@ -226,10 +221,6 @@ SINT32 CASymCipherOFB::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 	*/
 SINT32 CASymCipherOFB::crypt2(const UINT8* in,UINT8* out,UINT32 len)
 {
-#ifdef NO_ENCRYPTION
-	memmove(out, in, len);
-	return E_SUCCESS;
-#endif
 
 	UINT32 i=0;
 	while(i+15<len)

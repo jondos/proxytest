@@ -56,8 +56,9 @@ DAMAGE
 
 const UINT8* const SYMCHANNELCIPHER_ALG_NAME_OFB = (const UINT8* const) "AES/OFB/ANON";
 const UINT8* const SYMCHANNELCIPHER_ALG_NAME_CTR = (const UINT8* const) "AES/CTR";
+const UINT8* const SYMCHANNELCIPHER_ALG_NAME_NULL = (const UINT8* const) "NULL";
 
-enum SYMCHANNELCIPHER_ALGORITHM { OFB,CTR };
+enum SYMCHANNELCIPHER_ALGORITHM { OFB,CTR,NULL_CIPHER };
 
 class CASymChannelCipher
 	#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
@@ -75,6 +76,8 @@ class CASymChannelCipher
 								return SYMCHANNELCIPHER_ALG_NAME_OFB;
 							case CTR:
 								return SYMCHANNELCIPHER_ALG_NAME_CTR;
+							case NULL_CIPHER:
+								return SYMCHANNELCIPHER_ALG_NAME_NULL;
 						}	
 					return NULL;
 				}

@@ -292,6 +292,7 @@
     <ClInclude Include="CASymCipherOFB.hpp" />
     <ClInclude Include="CASymChannelCipher.hpp" />
     <ClInclude Include="CASymChannelCipherFactory.hpp" />
+    <ClInclude Include="CASymCipherNull.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="documentation\XML\FirstMixToInfoService.xml" />

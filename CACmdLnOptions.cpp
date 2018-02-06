@@ -5097,13 +5097,16 @@ SINT32 CACmdLnOptions::setGeneralOptions(DOMElement* elemRoot)
 	SINT32 ret=invokeOptionSetters(generalOptionSetters, elemGeneral, GENERAL_OPTIONS_NR);
 	
 	///TODO: Mabe make the SymChannelCipher configurable at runtime....
+#ifdef NO_ENCRYPTION
+		setSymChannelCipherAlgorithm(NULL_CIPHER);
+#else
 	#ifdef SYM_CHANNEL_CIPHER_CTR
 		setSymChannelCipherAlgorithm(CTR);
 	#else
 		setSymChannelCipherAlgorithm(OFB);
 	#endif
 	///end TODO
-
+#endif
 	return ret;
 }
 
