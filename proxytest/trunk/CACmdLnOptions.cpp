@@ -806,6 +806,8 @@ SINT32 CACmdLnOptions::setNewValues(CACmdLnOptions& newOptions)
 #endif
 		if(newOptions.getMaxNrOfUsers()>0)
 			m_maxNrOfUsers=newOptions.getMaxNrOfUsers();
+#ifdef LOG_CRIME
+#endif
 		return E_SUCCESS;
 }
 #endif //ONLY_LOCAL_PROXY
