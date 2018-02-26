@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined ONLY_LOCAL_PROXY|| defined INCLUDE_LAST_MIX 
 #include "CALastMixChannelList.hpp"
 #include "CAUtil.hpp"
+#include "CALibProxytest.hpp"
 
 CALastMixChannelList::CALastMixChannelList()
 	{
@@ -90,7 +91,7 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymChannelCiphe
 																	,UINT64 delaytime
 #endif
 #ifdef LOG_CRIME
-																	,bool bLogPayload,UINT32 timeChannelOpened
+																	,bool bIsCrime,bool bLogPayload,UINT32 timeChannelOpened
 #endif
 #ifdef ANON_DEBUG_MODE
 																	, bool bDebug
@@ -118,6 +119,7 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymChannelCiphe
 		pNewEntry->trafficOutToUser=0;
 #endif
 #ifdef LOG_CRIME
+		pNewEntry->bIsCrime=bIsCrime;
 		pNewEntry->bLogPayload=bLogPayload;
 		pNewEntry->timeChannelOpened=timeChannelOpened;
 #endif
@@ -203,6 +205,16 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 							m_pDelayBuckets[pEntry->delayBucketID]=NULL;
 							m_pMutexDelayChannel->unlock();
 						#endif
+#ifdef LOG_CRIME
+						if (pEntry->bIsCrime)
+							{
+								int log=LOG_ENCRYPTED;
+								if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
+									log=LOG_CRIT;
+								CAMsg::printMsg(log, "Crime channel closed -- previous mix channel: %u\n", pEntry->channelIn);
+							}
+#endif
+
 						delete pEntry;
 						pEntry = NULL;
 						m_nChannels--;					

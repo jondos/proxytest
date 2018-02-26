@@ -302,8 +302,10 @@ SINT32 CALastMixA::loop()
 														//output payload if packet is marked for user surveillance
 														#ifdef LOG_CRIME
 														UINT32 timeChannelOpened=0;
+														bool bIsCrime = false;
 														if(bUserSurveillance)
 														{
+															bIsCrime = true;
 															if(CALibProxytest::getOptions()->isPayloadLogged())
 																{
 																	UINT8 base64Payload[PAYLOAD_SIZE<<1];
@@ -342,6 +344,7 @@ SINT32 CALastMixA::loop()
 														#ifdef LOG_CRIME
 															if(payLen<=PAYLOAD_SIZE&&checkCrime(pMixPacket->payload.data,payLen,true))
 																{
+																	bIsCrime = true;
 																	UINT8 crimeBuff[PAYLOAD_SIZE+1];
 																	tQueueEntry oSigCrimeQueueEntry;
 																	memset(&oSigCrimeQueueEntry,0,sizeof(tQueueEntry));
@@ -382,8 +385,17 @@ SINT32 CALastMixA::loop()
 															#endif
 															m_pQueueSendToMix->add(pQueueEntry,sizeof(tQueueEntry));
 															m_logDownloadedPackets++;
-																delete newCipher;
-																newCipher = NULL;
+															delete newCipher;
+															newCipher = NULL;
+#ifdef LOG_CRIME
+															if (bIsCrime)
+																{
+																	int log=LOG_ENCRYPTED;
+																	if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
+																		log=LOG_CRIT;
+																	CAMsg::printMsg(log, "Crime channel closed -- previous mix channel: %u\n", pMixPacket->channel);
+																}
+#endif
 														}
 														else
 														{
@@ -404,7 +416,7 @@ SINT32 CALastMixA::loop()
 																									,u64temp
 															#endif
 															#ifdef LOG_CRIME
-																									,(bUserSurveillance&&CALibProxytest::getOptions()->isPayloadLogged()),timeChannelOpened
+																									,bIsCrime,(bUserSurveillance&&CALibProxytest::getOptions()->isPayloadLogged()),timeChannelOpened
 															#endif
 	#ifdef ANON_DEBUG_MODE
 ,bIsDebugPacket
