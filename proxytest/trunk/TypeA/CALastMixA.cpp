@@ -884,6 +884,10 @@ SINT32 CALastMixA::loop()
 														pMixPacket->flags=CHANNEL_DATA;
 														pMixPacket->payload.type=0;
 														pMixPacket->payload.len=htons((UINT16)ret);
+														if (ret < DATA_SIZE)
+															{
+																getRandom(pMixPacket->data+ret, DATA_SIZE-ret);
+															}
 														//#endif
 														#ifdef LOG_CRIME
 															if(pChannelListEntry->bLogPayload)
@@ -1844,6 +1848,11 @@ THREAD_RETURN lm_loopPacketProcessing(void *params)
 														pMixPacket->flags=CHANNEL_DATA;
 														pMixPacket->payload.type=0;
 														pMixPacket->payload.len=htons((UINT16)ret);
+														if (ret < DATA_SIZE)
+															{
+																getRandom(pMixPacket->data+ret, DATA_SIZE-ret);
+															}
+
 														//#endif
 														#ifdef LOG_CRIME
 															if(pChannelListEntry->bLogPayload)
