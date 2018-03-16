@@ -93,13 +93,48 @@ class CASymCipherGCM
 					return m_bKeySet;
 				}
 
-			/** Sets the keys for crypt1() and crypt2() to the same key*/
-			SINT32 setKey(const UINT8* key);	
-			
-
 			void setGCMKeys(UINT8* keyRecv, UINT8* keySend);
 			SINT32 encryptMessage(const UINT8* in, UINT32 inlen, UINT8* out);
-			SINT32 decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bool integrityCheck);
+			SINT32 decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bool integrityCheck)
+			{
+#ifdef NO_ENCRYPTION
+				memmove(out, in, inlen);
+				return E_SUCCESS;
+#endif
+
+				SINT32 ret = E_UNKNOWN;
+				//m_pcsDec->lock();
+				m_pDecMsgIV[2] = htonl(m_nDecMsgCounter);
+				if (integrityCheck)
+				{
+					m_nDecMsgCounter++;
+#ifndef USE_OPENSSL_GCM
+					ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, in, inlen - 16, in + inlen - 16, out);
+#else
+					CRYPTO_gcm128_setiv(m_pGCMCtxDec, (UINT8*)m_pDecMsgIV, 12);
+					CRYPTO_gcm128_decrypt(m_pGCMCtxDec, in, out, inlen - 16);
+					ret = CRYPTO_gcm128_finish(m_pGCMCtxDec, in + inlen - 16, 16);
+#endif
+				}
+				else
+				{
+#ifndef USE_OPENSSL_GCM
+					ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, in, inlen, out);
+#else
+					CRYPTO_gcm128_setiv(m_pGCMCtxDec, (UINT8*)m_pDecMsgIV, 12);
+					ret = CRYPTO_gcm128_decrypt(m_pGCMCtxDec, in, out, inlen);
+#endif
+				}
+				//m_pcsDec->unlock();
+#ifndef USE_OPENSSL_GCM
+				if (ret == 0)
+#else
+				if (ret != 0)
+#endif
+					return E_UNKNOWN;
+				return E_SUCCESS;
+
+			}
 
 
 		private:

@@ -93,6 +93,7 @@ SINT32 CASymCipherGCM::encryptMessage(const UINT8* const in, UINT32 inlen, UINT8
 	return E_SUCCESS;
 }
 
+/*
 SINT32 CASymCipherGCM::decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bool integrityCheck)
 {
 #ifdef NO_ENCRYPTION
@@ -132,3 +133,4 @@ SINT32 CASymCipherGCM::decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out,
 		return E_UNKNOWN;
 	return E_SUCCESS;
 }
+*/
