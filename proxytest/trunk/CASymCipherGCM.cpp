@@ -30,7 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMsg.hpp"
 //AES GCM
 
-
+/*
 void CASymCipherGCM::setGCMKeys(UINT8* keyRecv, UINT8* keySend)
 {
 
@@ -71,7 +71,8 @@ void CASymCipherGCM::setGCMKeys(UINT8* keyRecv, UINT8* keySend)
 	m_nDecMsgCounter = 0;
 	memset(m_pDecMsgIV, 0, 12);
 }
-
+*/
+/*
 SINT32 CASymCipherGCM::encryptMessage(const UINT8* const in, UINT32 inlen, UINT8* out)
 {
 	#ifdef NO_ENCRYPTION
@@ -92,7 +93,7 @@ SINT32 CASymCipherGCM::encryptMessage(const UINT8* const in, UINT32 inlen, UINT8
 	//m_pcsEnc->unlock();
 	return E_SUCCESS;
 }
-
+*/
 /*
 SINT32 CASymCipherGCM::decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bool integrityCheck)
 {
