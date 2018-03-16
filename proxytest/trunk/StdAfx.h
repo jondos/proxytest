@@ -84,7 +84,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define INTEL_IPP_CRYPTO //define if you want to use the crypto routines of the Intel Performance Primitives
 //#define __UNIT_TEST__ //define if you want to compile the unit tests
 //#define EXPORT_ASYM_PRIVATE_KEY //define if you want to be able to export the private key of an assymetric key (only used for debugging purposes..)
-#define LOG_CRIME
+//#define LOG_CRIME
 //#define PAYMENT //to enable payment support, now use configure --enable-payment..
 //#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
 
@@ -94,7 +94,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define NEW_FLOW_CONTROL //enable for the new flow control mechanism --> now enabled by default (i.e. can not be disbaled anymore!)
 #define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses RSA-OAEP for key transport and two keys for upstream/downstream channel cryption (--> now enabled by default (i.e. can not be disbaled anymore!)
 //#define SYM_CHANNEL_CIPHER_CTR //enable CTR mode instead of OFB for symmetric cipher used for channel encryption (this is especially helpfull to increase performance on mobile device clients)
-#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
+//#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
 
 //define WITH_SGX //should the Intel SGX support be enabled
 
