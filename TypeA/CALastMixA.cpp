@@ -189,8 +189,8 @@ SINT32 CALastMixA::loop()
 														continue;
 													}
 											#endif
-											CASymChannelCipher* newCipher = CASymChannelCipherFactory::createCipher(CALibProxytest::getOptions()->getSymChannelCipherAlgorithm());
 											#ifdef WITH_INTEGRITY_CHECK
+												CASymCipherGCM* newCipher = CASymCipherGCM();
 												newCipher->setGCMKeys(rsaBuff, rsaBuff + KEY_SIZE);
 
 												//Decrypt only the first two bytes to get the payload length
@@ -208,6 +208,7 @@ SINT32 CALastMixA::loop()
 														retval = newCipher->decryptMessage(pMixPacket->data +RSA_SIZE-rsaOutLen+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,  payloadLen+ GCM_MAC_SIZE + PAYLOAD_HEADER_SIZE , pMixPacket->data, true);
 													}
 											#else
+												CASymChannelCipher* newCipher = CASymChannelCipherFactory::createCipher(CALibProxytest::getOptions()->getSymChannelCipherAlgorithm());
 												newCipher->setKeys(rsaBuff,LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 												newCipher->crypt1(
 														pMixPacket->data+RSA_SIZE,
@@ -632,8 +633,8 @@ SINT32 CALastMixA::loop()
 															pChannelListEntry->pCipher->encryptMessage(pMixPacket->data, 3, ciphertextBuff);
 															memcpy(pMixPacket->data, ciphertextBuff, 3 + GCM_MAC_SIZE);
 														#endif
-																					delete pChannelListEntry->pCipher;
-																					pChannelListEntry->pCipher = NULL;
+														delete pChannelListEntry->pCipher;
+														pChannelListEntry->pCipher = NULL;
 														#ifdef LOG_CHANNEL
 															pChannelListEntry->packetsDataOutToUser++;
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);

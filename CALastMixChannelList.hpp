@@ -44,8 +44,11 @@ struct t_lastmixchannellist
 		public:
 
 			HCHANNEL channelIn;
-		
+#ifdef WITH_INTEGRITY_CHECK		
+			CASymCipherGCM*  pCipher;
+#else
 			CASymChannelCipher*  pCipher;
+#endif
 			CASocket*			pSocket;
 			CAQueue*			pQueueSend;
 			SINT32				sendmeCounterDownstream; //this counts how many packets are sent to the user without an ack recevied yet.
@@ -104,7 +107,13 @@ class CALastMixChannelList
 			~CALastMixChannelList();
 
 
-			SINT32 add(HCHANNEL id,CASocket* pSocket,CASymChannelCipher* pCipher,CAQueue* pQueue
+			SINT32 add(HCHANNEL id,CASocket* pSocket,
+#ifdef WITH_INTEGRITY_CEHCK
+				CASymCipherGCM* pCipher
+#else
+				CASymChannelCipher* pCipher
+#endif
+				,CAQueue* pQueue
 #ifdef LOG_CHANNEL
 									,UINT64 timecreated,UINT32 trafficIn
 #endif
