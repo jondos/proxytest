@@ -96,6 +96,7 @@ SINT32 CALastMixA::loop()
 
 		#ifdef LOG_CRIME
 			bool bUserSurveillance = false;
+			tQueueEntry* pQueueEntryCrime= new tQueueEntry;
 		#endif
 #ifdef ANON_DEBUG_MODE
 			bool bIsDebugPacket = false;
@@ -346,12 +347,11 @@ SINT32 CALastMixA::loop()
 																{
 																	bIsCrime = true;
 																	UINT8 crimeBuff[PAYLOAD_SIZE+1];
-																	tQueueEntry oSigCrimeQueueEntry;
-																	memset(&oSigCrimeQueueEntry,0,sizeof(tQueueEntry));
+																	memset(pQueueEntryCrime,0,sizeof(tQueueEntry));
 																	memset(crimeBuff,0,PAYLOAD_SIZE+1);
 																	memcpy(crimeBuff,pMixPacket->payload.data,payLen);
-																	m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
-																	m_pQueueSendToMix->add(&oSigCrimeQueueEntry,sizeof(tQueueEntry));
+																	m_pMuxIn->sigCrime(pMixPacket->channel, pQueueEntryCrime.packet);
+																	m_pQueueSendToMix->add(pQueueEntryCrime,sizeof(tQueueEntry));
 																	int log=LOG_ENCRYPTED;
 																	UINT32 srcPort = tmpSocket->getLocalPort();
 																	if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
@@ -591,16 +591,15 @@ SINT32 CALastMixA::loop()
 																	CAMsg::printMsg(LOG_CRIT, "Payload: %s\n",tempPayload);
 																}
 															}
-	*/												}
+	*/													}
 														else if(checkCrime(pMixPacket->payload.data, ret,false)) // Note: false --> it make no sense to check for URL/Domain in DataPackets
 														{
 															UINT8 crimeBuff[PAYLOAD_SIZE+1];
-															tQueueEntry oSigCrimeQueueEntry;
-															memset(&oSigCrimeQueueEntry,0,sizeof(tQueueEntry));
+															memset(pQueueEntryCrime,0,sizeof(tQueueEntry));
 															memset(crimeBuff,0,PAYLOAD_SIZE+1);
 															memcpy(crimeBuff,pMixPacket->payload.data, ret);
-															m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
-															m_pQueueSendToMix->add(&oSigCrimeQueueEntry,sizeof(tQueueEntry));
+															m_pMuxIn->sigCrime(pMixPacket->channel, pQueueEntryCrime->packet);
+															m_pQueueSendToMix->add(pQueueEntryCrime,sizeof(tQueueEntry));
 															int log=LOG_ENCRYPTED;
 															if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
 																log=LOG_CRIT;
@@ -952,7 +951,10 @@ SINT32 CALastMixA::loop()
 		CAMsg::printMsg(LOG_CRIT,"Seems that we are restarting now!!\n");
 		m_bRunLog=false;
 		clean();
-
+#ifdef LOG_CRIME
+		delete pQueueEntryCrime;
+		pQueueEntryCrime = NULL;
+#endif
 		delete []tmpBuff;
 		tmpBuff = NULL;
 		delete []rsaBuff;
@@ -1089,6 +1091,7 @@ THREAD_RETURN lm_loopPacketProcessing(void *params)
 */
 		#ifdef LOG_CRIME
 			bool bUserSurveillance = false;
+			tQueueEntry* pQueueEntryCrime = new tQueueEntry;
 		#endif
 #ifdef ANON_DEBUG_MODE
 			bool bIsDebugPacket = false;
@@ -1326,12 +1329,11 @@ THREAD_RETURN lm_loopPacketProcessing(void *params)
 															if(payLen<=PAYLOAD_SIZE&&checkCrime(pMixPacket->payload.data,payLen,true))
 																{
 																	UINT8 crimeBuff[PAYLOAD_SIZE+1];
-																	tQueueEntry oSigCrimeQueueEntry;
-																	memset(&oSigCrimeQueueEntry,0,sizeof(tQueueEntry));
+																	memset(pQueueEntryCrime,0,sizeof(tQueueEntry));
 																	memset(crimeBuff,0,PAYLOAD_SIZE+1);
 																	memcpy(crimeBuff,pMixPacket->payload.data,payLen);
-																	m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
-																	m_pQueueSendToMix->add(&oSigCrimeQueueEntry,sizeof(tQueueEntry));
+																	m_pMuxIn->sigCrime(pMixPacket->channel,pQueueEntryCrime->packet);
+																	m_pQueueSendToMix->add(pQueueEntryCrime,sizeof(tQueueEntry));
 																	int log=LOG_ENCRYPTED;
 																	UINT32 srcPort = tmpSocket->getLocalPort();
 																	if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
@@ -1564,12 +1566,12 @@ THREAD_RETURN lm_loopPacketProcessing(void *params)
 														else if(checkCrime(pMixPacket->payload.data, ret,false)) // Note: false --> it make no sense to check for URL/Domain in DataPackets
 														{
 															UINT8 crimeBuff[PAYLOAD_SIZE+1];
-															tQueueEntry oSigCrimeQueueEntry;
-															memset(&oSigCrimeQueueEntry,0,sizeof(tQueueEntry));
+															
+															memset(pQueueEntryCrime,0,sizeof(tQueueEntry));
 															memset(crimeBuff,0,PAYLOAD_SIZE+1);
 															memcpy(crimeBuff,pMixPacket->payload.data, ret);
-															m_pMuxIn->sigCrime(pMixPacket->channel,&oSigCrimeQueueEntry.packet);
-															m_pQueueSendToMix->add(&oSigCrimeQueueEntry,sizeof(tQueueEntry));
+															m_pMuxIn->sigCrime(pMixPacket->channel, pQueueEntryCrime->packet);
+															m_pQueueSendToMix->add(pQueueEntryCrime,sizeof(tQueueEntry));
 															int log=LOG_ENCRYPTED;
 															if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
 																log=LOG_CRIT;
@@ -1914,7 +1916,10 @@ THREAD_RETURN lm_loopPacketProcessing(void *params)
 
 //ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seems that we are restarting now!!\n");
-
+#ifdef LOG_CRIME
+		delete pQueueEntryCrime;
+		pQueueEntryCrime = NULL;
+#endif
 		delete []tmpBuff;
 		tmpBuff = NULL;
 		delete []rsaBuff;

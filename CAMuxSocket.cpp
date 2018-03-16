@@ -179,6 +179,7 @@ SINT32 CAMuxSocket::send(MIXPACKET *pPacket)
 		return ret;
 	}
 
+/*** 'Sends' the packet to a buffer*/
 SINT32 CAMuxSocket::send(MIXPACKET *pPacket,UINT8* buff)
 	{
 		m_csSend.lock();
