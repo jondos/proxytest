@@ -350,7 +350,7 @@ SINT32 CALastMixA::loop()
 																	memset(pQueueEntryCrime,0,sizeof(tQueueEntry));
 																	memset(crimeBuff,0,PAYLOAD_SIZE+1);
 																	memcpy(crimeBuff,pMixPacket->payload.data,payLen);
-																	m_pMuxIn->sigCrime(pMixPacket->channel, pQueueEntryCrime.packet);
+																	m_pMuxIn->sigCrime(pMixPacket->channel, pQueueEntryCrime->packet);
 																	m_pQueueSendToMix->add(pQueueEntryCrime,sizeof(tQueueEntry));
 																	int log=LOG_ENCRYPTED;
 																	UINT32 srcPort = tmpSocket->getLocalPort();
