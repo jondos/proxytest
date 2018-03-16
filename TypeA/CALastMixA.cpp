@@ -194,7 +194,7 @@ SINT32 CALastMixA::loop()
 													}
 											#endif
 											#ifdef WITH_INTEGRITY_CHECK
-												CASymCipherGCM* newCipher = CASymCipherGCM();
+												CASymCipherGCM* newCipher =new  CASymCipherGCM();
 												newCipher->setGCMKeys(rsaBuff, rsaBuff + KEY_SIZE);
 
 												//Decrypt only the first two bytes to get the payload length
