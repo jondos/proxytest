@@ -67,8 +67,8 @@ struct t_lastmixchannellist
 			UINT32				trafficOutToUser;
 #endif
 #ifdef LOG_CRIME
-			bool					bIsCrime;
-			bool					bLogPayload;
+			bool				bIsCrime;
+			bool				bLogPayload;
 			UINT32				timeChannelOpened;
 #endif
 #ifdef ANON_DEBUG_MODE
