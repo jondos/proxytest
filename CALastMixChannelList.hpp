@@ -111,7 +111,7 @@ class CALastMixChannelList
 
 
 			SINT32 add(HCHANNEL id,CASocket* pSocket,
-#ifdef WITH_INTEGRITY_CEHCK
+#ifdef WITH_INTEGRITY_CHECK
 				CASymCipherGCM* pCipher
 #else
 				CASymChannelCipher* pCipher
