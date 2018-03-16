@@ -350,7 +350,7 @@ SINT32 CALastMixA::loop()
 																	memset(pQueueEntryCrime,0,sizeof(tQueueEntry));
 																	memset(crimeBuff,0,PAYLOAD_SIZE+1);
 																	memcpy(crimeBuff,pMixPacket->payload.data,payLen);
-																	m_pMuxIn->sigCrime(pMixPacket->channel, pQueueEntryCrime->packet);
+																	m_pMuxIn->sigCrime(pMixPacket->channel, &(pQueueEntryCrime->packet));
 																	m_pQueueSendToMix->add(pQueueEntryCrime,sizeof(tQueueEntry));
 																	int log=LOG_ENCRYPTED;
 																	UINT32 srcPort = tmpSocket->getLocalPort();
@@ -534,7 +534,7 @@ SINT32 CALastMixA::loop()
 															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 															MACRO_DO_LOG_CHANNEL_CLOSE_FROM_MIX
 														#endif
-																				m_pChannelList->removeChannel(pMixPacket->channel);
+														m_pChannelList->removeChannel(pMixPacket->channel);
 														#ifdef LOG_PACKET_TIMES
 															setZero64(pQueueEntry->timestamp_proccessing_start);
 														#endif
@@ -598,7 +598,7 @@ SINT32 CALastMixA::loop()
 															memset(pQueueEntryCrime,0,sizeof(tQueueEntry));
 															memset(crimeBuff,0,PAYLOAD_SIZE+1);
 															memcpy(crimeBuff,pMixPacket->payload.data, ret);
-															m_pMuxIn->sigCrime(pMixPacket->channel, pQueueEntryCrime->packet);
+															m_pMuxIn->sigCrime(pMixPacket->channel, &(pQueueEntryCrime->packet));
 															m_pQueueSendToMix->add(pQueueEntryCrime,sizeof(tQueueEntry));
 															int log=LOG_ENCRYPTED;
 															if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
