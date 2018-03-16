@@ -93,8 +93,67 @@ class CASymCipherGCM
 					return m_bKeySet;
 				}
 
-			void setGCMKeys(UINT8* keyRecv, UINT8* keySend);
-			SINT32 encryptMessage(const UINT8* in, UINT32 inlen, UINT8* out);
+			void setGCMKeys(UINT8* keyRecv, UINT8* keySend)
+			{
+
+#ifndef USE_OPENSSL_GCM
+				m_pGCMCtxEnc = new gcm_ctx_64k;
+				m_pGCMCtxDec = new gcm_ctx_64k;
+#else
+				//Note the have to provide *some* key (OpenSSL API enforced --> so the use the variables we have anyway..)
+				// The Key will be overriden by a call to setKeyGCM in any case!
+				AES_set_encrypt_key(m_iv1, 128, m_keyAES1);
+				m_pGCMCtxEnc = CRYPTO_gcm128_new(m_keyAES1, (block128_f)AES_encrypt);
+				m_pGCMCtxDec = CRYPTO_gcm128_new(m_keyAES1, (block128_f)AES_encrypt);
+#endif
+
+
+
+#ifndef USE_OPENSSL_GCM
+				if (m_pGCMCtxDec != NULL)
+					delete m_pGCMCtxDec;
+				if (m_pGCMCtxEnc != NULL)
+					delete m_pGCMCtxEnc;
+
+				m_pGCMCtxEnc = new gcm_ctx_64k;
+				m_pGCMCtxDec = new gcm_ctx_64k;
+				gcm_init_64k(m_pGCMCtxEnc, keySend, 128);
+				gcm_init_64k(m_pGCMCtxDec, keyRecv, 128);
+#else
+				AES_set_encrypt_key(keyRecv, 128, m_keyAES1);
+				AES_set_encrypt_key(keySend, 128, m_keyAES2);
+				CRYPTO_gcm128_release(m_pGCMCtxEnc);
+				CRYPTO_gcm128_release(m_pGCMCtxDec);
+				m_pGCMCtxEnc = CRYPTO_gcm128_new(m_keyAES2, (block128_f)AES_encrypt);
+				m_pGCMCtxDec = CRYPTO_gcm128_new(m_keyAES1, (block128_f)AES_encrypt);
+#endif
+				//reset IV
+				m_nEncMsgCounter = 0;
+				memset(m_pEncMsgIV, 0, 12);
+				m_nDecMsgCounter = 0;
+				memset(m_pDecMsgIV, 0, 12);
+
+			}
+			SINT32 encryptMessage(const UINT8* in, UINT32 inlen, UINT8* out)
+			{
+#ifdef NO_ENCRYPTION
+				memmove(out, in, inlen);
+				return E_SUCCESS;
+#endif
+
+				//m_pcsEnc->lock();
+				m_pEncMsgIV[2] = htonl(m_nEncMsgCounter);
+				m_nEncMsgCounter++;
+#ifndef USE_OPENSSL_GCM
+				gcm_encrypt_64k(m_pGCMCtxEnc, m_pEncMsgIV, in, inlen, out, (UINT32*)(out + inlen));
+#else
+				CRYPTO_gcm128_setiv(m_pGCMCtxEnc, (UINT8*)m_pEncMsgIV, 12);
+				CRYPTO_gcm128_encrypt(m_pGCMCtxEnc, in, out, inlen);
+				CRYPTO_gcm128_tag(m_pGCMCtxEnc, out + inlen, 16);
+#endif
+				//m_pcsEnc->unlock();
+				return E_SUCCESS;
+			}
 			SINT32 decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bool integrityCheck)
 			{
 #ifdef NO_ENCRYPTION
