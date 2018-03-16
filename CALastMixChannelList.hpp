@@ -32,6 +32,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAMuxSocket.hpp"
 #include "CAQueue.hpp"
 #include "CASymChannelCipher.hpp"
+#ifdef WITH_INTEGRITY_CHECK
+#include "CASymCipherGCM.hpp"
+#endif
 #include "CAMutex.hpp"
 #include "CAMsg.hpp"
 #include "CAThread.hpp"

@@ -38,6 +38,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 #include "../CAControlChannelDispatcher.hpp"
 #include "../CASymChannelCipherFactory.hpp"
+#ifdef WITH_INTEGRITY_CHECK
+#include "../CASymCipherGCM.hpp"
+#endif
+
 
 #ifdef LOG_CHANNEL
 //CAMsg::printMsg(LOG_DEBUG,"Channel time log format is as follows: Channel-ID,Channel Start [micros], Channel End [micros], Upload (bytes), Download (bytes), DataAndOpenAndClosePacketsFromUser, DataAndClosePacketsToUser\n");
