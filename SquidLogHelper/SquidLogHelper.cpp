@@ -6,6 +6,13 @@
 
 #if defined(_WIN32)
 #include <io.h>
+#define myclose _close
+#define myopen _open
+#define mywrite _write
+#else
+#define myclose close
+#define myopen open
+#define mywrite write
 #endif // 
 
 
@@ -23,7 +30,7 @@ int main()
 		if (in[0] == 'c')
 			break;
 	}
-	_close(file);
+	myclose(file);
     return 0;
 }
 
