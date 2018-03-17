@@ -24,7 +24,11 @@ int main()
 	_sopen_s(&file, "test.log", O_APPEND | O_CREAT | _O_WRONLY | _O_BINARY, _SH_DENYNO, _S_IREAD | _S_IWRITE);
 	for (;;)
 	{
+#ifdef _WIN32
 		scanf_s("%s",in,0xFFFF);
+#else
+		scanf("%s", in);
+#endif
 		printf("%s\n", in);
 		mywrite(file, in, strlen(in));
 		mywrite(file, "\n", 1);
