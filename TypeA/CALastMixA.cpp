@@ -888,9 +888,9 @@ SINT32 CALastMixA::loop()
 														pMixPacket->flags=CHANNEL_DATA;
 														pMixPacket->payload.type=0;
 														pMixPacket->payload.len=htons((UINT16)ret);
-														if (ret < DATA_SIZE)
+														if (ret < PAYLOAD_SIZE)
 															{
-																getRandom(pMixPacket->data+ret, DATA_SIZE-ret);
+																getRandom(pMixPacket->payload.data+ret, PAYLOAD_SIZE-ret);
 															}
 														//#endif
 														#ifdef LOG_CRIME
