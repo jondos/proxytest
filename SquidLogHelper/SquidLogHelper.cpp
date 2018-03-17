@@ -10,6 +10,7 @@
 #define myopen _open
 #define mywrite _write
 #else
+#include <unistd.h>
 #define myclose close
 #define myopen open
 #define mywrite write
@@ -25,8 +26,8 @@ int main()
 	{
 		scanf_s("%s",in,0xFFFF);
 		printf("%s\n", in);
-		_write(file, in, strlen(in));
-		_write(file, "\n", 1);
+		mywrite(file, in, strlen(in));
+		mywrite(file, "\n", 1);
 		if (in[0] == 'c')
 			break;
 	}
