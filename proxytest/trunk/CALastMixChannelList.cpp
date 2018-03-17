@@ -218,7 +218,7 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 								int log=LOG_ENCRYPTED;
 								if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
 									log=LOG_CRIT;
-								UINT8 buff[255];
+								char buff[255];
 								strftime(buff, 255, "%Y/%m/%d-%H:%M:%S", localtime(&pEntry->timeChannelOpened));
 								CAMsg::printMsg(log, "Crime channel closed (opened at: %s [unix timestamp: %u]) -- previous mix channel: %u\n", buff,pEntry->timeChannelOpened,pEntry->channelIn);
 							}
