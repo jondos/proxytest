@@ -7,12 +7,10 @@
 #if defined(_WIN32)
 #include <io.h>
 #define myclose _close
-#define myopen _open
 #define mywrite _write
 #else
 #include <unistd.h>
 #define myclose close
-#define myopen open
 #define mywrite write
 #endif // 
 
@@ -21,7 +19,11 @@ int main()
 {
 	char* in = new char[0xFFFF];
 	int file;
+#ifdef _WIN32
 	_sopen_s(&file, "test.log", O_APPEND | O_CREAT | _O_WRONLY | _O_BINARY, _SH_DENYNO, _S_IREAD | _S_IWRITE);
+#else
+	file=open("test.log", O_APPEND | O_CREAT | O_WRONLY | O_BINARY);
+#endif
 	for (;;)
 	{
 #ifdef _WIN32
