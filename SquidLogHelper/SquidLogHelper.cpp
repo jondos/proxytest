@@ -2,8 +2,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <io.h>
 #include <string.h>
+
+#if defined(_WIN32)
+#include <io.h>
+#endif // 
+
 
 int main()
 {
