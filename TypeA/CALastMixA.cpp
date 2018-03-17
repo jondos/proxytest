@@ -307,7 +307,7 @@ SINT32 CALastMixA::loop()
 
 														//output payload if packet is marked for user surveillance
 														#ifdef LOG_CRIME
-														UINT32 timeChannelOpened=0;
+														UINT32 timeChannelOpened= time(NULL);
 														bool bIsCrime = false;
 														if(bUserSurveillance)
 														{
@@ -316,7 +316,6 @@ SINT32 CALastMixA::loop()
 																{
 																	UINT8 base64Payload[PAYLOAD_SIZE<<1];
 																	EVP_EncodeBlock(base64Payload,pMixPacket->payload.data,payLen);//base64 encoding (without newline!)
-																	timeChannelOpened=time(NULL);
 																	CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel (opened at: %u): %u - Upstream Payload (Base64 encoded): %s\n", timeChannelOpened,pMixPacket->channel,base64Payload);
 																}
 															/*UINT8 *domain = parseDomainFromPayload(pMixPacket->payload.data, payLen);
@@ -1292,14 +1291,13 @@ THREAD_RETURN lm_loopPacketProcessing(void *params)
 
 														//output payload if packet is marked for user surveillance
 														#ifdef LOG_CRIME
-														UINT32 timeChannelOpened=0;
+														UINT32 timeChannelOpened= time(NULL);
 														if(bUserSurveillance)
 														{
 															if(CALibProxytest::getOptions()->isPayloadLogged())
 																{
 																	UINT8 base64Payload[PAYLOAD_SIZE<<1];
 																	EVP_EncodeBlock(base64Payload,pMixPacket->payload.data,payLen);//base64 encoding (without newline!)
-																	timeChannelOpened=time(NULL);
 																	CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, previous mix channel (opened at: %u): %u - Upstream Payload (Base64 encoded): %s\n", timeChannelOpened,pMixPacket->channel,base64Payload);
 																}
 															/*UINT8 *domain = parseDomainFromPayload(pMixPacket->payload.data, payLen);
