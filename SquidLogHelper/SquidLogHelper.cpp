@@ -22,7 +22,7 @@ int main()
 #ifdef _WIN32
 	_sopen_s(&file, "test.log", O_APPEND | O_CREAT | _O_WRONLY | _O_BINARY, _SH_DENYNO, _S_IREAD | _S_IWRITE);
 #else
-	file=open("test.log", O_APPEND | O_CREAT | O_WRONLY | O_BINARY);
+	file=open("test.log", O_APPEND | O_CREAT | O_WRONLY );
 #endif
 	for (;;)
 	{
