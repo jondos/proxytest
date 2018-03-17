@@ -98,7 +98,7 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,
 																	,UINT64 delaytime
 #endif
 #ifdef LOG_CRIME
-																	,bool bIsCrime,bool bLogPayload,UINT32 timeChannelOpened
+																	,bool bIsCrime,bool bLogPayload, time_t timeChannelOpened
 #endif
 #ifdef ANON_DEBUG_MODE
 																	, bool bDebug
