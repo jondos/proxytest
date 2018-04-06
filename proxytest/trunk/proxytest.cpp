@@ -39,6 +39,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CALibProxytest.hpp"
 #include "InnerMiddleMix.hpp"
 
+#include "SquidLogHelper/SquidLogHelper.hpp"
+
 #ifdef _DEBUG //For FreeBSD memory checking functionality
 	const char* _malloc_options="AX";
 #endif
@@ -725,6 +727,9 @@ exit(0);
 */
 //End Test CAAsymCrypto
 
+
+squidloghelp_main();
+return 0;
 		if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"An error occurred before we could finish parsing the configuration file. Exiting...\n");

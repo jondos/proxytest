@@ -1,7 +1,7 @@
 #include "../StdAfx.h"
 #include "../CASocket.hpp"
 
-int main()
+int squidloghelp_main()
 {
 	CASocket* psocketListener = new CASocket();
 	psocketListener->listen(6789);

@@ -337,6 +337,7 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 		    CATLSClientSocket.hpp\
 		    CAClientSocket.hpp\
 		    CASymCipher.hpp \
+		    CASymCipherGCM.hpp \
 		    CASymChannelCipher.hpp \
 		    CASymChannelCipherFactory.hpp \
 		    CASymCipher.hpp \

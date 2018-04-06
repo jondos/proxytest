@@ -58,13 +58,13 @@
     <ProjectName>proxytest</ProjectName>
     <ProjectGUID>{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}</ProjectGUID>
     <RootNamespace>proxytest</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>NotSet</CharacterSet>
     <PlatformToolset>v141</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'" Label="Configuration">
@@ -284,9 +284,9 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>proxytest-lib.lib;ws2_32.lib;pthreadVC2.lib;xerces-c_3D.lib;minixml-2.10.lib;libcrypto.lib;libssl.lib;AdvAPI32.lib;crypt32.lib;gdi32.lib;user32.lib</AdditionalDependencies>
+      <AdditionalDependencies>SquidLogHelper.lib;proxytest-lib.lib;ws2_32.lib;pthreadVC2.lib;xerces-c_3D.lib;libcrypto.lib;libssl.lib;AdvAPI32.lib;crypt32.lib;gdi32.lib;user32.lib</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>C:\data\vld\bin\Win32\Debug;$(SolutionDir)\build\proxytest-lib\Debug;$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_MXML);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\data\vld\bin\Win32\Debug;$(SolutionDir)\Debug\;$(SolutionDir)\build\proxytest-lib\Debug;$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_MXML);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)proxytest.pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
@@ -927,6 +927,9 @@
   <ItemGroup>
     <ProjectReference Include="proxytest-lib_VC2017.vcxproj">
       <Project>{150377b0-ca8f-4031-a0b8-45a3001f4f81}</Project>
+    </ProjectReference>
+    <ProjectReference Include="SquidLogHelper\SquidLogHelper.vcxproj">
+      <Project>{7edf6c1a-905b-40f6-a651-82ad2c50a725}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
