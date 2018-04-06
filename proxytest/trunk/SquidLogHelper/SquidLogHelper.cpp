@@ -1,43 +1,25 @@
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <string.h>
-
-#if defined(_WIN32)
-#include <io.h>
-#define myclose _close
-#define mywrite _write
-#else
-#include <unistd.h>
-#define myclose close
-#define mywrite write
-#endif // 
-
+#include "../StdAfx.h"
+#include "../CASocket.hpp"
 
 int main()
 {
-	char* in = new char[0xFFFF];
+	CASocket* psocketListener = new CASocket();
+	psocketListener->listen(6789);
+	CASocket* psocketClient = new CASocket();
+	psocketListener->accept(*psocketClient);
+
+	UINT8* in = new UINT8[0xFFFF];
 	int file;
-#ifdef _WIN32
-	_sopen_s(&file, "test.log", O_APPEND | O_CREAT | _O_WRONLY | _O_BINARY, _SH_DENYNO, _S_IREAD | _S_IWRITE);
-#else
-	file=open("test.log", O_APPEND | O_CREAT | O_WRONLY, S_IRUSR|S_IWUSR);
-#endif
+	file=open("test.log", O_APPEND | O_CREAT | O_WRONLY);
 	for (;;)
 	{
-#ifdef _WIN32
-		scanf_s("%s",in,0xFFFF);
-#else
-		scanf("%s", in);
-#endif
-		printf("%s\n", in);
-		mywrite(file, in, strlen(in));
-		mywrite(file, "\n", 1);
-		if (in[0] == 'c')
+		SINT32 len=psocketClient->receive(in, 0xFFFF);
+		if (len > 0)
+			myfilewrite(file, in, len);
+		else
 			break;
 	}
-	myclose(file);
+	close(file);
     return 0;
 }
 
