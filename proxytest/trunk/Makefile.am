@@ -369,8 +369,8 @@ mix_LDADD += $(top_builddir)/libproxytest.a \
 	    $(top_builddir)/trio/libtrio.a \
 	    $(top_builddir)/tre/libtre.a \
 	    $(top_builddir)/gcm/libgcm.a \
-	    $(top_builddir)/TypeA/libmixa.a
-	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a \
+	    $(top_builddir)/TypeA/libmixa.a \
+	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
