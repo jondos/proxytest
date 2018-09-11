@@ -4,15 +4,188 @@
 #
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
-mix_LDADD = 
 
 export SGXTOOLCHAIN=@SCONE_TOOLCHAIN@
+
+proxytest_sources = CAAbstractControlChannel.cpp\
+		    CAAbstractXMLEncodable.cpp\
+		    CAAbstractXMLSignable.cpp\
+		    CAAccountingBIInterface.cpp\
+		    CAAccountingControlChannel.cpp\
+		    CAAccountingDBInterface.cpp\
+		    CAAccountingInstance.cpp\
+		    CAAccountingSettleThread.cpp\
+		    CAASymCipher.cpp \
+		    CABase64.cpp \
+		    CACacheLoadBalancing.cpp\
+		    CACertificate.cpp\
+		    CACertStore.cpp\
+		    CAClientSocket.cpp\
+		    CACmdLnOptions.cpp \
+		    CAConditionVariable.cpp\
+		    CAControlChannelDispatcher.cpp\
+		    CAControlChannelTest.cpp\
+		    CADatabase.cpp\
+		    CADatagramSocket.cpp \
+		    CADataRetentionLog.cpp\
+		    CADataRetentionLogFile.cpp\
+		    CADynaNetworking.cpp \
+		    CADynamicCascadeConfigurator.cpp \
+		    CAFileSystemDirectory.cpp \
+		    CAFirstMix.cpp \
+		    CAFirstMixChannelList.cpp \
+		    CAHttpClient.cpp \
+		    CAInfoService.cpp \
+		    CAInfoServiceAware.cpp \
+		    CAIPList.cpp \
+		    CAIPAddrWithNetmask.cpp \
+		    CALastMix.cpp \
+		    CALastMixChannelList.cpp\
+		    CAListenerInterface.cpp\
+		    CALibProxytest.cpp\
+		    CALocalProxy.cpp \
+		    CALogPacketStats.cpp\
+		    CAMiddleMix.cpp \
+		    CAMiddleMixChannelList.cpp \
+		    CAMix.cpp \
+		    CAMixWithReplayDB.cpp\
+		    CAMsg.cpp \
+		    CAMultiSignature.cpp\
+		    CAMutex.cpp\
+		    CAMuxSocket.cpp \
+		    CAPriceInfo.cpp \
+		    CAPool.cpp\
+		    CAQueue.cpp \
+		    CAReplayControlChannel.cpp\
+		    CAReplayCtrlChannelMsgProc.cpp\
+		    CASemaphore.cpp\
+		    CASignature.cpp \
+		    CASingleSocketGroup.cpp\
+		    CASocket.cpp \
+		    CASocketAddrINet.cpp \
+		    CASocketAddrUnix.cpp \
+		    CASocketGroup.cpp \
+		    CASocketGroupEpoll.cpp\
+		    CASocketList.cpp \
+		    CAStatusManager.cpp \
+		    CATLSClientSocket.cpp\
+		    CASymCipher.cpp \
+			CASymCipherCTR.cpp \
+			CASymCipherGCM.cpp \
+			CASymCipherOFB.cpp \
+		    CASyncControlChannel.cpp\
+		    CATempIPBlockList.cpp\
+		    CAThread.cpp \
+		    CAThreadPool.cpp\
+		    CAThreadList.cpp \
+		    CAUtil.cpp \
+		    CAXMLBI.cpp \
+		    CAXMLCostConfirmation.cpp\
+		    CAXMLErrorMessage.cpp\
+		    CAXMLPriceCert.cpp\
+		    Hashtable.cpp\
+		    TermsAndConditions.cpp \
+		    packetintro.cpp \
+		    StdAfx.cpp \
+		    InnerMiddleMix.cpp\
+		    InnerMiddleMix.hpp\
+		    CAAbstractControlChannel.hpp\
+		    CAAbstractXMLEncodable.hpp\
+		    CAAbstractXMLSignable.hpp\
+		    CAAccountingBIInterface.hpp\
+		    CAAccountingControlChannel.hpp\
+		    CAAccountingDBInterface.hpp\
+		    CAAccountingInstance.hpp\
+		    CAAccountingSettleThread.hpp\
+		    CAASymCipher.hpp \
+		    CABase64.hpp \
+		    CACacheLoadBalancing.hpp\
+		    CACertificate.hpp\
+		    CACertStore.hpp\
+		    CAConditionVariable.hpp\
+		    CAControlChannelDispatcher.hpp\
+		    CAControlChannelTest.hpp\
+		    CACmdLnOptions.hpp \
+		    CADatabase.hpp\
+		    CADatagramSocket.hpp\
+		    CADataRetentionLog.hpp\
+		    CADataRetentionLogFile.hpp\
+		    CADynaNetworking.hpp \
+		    CADynamicCascadeConfigurator.hpp \
+		    CAFileSystemDirectory.hpp \
+		    CAFirstMix.hpp \
+		    CAFirstMixChannelList.hpp \
+		    CAHttpClient.hpp \
+		    CAInfoService.hpp \
+		    CAInfoServiceAware.hpp \
+		    CAIPList.hpp \
+		    CAIPAddrWithNetmask.hpp \
+		    CALastMix.hpp \
+		    CALastMixChannelList.hpp\
+		    CAListenerInterface.hpp\
+		    CALibProxytest.hpp\
+		    CALocalProxy.hpp \
+		    CALockAble.hpp\
+		    CALogPacketStats.hpp\
+		    CAMiddleMix.hpp \
+		    CAMiddleMixChannelList.hpp \
+		    CAMix.hpp \
+		    CAMixWithReplayDB.hpp\
+		    CAMsg.hpp \
+		    CAMultiSignature.hpp\
+		    CAMutex.hpp\
+		    CAMuxSocket.hpp \
+		    CAPriceInfo.hpp \
+		    CAPool.hpp\
+		    CAQueue.hpp \
+		    CAReplayControlChannel.hpp\
+		    CAReplayCtrlChannelMsgProc.hpp\
+		    CASemaphore.hpp\
+		    CASignature.hpp \
+		    CASingleSocketGroup.hpp\
+		    CASocket.hpp \
+		    CASocketAddr.hpp \
+		    CASocketAddrINet.hpp \
+		    CASocketAddrUnix.hpp \
+		    CASocketGroup.hpp \
+		    CASocketGroupEpoll.hpp\
+		    CASocketList.hpp \
+		    CAStatusManager.hpp \
+		    CATLSClientSocket.hpp\
+		    CAClientSocket.hpp\
+		    CASymCipher.hpp \
+		    CASymCipherGCM.hpp \
+		    CASymChannelCipher.hpp \
+		    CASymChannelCipherFactory.hpp \
+		    CASymCipher.hpp \
+			CASymCipherCTR.hpp \
+			CASymCipherGCM.hpp \
+			CASymCipherOFB.hpp \
+		    CASyncControlChannel.hpp \
+		    CATempIPBlockList.hpp\
+		    CAThread.hpp \
+		    CAThreadPool.hpp\
+		    CAThreadList.hpp \
+		    CAUtil.hpp \
+		    CAXMLBI.hpp \
+		    CAXMLCostConfirmation.hpp\
+		    CAXMLErrorMessage.hpp\
+		    CAXMLPriceCert.hpp\
+		    Hashtable.hpp\
+		    TermsAndConditions.hpp \
+		    packetintro.h\
+		    StdAfx.h\
+		    basetypedefs.h
+
+
+
 
 
 if ONLY_LIB
 lib_LTLIBRARIES = libmix.la			
 libmix_la_CPPFLAGS = -DSOMEFLAG
-libmix_la_SOURCES = CAAbstractControlChannel.cpp\
+libmix_la_SOURCES = $proxtest_sources
+CAAbstractControlChannel.cpp\
 		    CAAbstractXMLEncodable.cpp\
 		    CAAbstractXMLSignable.cpp\
 		    CAAccountingBIInterface.cpp\
@@ -190,181 +363,13 @@ else
 noinst_LIBRARIES = libproxytest.a
 sbin_PROGRAMS = mix
 libproxytest_a_CPPFLAGS = -DSOMEFLAG
-libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
-		    CAAbstractXMLEncodable.cpp\
-		    CAAbstractXMLSignable.cpp\
-		    CAAccountingBIInterface.cpp\
-		    CAAccountingControlChannel.cpp\
-		    CAAccountingDBInterface.cpp\
-		    CAAccountingInstance.cpp\
-		    CAAccountingSettleThread.cpp\
-		    CAASymCipher.cpp \
-		    CABase64.cpp \
-		    CACacheLoadBalancing.cpp\
-		    CACertificate.cpp\
-		    CACertStore.cpp\
-		    CAClientSocket.cpp\
-		    CACmdLnOptions.cpp \
-		    CAConditionVariable.cpp\
-		    CAControlChannelDispatcher.cpp\
-		    CAControlChannelTest.cpp\
-		    CADatabase.cpp\
-		    CADatagramSocket.cpp \
-		    CADataRetentionLog.cpp\
-		    CADataRetentionLogFile.cpp\
-		    CADynaNetworking.cpp \
-		    CADynamicCascadeConfigurator.cpp \
-		    CAFileSystemDirectory.cpp \
-		    CAFirstMix.cpp \
-		    CAFirstMixChannelList.cpp \
-		    CAHttpClient.cpp \
-		    CAInfoService.cpp \
-		    CAInfoServiceAware.cpp \
-		    CAIPList.cpp \
-		    CAIPAddrWithNetmask.cpp \
-		    CALastMix.cpp \
-		    CALastMixChannelList.cpp\
-		    CAListenerInterface.cpp\
-		    CALibProxytest.cpp\
-		    CALocalProxy.cpp \
-		    CALogPacketStats.cpp\
-		    CAMiddleMix.cpp \
-		    CAMiddleMixChannelList.cpp \
-		    CAMix.cpp \
-		    CAMixWithReplayDB.cpp\
-		    CAMsg.cpp \
-		    CAMultiSignature.cpp\
-		    CAMutex.cpp\
-		    CAMuxSocket.cpp \
-		    CAPriceInfo.cpp \
-		    CAPool.cpp\
-		    CAQueue.cpp \
-		    CAReplayControlChannel.cpp\
-		    CAReplayCtrlChannelMsgProc.cpp\
-		    CASemaphore.cpp\
-		    CASignature.cpp \
-		    CASingleSocketGroup.cpp\
-		    CASocket.cpp \
-		    CASocketAddrINet.cpp \
-		    CASocketAddrUnix.cpp \
-		    CASocketGroup.cpp \
-		    CASocketGroupEpoll.cpp\
-		    CASocketList.cpp \
-		    CAStatusManager.cpp \
-		    CATLSClientSocket.cpp\
-		    CASymCipher.cpp \
-			CASymCipherCTR.cpp \
-			CASymCipherGCM.cpp \
-			CASymCipherOFB.cpp \
-		    CASyncControlChannel.cpp\
-		    CATempIPBlockList.cpp\
-		    CAThread.cpp \
-		    CAThreadPool.cpp\
-		    CAThreadList.cpp \
-		    CAUtil.cpp \
-		    CAXMLBI.cpp \
-		    CAXMLCostConfirmation.cpp\
-		    CAXMLErrorMessage.cpp\
-		    CAXMLPriceCert.cpp\
-		    Hashtable.cpp\
-		    TermsAndConditions.cpp \
-		    packetintro.cpp \
-		    StdAfx.cpp \
-		    InnerMiddleMix.cpp\
-		    InnerMiddleMix.hpp\
-		    CAAbstractControlChannel.hpp\
-		    CAAbstractXMLEncodable.hpp\
-		    CAAbstractXMLSignable.hpp\
-		    CAAccountingBIInterface.hpp\
-		    CAAccountingControlChannel.hpp\
-		    CAAccountingDBInterface.hpp\
-		    CAAccountingInstance.hpp\
-		    CAAccountingSettleThread.hpp\
-		    CAASymCipher.hpp \
-		    CABase64.hpp \
-		    CACacheLoadBalancing.hpp\
-		    CACertificate.hpp\
-		    CACertStore.hpp\
-		    CAConditionVariable.hpp\
-		    CAControlChannelDispatcher.hpp\
-		    CAControlChannelTest.hpp\
-		    CACmdLnOptions.hpp \
-		    CADatabase.hpp\
-		    CADatagramSocket.hpp\
-		    CADataRetentionLog.hpp\
-		    CADataRetentionLogFile.hpp\
-		    CADynaNetworking.hpp \
-		    CADynamicCascadeConfigurator.hpp \
-		    CAFileSystemDirectory.hpp \
-		    CAFirstMix.hpp \
-		    CAFirstMixChannelList.hpp \
-		    CAHttpClient.hpp \
-		    CAInfoService.hpp \
-		    CAInfoServiceAware.hpp \
-		    CAIPList.hpp \
-		    CAIPAddrWithNetmask.hpp \
-		    CALastMix.hpp \
-		    CALastMixChannelList.hpp\
-		    CAListenerInterface.hpp\
-		    CALibProxytest.hpp\
-		    CALocalProxy.hpp \
-		    CALockAble.hpp\
-		    CALogPacketStats.hpp\
-		    CAMiddleMix.hpp \
-		    CAMiddleMixChannelList.hpp \
-		    CAMix.hpp \
-		    CAMixWithReplayDB.hpp\
-		    CAMsg.hpp \
-		    CAMultiSignature.hpp\
-		    CAMutex.hpp\
-		    CAMuxSocket.hpp \
-		    CAPriceInfo.hpp \
-		    CAPool.hpp\
-		    CAQueue.hpp \
-		    CAReplayControlChannel.hpp\
-		    CAReplayCtrlChannelMsgProc.hpp\
-		    CASemaphore.hpp\
-		    CASignature.hpp \
-		    CASingleSocketGroup.hpp\
-		    CASocket.hpp \
-		    CASocketAddr.hpp \
-		    CASocketAddrINet.hpp \
-		    CASocketAddrUnix.hpp \
-		    CASocketGroup.hpp \
-		    CASocketGroupEpoll.hpp\
-		    CASocketList.hpp \
-		    CAStatusManager.hpp \
-		    CATLSClientSocket.hpp\
-		    CAClientSocket.hpp\
-		    CASymCipher.hpp \
-		    CASymCipherGCM.hpp \
-		    CASymChannelCipher.hpp \
-		    CASymChannelCipherFactory.hpp \
-		    CASymCipher.hpp \
-			CASymCipherCTR.hpp \
-			CASymCipherGCM.hpp \
-			CASymCipherOFB.hpp \
-		    CASyncControlChannel.hpp \
-		    CATempIPBlockList.hpp\
-		    CAThread.hpp \
-		    CAThreadPool.hpp\
-		    CAThreadList.hpp \
-		    CAUtil.hpp \
-		    CAXMLBI.hpp \
-		    CAXMLCostConfirmation.hpp\
-		    CAXMLErrorMessage.hpp\
-		    CAXMLPriceCert.hpp\
-		    Hashtable.hpp\
-		    TermsAndConditions.hpp \
-		    packetintro.h\
-		    StdAfx.h\
-		    basetypedefs.h
+libproxytest_a_SOURCES = $(proxytest_sources)
 
 
 mix_SOURCES = proxytest.cpp
 mix_CFLAGS = $(AM_CFLAGS)
 mix_CPPFLAGS = $(AM_CPPFLAGS)
-mix_LDADD += $(top_builddir)/libproxytest.a \
+mix_LDADD = $(top_builddir)/libproxytest.a \
 	    $(top_builddir)/xml/libxml.a \
 	    $(top_builddir)/popt/libpopt.a \
 	    $(top_builddir)/trio/libtrio.a \
