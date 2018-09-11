@@ -961,6 +961,15 @@ AC_ARG_WITH(SCONE,
 	]
 )
 
+build_as_shadow_plugin="false"
+AC_ARG_ENABLE(build-as-shadow-plugin,
+	AS_HELP_STRING([--enable-build-as-shadow-plugin],[Build as Shadow simulator plugin]),
+	[
+		if test "x$enableval" != "xno" ; then
+			build_as_shadow_plugin="true"
+		fi
+	]
+)
 
 TEST_CFLAGS=""
 
@@ -1013,6 +1022,7 @@ AM_CONDITIONAL([DOTESTS], [test x$DOTHETESTS = xyes])
 AM_CONDITIONAL([DOWIRESHARK], [test x$DOWITHWIRESHARK = xyes])
 AM_CONDITIONAL([ONLY_LIB], [test x$onlylib = xtrue])
 AM_CONDITIONAL([ALL_FROM_SOURCE], [test x$allfromsource = xtrue])
+AM_CONDITIONAL([BUILD_AS_SHADOW_PLUGIN, [test x$build_as_shadow_plugin = xtrue])
 
 AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile SquidLogHelper/Makefile])
 AC_OUTPUT
