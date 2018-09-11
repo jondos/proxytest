@@ -359,7 +359,25 @@ libmix_la_LIBADD = $(top_builddir)/xml/libxml.a \
 	    $(top_builddir)/trio/libtrio.a \
 	    $(top_builddir)/tre/libtre.a \
 	    $(top_builddir)/gcm/libgcm.a
-else
+
+
+else #only lib
+
+if BUILD_AS_SHADOW_PLUGIN
+
+lib_LTLIBRARIES = libmixshadow.la	
+libmixshadow_la_SOURCES = $(proxytest_sources) proxytest.cpp
+
+libmixshadow_la_LIBADD = 
+	    $(top_builddir)/xml/libxml.a \
+	    $(top_builddir)/popt/libpopt.a \
+	    $(top_builddir)/trio/libtrio.a \
+	    $(top_builddir)/tre/libtre.a \
+	    $(top_builddir)/gcm/libgcm.a \
+	    $(top_builddir)/TypeA/libmixa.a \
+	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
+
+else BUILD_AS_SHADOW_PLUGIN
 
 noinst_LIBRARIES = libproxytest.a
 sbin_PROGRAMS = mix
@@ -383,20 +401,6 @@ mix_LDADD += $(top_builddir)/libproxytest.a \
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
-
-if BUILD_AS_SHADOW_PLUGIN
-
-lib_LTLIBRARIES = libmixshadow.la	
-libmixshadow_la_SOURCES = $(proxytest_sources) proxytest.cpp
-
-libmixshadow_la_LIBADD = 
-	    $(top_builddir)/xml/libxml.a \
-	    $(top_builddir)/popt/libpopt.a \
-	    $(top_builddir)/trio/libtrio.a \
-	    $(top_builddir)/tre/libtre.a \
-	    $(top_builddir)/gcm/libgcm.a \
-	    $(top_builddir)/TypeA/libmixa.a \
-	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
 
 
 endif #BUILD_AS_SHADOW_PLUGIN
