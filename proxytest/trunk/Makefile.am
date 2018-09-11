@@ -380,7 +380,7 @@ if BUILD_AS_SHADOW_PLUGIN
 lib_LTLIBRARIES = libmixshadow.la	
 libmixshadow_la_SOURCES = proxytest.cpp
 
-libmixshadow_la_LDADD = $(top_builddir)/libproxytest.a \
+libmixshadow_la_LIBADD = $(top_builddir)/libproxytest.a \
 	    $(top_builddir)/xml/libxml.a \
 	    $(top_builddir)/popt/libpopt.a \
 	    $(top_builddir)/trio/libtrio.a \
