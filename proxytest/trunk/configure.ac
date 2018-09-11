@@ -996,7 +996,7 @@ LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB $GOOGLETEST_LIB"
 
 
 
-if test "x$onlylib" == "xtrue" || test "x$onlylib" == "xbuild_as_shadow_plugin" ; then
+if test "x$onlylib" == "xtrue" || test "x$build_as_shadow_plugin" == "xtrue" ; then
 	CXXFLAGS="$CXXFLAGS -fPIC -DPIC"
 	CFLAGS="$CFLAGS -fPIC -DPIC"
 fi
