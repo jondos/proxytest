@@ -90,15 +90,16 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@ONLY_LIB_FALSE@sbin_PROGRAMS = mix$(EXEEXT)
-@ONLY_LIB_FALSE@am__append_1 = $(top_builddir)/libproxytest.a \
-@ONLY_LIB_FALSE@	    $(top_builddir)/xml/libxml.a \
-@ONLY_LIB_FALSE@	    $(top_builddir)/popt/libpopt.a \
-@ONLY_LIB_FALSE@	    $(top_builddir)/trio/libtrio.a \
-@ONLY_LIB_FALSE@	    $(top_builddir)/tre/libtre.a \
-@ONLY_LIB_FALSE@	    $(top_builddir)/gcm/libgcm.a \
-@ONLY_LIB_FALSE@	    $(top_builddir)/TypeA/libmixa.a \
-@ONLY_LIB_FALSE@	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@sbin_PROGRAMS =  \
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@	mix$(EXEEXT)
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@am__append_1 = $(top_builddir)/libproxytest.a \
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@	    $(top_builddir)/xml/libxml.a \
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@	    $(top_builddir)/popt/libpopt.a \
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@	    $(top_builddir)/trio/libtrio.a \
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@	    $(top_builddir)/tre/libtre.a \
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@	    $(top_builddir)/gcm/libgcm.a \
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@	    $(top_builddir)/TypeA/libmixa.a \
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
 
 @ALL_FROM_SOURCE_TRUE@am__append_2 = $(top_srcdir)/build/mxml/libmxml.a \
 @ALL_FROM_SOURCE_TRUE@	$(top_builddir)/build/openssl/libssl.a \
@@ -217,94 +218,110 @@ am__libproxytest_a_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CAXMLCostConfirmation.hpp CAXMLErrorMessage.hpp \
 	CAXMLPriceCert.hpp Hashtable.hpp TermsAndConditions.hpp \
 	packetintro.h StdAfx.h basetypedefs.h
-@ONLY_LIB_FALSE@am_libproxytest_a_OBJECTS = libproxytest_a-CAAbstractControlChannel.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAAbstractXMLEncodable.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAAbstractXMLSignable.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAAccountingBIInterface.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAAccountingControlChannel.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAAccountingDBInterface.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAAccountingInstance.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAAccountingSettleThread.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAASymCipher.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CABase64.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CACacheLoadBalancing.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CACertificate.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CACertStore.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAClientSocket.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CACmdLnOptions.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAConditionVariable.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAControlChannelDispatcher.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAControlChannelTest.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CADatabase.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CADatagramSocket.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CADataRetentionLog.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CADataRetentionLogFile.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CADynaNetworking.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CADynamicCascadeConfigurator.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAFileSystemDirectory.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAFirstMix.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAFirstMixChannelList.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAHttpClient.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAInfoService.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAInfoServiceAware.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAIPList.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAIPAddrWithNetmask.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CALastMix.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CALastMixChannelList.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAListenerInterface.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CALibProxytest.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CALocalProxy.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CALogPacketStats.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAMiddleMix.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAMiddleMixChannelList.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAMix.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAMixWithReplayDB.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAMsg.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAMultiSignature.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAMutex.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAMuxSocket.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAPriceInfo.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAPool.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAQueue.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAReplayControlChannel.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAReplayCtrlChannelMsgProc.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CASemaphore.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CASignature.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CASingleSocketGroup.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CASocket.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CASocketAddrINet.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CASocketAddrUnix.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CASocketGroup.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CASocketGroupEpoll.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CASocketList.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAStatusManager.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CATLSClientSocket.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CASymCipher.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CASymCipherCTR.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CASymCipherGCM.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CASymCipherOFB.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CASyncControlChannel.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CATempIPBlockList.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAThread.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAThreadPool.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAThreadList.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAUtil.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAXMLBI.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAXMLCostConfirmation.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAXMLErrorMessage.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-CAXMLPriceCert.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-Hashtable.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-TermsAndConditions.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-packetintro.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-StdAfx.$(OBJEXT) \
-@ONLY_LIB_FALSE@	libproxytest_a-InnerMiddleMix.$(OBJEXT)
+am__objects_1 = libproxytest_a-CAAbstractControlChannel.$(OBJEXT) \
+	libproxytest_a-CAAbstractXMLEncodable.$(OBJEXT) \
+	libproxytest_a-CAAbstractXMLSignable.$(OBJEXT) \
+	libproxytest_a-CAAccountingBIInterface.$(OBJEXT) \
+	libproxytest_a-CAAccountingControlChannel.$(OBJEXT) \
+	libproxytest_a-CAAccountingDBInterface.$(OBJEXT) \
+	libproxytest_a-CAAccountingInstance.$(OBJEXT) \
+	libproxytest_a-CAAccountingSettleThread.$(OBJEXT) \
+	libproxytest_a-CAASymCipher.$(OBJEXT) \
+	libproxytest_a-CABase64.$(OBJEXT) \
+	libproxytest_a-CACacheLoadBalancing.$(OBJEXT) \
+	libproxytest_a-CACertificate.$(OBJEXT) \
+	libproxytest_a-CACertStore.$(OBJEXT) \
+	libproxytest_a-CAClientSocket.$(OBJEXT) \
+	libproxytest_a-CACmdLnOptions.$(OBJEXT) \
+	libproxytest_a-CAConditionVariable.$(OBJEXT) \
+	libproxytest_a-CAControlChannelDispatcher.$(OBJEXT) \
+	libproxytest_a-CAControlChannelTest.$(OBJEXT) \
+	libproxytest_a-CADatabase.$(OBJEXT) \
+	libproxytest_a-CADatagramSocket.$(OBJEXT) \
+	libproxytest_a-CADataRetentionLog.$(OBJEXT) \
+	libproxytest_a-CADataRetentionLogFile.$(OBJEXT) \
+	libproxytest_a-CADynaNetworking.$(OBJEXT) \
+	libproxytest_a-CADynamicCascadeConfigurator.$(OBJEXT) \
+	libproxytest_a-CAFileSystemDirectory.$(OBJEXT) \
+	libproxytest_a-CAFirstMix.$(OBJEXT) \
+	libproxytest_a-CAFirstMixChannelList.$(OBJEXT) \
+	libproxytest_a-CAHttpClient.$(OBJEXT) \
+	libproxytest_a-CAInfoService.$(OBJEXT) \
+	libproxytest_a-CAInfoServiceAware.$(OBJEXT) \
+	libproxytest_a-CAIPList.$(OBJEXT) \
+	libproxytest_a-CAIPAddrWithNetmask.$(OBJEXT) \
+	libproxytest_a-CALastMix.$(OBJEXT) \
+	libproxytest_a-CALastMixChannelList.$(OBJEXT) \
+	libproxytest_a-CAListenerInterface.$(OBJEXT) \
+	libproxytest_a-CALibProxytest.$(OBJEXT) \
+	libproxytest_a-CALocalProxy.$(OBJEXT) \
+	libproxytest_a-CALogPacketStats.$(OBJEXT) \
+	libproxytest_a-CAMiddleMix.$(OBJEXT) \
+	libproxytest_a-CAMiddleMixChannelList.$(OBJEXT) \
+	libproxytest_a-CAMix.$(OBJEXT) \
+	libproxytest_a-CAMixWithReplayDB.$(OBJEXT) \
+	libproxytest_a-CAMsg.$(OBJEXT) \
+	libproxytest_a-CAMultiSignature.$(OBJEXT) \
+	libproxytest_a-CAMutex.$(OBJEXT) \
+	libproxytest_a-CAMuxSocket.$(OBJEXT) \
+	libproxytest_a-CAPriceInfo.$(OBJEXT) \
+	libproxytest_a-CAPool.$(OBJEXT) \
+	libproxytest_a-CAQueue.$(OBJEXT) \
+	libproxytest_a-CAReplayControlChannel.$(OBJEXT) \
+	libproxytest_a-CAReplayCtrlChannelMsgProc.$(OBJEXT) \
+	libproxytest_a-CASemaphore.$(OBJEXT) \
+	libproxytest_a-CASignature.$(OBJEXT) \
+	libproxytest_a-CASingleSocketGroup.$(OBJEXT) \
+	libproxytest_a-CASocket.$(OBJEXT) \
+	libproxytest_a-CASocketAddrINet.$(OBJEXT) \
+	libproxytest_a-CASocketAddrUnix.$(OBJEXT) \
+	libproxytest_a-CASocketGroup.$(OBJEXT) \
+	libproxytest_a-CASocketGroupEpoll.$(OBJEXT) \
+	libproxytest_a-CASocketList.$(OBJEXT) \
+	libproxytest_a-CAStatusManager.$(OBJEXT) \
+	libproxytest_a-CATLSClientSocket.$(OBJEXT) \
+	libproxytest_a-CASymCipher.$(OBJEXT) \
+	libproxytest_a-CASymCipherCTR.$(OBJEXT) \
+	libproxytest_a-CASymCipherGCM.$(OBJEXT) \
+	libproxytest_a-CASymCipherOFB.$(OBJEXT) \
+	libproxytest_a-CASyncControlChannel.$(OBJEXT) \
+	libproxytest_a-CATempIPBlockList.$(OBJEXT) \
+	libproxytest_a-CAThread.$(OBJEXT) \
+	libproxytest_a-CAThreadPool.$(OBJEXT) \
+	libproxytest_a-CAThreadList.$(OBJEXT) \
+	libproxytest_a-CAUtil.$(OBJEXT) \
+	libproxytest_a-CAXMLBI.$(OBJEXT) \
+	libproxytest_a-CAXMLCostConfirmation.$(OBJEXT) \
+	libproxytest_a-CAXMLErrorMessage.$(OBJEXT) \
+	libproxytest_a-CAXMLPriceCert.$(OBJEXT) \
+	libproxytest_a-Hashtable.$(OBJEXT) \
+	libproxytest_a-TermsAndConditions.$(OBJEXT) \
+	libproxytest_a-packetintro.$(OBJEXT) \
+	libproxytest_a-StdAfx.$(OBJEXT) \
+	libproxytest_a-InnerMiddleMix.$(OBJEXT)
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@am_libproxytest_a_OBJECTS = $(am__objects_1)
 libproxytest_a_OBJECTS = $(am_libproxytest_a_OBJECTS)
 @ONLY_LIB_TRUE@libmix_la_DEPENDENCIES = $(top_builddir)/xml/libxml.a \
 @ONLY_LIB_TRUE@	$(top_builddir)/popt/libpopt.a \
 @ONLY_LIB_TRUE@	$(top_builddir)/trio/libtrio.a \
 @ONLY_LIB_TRUE@	$(top_builddir)/tre/libtre.a \
 @ONLY_LIB_TRUE@	$(top_builddir)/gcm/libgcm.a
-am__libmix_la_SOURCES_DIST = CAAbstractControlChannel.cpp \
+am__libmix_la_SOURCES_DIST = $proxtest_sources
+am_libmix_la_OBJECTS =
+libmix_la_OBJECTS = $(am_libmix_la_OBJECTS)
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
+@ONLY_LIB_TRUE@am_libmix_la_rpath = -rpath $(libdir)
+@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@libmixshadow_la_DEPENDENCIES = $(top_builddir)/xml/libxml.a \
+@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(top_builddir)/popt/libpopt.a \
+@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(top_builddir)/trio/libtrio.a \
+@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(top_builddir)/tre/libtre.a \
+@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(top_builddir)/gcm/libgcm.a \
+@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(top_builddir)/TypeA/libmixa.a \
+@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(top_builddir)/SquidLogHelper/libsquidloghelper.a
+am__libmixshadow_la_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CAAbstractXMLEncodable.cpp CAAbstractXMLSignable.cpp \
 	CAAccountingBIInterface.cpp CAAccountingControlChannel.cpp \
 	CAAccountingDBInterface.cpp CAAccountingInstance.cpp \
@@ -358,112 +375,55 @@ am__libmix_la_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CASocket.hpp CASocketAddr.hpp CASocketAddrINet.hpp \
 	CASocketAddrUnix.hpp CASocketGroup.hpp CASocketGroupEpoll.hpp \
 	CASocketList.hpp CAStatusManager.hpp CATLSClientSocket.hpp \
-	CAClientSocket.hpp CASymChannelCipher.hpp \
-	CASymChannelCipherFactory.hpp CASymCipher.hpp \
-	CASymCipherCTR.hpp CASymCipherGCM.hpp CASymCipherOFB.hpp \
-	CASyncControlChannel.hpp CATempIPBlockList.hpp CAThread.hpp \
-	CAThreadPool.hpp CAThreadList.hpp CAUtil.hpp CAXMLBI.hpp \
+	CAClientSocket.hpp CASymCipher.hpp CASymCipherGCM.hpp \
+	CASymChannelCipher.hpp CASymChannelCipherFactory.hpp \
+	CASymCipherCTR.hpp CASymCipherOFB.hpp CASyncControlChannel.hpp \
+	CATempIPBlockList.hpp CAThread.hpp CAThreadPool.hpp \
+	CAThreadList.hpp CAUtil.hpp CAXMLBI.hpp \
 	CAXMLCostConfirmation.hpp CAXMLErrorMessage.hpp \
 	CAXMLPriceCert.hpp Hashtable.hpp TermsAndConditions.hpp \
-	packetintro.h StdAfx.h basetypedefs.h
-@ONLY_LIB_TRUE@am_libmix_la_OBJECTS =  \
-@ONLY_LIB_TRUE@	libmix_la-CAAbstractControlChannel.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAAbstractXMLEncodable.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAAbstractXMLSignable.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAAccountingBIInterface.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAAccountingControlChannel.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAAccountingDBInterface.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAAccountingInstance.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAAccountingSettleThread.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAASymCipher.lo libmix_la-CABase64.lo \
-@ONLY_LIB_TRUE@	libmix_la-CACacheLoadBalancing.lo \
-@ONLY_LIB_TRUE@	libmix_la-CACertificate.lo \
-@ONLY_LIB_TRUE@	libmix_la-CACertStore.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAClientSocket.lo \
-@ONLY_LIB_TRUE@	libmix_la-CACmdLnOptions.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAConditionVariable.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAControlChannelDispatcher.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAControlChannelTest.lo \
-@ONLY_LIB_TRUE@	libmix_la-CADatabase.lo \
-@ONLY_LIB_TRUE@	libmix_la-CADatagramSocket.lo \
-@ONLY_LIB_TRUE@	libmix_la-CADataRetentionLog.lo \
-@ONLY_LIB_TRUE@	libmix_la-CADataRetentionLogFile.lo \
-@ONLY_LIB_TRUE@	libmix_la-CADynaNetworking.lo \
-@ONLY_LIB_TRUE@	libmix_la-CADynamicCascadeConfigurator.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAFileSystemDirectory.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAFirstMix.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAFirstMixChannelList.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAHttpClient.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAInfoService.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAInfoServiceAware.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAIPList.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAIPAddrWithNetmask.lo \
-@ONLY_LIB_TRUE@	libmix_la-CALastMix.lo \
-@ONLY_LIB_TRUE@	libmix_la-CALastMixChannelList.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAListenerInterface.lo \
-@ONLY_LIB_TRUE@	libmix_la-CALibProxytest.lo \
-@ONLY_LIB_TRUE@	libmix_la-CALocalProxy.lo \
-@ONLY_LIB_TRUE@	libmix_la-CALogPacketStats.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAMiddleMix.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAMiddleMixChannelList.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAMix.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAMixWithReplayDB.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAMsg.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAMultiSignature.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAMutex.lo libmix_la-CAMuxSocket.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAPriceInfo.lo libmix_la-CAPool.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAQueue.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAReplayControlChannel.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAReplayCtrlChannelMsgProc.lo \
-@ONLY_LIB_TRUE@	libmix_la-CASemaphore.lo \
-@ONLY_LIB_TRUE@	libmix_la-CASignature.lo \
-@ONLY_LIB_TRUE@	libmix_la-CASingleSocketGroup.lo \
-@ONLY_LIB_TRUE@	libmix_la-CASocket.lo \
-@ONLY_LIB_TRUE@	libmix_la-CASocketAddrINet.lo \
-@ONLY_LIB_TRUE@	libmix_la-CASocketAddrUnix.lo \
-@ONLY_LIB_TRUE@	libmix_la-CASocketGroup.lo \
-@ONLY_LIB_TRUE@	libmix_la-CASocketGroupEpoll.lo \
-@ONLY_LIB_TRUE@	libmix_la-CASocketList.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAStatusManager.lo \
-@ONLY_LIB_TRUE@	libmix_la-CATLSClientSocket.lo \
-@ONLY_LIB_TRUE@	libmix_la-CASymCipher.lo \
-@ONLY_LIB_TRUE@	libmix_la-CASymCipherCTR.lo \
-@ONLY_LIB_TRUE@	libmix_la-CASymCipherGCM.lo \
-@ONLY_LIB_TRUE@	libmix_la-CASymCipherOFB.lo \
-@ONLY_LIB_TRUE@	libmix_la-CASyncControlChannel.lo \
-@ONLY_LIB_TRUE@	libmix_la-CATempIPBlockList.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAThread.lo libmix_la-CAThreadPool.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAThreadList.lo libmix_la-CAUtil.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAXMLBI.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAXMLCostConfirmation.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAXMLErrorMessage.lo \
-@ONLY_LIB_TRUE@	libmix_la-CAXMLPriceCert.lo \
-@ONLY_LIB_TRUE@	libmix_la-Hashtable.lo \
-@ONLY_LIB_TRUE@	libmix_la-TermsAndConditions.lo \
-@ONLY_LIB_TRUE@	libmix_la-packetintro.lo libmix_la-StdAfx.lo \
-@ONLY_LIB_TRUE@	libmix_la-InnerMiddleMix.lo
-libmix_la_OBJECTS = $(am_libmix_la_OBJECTS)
-AM_V_lt = $(am__v_lt_@AM_V@)
-am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
-am__v_lt_0 = --silent
-am__v_lt_1 = 
-@ONLY_LIB_TRUE@am_libmix_la_rpath = -rpath $(libdir)
-@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@libmixshadow_la_DEPENDENCIES = $(top_builddir)/libproxytest.a \
-@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(top_builddir)/xml/libxml.a \
-@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(top_builddir)/popt/libpopt.a \
-@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(top_builddir)/trio/libtrio.a \
-@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(top_builddir)/tre/libtre.a \
-@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(top_builddir)/gcm/libgcm.a \
-@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(top_builddir)/TypeA/libmixa.a \
-@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(top_builddir)/SquidLogHelper/libsquidloghelper.a
-am__libmixshadow_la_SOURCES_DIST = proxytest.cpp
+	packetintro.h StdAfx.h basetypedefs.h proxytest.cpp
+am__objects_2 = CAAbstractControlChannel.lo CAAbstractXMLEncodable.lo \
+	CAAbstractXMLSignable.lo CAAccountingBIInterface.lo \
+	CAAccountingControlChannel.lo CAAccountingDBInterface.lo \
+	CAAccountingInstance.lo CAAccountingSettleThread.lo \
+	CAASymCipher.lo CABase64.lo CACacheLoadBalancing.lo \
+	CACertificate.lo CACertStore.lo CAClientSocket.lo \
+	CACmdLnOptions.lo CAConditionVariable.lo \
+	CAControlChannelDispatcher.lo CAControlChannelTest.lo \
+	CADatabase.lo CADatagramSocket.lo CADataRetentionLog.lo \
+	CADataRetentionLogFile.lo CADynaNetworking.lo \
+	CADynamicCascadeConfigurator.lo CAFileSystemDirectory.lo \
+	CAFirstMix.lo CAFirstMixChannelList.lo CAHttpClient.lo \
+	CAInfoService.lo CAInfoServiceAware.lo CAIPList.lo \
+	CAIPAddrWithNetmask.lo CALastMix.lo CALastMixChannelList.lo \
+	CAListenerInterface.lo CALibProxytest.lo CALocalProxy.lo \
+	CALogPacketStats.lo CAMiddleMix.lo CAMiddleMixChannelList.lo \
+	CAMix.lo CAMixWithReplayDB.lo CAMsg.lo CAMultiSignature.lo \
+	CAMutex.lo CAMuxSocket.lo CAPriceInfo.lo CAPool.lo CAQueue.lo \
+	CAReplayControlChannel.lo CAReplayCtrlChannelMsgProc.lo \
+	CASemaphore.lo CASignature.lo CASingleSocketGroup.lo \
+	CASocket.lo CASocketAddrINet.lo CASocketAddrUnix.lo \
+	CASocketGroup.lo CASocketGroupEpoll.lo CASocketList.lo \
+	CAStatusManager.lo CATLSClientSocket.lo CASymCipher.lo \
+	CASymCipherCTR.lo CASymCipherGCM.lo CASymCipherOFB.lo \
+	CASyncControlChannel.lo CATempIPBlockList.lo CAThread.lo \
+	CAThreadPool.lo CAThreadList.lo CAUtil.lo CAXMLBI.lo \
+	CAXMLCostConfirmation.lo CAXMLErrorMessage.lo \
+	CAXMLPriceCert.lo Hashtable.lo TermsAndConditions.lo \
+	packetintro.lo StdAfx.lo InnerMiddleMix.lo
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@am_libmixshadow_la_OBJECTS =  \
+@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(am__objects_2) \
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	proxytest.lo
 libmixshadow_la_OBJECTS = $(am_libmixshadow_la_OBJECTS)
+libmixshadow_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
+	$(AM_CXXFLAGS) $(CXXFLAGS) $(libmixshadow_la_LDFLAGS) \
+	$(LDFLAGS) -o $@
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@am_libmixshadow_la_rpath =  \
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	-rpath $(libdir)
 am__mix_SOURCES_DIST = proxytest.cpp
-@ONLY_LIB_FALSE@am_mix_OBJECTS = mix-proxytest.$(OBJEXT)
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@am_mix_OBJECTS = mix-proxytest.$(OBJEXT)
 mix_OBJECTS = $(am_mix_OBJECTS)
 mix_DEPENDENCIES = $(am__append_1) $(am__append_2)
 AM_V_P = $(am__v_P_@AM_V@)
@@ -481,87 +441,63 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/libmix_la-CAASymCipher.Plo \
-	./$(DEPDIR)/libmix_la-CAAbstractControlChannel.Plo \
-	./$(DEPDIR)/libmix_la-CAAbstractXMLEncodable.Plo \
-	./$(DEPDIR)/libmix_la-CAAbstractXMLSignable.Plo \
-	./$(DEPDIR)/libmix_la-CAAccountingBIInterface.Plo \
-	./$(DEPDIR)/libmix_la-CAAccountingControlChannel.Plo \
-	./$(DEPDIR)/libmix_la-CAAccountingDBInterface.Plo \
-	./$(DEPDIR)/libmix_la-CAAccountingInstance.Plo \
-	./$(DEPDIR)/libmix_la-CAAccountingSettleThread.Plo \
-	./$(DEPDIR)/libmix_la-CABase64.Plo \
-	./$(DEPDIR)/libmix_la-CACacheLoadBalancing.Plo \
-	./$(DEPDIR)/libmix_la-CACertStore.Plo \
-	./$(DEPDIR)/libmix_la-CACertificate.Plo \
-	./$(DEPDIR)/libmix_la-CAClientSocket.Plo \
-	./$(DEPDIR)/libmix_la-CACmdLnOptions.Plo \
-	./$(DEPDIR)/libmix_la-CAConditionVariable.Plo \
-	./$(DEPDIR)/libmix_la-CAControlChannelDispatcher.Plo \
-	./$(DEPDIR)/libmix_la-CAControlChannelTest.Plo \
-	./$(DEPDIR)/libmix_la-CADataRetentionLog.Plo \
-	./$(DEPDIR)/libmix_la-CADataRetentionLogFile.Plo \
-	./$(DEPDIR)/libmix_la-CADatabase.Plo \
-	./$(DEPDIR)/libmix_la-CADatagramSocket.Plo \
-	./$(DEPDIR)/libmix_la-CADynaNetworking.Plo \
-	./$(DEPDIR)/libmix_la-CADynamicCascadeConfigurator.Plo \
-	./$(DEPDIR)/libmix_la-CAFileSystemDirectory.Plo \
-	./$(DEPDIR)/libmix_la-CAFirstMix.Plo \
-	./$(DEPDIR)/libmix_la-CAFirstMixChannelList.Plo \
-	./$(DEPDIR)/libmix_la-CAHttpClient.Plo \
-	./$(DEPDIR)/libmix_la-CAIPAddrWithNetmask.Plo \
-	./$(DEPDIR)/libmix_la-CAIPList.Plo \
-	./$(DEPDIR)/libmix_la-CAInfoService.Plo \
-	./$(DEPDIR)/libmix_la-CAInfoServiceAware.Plo \
-	./$(DEPDIR)/libmix_la-CALastMix.Plo \
-	./$(DEPDIR)/libmix_la-CALastMixChannelList.Plo \
-	./$(DEPDIR)/libmix_la-CALibProxytest.Plo \
-	./$(DEPDIR)/libmix_la-CAListenerInterface.Plo \
-	./$(DEPDIR)/libmix_la-CALocalProxy.Plo \
-	./$(DEPDIR)/libmix_la-CALogPacketStats.Plo \
-	./$(DEPDIR)/libmix_la-CAMiddleMix.Plo \
-	./$(DEPDIR)/libmix_la-CAMiddleMixChannelList.Plo \
-	./$(DEPDIR)/libmix_la-CAMix.Plo \
-	./$(DEPDIR)/libmix_la-CAMixWithReplayDB.Plo \
-	./$(DEPDIR)/libmix_la-CAMsg.Plo \
-	./$(DEPDIR)/libmix_la-CAMultiSignature.Plo \
-	./$(DEPDIR)/libmix_la-CAMutex.Plo \
-	./$(DEPDIR)/libmix_la-CAMuxSocket.Plo \
-	./$(DEPDIR)/libmix_la-CAPool.Plo \
-	./$(DEPDIR)/libmix_la-CAPriceInfo.Plo \
-	./$(DEPDIR)/libmix_la-CAQueue.Plo \
-	./$(DEPDIR)/libmix_la-CAReplayControlChannel.Plo \
-	./$(DEPDIR)/libmix_la-CAReplayCtrlChannelMsgProc.Plo \
-	./$(DEPDIR)/libmix_la-CASemaphore.Plo \
-	./$(DEPDIR)/libmix_la-CASignature.Plo \
-	./$(DEPDIR)/libmix_la-CASingleSocketGroup.Plo \
-	./$(DEPDIR)/libmix_la-CASocket.Plo \
-	./$(DEPDIR)/libmix_la-CASocketAddrINet.Plo \
-	./$(DEPDIR)/libmix_la-CASocketAddrUnix.Plo \
-	./$(DEPDIR)/libmix_la-CASocketGroup.Plo \
-	./$(DEPDIR)/libmix_la-CASocketGroupEpoll.Plo \
-	./$(DEPDIR)/libmix_la-CASocketList.Plo \
-	./$(DEPDIR)/libmix_la-CAStatusManager.Plo \
-	./$(DEPDIR)/libmix_la-CASymCipher.Plo \
-	./$(DEPDIR)/libmix_la-CASymCipherCTR.Plo \
-	./$(DEPDIR)/libmix_la-CASymCipherGCM.Plo \
-	./$(DEPDIR)/libmix_la-CASymCipherOFB.Plo \
-	./$(DEPDIR)/libmix_la-CASyncControlChannel.Plo \
-	./$(DEPDIR)/libmix_la-CATLSClientSocket.Plo \
-	./$(DEPDIR)/libmix_la-CATempIPBlockList.Plo \
-	./$(DEPDIR)/libmix_la-CAThread.Plo \
-	./$(DEPDIR)/libmix_la-CAThreadList.Plo \
-	./$(DEPDIR)/libmix_la-CAThreadPool.Plo \
-	./$(DEPDIR)/libmix_la-CAUtil.Plo \
-	./$(DEPDIR)/libmix_la-CAXMLBI.Plo \
-	./$(DEPDIR)/libmix_la-CAXMLCostConfirmation.Plo \
-	./$(DEPDIR)/libmix_la-CAXMLErrorMessage.Plo \
-	./$(DEPDIR)/libmix_la-CAXMLPriceCert.Plo \
-	./$(DEPDIR)/libmix_la-Hashtable.Plo \
-	./$(DEPDIR)/libmix_la-InnerMiddleMix.Plo \
-	./$(DEPDIR)/libmix_la-StdAfx.Plo \
-	./$(DEPDIR)/libmix_la-TermsAndConditions.Plo \
-	./$(DEPDIR)/libmix_la-packetintro.Plo \
+am__depfiles_remade = ./$(DEPDIR)/CAASymCipher.Plo \
+	./$(DEPDIR)/CAAbstractControlChannel.Plo \
+	./$(DEPDIR)/CAAbstractXMLEncodable.Plo \
+	./$(DEPDIR)/CAAbstractXMLSignable.Plo \
+	./$(DEPDIR)/CAAccountingBIInterface.Plo \
+	./$(DEPDIR)/CAAccountingControlChannel.Plo \
+	./$(DEPDIR)/CAAccountingDBInterface.Plo \
+	./$(DEPDIR)/CAAccountingInstance.Plo \
+	./$(DEPDIR)/CAAccountingSettleThread.Plo \
+	./$(DEPDIR)/CABase64.Plo ./$(DEPDIR)/CACacheLoadBalancing.Plo \
+	./$(DEPDIR)/CACertStore.Plo ./$(DEPDIR)/CACertificate.Plo \
+	./$(DEPDIR)/CAClientSocket.Plo ./$(DEPDIR)/CACmdLnOptions.Plo \
+	./$(DEPDIR)/CAConditionVariable.Plo \
+	./$(DEPDIR)/CAControlChannelDispatcher.Plo \
+	./$(DEPDIR)/CAControlChannelTest.Plo \
+	./$(DEPDIR)/CADataRetentionLog.Plo \
+	./$(DEPDIR)/CADataRetentionLogFile.Plo \
+	./$(DEPDIR)/CADatabase.Plo ./$(DEPDIR)/CADatagramSocket.Plo \
+	./$(DEPDIR)/CADynaNetworking.Plo \
+	./$(DEPDIR)/CADynamicCascadeConfigurator.Plo \
+	./$(DEPDIR)/CAFileSystemDirectory.Plo \
+	./$(DEPDIR)/CAFirstMix.Plo \
+	./$(DEPDIR)/CAFirstMixChannelList.Plo \
+	./$(DEPDIR)/CAHttpClient.Plo \
+	./$(DEPDIR)/CAIPAddrWithNetmask.Plo ./$(DEPDIR)/CAIPList.Plo \
+	./$(DEPDIR)/CAInfoService.Plo \
+	./$(DEPDIR)/CAInfoServiceAware.Plo ./$(DEPDIR)/CALastMix.Plo \
+	./$(DEPDIR)/CALastMixChannelList.Plo \
+	./$(DEPDIR)/CALibProxytest.Plo \
+	./$(DEPDIR)/CAListenerInterface.Plo \
+	./$(DEPDIR)/CALocalProxy.Plo ./$(DEPDIR)/CALogPacketStats.Plo \
+	./$(DEPDIR)/CAMiddleMix.Plo \
+	./$(DEPDIR)/CAMiddleMixChannelList.Plo ./$(DEPDIR)/CAMix.Plo \
+	./$(DEPDIR)/CAMixWithReplayDB.Plo ./$(DEPDIR)/CAMsg.Plo \
+	./$(DEPDIR)/CAMultiSignature.Plo ./$(DEPDIR)/CAMutex.Plo \
+	./$(DEPDIR)/CAMuxSocket.Plo ./$(DEPDIR)/CAPool.Plo \
+	./$(DEPDIR)/CAPriceInfo.Plo ./$(DEPDIR)/CAQueue.Plo \
+	./$(DEPDIR)/CAReplayControlChannel.Plo \
+	./$(DEPDIR)/CAReplayCtrlChannelMsgProc.Plo \
+	./$(DEPDIR)/CASemaphore.Plo ./$(DEPDIR)/CASignature.Plo \
+	./$(DEPDIR)/CASingleSocketGroup.Plo ./$(DEPDIR)/CASocket.Plo \
+	./$(DEPDIR)/CASocketAddrINet.Plo \
+	./$(DEPDIR)/CASocketAddrUnix.Plo ./$(DEPDIR)/CASocketGroup.Plo \
+	./$(DEPDIR)/CASocketGroupEpoll.Plo \
+	./$(DEPDIR)/CASocketList.Plo ./$(DEPDIR)/CAStatusManager.Plo \
+	./$(DEPDIR)/CASymCipher.Plo ./$(DEPDIR)/CASymCipherCTR.Plo \
+	./$(DEPDIR)/CASymCipherGCM.Plo ./$(DEPDIR)/CASymCipherOFB.Plo \
+	./$(DEPDIR)/CASyncControlChannel.Plo \
+	./$(DEPDIR)/CATLSClientSocket.Plo \
+	./$(DEPDIR)/CATempIPBlockList.Plo ./$(DEPDIR)/CAThread.Plo \
+	./$(DEPDIR)/CAThreadList.Plo ./$(DEPDIR)/CAThreadPool.Plo \
+	./$(DEPDIR)/CAUtil.Plo ./$(DEPDIR)/CAXMLBI.Plo \
+	./$(DEPDIR)/CAXMLCostConfirmation.Plo \
+	./$(DEPDIR)/CAXMLErrorMessage.Plo \
+	./$(DEPDIR)/CAXMLPriceCert.Plo ./$(DEPDIR)/Hashtable.Plo \
+	./$(DEPDIR)/InnerMiddleMix.Plo ./$(DEPDIR)/StdAfx.Plo \
+	./$(DEPDIR)/TermsAndConditions.Plo \
 	./$(DEPDIR)/libproxytest_a-CAASymCipher.Po \
 	./$(DEPDIR)/libproxytest_a-CAAbstractControlChannel.Po \
 	./$(DEPDIR)/libproxytest_a-CAAbstractXMLEncodable.Po \
@@ -643,7 +579,8 @@ am__depfiles_remade = ./$(DEPDIR)/libmix_la-CAASymCipher.Plo \
 	./$(DEPDIR)/libproxytest_a-StdAfx.Po \
 	./$(DEPDIR)/libproxytest_a-TermsAndConditions.Po \
 	./$(DEPDIR)/libproxytest_a-packetintro.Po \
-	./$(DEPDIR)/mix-proxytest.Po ./$(DEPDIR)/proxytest.Plo
+	./$(DEPDIR)/mix-proxytest.Po ./$(DEPDIR)/packetintro.Plo \
+	./$(DEPDIR)/proxytest.Plo
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -914,362 +851,188 @@ top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 mix_LDADD = $(am__append_1) $(am__append_2)
-@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@lib_LTLIBRARIES = libmixshadow.la	
-@ONLY_LIB_TRUE@lib_LTLIBRARIES = libmix.la			
-@ONLY_LIB_TRUE@libmix_la_CPPFLAGS = -DSOMEFLAG
-@ONLY_LIB_TRUE@libmix_la_SOURCES = CAAbstractControlChannel.cpp\
-@ONLY_LIB_TRUE@		    CAAbstractXMLEncodable.cpp\
-@ONLY_LIB_TRUE@		    CAAbstractXMLSignable.cpp\
-@ONLY_LIB_TRUE@		    CAAccountingBIInterface.cpp\
-@ONLY_LIB_TRUE@		    CAAccountingControlChannel.cpp\
-@ONLY_LIB_TRUE@		    CAAccountingDBInterface.cpp\
-@ONLY_LIB_TRUE@		    CAAccountingInstance.cpp\
-@ONLY_LIB_TRUE@		    CAAccountingSettleThread.cpp\
-@ONLY_LIB_TRUE@		    CAASymCipher.cpp \
-@ONLY_LIB_TRUE@		    CABase64.cpp \
-@ONLY_LIB_TRUE@		    CACacheLoadBalancing.cpp\
-@ONLY_LIB_TRUE@		    CACertificate.cpp\
-@ONLY_LIB_TRUE@		    CACertStore.cpp\
-@ONLY_LIB_TRUE@		    CAClientSocket.cpp\
-@ONLY_LIB_TRUE@		    CACmdLnOptions.cpp \
-@ONLY_LIB_TRUE@		    CAConditionVariable.cpp\
-@ONLY_LIB_TRUE@		    CAControlChannelDispatcher.cpp\
-@ONLY_LIB_TRUE@		    CAControlChannelTest.cpp\
-@ONLY_LIB_TRUE@		    CADatabase.cpp\
-@ONLY_LIB_TRUE@		    CADatagramSocket.cpp \
-@ONLY_LIB_TRUE@		    CADataRetentionLog.cpp\
-@ONLY_LIB_TRUE@		    CADataRetentionLogFile.cpp\
-@ONLY_LIB_TRUE@		    CADynaNetworking.cpp \
-@ONLY_LIB_TRUE@		    CADynamicCascadeConfigurator.cpp \
-@ONLY_LIB_TRUE@		    CAFileSystemDirectory.cpp \
-@ONLY_LIB_TRUE@		    CAFirstMix.cpp \
-@ONLY_LIB_TRUE@		    CAFirstMixChannelList.cpp \
-@ONLY_LIB_TRUE@		    CAHttpClient.cpp \
-@ONLY_LIB_TRUE@		    CAInfoService.cpp \
-@ONLY_LIB_TRUE@		    CAInfoServiceAware.cpp \
-@ONLY_LIB_TRUE@		    CAIPList.cpp \
-@ONLY_LIB_TRUE@		    CAIPAddrWithNetmask.cpp \
-@ONLY_LIB_TRUE@		    CALastMix.cpp \
-@ONLY_LIB_TRUE@		    CALastMixChannelList.cpp\
-@ONLY_LIB_TRUE@		    CAListenerInterface.cpp\
-@ONLY_LIB_TRUE@		    CALibProxytest.cpp\
-@ONLY_LIB_TRUE@		    CALocalProxy.cpp \
-@ONLY_LIB_TRUE@		    CALogPacketStats.cpp\
-@ONLY_LIB_TRUE@		    CAMiddleMix.cpp \
-@ONLY_LIB_TRUE@		    CAMiddleMixChannelList.cpp \
-@ONLY_LIB_TRUE@		    CAMix.cpp \
-@ONLY_LIB_TRUE@		    CAMixWithReplayDB.cpp\
-@ONLY_LIB_TRUE@		    CAMsg.cpp \
-@ONLY_LIB_TRUE@		    CAMultiSignature.cpp\
-@ONLY_LIB_TRUE@		    CAMutex.cpp\
-@ONLY_LIB_TRUE@		    CAMuxSocket.cpp \
-@ONLY_LIB_TRUE@		    CAPriceInfo.cpp \
-@ONLY_LIB_TRUE@		    CAPool.cpp\
-@ONLY_LIB_TRUE@		    CAQueue.cpp \
-@ONLY_LIB_TRUE@		    CAReplayControlChannel.cpp\
-@ONLY_LIB_TRUE@		    CAReplayCtrlChannelMsgProc.cpp\
-@ONLY_LIB_TRUE@		    CASemaphore.cpp\
-@ONLY_LIB_TRUE@		    CASignature.cpp \
-@ONLY_LIB_TRUE@		    CASingleSocketGroup.cpp\
-@ONLY_LIB_TRUE@		    CASocket.cpp \
-@ONLY_LIB_TRUE@		    CASocketAddrINet.cpp \
-@ONLY_LIB_TRUE@		    CASocketAddrUnix.cpp \
-@ONLY_LIB_TRUE@		    CASocketGroup.cpp \
-@ONLY_LIB_TRUE@		    CASocketGroupEpoll.cpp\
-@ONLY_LIB_TRUE@		    CASocketList.cpp \
-@ONLY_LIB_TRUE@		    CAStatusManager.cpp \
-@ONLY_LIB_TRUE@		    CATLSClientSocket.cpp\
-@ONLY_LIB_TRUE@		    CASymCipher.cpp \
-@ONLY_LIB_TRUE@			CASymCipherCTR.cpp \
-@ONLY_LIB_TRUE@			CASymCipherGCM.cpp \
-@ONLY_LIB_TRUE@			CASymCipherOFB.cpp \
-@ONLY_LIB_TRUE@		    CASyncControlChannel.cpp\
-@ONLY_LIB_TRUE@		    CATempIPBlockList.cpp\
-@ONLY_LIB_TRUE@		    CAThread.cpp \
-@ONLY_LIB_TRUE@		    CAThreadPool.cpp\
-@ONLY_LIB_TRUE@		    CAThreadList.cpp \
-@ONLY_LIB_TRUE@		    CAUtil.cpp \
-@ONLY_LIB_TRUE@		    CAXMLBI.cpp \
-@ONLY_LIB_TRUE@		    CAXMLCostConfirmation.cpp\
-@ONLY_LIB_TRUE@		    CAXMLErrorMessage.cpp\
-@ONLY_LIB_TRUE@		    CAXMLPriceCert.cpp\
-@ONLY_LIB_TRUE@		    Hashtable.cpp\
-@ONLY_LIB_TRUE@		    TermsAndConditions.cpp \
-@ONLY_LIB_TRUE@		    packetintro.cpp \
-@ONLY_LIB_TRUE@		    StdAfx.cpp \
-@ONLY_LIB_TRUE@		    InnerMiddleMix.cpp\
-@ONLY_LIB_TRUE@		    InnerMiddleMix.hpp\
-@ONLY_LIB_TRUE@		    CAAbstractControlChannel.hpp\
-@ONLY_LIB_TRUE@		    CAAbstractXMLEncodable.hpp\
-@ONLY_LIB_TRUE@		    CAAbstractXMLSignable.hpp\
-@ONLY_LIB_TRUE@		    CAAccountingBIInterface.hpp\
-@ONLY_LIB_TRUE@		    CAAccountingControlChannel.hpp\
-@ONLY_LIB_TRUE@		    CAAccountingDBInterface.hpp\
-@ONLY_LIB_TRUE@		    CAAccountingInstance.hpp\
-@ONLY_LIB_TRUE@		    CAAccountingSettleThread.hpp\
-@ONLY_LIB_TRUE@		    CAASymCipher.hpp \
-@ONLY_LIB_TRUE@		    CABase64.hpp \
-@ONLY_LIB_TRUE@		    CACacheLoadBalancing.hpp\
-@ONLY_LIB_TRUE@		    CACertificate.hpp\
-@ONLY_LIB_TRUE@		    CACertStore.hpp\
-@ONLY_LIB_TRUE@		    CAConditionVariable.hpp\
-@ONLY_LIB_TRUE@		    CAControlChannelDispatcher.hpp\
-@ONLY_LIB_TRUE@		    CAControlChannelTest.hpp\
-@ONLY_LIB_TRUE@		    CACmdLnOptions.hpp \
-@ONLY_LIB_TRUE@		    CADatabase.hpp\
-@ONLY_LIB_TRUE@		    CADatagramSocket.hpp\
-@ONLY_LIB_TRUE@		    CADataRetentionLog.hpp\
-@ONLY_LIB_TRUE@		    CADataRetentionLogFile.hpp\
-@ONLY_LIB_TRUE@		    CADynaNetworking.hpp \
-@ONLY_LIB_TRUE@		    CADynamicCascadeConfigurator.hpp \
-@ONLY_LIB_TRUE@		    CAFileSystemDirectory.hpp \
-@ONLY_LIB_TRUE@		    CAFirstMix.hpp \
-@ONLY_LIB_TRUE@		    CAFirstMixChannelList.hpp \
-@ONLY_LIB_TRUE@		    CAHttpClient.hpp \
-@ONLY_LIB_TRUE@		    CAInfoService.hpp \
-@ONLY_LIB_TRUE@		    CAInfoServiceAware.hpp \
-@ONLY_LIB_TRUE@		    CAIPList.hpp \
-@ONLY_LIB_TRUE@		    CAIPAddrWithNetmask.hpp \
-@ONLY_LIB_TRUE@		    CALastMix.hpp \
-@ONLY_LIB_TRUE@		    CALastMixChannelList.hpp\
-@ONLY_LIB_TRUE@		    CAListenerInterface.hpp\
-@ONLY_LIB_TRUE@		    CALibProxytest.hpp\
-@ONLY_LIB_TRUE@		    CALocalProxy.hpp \
-@ONLY_LIB_TRUE@		    CALockAble.hpp\
-@ONLY_LIB_TRUE@		    CALogPacketStats.hpp\
-@ONLY_LIB_TRUE@		    CAMiddleMix.hpp \
-@ONLY_LIB_TRUE@		    CAMiddleMixChannelList.hpp \
-@ONLY_LIB_TRUE@		    CAMix.hpp \
-@ONLY_LIB_TRUE@		    CAMixWithReplayDB.hpp\
-@ONLY_LIB_TRUE@		    CAMsg.hpp \
-@ONLY_LIB_TRUE@		    CAMultiSignature.hpp\
-@ONLY_LIB_TRUE@		    CAMutex.hpp\
-@ONLY_LIB_TRUE@		    CAMuxSocket.hpp \
-@ONLY_LIB_TRUE@		    CAPriceInfo.hpp \
-@ONLY_LIB_TRUE@		    CAPool.hpp\
-@ONLY_LIB_TRUE@		    CAQueue.hpp \
-@ONLY_LIB_TRUE@		    CAReplayControlChannel.hpp\
-@ONLY_LIB_TRUE@		    CAReplayCtrlChannelMsgProc.hpp\
-@ONLY_LIB_TRUE@		    CASemaphore.hpp\
-@ONLY_LIB_TRUE@		    CASignature.hpp \
-@ONLY_LIB_TRUE@		    CASingleSocketGroup.hpp\
-@ONLY_LIB_TRUE@		    CASocket.hpp \
-@ONLY_LIB_TRUE@		    CASocketAddr.hpp \
-@ONLY_LIB_TRUE@		    CASocketAddrINet.hpp \
-@ONLY_LIB_TRUE@		    CASocketAddrUnix.hpp \
-@ONLY_LIB_TRUE@		    CASocketGroup.hpp \
-@ONLY_LIB_TRUE@		    CASocketGroupEpoll.hpp\
-@ONLY_LIB_TRUE@		    CASocketList.hpp \
-@ONLY_LIB_TRUE@		    CAStatusManager.hpp \
-@ONLY_LIB_TRUE@		    CATLSClientSocket.hpp\
-@ONLY_LIB_TRUE@		    CAClientSocket.hpp\
-@ONLY_LIB_TRUE@		    CASymChannelCipher.hpp \
-@ONLY_LIB_TRUE@		    CASymChannelCipherFactory.hpp \
-@ONLY_LIB_TRUE@		    CASymCipher.hpp \
-@ONLY_LIB_TRUE@			CASymCipherCTR.hpp \
-@ONLY_LIB_TRUE@			CASymCipherGCM.hpp \
-@ONLY_LIB_TRUE@			CASymCipherOFB.hpp \
-@ONLY_LIB_TRUE@		    CASyncControlChannel.hpp \
-@ONLY_LIB_TRUE@		    CATempIPBlockList.hpp\
-@ONLY_LIB_TRUE@		    CAThread.hpp \
-@ONLY_LIB_TRUE@		    CAThreadPool.hpp\
-@ONLY_LIB_TRUE@		    CAThreadList.hpp \
-@ONLY_LIB_TRUE@		    CAUtil.hpp \
-@ONLY_LIB_TRUE@		    CAXMLBI.hpp \
-@ONLY_LIB_TRUE@		    CAXMLCostConfirmation.hpp\
-@ONLY_LIB_TRUE@		    CAXMLErrorMessage.hpp\
-@ONLY_LIB_TRUE@		    CAXMLPriceCert.hpp\
-@ONLY_LIB_TRUE@		    Hashtable.hpp\
-@ONLY_LIB_TRUE@		    TermsAndConditions.hpp \
-@ONLY_LIB_TRUE@		    packetintro.h\
-@ONLY_LIB_TRUE@		    StdAfx.h\
-@ONLY_LIB_TRUE@		    basetypedefs.h
+proxytest_sources = CAAbstractControlChannel.cpp\
+		    CAAbstractXMLEncodable.cpp\
+		    CAAbstractXMLSignable.cpp\
+		    CAAccountingBIInterface.cpp\
+		    CAAccountingControlChannel.cpp\
+		    CAAccountingDBInterface.cpp\
+		    CAAccountingInstance.cpp\
+		    CAAccountingSettleThread.cpp\
+		    CAASymCipher.cpp \
+		    CABase64.cpp \
+		    CACacheLoadBalancing.cpp\
+		    CACertificate.cpp\
+		    CACertStore.cpp\
+		    CAClientSocket.cpp\
+		    CACmdLnOptions.cpp \
+		    CAConditionVariable.cpp\
+		    CAControlChannelDispatcher.cpp\
+		    CAControlChannelTest.cpp\
+		    CADatabase.cpp\
+		    CADatagramSocket.cpp \
+		    CADataRetentionLog.cpp\
+		    CADataRetentionLogFile.cpp\
+		    CADynaNetworking.cpp \
+		    CADynamicCascadeConfigurator.cpp \
+		    CAFileSystemDirectory.cpp \
+		    CAFirstMix.cpp \
+		    CAFirstMixChannelList.cpp \
+		    CAHttpClient.cpp \
+		    CAInfoService.cpp \
+		    CAInfoServiceAware.cpp \
+		    CAIPList.cpp \
+		    CAIPAddrWithNetmask.cpp \
+		    CALastMix.cpp \
+		    CALastMixChannelList.cpp\
+		    CAListenerInterface.cpp\
+		    CALibProxytest.cpp\
+		    CALocalProxy.cpp \
+		    CALogPacketStats.cpp\
+		    CAMiddleMix.cpp \
+		    CAMiddleMixChannelList.cpp \
+		    CAMix.cpp \
+		    CAMixWithReplayDB.cpp\
+		    CAMsg.cpp \
+		    CAMultiSignature.cpp\
+		    CAMutex.cpp\
+		    CAMuxSocket.cpp \
+		    CAPriceInfo.cpp \
+		    CAPool.cpp\
+		    CAQueue.cpp \
+		    CAReplayControlChannel.cpp\
+		    CAReplayCtrlChannelMsgProc.cpp\
+		    CASemaphore.cpp\
+		    CASignature.cpp \
+		    CASingleSocketGroup.cpp\
+		    CASocket.cpp \
+		    CASocketAddrINet.cpp \
+		    CASocketAddrUnix.cpp \
+		    CASocketGroup.cpp \
+		    CASocketGroupEpoll.cpp\
+		    CASocketList.cpp \
+		    CAStatusManager.cpp \
+		    CATLSClientSocket.cpp\
+		    CASymCipher.cpp \
+			CASymCipherCTR.cpp \
+			CASymCipherGCM.cpp \
+			CASymCipherOFB.cpp \
+		    CASyncControlChannel.cpp\
+		    CATempIPBlockList.cpp\
+		    CAThread.cpp \
+		    CAThreadPool.cpp\
+		    CAThreadList.cpp \
+		    CAUtil.cpp \
+		    CAXMLBI.cpp \
+		    CAXMLCostConfirmation.cpp\
+		    CAXMLErrorMessage.cpp\
+		    CAXMLPriceCert.cpp\
+		    Hashtable.cpp\
+		    TermsAndConditions.cpp \
+		    packetintro.cpp \
+		    StdAfx.cpp \
+		    InnerMiddleMix.cpp\
+		    InnerMiddleMix.hpp\
+		    CAAbstractControlChannel.hpp\
+		    CAAbstractXMLEncodable.hpp\
+		    CAAbstractXMLSignable.hpp\
+		    CAAccountingBIInterface.hpp\
+		    CAAccountingControlChannel.hpp\
+		    CAAccountingDBInterface.hpp\
+		    CAAccountingInstance.hpp\
+		    CAAccountingSettleThread.hpp\
+		    CAASymCipher.hpp \
+		    CABase64.hpp \
+		    CACacheLoadBalancing.hpp\
+		    CACertificate.hpp\
+		    CACertStore.hpp\
+		    CAConditionVariable.hpp\
+		    CAControlChannelDispatcher.hpp\
+		    CAControlChannelTest.hpp\
+		    CACmdLnOptions.hpp \
+		    CADatabase.hpp\
+		    CADatagramSocket.hpp\
+		    CADataRetentionLog.hpp\
+		    CADataRetentionLogFile.hpp\
+		    CADynaNetworking.hpp \
+		    CADynamicCascadeConfigurator.hpp \
+		    CAFileSystemDirectory.hpp \
+		    CAFirstMix.hpp \
+		    CAFirstMixChannelList.hpp \
+		    CAHttpClient.hpp \
+		    CAInfoService.hpp \
+		    CAInfoServiceAware.hpp \
+		    CAIPList.hpp \
+		    CAIPAddrWithNetmask.hpp \
+		    CALastMix.hpp \
+		    CALastMixChannelList.hpp\
+		    CAListenerInterface.hpp\
+		    CALibProxytest.hpp\
+		    CALocalProxy.hpp \
+		    CALockAble.hpp\
+		    CALogPacketStats.hpp\
+		    CAMiddleMix.hpp \
+		    CAMiddleMixChannelList.hpp \
+		    CAMix.hpp \
+		    CAMixWithReplayDB.hpp\
+		    CAMsg.hpp \
+		    CAMultiSignature.hpp\
+		    CAMutex.hpp\
+		    CAMuxSocket.hpp \
+		    CAPriceInfo.hpp \
+		    CAPool.hpp\
+		    CAQueue.hpp \
+		    CAReplayControlChannel.hpp\
+		    CAReplayCtrlChannelMsgProc.hpp\
+		    CASemaphore.hpp\
+		    CASignature.hpp \
+		    CASingleSocketGroup.hpp\
+		    CASocket.hpp \
+		    CASocketAddr.hpp \
+		    CASocketAddrINet.hpp \
+		    CASocketAddrUnix.hpp \
+		    CASocketGroup.hpp \
+		    CASocketGroupEpoll.hpp\
+		    CASocketList.hpp \
+		    CAStatusManager.hpp \
+		    CATLSClientSocket.hpp\
+		    CAClientSocket.hpp\
+		    CASymCipher.hpp \
+		    CASymCipherGCM.hpp \
+		    CASymChannelCipher.hpp \
+		    CASymChannelCipherFactory.hpp \
+		    CASymCipher.hpp \
+			CASymCipherCTR.hpp \
+			CASymCipherGCM.hpp \
+			CASymCipherOFB.hpp \
+		    CASyncControlChannel.hpp \
+		    CATempIPBlockList.hpp\
+		    CAThread.hpp \
+		    CAThreadPool.hpp\
+		    CAThreadList.hpp \
+		    CAUtil.hpp \
+		    CAXMLBI.hpp \
+		    CAXMLCostConfirmation.hpp\
+		    CAXMLErrorMessage.hpp\
+		    CAXMLPriceCert.hpp\
+		    Hashtable.hpp\
+		    TermsAndConditions.hpp \
+		    packetintro.h\
+		    StdAfx.h\
+		    basetypedefs.h
 
+@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@lib_LTLIBRARIES = libmixshadow.la
+@ONLY_LIB_TRUE@lib_LTLIBRARIES = libmix.la
+@ONLY_LIB_TRUE@libmix_la_CPPFLAGS = -DSOMEFLAG
+@ONLY_LIB_TRUE@libmix_la_SOURCES = $proxtest_sources
 @ONLY_LIB_TRUE@libmix_la_LIBADD = $(top_builddir)/xml/libxml.a \
 @ONLY_LIB_TRUE@	    $(top_builddir)/popt/libpopt.a \
 @ONLY_LIB_TRUE@	    $(top_builddir)/trio/libtrio.a \
 @ONLY_LIB_TRUE@	    $(top_builddir)/tre/libtre.a \
 @ONLY_LIB_TRUE@	    $(top_builddir)/gcm/libgcm.a
 
-@ONLY_LIB_FALSE@noinst_LIBRARIES = libproxytest.a
-@ONLY_LIB_FALSE@libproxytest_a_CPPFLAGS = -DSOMEFLAG
-@ONLY_LIB_FALSE@libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
-@ONLY_LIB_FALSE@		    CAAbstractXMLEncodable.cpp\
-@ONLY_LIB_FALSE@		    CAAbstractXMLSignable.cpp\
-@ONLY_LIB_FALSE@		    CAAccountingBIInterface.cpp\
-@ONLY_LIB_FALSE@		    CAAccountingControlChannel.cpp\
-@ONLY_LIB_FALSE@		    CAAccountingDBInterface.cpp\
-@ONLY_LIB_FALSE@		    CAAccountingInstance.cpp\
-@ONLY_LIB_FALSE@		    CAAccountingSettleThread.cpp\
-@ONLY_LIB_FALSE@		    CAASymCipher.cpp \
-@ONLY_LIB_FALSE@		    CABase64.cpp \
-@ONLY_LIB_FALSE@		    CACacheLoadBalancing.cpp\
-@ONLY_LIB_FALSE@		    CACertificate.cpp\
-@ONLY_LIB_FALSE@		    CACertStore.cpp\
-@ONLY_LIB_FALSE@		    CAClientSocket.cpp\
-@ONLY_LIB_FALSE@		    CACmdLnOptions.cpp \
-@ONLY_LIB_FALSE@		    CAConditionVariable.cpp\
-@ONLY_LIB_FALSE@		    CAControlChannelDispatcher.cpp\
-@ONLY_LIB_FALSE@		    CAControlChannelTest.cpp\
-@ONLY_LIB_FALSE@		    CADatabase.cpp\
-@ONLY_LIB_FALSE@		    CADatagramSocket.cpp \
-@ONLY_LIB_FALSE@		    CADataRetentionLog.cpp\
-@ONLY_LIB_FALSE@		    CADataRetentionLogFile.cpp\
-@ONLY_LIB_FALSE@		    CADynaNetworking.cpp \
-@ONLY_LIB_FALSE@		    CADynamicCascadeConfigurator.cpp \
-@ONLY_LIB_FALSE@		    CAFileSystemDirectory.cpp \
-@ONLY_LIB_FALSE@		    CAFirstMix.cpp \
-@ONLY_LIB_FALSE@		    CAFirstMixChannelList.cpp \
-@ONLY_LIB_FALSE@		    CAHttpClient.cpp \
-@ONLY_LIB_FALSE@		    CAInfoService.cpp \
-@ONLY_LIB_FALSE@		    CAInfoServiceAware.cpp \
-@ONLY_LIB_FALSE@		    CAIPList.cpp \
-@ONLY_LIB_FALSE@		    CAIPAddrWithNetmask.cpp \
-@ONLY_LIB_FALSE@		    CALastMix.cpp \
-@ONLY_LIB_FALSE@		    CALastMixChannelList.cpp\
-@ONLY_LIB_FALSE@		    CAListenerInterface.cpp\
-@ONLY_LIB_FALSE@		    CALibProxytest.cpp\
-@ONLY_LIB_FALSE@		    CALocalProxy.cpp \
-@ONLY_LIB_FALSE@		    CALogPacketStats.cpp\
-@ONLY_LIB_FALSE@		    CAMiddleMix.cpp \
-@ONLY_LIB_FALSE@		    CAMiddleMixChannelList.cpp \
-@ONLY_LIB_FALSE@		    CAMix.cpp \
-@ONLY_LIB_FALSE@		    CAMixWithReplayDB.cpp\
-@ONLY_LIB_FALSE@		    CAMsg.cpp \
-@ONLY_LIB_FALSE@		    CAMultiSignature.cpp\
-@ONLY_LIB_FALSE@		    CAMutex.cpp\
-@ONLY_LIB_FALSE@		    CAMuxSocket.cpp \
-@ONLY_LIB_FALSE@		    CAPriceInfo.cpp \
-@ONLY_LIB_FALSE@		    CAPool.cpp\
-@ONLY_LIB_FALSE@		    CAQueue.cpp \
-@ONLY_LIB_FALSE@		    CAReplayControlChannel.cpp\
-@ONLY_LIB_FALSE@		    CAReplayCtrlChannelMsgProc.cpp\
-@ONLY_LIB_FALSE@		    CASemaphore.cpp\
-@ONLY_LIB_FALSE@		    CASignature.cpp \
-@ONLY_LIB_FALSE@		    CASingleSocketGroup.cpp\
-@ONLY_LIB_FALSE@		    CASocket.cpp \
-@ONLY_LIB_FALSE@		    CASocketAddrINet.cpp \
-@ONLY_LIB_FALSE@		    CASocketAddrUnix.cpp \
-@ONLY_LIB_FALSE@		    CASocketGroup.cpp \
-@ONLY_LIB_FALSE@		    CASocketGroupEpoll.cpp\
-@ONLY_LIB_FALSE@		    CASocketList.cpp \
-@ONLY_LIB_FALSE@		    CAStatusManager.cpp \
-@ONLY_LIB_FALSE@		    CATLSClientSocket.cpp\
-@ONLY_LIB_FALSE@		    CASymCipher.cpp \
-@ONLY_LIB_FALSE@			CASymCipherCTR.cpp \
-@ONLY_LIB_FALSE@			CASymCipherGCM.cpp \
-@ONLY_LIB_FALSE@			CASymCipherOFB.cpp \
-@ONLY_LIB_FALSE@		    CASyncControlChannel.cpp\
-@ONLY_LIB_FALSE@		    CATempIPBlockList.cpp\
-@ONLY_LIB_FALSE@		    CAThread.cpp \
-@ONLY_LIB_FALSE@		    CAThreadPool.cpp\
-@ONLY_LIB_FALSE@		    CAThreadList.cpp \
-@ONLY_LIB_FALSE@		    CAUtil.cpp \
-@ONLY_LIB_FALSE@		    CAXMLBI.cpp \
-@ONLY_LIB_FALSE@		    CAXMLCostConfirmation.cpp\
-@ONLY_LIB_FALSE@		    CAXMLErrorMessage.cpp\
-@ONLY_LIB_FALSE@		    CAXMLPriceCert.cpp\
-@ONLY_LIB_FALSE@		    Hashtable.cpp\
-@ONLY_LIB_FALSE@		    TermsAndConditions.cpp \
-@ONLY_LIB_FALSE@		    packetintro.cpp \
-@ONLY_LIB_FALSE@		    StdAfx.cpp \
-@ONLY_LIB_FALSE@		    InnerMiddleMix.cpp\
-@ONLY_LIB_FALSE@		    InnerMiddleMix.hpp\
-@ONLY_LIB_FALSE@		    CAAbstractControlChannel.hpp\
-@ONLY_LIB_FALSE@		    CAAbstractXMLEncodable.hpp\
-@ONLY_LIB_FALSE@		    CAAbstractXMLSignable.hpp\
-@ONLY_LIB_FALSE@		    CAAccountingBIInterface.hpp\
-@ONLY_LIB_FALSE@		    CAAccountingControlChannel.hpp\
-@ONLY_LIB_FALSE@		    CAAccountingDBInterface.hpp\
-@ONLY_LIB_FALSE@		    CAAccountingInstance.hpp\
-@ONLY_LIB_FALSE@		    CAAccountingSettleThread.hpp\
-@ONLY_LIB_FALSE@		    CAASymCipher.hpp \
-@ONLY_LIB_FALSE@		    CABase64.hpp \
-@ONLY_LIB_FALSE@		    CACacheLoadBalancing.hpp\
-@ONLY_LIB_FALSE@		    CACertificate.hpp\
-@ONLY_LIB_FALSE@		    CACertStore.hpp\
-@ONLY_LIB_FALSE@		    CAConditionVariable.hpp\
-@ONLY_LIB_FALSE@		    CAControlChannelDispatcher.hpp\
-@ONLY_LIB_FALSE@		    CAControlChannelTest.hpp\
-@ONLY_LIB_FALSE@		    CACmdLnOptions.hpp \
-@ONLY_LIB_FALSE@		    CADatabase.hpp\
-@ONLY_LIB_FALSE@		    CADatagramSocket.hpp\
-@ONLY_LIB_FALSE@		    CADataRetentionLog.hpp\
-@ONLY_LIB_FALSE@		    CADataRetentionLogFile.hpp\
-@ONLY_LIB_FALSE@		    CADynaNetworking.hpp \
-@ONLY_LIB_FALSE@		    CADynamicCascadeConfigurator.hpp \
-@ONLY_LIB_FALSE@		    CAFileSystemDirectory.hpp \
-@ONLY_LIB_FALSE@		    CAFirstMix.hpp \
-@ONLY_LIB_FALSE@		    CAFirstMixChannelList.hpp \
-@ONLY_LIB_FALSE@		    CAHttpClient.hpp \
-@ONLY_LIB_FALSE@		    CAInfoService.hpp \
-@ONLY_LIB_FALSE@		    CAInfoServiceAware.hpp \
-@ONLY_LIB_FALSE@		    CAIPList.hpp \
-@ONLY_LIB_FALSE@		    CAIPAddrWithNetmask.hpp \
-@ONLY_LIB_FALSE@		    CALastMix.hpp \
-@ONLY_LIB_FALSE@		    CALastMixChannelList.hpp\
-@ONLY_LIB_FALSE@		    CAListenerInterface.hpp\
-@ONLY_LIB_FALSE@		    CALibProxytest.hpp\
-@ONLY_LIB_FALSE@		    CALocalProxy.hpp \
-@ONLY_LIB_FALSE@		    CALockAble.hpp\
-@ONLY_LIB_FALSE@		    CALogPacketStats.hpp\
-@ONLY_LIB_FALSE@		    CAMiddleMix.hpp \
-@ONLY_LIB_FALSE@		    CAMiddleMixChannelList.hpp \
-@ONLY_LIB_FALSE@		    CAMix.hpp \
-@ONLY_LIB_FALSE@		    CAMixWithReplayDB.hpp\
-@ONLY_LIB_FALSE@		    CAMsg.hpp \
-@ONLY_LIB_FALSE@		    CAMultiSignature.hpp\
-@ONLY_LIB_FALSE@		    CAMutex.hpp\
-@ONLY_LIB_FALSE@		    CAMuxSocket.hpp \
-@ONLY_LIB_FALSE@		    CAPriceInfo.hpp \
-@ONLY_LIB_FALSE@		    CAPool.hpp\
-@ONLY_LIB_FALSE@		    CAQueue.hpp \
-@ONLY_LIB_FALSE@		    CAReplayControlChannel.hpp\
-@ONLY_LIB_FALSE@		    CAReplayCtrlChannelMsgProc.hpp\
-@ONLY_LIB_FALSE@		    CASemaphore.hpp\
-@ONLY_LIB_FALSE@		    CASignature.hpp \
-@ONLY_LIB_FALSE@		    CASingleSocketGroup.hpp\
-@ONLY_LIB_FALSE@		    CASocket.hpp \
-@ONLY_LIB_FALSE@		    CASocketAddr.hpp \
-@ONLY_LIB_FALSE@		    CASocketAddrINet.hpp \
-@ONLY_LIB_FALSE@		    CASocketAddrUnix.hpp \
-@ONLY_LIB_FALSE@		    CASocketGroup.hpp \
-@ONLY_LIB_FALSE@		    CASocketGroupEpoll.hpp\
-@ONLY_LIB_FALSE@		    CASocketList.hpp \
-@ONLY_LIB_FALSE@		    CAStatusManager.hpp \
-@ONLY_LIB_FALSE@		    CATLSClientSocket.hpp\
-@ONLY_LIB_FALSE@		    CAClientSocket.hpp\
-@ONLY_LIB_FALSE@		    CASymCipher.hpp \
-@ONLY_LIB_FALSE@		    CASymCipherGCM.hpp \
-@ONLY_LIB_FALSE@		    CASymChannelCipher.hpp \
-@ONLY_LIB_FALSE@		    CASymChannelCipherFactory.hpp \
-@ONLY_LIB_FALSE@		    CASymCipher.hpp \
-@ONLY_LIB_FALSE@			CASymCipherCTR.hpp \
-@ONLY_LIB_FALSE@			CASymCipherGCM.hpp \
-@ONLY_LIB_FALSE@			CASymCipherOFB.hpp \
-@ONLY_LIB_FALSE@		    CASyncControlChannel.hpp \
-@ONLY_LIB_FALSE@		    CATempIPBlockList.hpp\
-@ONLY_LIB_FALSE@		    CAThread.hpp \
-@ONLY_LIB_FALSE@		    CAThreadPool.hpp\
-@ONLY_LIB_FALSE@		    CAThreadList.hpp \
-@ONLY_LIB_FALSE@		    CAUtil.hpp \
-@ONLY_LIB_FALSE@		    CAXMLBI.hpp \
-@ONLY_LIB_FALSE@		    CAXMLCostConfirmation.hpp\
-@ONLY_LIB_FALSE@		    CAXMLErrorMessage.hpp\
-@ONLY_LIB_FALSE@		    CAXMLPriceCert.hpp\
-@ONLY_LIB_FALSE@		    Hashtable.hpp\
-@ONLY_LIB_FALSE@		    TermsAndConditions.hpp \
-@ONLY_LIB_FALSE@		    packetintro.h\
-@ONLY_LIB_FALSE@		    StdAfx.h\
-@ONLY_LIB_FALSE@		    basetypedefs.h
-
-@ONLY_LIB_FALSE@mix_SOURCES = proxytest.cpp
-@ONLY_LIB_FALSE@mix_CFLAGS = $(AM_CFLAGS)
-@ONLY_LIB_FALSE@mix_CPPFLAGS = $(AM_CPPFLAGS)
-@ONLY_LIB_FALSE@EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
-@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@libmixshadow_la_SOURCES = proxytest.cpp
-@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@libmixshadow_la_LIBADD = $(top_builddir)/libproxytest.a \
-@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	    $(top_builddir)/xml/libxml.a \
+@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@libmixshadow_la_SOURCES = $(proxytest_sources) proxytest.cpp
+@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@libmixshadow_la_LIBADD = $(top_builddir)/xml/libxml.a \
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	    $(top_builddir)/popt/libpopt.a \
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	    $(top_builddir)/trio/libtrio.a \
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	    $(top_builddir)/tre/libtre.a \
@@ -1277,6 +1040,14 @@ mix_LDADD = $(am__append_1) $(am__append_2)
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	    $(top_builddir)/TypeA/libmixa.a \
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
 
+@BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@libmixshadow_la_LDFLAGS = -Wl,--no-as-needed
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@noinst_LIBRARIES = libproxytest.a
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@libproxytest_a_CPPFLAGS = -DSOMEFLAG
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@libproxytest_a_SOURCES = $(proxytest_sources)
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@mix_SOURCES = proxytest.cpp
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@mix_CFLAGS = $(AM_CFLAGS)
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@mix_CPPFLAGS = $(AM_CPPFLAGS)
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 @DOTESTS_TRUE@MAYBE_tests = test
 @DOWIRESHARK_TRUE@MAYBE_wireshark = wireshark
 @ALL_FROM_SOURCE_TRUE@BUILT_SOURCES = external.h
@@ -1428,10 +1199,10 @@ libproxytest.a: $(libproxytest_a_OBJECTS) $(libproxytest_a_DEPENDENCIES) $(EXTRA
 	$(AM_V_at)$(RANLIB) libproxytest.a
 
 libmix.la: $(libmix_la_OBJECTS) $(libmix_la_DEPENDENCIES) $(EXTRA_libmix_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) $(am_libmix_la_rpath) $(libmix_la_OBJECTS) $(libmix_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(am_libmix_la_rpath) $(libmix_la_OBJECTS) $(libmix_la_LIBADD) $(LIBS)
 
 libmixshadow.la: $(libmixshadow_la_OBJECTS) $(libmixshadow_la_DEPENDENCIES) $(EXTRA_libmixshadow_la_DEPENDENCIES) 
-	$(AM_V_CXXLD)$(CXXLINK) $(am_libmixshadow_la_rpath) $(libmixshadow_la_OBJECTS) $(libmixshadow_la_LIBADD) $(LIBS)
+	$(AM_V_CXXLD)$(libmixshadow_la_LINK) $(am_libmixshadow_la_rpath) $(libmixshadow_la_OBJECTS) $(libmixshadow_la_LIBADD) $(LIBS)
 
 mix$(EXEEXT): $(mix_OBJECTS) $(mix_DEPENDENCIES) $(EXTRA_mix_DEPENDENCIES) 
 	@rm -f mix$(EXEEXT)
@@ -1443,87 +1214,86 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAASymCipher.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAAbstractControlChannel.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAAbstractXMLEncodable.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAAbstractXMLSignable.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAAccountingBIInterface.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAAccountingControlChannel.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAAccountingDBInterface.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAAccountingInstance.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAAccountingSettleThread.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CABase64.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CACacheLoadBalancing.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CACertStore.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CACertificate.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAClientSocket.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CACmdLnOptions.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAConditionVariable.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAControlChannelDispatcher.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAControlChannelTest.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CADataRetentionLog.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CADataRetentionLogFile.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CADatabase.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CADatagramSocket.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CADynaNetworking.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CADynamicCascadeConfigurator.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAFileSystemDirectory.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAFirstMix.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAFirstMixChannelList.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAHttpClient.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAIPAddrWithNetmask.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAIPList.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAInfoService.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAInfoServiceAware.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CALastMix.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CALastMixChannelList.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CALibProxytest.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAListenerInterface.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CALocalProxy.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CALogPacketStats.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAMiddleMix.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAMiddleMixChannelList.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAMix.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAMixWithReplayDB.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAMsg.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAMultiSignature.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAMutex.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAMuxSocket.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAPool.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAPriceInfo.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAQueue.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAReplayControlChannel.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAReplayCtrlChannelMsgProc.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASemaphore.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASignature.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASingleSocketGroup.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASocket.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASocketAddrINet.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASocketAddrUnix.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASocketGroup.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASocketGroupEpoll.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASocketList.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAStatusManager.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASymCipher.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASymCipherCTR.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASymCipherGCM.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASymCipherOFB.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CASyncControlChannel.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CATLSClientSocket.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CATempIPBlockList.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAThread.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAThreadList.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAThreadPool.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAUtil.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAXMLBI.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAXMLCostConfirmation.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAXMLErrorMessage.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAXMLPriceCert.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-Hashtable.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-InnerMiddleMix.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-StdAfx.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-TermsAndConditions.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-packetintro.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAASymCipher.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAbstractControlChannel.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAbstractXMLEncodable.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAbstractXMLSignable.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingBIInterface.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingControlChannel.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingDBInterface.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingInstance.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAAccountingSettleThread.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CABase64.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACacheLoadBalancing.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACertStore.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACertificate.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAClientSocket.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACmdLnOptions.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAConditionVariable.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAControlChannelDispatcher.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAControlChannelTest.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADataRetentionLog.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADataRetentionLogFile.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADatabase.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADatagramSocket.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADynaNetworking.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADynamicCascadeConfigurator.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAFileSystemDirectory.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAFirstMix.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAFirstMixChannelList.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAHttpClient.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAIPAddrWithNetmask.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAIPList.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAInfoService.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAInfoServiceAware.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALastMix.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALastMixChannelList.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALibProxytest.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAListenerInterface.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALocalProxy.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CALogPacketStats.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMiddleMix.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMiddleMixChannelList.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMix.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMixWithReplayDB.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMsg.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMultiSignature.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMutex.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMuxSocket.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAPool.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAPriceInfo.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAQueue.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAReplayControlChannel.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAReplayCtrlChannelMsgProc.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASemaphore.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASignature.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASingleSocketGroup.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocket.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketAddrINet.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketAddrUnix.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketGroup.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketGroupEpoll.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketList.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAStatusManager.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASymCipher.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASymCipherCTR.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASymCipherGCM.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASymCipherOFB.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASyncControlChannel.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CATLSClientSocket.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CATempIPBlockList.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAThread.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAThreadList.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAThreadPool.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAUtil.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAXMLBI.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAXMLCostConfirmation.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAXMLErrorMessage.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAXMLPriceCert.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Hashtable.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/InnerMiddleMix.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StdAfx.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TermsAndConditions.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAASymCipher.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAAbstractControlChannel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAAbstractXMLEncodable.Po@am__quote@ # am--include-marker
@@ -1606,6 +1376,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-TermsAndConditions.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-packetintro.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mix-proxytest.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packetintro.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/proxytest.Plo@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -2772,573 +2543,6 @@ libproxytest_a-InnerMiddleMix.obj: InnerMiddleMix.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-InnerMiddleMix.obj `if test -f 'InnerMiddleMix.cpp'; then $(CYGPATH_W) 'InnerMiddleMix.cpp'; else $(CYGPATH_W) '$(srcdir)/InnerMiddleMix.cpp'; fi`
 
-libmix_la-CAAbstractControlChannel.lo: CAAbstractControlChannel.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAAbstractControlChannel.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAAbstractControlChannel.Tpo -c -o libmix_la-CAAbstractControlChannel.lo `test -f 'CAAbstractControlChannel.cpp' || echo '$(srcdir)/'`CAAbstractControlChannel.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAAbstractControlChannel.Tpo $(DEPDIR)/libmix_la-CAAbstractControlChannel.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAAbstractControlChannel.cpp' object='libmix_la-CAAbstractControlChannel.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAAbstractControlChannel.lo `test -f 'CAAbstractControlChannel.cpp' || echo '$(srcdir)/'`CAAbstractControlChannel.cpp
-
-libmix_la-CAAbstractXMLEncodable.lo: CAAbstractXMLEncodable.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAAbstractXMLEncodable.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAAbstractXMLEncodable.Tpo -c -o libmix_la-CAAbstractXMLEncodable.lo `test -f 'CAAbstractXMLEncodable.cpp' || echo '$(srcdir)/'`CAAbstractXMLEncodable.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAAbstractXMLEncodable.Tpo $(DEPDIR)/libmix_la-CAAbstractXMLEncodable.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAAbstractXMLEncodable.cpp' object='libmix_la-CAAbstractXMLEncodable.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAAbstractXMLEncodable.lo `test -f 'CAAbstractXMLEncodable.cpp' || echo '$(srcdir)/'`CAAbstractXMLEncodable.cpp
-
-libmix_la-CAAbstractXMLSignable.lo: CAAbstractXMLSignable.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAAbstractXMLSignable.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAAbstractXMLSignable.Tpo -c -o libmix_la-CAAbstractXMLSignable.lo `test -f 'CAAbstractXMLSignable.cpp' || echo '$(srcdir)/'`CAAbstractXMLSignable.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAAbstractXMLSignable.Tpo $(DEPDIR)/libmix_la-CAAbstractXMLSignable.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAAbstractXMLSignable.cpp' object='libmix_la-CAAbstractXMLSignable.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAAbstractXMLSignable.lo `test -f 'CAAbstractXMLSignable.cpp' || echo '$(srcdir)/'`CAAbstractXMLSignable.cpp
-
-libmix_la-CAAccountingBIInterface.lo: CAAccountingBIInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAAccountingBIInterface.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAAccountingBIInterface.Tpo -c -o libmix_la-CAAccountingBIInterface.lo `test -f 'CAAccountingBIInterface.cpp' || echo '$(srcdir)/'`CAAccountingBIInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAAccountingBIInterface.Tpo $(DEPDIR)/libmix_la-CAAccountingBIInterface.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAAccountingBIInterface.cpp' object='libmix_la-CAAccountingBIInterface.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAAccountingBIInterface.lo `test -f 'CAAccountingBIInterface.cpp' || echo '$(srcdir)/'`CAAccountingBIInterface.cpp
-
-libmix_la-CAAccountingControlChannel.lo: CAAccountingControlChannel.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAAccountingControlChannel.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAAccountingControlChannel.Tpo -c -o libmix_la-CAAccountingControlChannel.lo `test -f 'CAAccountingControlChannel.cpp' || echo '$(srcdir)/'`CAAccountingControlChannel.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAAccountingControlChannel.Tpo $(DEPDIR)/libmix_la-CAAccountingControlChannel.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAAccountingControlChannel.cpp' object='libmix_la-CAAccountingControlChannel.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAAccountingControlChannel.lo `test -f 'CAAccountingControlChannel.cpp' || echo '$(srcdir)/'`CAAccountingControlChannel.cpp
-
-libmix_la-CAAccountingDBInterface.lo: CAAccountingDBInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAAccountingDBInterface.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAAccountingDBInterface.Tpo -c -o libmix_la-CAAccountingDBInterface.lo `test -f 'CAAccountingDBInterface.cpp' || echo '$(srcdir)/'`CAAccountingDBInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAAccountingDBInterface.Tpo $(DEPDIR)/libmix_la-CAAccountingDBInterface.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAAccountingDBInterface.cpp' object='libmix_la-CAAccountingDBInterface.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAAccountingDBInterface.lo `test -f 'CAAccountingDBInterface.cpp' || echo '$(srcdir)/'`CAAccountingDBInterface.cpp
-
-libmix_la-CAAccountingInstance.lo: CAAccountingInstance.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAAccountingInstance.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAAccountingInstance.Tpo -c -o libmix_la-CAAccountingInstance.lo `test -f 'CAAccountingInstance.cpp' || echo '$(srcdir)/'`CAAccountingInstance.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAAccountingInstance.Tpo $(DEPDIR)/libmix_la-CAAccountingInstance.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAAccountingInstance.cpp' object='libmix_la-CAAccountingInstance.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAAccountingInstance.lo `test -f 'CAAccountingInstance.cpp' || echo '$(srcdir)/'`CAAccountingInstance.cpp
-
-libmix_la-CAAccountingSettleThread.lo: CAAccountingSettleThread.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAAccountingSettleThread.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAAccountingSettleThread.Tpo -c -o libmix_la-CAAccountingSettleThread.lo `test -f 'CAAccountingSettleThread.cpp' || echo '$(srcdir)/'`CAAccountingSettleThread.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAAccountingSettleThread.Tpo $(DEPDIR)/libmix_la-CAAccountingSettleThread.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAAccountingSettleThread.cpp' object='libmix_la-CAAccountingSettleThread.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAAccountingSettleThread.lo `test -f 'CAAccountingSettleThread.cpp' || echo '$(srcdir)/'`CAAccountingSettleThread.cpp
-
-libmix_la-CAASymCipher.lo: CAASymCipher.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAASymCipher.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAASymCipher.Tpo -c -o libmix_la-CAASymCipher.lo `test -f 'CAASymCipher.cpp' || echo '$(srcdir)/'`CAASymCipher.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAASymCipher.Tpo $(DEPDIR)/libmix_la-CAASymCipher.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAASymCipher.cpp' object='libmix_la-CAASymCipher.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAASymCipher.lo `test -f 'CAASymCipher.cpp' || echo '$(srcdir)/'`CAASymCipher.cpp
-
-libmix_la-CABase64.lo: CABase64.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CABase64.lo -MD -MP -MF $(DEPDIR)/libmix_la-CABase64.Tpo -c -o libmix_la-CABase64.lo `test -f 'CABase64.cpp' || echo '$(srcdir)/'`CABase64.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CABase64.Tpo $(DEPDIR)/libmix_la-CABase64.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CABase64.cpp' object='libmix_la-CABase64.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CABase64.lo `test -f 'CABase64.cpp' || echo '$(srcdir)/'`CABase64.cpp
-
-libmix_la-CACacheLoadBalancing.lo: CACacheLoadBalancing.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CACacheLoadBalancing.lo -MD -MP -MF $(DEPDIR)/libmix_la-CACacheLoadBalancing.Tpo -c -o libmix_la-CACacheLoadBalancing.lo `test -f 'CACacheLoadBalancing.cpp' || echo '$(srcdir)/'`CACacheLoadBalancing.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CACacheLoadBalancing.Tpo $(DEPDIR)/libmix_la-CACacheLoadBalancing.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CACacheLoadBalancing.cpp' object='libmix_la-CACacheLoadBalancing.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CACacheLoadBalancing.lo `test -f 'CACacheLoadBalancing.cpp' || echo '$(srcdir)/'`CACacheLoadBalancing.cpp
-
-libmix_la-CACertificate.lo: CACertificate.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CACertificate.lo -MD -MP -MF $(DEPDIR)/libmix_la-CACertificate.Tpo -c -o libmix_la-CACertificate.lo `test -f 'CACertificate.cpp' || echo '$(srcdir)/'`CACertificate.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CACertificate.Tpo $(DEPDIR)/libmix_la-CACertificate.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CACertificate.cpp' object='libmix_la-CACertificate.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CACertificate.lo `test -f 'CACertificate.cpp' || echo '$(srcdir)/'`CACertificate.cpp
-
-libmix_la-CACertStore.lo: CACertStore.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CACertStore.lo -MD -MP -MF $(DEPDIR)/libmix_la-CACertStore.Tpo -c -o libmix_la-CACertStore.lo `test -f 'CACertStore.cpp' || echo '$(srcdir)/'`CACertStore.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CACertStore.Tpo $(DEPDIR)/libmix_la-CACertStore.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CACertStore.cpp' object='libmix_la-CACertStore.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CACertStore.lo `test -f 'CACertStore.cpp' || echo '$(srcdir)/'`CACertStore.cpp
-
-libmix_la-CAClientSocket.lo: CAClientSocket.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAClientSocket.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAClientSocket.Tpo -c -o libmix_la-CAClientSocket.lo `test -f 'CAClientSocket.cpp' || echo '$(srcdir)/'`CAClientSocket.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAClientSocket.Tpo $(DEPDIR)/libmix_la-CAClientSocket.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAClientSocket.cpp' object='libmix_la-CAClientSocket.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAClientSocket.lo `test -f 'CAClientSocket.cpp' || echo '$(srcdir)/'`CAClientSocket.cpp
-
-libmix_la-CACmdLnOptions.lo: CACmdLnOptions.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CACmdLnOptions.lo -MD -MP -MF $(DEPDIR)/libmix_la-CACmdLnOptions.Tpo -c -o libmix_la-CACmdLnOptions.lo `test -f 'CACmdLnOptions.cpp' || echo '$(srcdir)/'`CACmdLnOptions.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CACmdLnOptions.Tpo $(DEPDIR)/libmix_la-CACmdLnOptions.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CACmdLnOptions.cpp' object='libmix_la-CACmdLnOptions.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CACmdLnOptions.lo `test -f 'CACmdLnOptions.cpp' || echo '$(srcdir)/'`CACmdLnOptions.cpp
-
-libmix_la-CAConditionVariable.lo: CAConditionVariable.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAConditionVariable.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAConditionVariable.Tpo -c -o libmix_la-CAConditionVariable.lo `test -f 'CAConditionVariable.cpp' || echo '$(srcdir)/'`CAConditionVariable.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAConditionVariable.Tpo $(DEPDIR)/libmix_la-CAConditionVariable.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAConditionVariable.cpp' object='libmix_la-CAConditionVariable.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAConditionVariable.lo `test -f 'CAConditionVariable.cpp' || echo '$(srcdir)/'`CAConditionVariable.cpp
-
-libmix_la-CAControlChannelDispatcher.lo: CAControlChannelDispatcher.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAControlChannelDispatcher.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAControlChannelDispatcher.Tpo -c -o libmix_la-CAControlChannelDispatcher.lo `test -f 'CAControlChannelDispatcher.cpp' || echo '$(srcdir)/'`CAControlChannelDispatcher.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAControlChannelDispatcher.Tpo $(DEPDIR)/libmix_la-CAControlChannelDispatcher.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAControlChannelDispatcher.cpp' object='libmix_la-CAControlChannelDispatcher.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAControlChannelDispatcher.lo `test -f 'CAControlChannelDispatcher.cpp' || echo '$(srcdir)/'`CAControlChannelDispatcher.cpp
-
-libmix_la-CAControlChannelTest.lo: CAControlChannelTest.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAControlChannelTest.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAControlChannelTest.Tpo -c -o libmix_la-CAControlChannelTest.lo `test -f 'CAControlChannelTest.cpp' || echo '$(srcdir)/'`CAControlChannelTest.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAControlChannelTest.Tpo $(DEPDIR)/libmix_la-CAControlChannelTest.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAControlChannelTest.cpp' object='libmix_la-CAControlChannelTest.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAControlChannelTest.lo `test -f 'CAControlChannelTest.cpp' || echo '$(srcdir)/'`CAControlChannelTest.cpp
-
-libmix_la-CADatabase.lo: CADatabase.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CADatabase.lo -MD -MP -MF $(DEPDIR)/libmix_la-CADatabase.Tpo -c -o libmix_la-CADatabase.lo `test -f 'CADatabase.cpp' || echo '$(srcdir)/'`CADatabase.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CADatabase.Tpo $(DEPDIR)/libmix_la-CADatabase.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CADatabase.cpp' object='libmix_la-CADatabase.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CADatabase.lo `test -f 'CADatabase.cpp' || echo '$(srcdir)/'`CADatabase.cpp
-
-libmix_la-CADatagramSocket.lo: CADatagramSocket.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CADatagramSocket.lo -MD -MP -MF $(DEPDIR)/libmix_la-CADatagramSocket.Tpo -c -o libmix_la-CADatagramSocket.lo `test -f 'CADatagramSocket.cpp' || echo '$(srcdir)/'`CADatagramSocket.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CADatagramSocket.Tpo $(DEPDIR)/libmix_la-CADatagramSocket.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CADatagramSocket.cpp' object='libmix_la-CADatagramSocket.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CADatagramSocket.lo `test -f 'CADatagramSocket.cpp' || echo '$(srcdir)/'`CADatagramSocket.cpp
-
-libmix_la-CADataRetentionLog.lo: CADataRetentionLog.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CADataRetentionLog.lo -MD -MP -MF $(DEPDIR)/libmix_la-CADataRetentionLog.Tpo -c -o libmix_la-CADataRetentionLog.lo `test -f 'CADataRetentionLog.cpp' || echo '$(srcdir)/'`CADataRetentionLog.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CADataRetentionLog.Tpo $(DEPDIR)/libmix_la-CADataRetentionLog.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CADataRetentionLog.cpp' object='libmix_la-CADataRetentionLog.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CADataRetentionLog.lo `test -f 'CADataRetentionLog.cpp' || echo '$(srcdir)/'`CADataRetentionLog.cpp
-
-libmix_la-CADataRetentionLogFile.lo: CADataRetentionLogFile.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CADataRetentionLogFile.lo -MD -MP -MF $(DEPDIR)/libmix_la-CADataRetentionLogFile.Tpo -c -o libmix_la-CADataRetentionLogFile.lo `test -f 'CADataRetentionLogFile.cpp' || echo '$(srcdir)/'`CADataRetentionLogFile.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CADataRetentionLogFile.Tpo $(DEPDIR)/libmix_la-CADataRetentionLogFile.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CADataRetentionLogFile.cpp' object='libmix_la-CADataRetentionLogFile.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CADataRetentionLogFile.lo `test -f 'CADataRetentionLogFile.cpp' || echo '$(srcdir)/'`CADataRetentionLogFile.cpp
-
-libmix_la-CADynaNetworking.lo: CADynaNetworking.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CADynaNetworking.lo -MD -MP -MF $(DEPDIR)/libmix_la-CADynaNetworking.Tpo -c -o libmix_la-CADynaNetworking.lo `test -f 'CADynaNetworking.cpp' || echo '$(srcdir)/'`CADynaNetworking.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CADynaNetworking.Tpo $(DEPDIR)/libmix_la-CADynaNetworking.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CADynaNetworking.cpp' object='libmix_la-CADynaNetworking.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CADynaNetworking.lo `test -f 'CADynaNetworking.cpp' || echo '$(srcdir)/'`CADynaNetworking.cpp
-
-libmix_la-CADynamicCascadeConfigurator.lo: CADynamicCascadeConfigurator.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CADynamicCascadeConfigurator.lo -MD -MP -MF $(DEPDIR)/libmix_la-CADynamicCascadeConfigurator.Tpo -c -o libmix_la-CADynamicCascadeConfigurator.lo `test -f 'CADynamicCascadeConfigurator.cpp' || echo '$(srcdir)/'`CADynamicCascadeConfigurator.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CADynamicCascadeConfigurator.Tpo $(DEPDIR)/libmix_la-CADynamicCascadeConfigurator.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CADynamicCascadeConfigurator.cpp' object='libmix_la-CADynamicCascadeConfigurator.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CADynamicCascadeConfigurator.lo `test -f 'CADynamicCascadeConfigurator.cpp' || echo '$(srcdir)/'`CADynamicCascadeConfigurator.cpp
-
-libmix_la-CAFileSystemDirectory.lo: CAFileSystemDirectory.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAFileSystemDirectory.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAFileSystemDirectory.Tpo -c -o libmix_la-CAFileSystemDirectory.lo `test -f 'CAFileSystemDirectory.cpp' || echo '$(srcdir)/'`CAFileSystemDirectory.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAFileSystemDirectory.Tpo $(DEPDIR)/libmix_la-CAFileSystemDirectory.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAFileSystemDirectory.cpp' object='libmix_la-CAFileSystemDirectory.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAFileSystemDirectory.lo `test -f 'CAFileSystemDirectory.cpp' || echo '$(srcdir)/'`CAFileSystemDirectory.cpp
-
-libmix_la-CAFirstMix.lo: CAFirstMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAFirstMix.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAFirstMix.Tpo -c -o libmix_la-CAFirstMix.lo `test -f 'CAFirstMix.cpp' || echo '$(srcdir)/'`CAFirstMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAFirstMix.Tpo $(DEPDIR)/libmix_la-CAFirstMix.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAFirstMix.cpp' object='libmix_la-CAFirstMix.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAFirstMix.lo `test -f 'CAFirstMix.cpp' || echo '$(srcdir)/'`CAFirstMix.cpp
-
-libmix_la-CAFirstMixChannelList.lo: CAFirstMixChannelList.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAFirstMixChannelList.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAFirstMixChannelList.Tpo -c -o libmix_la-CAFirstMixChannelList.lo `test -f 'CAFirstMixChannelList.cpp' || echo '$(srcdir)/'`CAFirstMixChannelList.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAFirstMixChannelList.Tpo $(DEPDIR)/libmix_la-CAFirstMixChannelList.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAFirstMixChannelList.cpp' object='libmix_la-CAFirstMixChannelList.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAFirstMixChannelList.lo `test -f 'CAFirstMixChannelList.cpp' || echo '$(srcdir)/'`CAFirstMixChannelList.cpp
-
-libmix_la-CAHttpClient.lo: CAHttpClient.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAHttpClient.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAHttpClient.Tpo -c -o libmix_la-CAHttpClient.lo `test -f 'CAHttpClient.cpp' || echo '$(srcdir)/'`CAHttpClient.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAHttpClient.Tpo $(DEPDIR)/libmix_la-CAHttpClient.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAHttpClient.cpp' object='libmix_la-CAHttpClient.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAHttpClient.lo `test -f 'CAHttpClient.cpp' || echo '$(srcdir)/'`CAHttpClient.cpp
-
-libmix_la-CAInfoService.lo: CAInfoService.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAInfoService.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAInfoService.Tpo -c -o libmix_la-CAInfoService.lo `test -f 'CAInfoService.cpp' || echo '$(srcdir)/'`CAInfoService.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAInfoService.Tpo $(DEPDIR)/libmix_la-CAInfoService.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAInfoService.cpp' object='libmix_la-CAInfoService.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAInfoService.lo `test -f 'CAInfoService.cpp' || echo '$(srcdir)/'`CAInfoService.cpp
-
-libmix_la-CAInfoServiceAware.lo: CAInfoServiceAware.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAInfoServiceAware.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAInfoServiceAware.Tpo -c -o libmix_la-CAInfoServiceAware.lo `test -f 'CAInfoServiceAware.cpp' || echo '$(srcdir)/'`CAInfoServiceAware.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAInfoServiceAware.Tpo $(DEPDIR)/libmix_la-CAInfoServiceAware.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAInfoServiceAware.cpp' object='libmix_la-CAInfoServiceAware.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAInfoServiceAware.lo `test -f 'CAInfoServiceAware.cpp' || echo '$(srcdir)/'`CAInfoServiceAware.cpp
-
-libmix_la-CAIPList.lo: CAIPList.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAIPList.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAIPList.Tpo -c -o libmix_la-CAIPList.lo `test -f 'CAIPList.cpp' || echo '$(srcdir)/'`CAIPList.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAIPList.Tpo $(DEPDIR)/libmix_la-CAIPList.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAIPList.cpp' object='libmix_la-CAIPList.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAIPList.lo `test -f 'CAIPList.cpp' || echo '$(srcdir)/'`CAIPList.cpp
-
-libmix_la-CAIPAddrWithNetmask.lo: CAIPAddrWithNetmask.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAIPAddrWithNetmask.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAIPAddrWithNetmask.Tpo -c -o libmix_la-CAIPAddrWithNetmask.lo `test -f 'CAIPAddrWithNetmask.cpp' || echo '$(srcdir)/'`CAIPAddrWithNetmask.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAIPAddrWithNetmask.Tpo $(DEPDIR)/libmix_la-CAIPAddrWithNetmask.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAIPAddrWithNetmask.cpp' object='libmix_la-CAIPAddrWithNetmask.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAIPAddrWithNetmask.lo `test -f 'CAIPAddrWithNetmask.cpp' || echo '$(srcdir)/'`CAIPAddrWithNetmask.cpp
-
-libmix_la-CALastMix.lo: CALastMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CALastMix.lo -MD -MP -MF $(DEPDIR)/libmix_la-CALastMix.Tpo -c -o libmix_la-CALastMix.lo `test -f 'CALastMix.cpp' || echo '$(srcdir)/'`CALastMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CALastMix.Tpo $(DEPDIR)/libmix_la-CALastMix.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CALastMix.cpp' object='libmix_la-CALastMix.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CALastMix.lo `test -f 'CALastMix.cpp' || echo '$(srcdir)/'`CALastMix.cpp
-
-libmix_la-CALastMixChannelList.lo: CALastMixChannelList.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CALastMixChannelList.lo -MD -MP -MF $(DEPDIR)/libmix_la-CALastMixChannelList.Tpo -c -o libmix_la-CALastMixChannelList.lo `test -f 'CALastMixChannelList.cpp' || echo '$(srcdir)/'`CALastMixChannelList.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CALastMixChannelList.Tpo $(DEPDIR)/libmix_la-CALastMixChannelList.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CALastMixChannelList.cpp' object='libmix_la-CALastMixChannelList.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CALastMixChannelList.lo `test -f 'CALastMixChannelList.cpp' || echo '$(srcdir)/'`CALastMixChannelList.cpp
-
-libmix_la-CAListenerInterface.lo: CAListenerInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAListenerInterface.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAListenerInterface.Tpo -c -o libmix_la-CAListenerInterface.lo `test -f 'CAListenerInterface.cpp' || echo '$(srcdir)/'`CAListenerInterface.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAListenerInterface.Tpo $(DEPDIR)/libmix_la-CAListenerInterface.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAListenerInterface.cpp' object='libmix_la-CAListenerInterface.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAListenerInterface.lo `test -f 'CAListenerInterface.cpp' || echo '$(srcdir)/'`CAListenerInterface.cpp
-
-libmix_la-CALibProxytest.lo: CALibProxytest.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CALibProxytest.lo -MD -MP -MF $(DEPDIR)/libmix_la-CALibProxytest.Tpo -c -o libmix_la-CALibProxytest.lo `test -f 'CALibProxytest.cpp' || echo '$(srcdir)/'`CALibProxytest.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CALibProxytest.Tpo $(DEPDIR)/libmix_la-CALibProxytest.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CALibProxytest.cpp' object='libmix_la-CALibProxytest.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CALibProxytest.lo `test -f 'CALibProxytest.cpp' || echo '$(srcdir)/'`CALibProxytest.cpp
-
-libmix_la-CALocalProxy.lo: CALocalProxy.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CALocalProxy.lo -MD -MP -MF $(DEPDIR)/libmix_la-CALocalProxy.Tpo -c -o libmix_la-CALocalProxy.lo `test -f 'CALocalProxy.cpp' || echo '$(srcdir)/'`CALocalProxy.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CALocalProxy.Tpo $(DEPDIR)/libmix_la-CALocalProxy.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CALocalProxy.cpp' object='libmix_la-CALocalProxy.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CALocalProxy.lo `test -f 'CALocalProxy.cpp' || echo '$(srcdir)/'`CALocalProxy.cpp
-
-libmix_la-CALogPacketStats.lo: CALogPacketStats.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CALogPacketStats.lo -MD -MP -MF $(DEPDIR)/libmix_la-CALogPacketStats.Tpo -c -o libmix_la-CALogPacketStats.lo `test -f 'CALogPacketStats.cpp' || echo '$(srcdir)/'`CALogPacketStats.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CALogPacketStats.Tpo $(DEPDIR)/libmix_la-CALogPacketStats.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CALogPacketStats.cpp' object='libmix_la-CALogPacketStats.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CALogPacketStats.lo `test -f 'CALogPacketStats.cpp' || echo '$(srcdir)/'`CALogPacketStats.cpp
-
-libmix_la-CAMiddleMix.lo: CAMiddleMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAMiddleMix.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAMiddleMix.Tpo -c -o libmix_la-CAMiddleMix.lo `test -f 'CAMiddleMix.cpp' || echo '$(srcdir)/'`CAMiddleMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAMiddleMix.Tpo $(DEPDIR)/libmix_la-CAMiddleMix.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAMiddleMix.cpp' object='libmix_la-CAMiddleMix.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAMiddleMix.lo `test -f 'CAMiddleMix.cpp' || echo '$(srcdir)/'`CAMiddleMix.cpp
-
-libmix_la-CAMiddleMixChannelList.lo: CAMiddleMixChannelList.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAMiddleMixChannelList.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAMiddleMixChannelList.Tpo -c -o libmix_la-CAMiddleMixChannelList.lo `test -f 'CAMiddleMixChannelList.cpp' || echo '$(srcdir)/'`CAMiddleMixChannelList.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAMiddleMixChannelList.Tpo $(DEPDIR)/libmix_la-CAMiddleMixChannelList.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAMiddleMixChannelList.cpp' object='libmix_la-CAMiddleMixChannelList.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAMiddleMixChannelList.lo `test -f 'CAMiddleMixChannelList.cpp' || echo '$(srcdir)/'`CAMiddleMixChannelList.cpp
-
-libmix_la-CAMix.lo: CAMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAMix.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAMix.Tpo -c -o libmix_la-CAMix.lo `test -f 'CAMix.cpp' || echo '$(srcdir)/'`CAMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAMix.Tpo $(DEPDIR)/libmix_la-CAMix.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAMix.cpp' object='libmix_la-CAMix.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAMix.lo `test -f 'CAMix.cpp' || echo '$(srcdir)/'`CAMix.cpp
-
-libmix_la-CAMixWithReplayDB.lo: CAMixWithReplayDB.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAMixWithReplayDB.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAMixWithReplayDB.Tpo -c -o libmix_la-CAMixWithReplayDB.lo `test -f 'CAMixWithReplayDB.cpp' || echo '$(srcdir)/'`CAMixWithReplayDB.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAMixWithReplayDB.Tpo $(DEPDIR)/libmix_la-CAMixWithReplayDB.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAMixWithReplayDB.cpp' object='libmix_la-CAMixWithReplayDB.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAMixWithReplayDB.lo `test -f 'CAMixWithReplayDB.cpp' || echo '$(srcdir)/'`CAMixWithReplayDB.cpp
-
-libmix_la-CAMsg.lo: CAMsg.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAMsg.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAMsg.Tpo -c -o libmix_la-CAMsg.lo `test -f 'CAMsg.cpp' || echo '$(srcdir)/'`CAMsg.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAMsg.Tpo $(DEPDIR)/libmix_la-CAMsg.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAMsg.cpp' object='libmix_la-CAMsg.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAMsg.lo `test -f 'CAMsg.cpp' || echo '$(srcdir)/'`CAMsg.cpp
-
-libmix_la-CAMultiSignature.lo: CAMultiSignature.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAMultiSignature.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAMultiSignature.Tpo -c -o libmix_la-CAMultiSignature.lo `test -f 'CAMultiSignature.cpp' || echo '$(srcdir)/'`CAMultiSignature.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAMultiSignature.Tpo $(DEPDIR)/libmix_la-CAMultiSignature.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAMultiSignature.cpp' object='libmix_la-CAMultiSignature.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAMultiSignature.lo `test -f 'CAMultiSignature.cpp' || echo '$(srcdir)/'`CAMultiSignature.cpp
-
-libmix_la-CAMutex.lo: CAMutex.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAMutex.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAMutex.Tpo -c -o libmix_la-CAMutex.lo `test -f 'CAMutex.cpp' || echo '$(srcdir)/'`CAMutex.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAMutex.Tpo $(DEPDIR)/libmix_la-CAMutex.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAMutex.cpp' object='libmix_la-CAMutex.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAMutex.lo `test -f 'CAMutex.cpp' || echo '$(srcdir)/'`CAMutex.cpp
-
-libmix_la-CAMuxSocket.lo: CAMuxSocket.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAMuxSocket.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAMuxSocket.Tpo -c -o libmix_la-CAMuxSocket.lo `test -f 'CAMuxSocket.cpp' || echo '$(srcdir)/'`CAMuxSocket.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAMuxSocket.Tpo $(DEPDIR)/libmix_la-CAMuxSocket.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAMuxSocket.cpp' object='libmix_la-CAMuxSocket.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAMuxSocket.lo `test -f 'CAMuxSocket.cpp' || echo '$(srcdir)/'`CAMuxSocket.cpp
-
-libmix_la-CAPriceInfo.lo: CAPriceInfo.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAPriceInfo.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAPriceInfo.Tpo -c -o libmix_la-CAPriceInfo.lo `test -f 'CAPriceInfo.cpp' || echo '$(srcdir)/'`CAPriceInfo.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAPriceInfo.Tpo $(DEPDIR)/libmix_la-CAPriceInfo.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAPriceInfo.cpp' object='libmix_la-CAPriceInfo.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAPriceInfo.lo `test -f 'CAPriceInfo.cpp' || echo '$(srcdir)/'`CAPriceInfo.cpp
-
-libmix_la-CAPool.lo: CAPool.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAPool.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAPool.Tpo -c -o libmix_la-CAPool.lo `test -f 'CAPool.cpp' || echo '$(srcdir)/'`CAPool.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAPool.Tpo $(DEPDIR)/libmix_la-CAPool.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAPool.cpp' object='libmix_la-CAPool.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAPool.lo `test -f 'CAPool.cpp' || echo '$(srcdir)/'`CAPool.cpp
-
-libmix_la-CAQueue.lo: CAQueue.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAQueue.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAQueue.Tpo -c -o libmix_la-CAQueue.lo `test -f 'CAQueue.cpp' || echo '$(srcdir)/'`CAQueue.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAQueue.Tpo $(DEPDIR)/libmix_la-CAQueue.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAQueue.cpp' object='libmix_la-CAQueue.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAQueue.lo `test -f 'CAQueue.cpp' || echo '$(srcdir)/'`CAQueue.cpp
-
-libmix_la-CAReplayControlChannel.lo: CAReplayControlChannel.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAReplayControlChannel.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAReplayControlChannel.Tpo -c -o libmix_la-CAReplayControlChannel.lo `test -f 'CAReplayControlChannel.cpp' || echo '$(srcdir)/'`CAReplayControlChannel.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAReplayControlChannel.Tpo $(DEPDIR)/libmix_la-CAReplayControlChannel.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAReplayControlChannel.cpp' object='libmix_la-CAReplayControlChannel.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAReplayControlChannel.lo `test -f 'CAReplayControlChannel.cpp' || echo '$(srcdir)/'`CAReplayControlChannel.cpp
-
-libmix_la-CAReplayCtrlChannelMsgProc.lo: CAReplayCtrlChannelMsgProc.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAReplayCtrlChannelMsgProc.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAReplayCtrlChannelMsgProc.Tpo -c -o libmix_la-CAReplayCtrlChannelMsgProc.lo `test -f 'CAReplayCtrlChannelMsgProc.cpp' || echo '$(srcdir)/'`CAReplayCtrlChannelMsgProc.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAReplayCtrlChannelMsgProc.Tpo $(DEPDIR)/libmix_la-CAReplayCtrlChannelMsgProc.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAReplayCtrlChannelMsgProc.cpp' object='libmix_la-CAReplayCtrlChannelMsgProc.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAReplayCtrlChannelMsgProc.lo `test -f 'CAReplayCtrlChannelMsgProc.cpp' || echo '$(srcdir)/'`CAReplayCtrlChannelMsgProc.cpp
-
-libmix_la-CASemaphore.lo: CASemaphore.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASemaphore.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASemaphore.Tpo -c -o libmix_la-CASemaphore.lo `test -f 'CASemaphore.cpp' || echo '$(srcdir)/'`CASemaphore.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASemaphore.Tpo $(DEPDIR)/libmix_la-CASemaphore.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASemaphore.cpp' object='libmix_la-CASemaphore.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASemaphore.lo `test -f 'CASemaphore.cpp' || echo '$(srcdir)/'`CASemaphore.cpp
-
-libmix_la-CASignature.lo: CASignature.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASignature.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASignature.Tpo -c -o libmix_la-CASignature.lo `test -f 'CASignature.cpp' || echo '$(srcdir)/'`CASignature.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASignature.Tpo $(DEPDIR)/libmix_la-CASignature.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASignature.cpp' object='libmix_la-CASignature.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASignature.lo `test -f 'CASignature.cpp' || echo '$(srcdir)/'`CASignature.cpp
-
-libmix_la-CASingleSocketGroup.lo: CASingleSocketGroup.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASingleSocketGroup.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASingleSocketGroup.Tpo -c -o libmix_la-CASingleSocketGroup.lo `test -f 'CASingleSocketGroup.cpp' || echo '$(srcdir)/'`CASingleSocketGroup.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASingleSocketGroup.Tpo $(DEPDIR)/libmix_la-CASingleSocketGroup.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASingleSocketGroup.cpp' object='libmix_la-CASingleSocketGroup.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASingleSocketGroup.lo `test -f 'CASingleSocketGroup.cpp' || echo '$(srcdir)/'`CASingleSocketGroup.cpp
-
-libmix_la-CASocket.lo: CASocket.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASocket.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASocket.Tpo -c -o libmix_la-CASocket.lo `test -f 'CASocket.cpp' || echo '$(srcdir)/'`CASocket.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASocket.Tpo $(DEPDIR)/libmix_la-CASocket.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASocket.cpp' object='libmix_la-CASocket.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASocket.lo `test -f 'CASocket.cpp' || echo '$(srcdir)/'`CASocket.cpp
-
-libmix_la-CASocketAddrINet.lo: CASocketAddrINet.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASocketAddrINet.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASocketAddrINet.Tpo -c -o libmix_la-CASocketAddrINet.lo `test -f 'CASocketAddrINet.cpp' || echo '$(srcdir)/'`CASocketAddrINet.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASocketAddrINet.Tpo $(DEPDIR)/libmix_la-CASocketAddrINet.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASocketAddrINet.cpp' object='libmix_la-CASocketAddrINet.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASocketAddrINet.lo `test -f 'CASocketAddrINet.cpp' || echo '$(srcdir)/'`CASocketAddrINet.cpp
-
-libmix_la-CASocketAddrUnix.lo: CASocketAddrUnix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASocketAddrUnix.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASocketAddrUnix.Tpo -c -o libmix_la-CASocketAddrUnix.lo `test -f 'CASocketAddrUnix.cpp' || echo '$(srcdir)/'`CASocketAddrUnix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASocketAddrUnix.Tpo $(DEPDIR)/libmix_la-CASocketAddrUnix.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASocketAddrUnix.cpp' object='libmix_la-CASocketAddrUnix.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASocketAddrUnix.lo `test -f 'CASocketAddrUnix.cpp' || echo '$(srcdir)/'`CASocketAddrUnix.cpp
-
-libmix_la-CASocketGroup.lo: CASocketGroup.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASocketGroup.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASocketGroup.Tpo -c -o libmix_la-CASocketGroup.lo `test -f 'CASocketGroup.cpp' || echo '$(srcdir)/'`CASocketGroup.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASocketGroup.Tpo $(DEPDIR)/libmix_la-CASocketGroup.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASocketGroup.cpp' object='libmix_la-CASocketGroup.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASocketGroup.lo `test -f 'CASocketGroup.cpp' || echo '$(srcdir)/'`CASocketGroup.cpp
-
-libmix_la-CASocketGroupEpoll.lo: CASocketGroupEpoll.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASocketGroupEpoll.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASocketGroupEpoll.Tpo -c -o libmix_la-CASocketGroupEpoll.lo `test -f 'CASocketGroupEpoll.cpp' || echo '$(srcdir)/'`CASocketGroupEpoll.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASocketGroupEpoll.Tpo $(DEPDIR)/libmix_la-CASocketGroupEpoll.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASocketGroupEpoll.cpp' object='libmix_la-CASocketGroupEpoll.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASocketGroupEpoll.lo `test -f 'CASocketGroupEpoll.cpp' || echo '$(srcdir)/'`CASocketGroupEpoll.cpp
-
-libmix_la-CASocketList.lo: CASocketList.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASocketList.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASocketList.Tpo -c -o libmix_la-CASocketList.lo `test -f 'CASocketList.cpp' || echo '$(srcdir)/'`CASocketList.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASocketList.Tpo $(DEPDIR)/libmix_la-CASocketList.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASocketList.cpp' object='libmix_la-CASocketList.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASocketList.lo `test -f 'CASocketList.cpp' || echo '$(srcdir)/'`CASocketList.cpp
-
-libmix_la-CAStatusManager.lo: CAStatusManager.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAStatusManager.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAStatusManager.Tpo -c -o libmix_la-CAStatusManager.lo `test -f 'CAStatusManager.cpp' || echo '$(srcdir)/'`CAStatusManager.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAStatusManager.Tpo $(DEPDIR)/libmix_la-CAStatusManager.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAStatusManager.cpp' object='libmix_la-CAStatusManager.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAStatusManager.lo `test -f 'CAStatusManager.cpp' || echo '$(srcdir)/'`CAStatusManager.cpp
-
-libmix_la-CATLSClientSocket.lo: CATLSClientSocket.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CATLSClientSocket.lo -MD -MP -MF $(DEPDIR)/libmix_la-CATLSClientSocket.Tpo -c -o libmix_la-CATLSClientSocket.lo `test -f 'CATLSClientSocket.cpp' || echo '$(srcdir)/'`CATLSClientSocket.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CATLSClientSocket.Tpo $(DEPDIR)/libmix_la-CATLSClientSocket.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CATLSClientSocket.cpp' object='libmix_la-CATLSClientSocket.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CATLSClientSocket.lo `test -f 'CATLSClientSocket.cpp' || echo '$(srcdir)/'`CATLSClientSocket.cpp
-
-libmix_la-CASymCipher.lo: CASymCipher.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASymCipher.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASymCipher.Tpo -c -o libmix_la-CASymCipher.lo `test -f 'CASymCipher.cpp' || echo '$(srcdir)/'`CASymCipher.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASymCipher.Tpo $(DEPDIR)/libmix_la-CASymCipher.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASymCipher.cpp' object='libmix_la-CASymCipher.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASymCipher.lo `test -f 'CASymCipher.cpp' || echo '$(srcdir)/'`CASymCipher.cpp
-
-libmix_la-CASymCipherCTR.lo: CASymCipherCTR.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASymCipherCTR.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASymCipherCTR.Tpo -c -o libmix_la-CASymCipherCTR.lo `test -f 'CASymCipherCTR.cpp' || echo '$(srcdir)/'`CASymCipherCTR.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASymCipherCTR.Tpo $(DEPDIR)/libmix_la-CASymCipherCTR.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASymCipherCTR.cpp' object='libmix_la-CASymCipherCTR.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASymCipherCTR.lo `test -f 'CASymCipherCTR.cpp' || echo '$(srcdir)/'`CASymCipherCTR.cpp
-
-libmix_la-CASymCipherGCM.lo: CASymCipherGCM.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASymCipherGCM.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASymCipherGCM.Tpo -c -o libmix_la-CASymCipherGCM.lo `test -f 'CASymCipherGCM.cpp' || echo '$(srcdir)/'`CASymCipherGCM.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASymCipherGCM.Tpo $(DEPDIR)/libmix_la-CASymCipherGCM.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASymCipherGCM.cpp' object='libmix_la-CASymCipherGCM.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASymCipherGCM.lo `test -f 'CASymCipherGCM.cpp' || echo '$(srcdir)/'`CASymCipherGCM.cpp
-
-libmix_la-CASymCipherOFB.lo: CASymCipherOFB.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASymCipherOFB.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASymCipherOFB.Tpo -c -o libmix_la-CASymCipherOFB.lo `test -f 'CASymCipherOFB.cpp' || echo '$(srcdir)/'`CASymCipherOFB.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASymCipherOFB.Tpo $(DEPDIR)/libmix_la-CASymCipherOFB.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASymCipherOFB.cpp' object='libmix_la-CASymCipherOFB.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASymCipherOFB.lo `test -f 'CASymCipherOFB.cpp' || echo '$(srcdir)/'`CASymCipherOFB.cpp
-
-libmix_la-CASyncControlChannel.lo: CASyncControlChannel.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CASyncControlChannel.lo -MD -MP -MF $(DEPDIR)/libmix_la-CASyncControlChannel.Tpo -c -o libmix_la-CASyncControlChannel.lo `test -f 'CASyncControlChannel.cpp' || echo '$(srcdir)/'`CASyncControlChannel.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CASyncControlChannel.Tpo $(DEPDIR)/libmix_la-CASyncControlChannel.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CASyncControlChannel.cpp' object='libmix_la-CASyncControlChannel.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CASyncControlChannel.lo `test -f 'CASyncControlChannel.cpp' || echo '$(srcdir)/'`CASyncControlChannel.cpp
-
-libmix_la-CATempIPBlockList.lo: CATempIPBlockList.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CATempIPBlockList.lo -MD -MP -MF $(DEPDIR)/libmix_la-CATempIPBlockList.Tpo -c -o libmix_la-CATempIPBlockList.lo `test -f 'CATempIPBlockList.cpp' || echo '$(srcdir)/'`CATempIPBlockList.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CATempIPBlockList.Tpo $(DEPDIR)/libmix_la-CATempIPBlockList.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CATempIPBlockList.cpp' object='libmix_la-CATempIPBlockList.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CATempIPBlockList.lo `test -f 'CATempIPBlockList.cpp' || echo '$(srcdir)/'`CATempIPBlockList.cpp
-
-libmix_la-CAThread.lo: CAThread.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAThread.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAThread.Tpo -c -o libmix_la-CAThread.lo `test -f 'CAThread.cpp' || echo '$(srcdir)/'`CAThread.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAThread.Tpo $(DEPDIR)/libmix_la-CAThread.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAThread.cpp' object='libmix_la-CAThread.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAThread.lo `test -f 'CAThread.cpp' || echo '$(srcdir)/'`CAThread.cpp
-
-libmix_la-CAThreadPool.lo: CAThreadPool.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAThreadPool.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAThreadPool.Tpo -c -o libmix_la-CAThreadPool.lo `test -f 'CAThreadPool.cpp' || echo '$(srcdir)/'`CAThreadPool.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAThreadPool.Tpo $(DEPDIR)/libmix_la-CAThreadPool.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAThreadPool.cpp' object='libmix_la-CAThreadPool.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAThreadPool.lo `test -f 'CAThreadPool.cpp' || echo '$(srcdir)/'`CAThreadPool.cpp
-
-libmix_la-CAThreadList.lo: CAThreadList.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAThreadList.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAThreadList.Tpo -c -o libmix_la-CAThreadList.lo `test -f 'CAThreadList.cpp' || echo '$(srcdir)/'`CAThreadList.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAThreadList.Tpo $(DEPDIR)/libmix_la-CAThreadList.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAThreadList.cpp' object='libmix_la-CAThreadList.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAThreadList.lo `test -f 'CAThreadList.cpp' || echo '$(srcdir)/'`CAThreadList.cpp
-
-libmix_la-CAUtil.lo: CAUtil.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAUtil.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAUtil.Tpo -c -o libmix_la-CAUtil.lo `test -f 'CAUtil.cpp' || echo '$(srcdir)/'`CAUtil.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAUtil.Tpo $(DEPDIR)/libmix_la-CAUtil.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAUtil.cpp' object='libmix_la-CAUtil.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAUtil.lo `test -f 'CAUtil.cpp' || echo '$(srcdir)/'`CAUtil.cpp
-
-libmix_la-CAXMLBI.lo: CAXMLBI.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAXMLBI.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAXMLBI.Tpo -c -o libmix_la-CAXMLBI.lo `test -f 'CAXMLBI.cpp' || echo '$(srcdir)/'`CAXMLBI.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAXMLBI.Tpo $(DEPDIR)/libmix_la-CAXMLBI.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAXMLBI.cpp' object='libmix_la-CAXMLBI.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAXMLBI.lo `test -f 'CAXMLBI.cpp' || echo '$(srcdir)/'`CAXMLBI.cpp
-
-libmix_la-CAXMLCostConfirmation.lo: CAXMLCostConfirmation.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAXMLCostConfirmation.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAXMLCostConfirmation.Tpo -c -o libmix_la-CAXMLCostConfirmation.lo `test -f 'CAXMLCostConfirmation.cpp' || echo '$(srcdir)/'`CAXMLCostConfirmation.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAXMLCostConfirmation.Tpo $(DEPDIR)/libmix_la-CAXMLCostConfirmation.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAXMLCostConfirmation.cpp' object='libmix_la-CAXMLCostConfirmation.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAXMLCostConfirmation.lo `test -f 'CAXMLCostConfirmation.cpp' || echo '$(srcdir)/'`CAXMLCostConfirmation.cpp
-
-libmix_la-CAXMLErrorMessage.lo: CAXMLErrorMessage.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAXMLErrorMessage.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAXMLErrorMessage.Tpo -c -o libmix_la-CAXMLErrorMessage.lo `test -f 'CAXMLErrorMessage.cpp' || echo '$(srcdir)/'`CAXMLErrorMessage.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAXMLErrorMessage.Tpo $(DEPDIR)/libmix_la-CAXMLErrorMessage.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAXMLErrorMessage.cpp' object='libmix_la-CAXMLErrorMessage.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAXMLErrorMessage.lo `test -f 'CAXMLErrorMessage.cpp' || echo '$(srcdir)/'`CAXMLErrorMessage.cpp
-
-libmix_la-CAXMLPriceCert.lo: CAXMLPriceCert.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CAXMLPriceCert.lo -MD -MP -MF $(DEPDIR)/libmix_la-CAXMLPriceCert.Tpo -c -o libmix_la-CAXMLPriceCert.lo `test -f 'CAXMLPriceCert.cpp' || echo '$(srcdir)/'`CAXMLPriceCert.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CAXMLPriceCert.Tpo $(DEPDIR)/libmix_la-CAXMLPriceCert.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CAXMLPriceCert.cpp' object='libmix_la-CAXMLPriceCert.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-CAXMLPriceCert.lo `test -f 'CAXMLPriceCert.cpp' || echo '$(srcdir)/'`CAXMLPriceCert.cpp
-
-libmix_la-Hashtable.lo: Hashtable.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-Hashtable.lo -MD -MP -MF $(DEPDIR)/libmix_la-Hashtable.Tpo -c -o libmix_la-Hashtable.lo `test -f 'Hashtable.cpp' || echo '$(srcdir)/'`Hashtable.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-Hashtable.Tpo $(DEPDIR)/libmix_la-Hashtable.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='Hashtable.cpp' object='libmix_la-Hashtable.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-Hashtable.lo `test -f 'Hashtable.cpp' || echo '$(srcdir)/'`Hashtable.cpp
-
-libmix_la-TermsAndConditions.lo: TermsAndConditions.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-TermsAndConditions.lo -MD -MP -MF $(DEPDIR)/libmix_la-TermsAndConditions.Tpo -c -o libmix_la-TermsAndConditions.lo `test -f 'TermsAndConditions.cpp' || echo '$(srcdir)/'`TermsAndConditions.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-TermsAndConditions.Tpo $(DEPDIR)/libmix_la-TermsAndConditions.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='TermsAndConditions.cpp' object='libmix_la-TermsAndConditions.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-TermsAndConditions.lo `test -f 'TermsAndConditions.cpp' || echo '$(srcdir)/'`TermsAndConditions.cpp
-
-libmix_la-packetintro.lo: packetintro.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-packetintro.lo -MD -MP -MF $(DEPDIR)/libmix_la-packetintro.Tpo -c -o libmix_la-packetintro.lo `test -f 'packetintro.cpp' || echo '$(srcdir)/'`packetintro.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-packetintro.Tpo $(DEPDIR)/libmix_la-packetintro.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='packetintro.cpp' object='libmix_la-packetintro.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-packetintro.lo `test -f 'packetintro.cpp' || echo '$(srcdir)/'`packetintro.cpp
-
-libmix_la-StdAfx.lo: StdAfx.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-StdAfx.lo -MD -MP -MF $(DEPDIR)/libmix_la-StdAfx.Tpo -c -o libmix_la-StdAfx.lo `test -f 'StdAfx.cpp' || echo '$(srcdir)/'`StdAfx.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-StdAfx.Tpo $(DEPDIR)/libmix_la-StdAfx.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='StdAfx.cpp' object='libmix_la-StdAfx.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-StdAfx.lo `test -f 'StdAfx.cpp' || echo '$(srcdir)/'`StdAfx.cpp
-
-libmix_la-InnerMiddleMix.lo: InnerMiddleMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-InnerMiddleMix.lo -MD -MP -MF $(DEPDIR)/libmix_la-InnerMiddleMix.Tpo -c -o libmix_la-InnerMiddleMix.lo `test -f 'InnerMiddleMix.cpp' || echo '$(srcdir)/'`InnerMiddleMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-InnerMiddleMix.Tpo $(DEPDIR)/libmix_la-InnerMiddleMix.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='InnerMiddleMix.cpp' object='libmix_la-InnerMiddleMix.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-InnerMiddleMix.lo `test -f 'InnerMiddleMix.cpp' || echo '$(srcdir)/'`InnerMiddleMix.cpp
-
 mix-proxytest.o: proxytest.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mix_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mix-proxytest.o -MD -MP -MF $(DEPDIR)/mix-proxytest.Tpo -c -o mix-proxytest.o `test -f 'proxytest.cpp' || echo '$(srcdir)/'`proxytest.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mix-proxytest.Tpo $(DEPDIR)/mix-proxytest.Po
@@ -3707,87 +2911,86 @@ clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-		-rm -f ./$(DEPDIR)/libmix_la-CAASymCipher.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAbstractControlChannel.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAbstractXMLEncodable.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAbstractXMLSignable.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAccountingBIInterface.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAccountingControlChannel.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAccountingDBInterface.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAccountingInstance.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAccountingSettleThread.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CABase64.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CACacheLoadBalancing.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CACertStore.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CACertificate.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAClientSocket.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CACmdLnOptions.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAConditionVariable.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAControlChannelDispatcher.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAControlChannelTest.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CADataRetentionLog.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CADataRetentionLogFile.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CADatabase.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CADatagramSocket.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CADynaNetworking.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CADynamicCascadeConfigurator.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAFileSystemDirectory.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAFirstMix.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAFirstMixChannelList.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAHttpClient.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAIPAddrWithNetmask.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAIPList.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAInfoService.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAInfoServiceAware.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CALastMix.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CALastMixChannelList.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CALibProxytest.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAListenerInterface.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CALocalProxy.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CALogPacketStats.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMiddleMix.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMiddleMixChannelList.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMix.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMixWithReplayDB.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMsg.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMultiSignature.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMutex.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMuxSocket.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAPool.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAPriceInfo.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAQueue.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAReplayControlChannel.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAReplayCtrlChannelMsgProc.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASemaphore.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASignature.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASingleSocketGroup.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASocket.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASocketAddrINet.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASocketAddrUnix.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASocketGroup.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASocketGroupEpoll.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASocketList.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAStatusManager.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASymCipher.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASymCipherCTR.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASymCipherGCM.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASymCipherOFB.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASyncControlChannel.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CATLSClientSocket.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CATempIPBlockList.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAThread.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAThreadList.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAThreadPool.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAUtil.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAXMLBI.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAXMLCostConfirmation.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAXMLErrorMessage.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAXMLPriceCert.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-Hashtable.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-InnerMiddleMix.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-StdAfx.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-TermsAndConditions.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-packetintro.Plo
+		-rm -f ./$(DEPDIR)/CAASymCipher.Plo
+	-rm -f ./$(DEPDIR)/CAAbstractControlChannel.Plo
+	-rm -f ./$(DEPDIR)/CAAbstractXMLEncodable.Plo
+	-rm -f ./$(DEPDIR)/CAAbstractXMLSignable.Plo
+	-rm -f ./$(DEPDIR)/CAAccountingBIInterface.Plo
+	-rm -f ./$(DEPDIR)/CAAccountingControlChannel.Plo
+	-rm -f ./$(DEPDIR)/CAAccountingDBInterface.Plo
+	-rm -f ./$(DEPDIR)/CAAccountingInstance.Plo
+	-rm -f ./$(DEPDIR)/CAAccountingSettleThread.Plo
+	-rm -f ./$(DEPDIR)/CABase64.Plo
+	-rm -f ./$(DEPDIR)/CACacheLoadBalancing.Plo
+	-rm -f ./$(DEPDIR)/CACertStore.Plo
+	-rm -f ./$(DEPDIR)/CACertificate.Plo
+	-rm -f ./$(DEPDIR)/CAClientSocket.Plo
+	-rm -f ./$(DEPDIR)/CACmdLnOptions.Plo
+	-rm -f ./$(DEPDIR)/CAConditionVariable.Plo
+	-rm -f ./$(DEPDIR)/CAControlChannelDispatcher.Plo
+	-rm -f ./$(DEPDIR)/CAControlChannelTest.Plo
+	-rm -f ./$(DEPDIR)/CADataRetentionLog.Plo
+	-rm -f ./$(DEPDIR)/CADataRetentionLogFile.Plo
+	-rm -f ./$(DEPDIR)/CADatabase.Plo
+	-rm -f ./$(DEPDIR)/CADatagramSocket.Plo
+	-rm -f ./$(DEPDIR)/CADynaNetworking.Plo
+	-rm -f ./$(DEPDIR)/CADynamicCascadeConfigurator.Plo
+	-rm -f ./$(DEPDIR)/CAFileSystemDirectory.Plo
+	-rm -f ./$(DEPDIR)/CAFirstMix.Plo
+	-rm -f ./$(DEPDIR)/CAFirstMixChannelList.Plo
+	-rm -f ./$(DEPDIR)/CAHttpClient.Plo
+	-rm -f ./$(DEPDIR)/CAIPAddrWithNetmask.Plo
+	-rm -f ./$(DEPDIR)/CAIPList.Plo
+	-rm -f ./$(DEPDIR)/CAInfoService.Plo
+	-rm -f ./$(DEPDIR)/CAInfoServiceAware.Plo
+	-rm -f ./$(DEPDIR)/CALastMix.Plo
+	-rm -f ./$(DEPDIR)/CALastMixChannelList.Plo
+	-rm -f ./$(DEPDIR)/CALibProxytest.Plo
+	-rm -f ./$(DEPDIR)/CAListenerInterface.Plo
+	-rm -f ./$(DEPDIR)/CALocalProxy.Plo
+	-rm -f ./$(DEPDIR)/CALogPacketStats.Plo
+	-rm -f ./$(DEPDIR)/CAMiddleMix.Plo
+	-rm -f ./$(DEPDIR)/CAMiddleMixChannelList.Plo
+	-rm -f ./$(DEPDIR)/CAMix.Plo
+	-rm -f ./$(DEPDIR)/CAMixWithReplayDB.Plo
+	-rm -f ./$(DEPDIR)/CAMsg.Plo
+	-rm -f ./$(DEPDIR)/CAMultiSignature.Plo
+	-rm -f ./$(DEPDIR)/CAMutex.Plo
+	-rm -f ./$(DEPDIR)/CAMuxSocket.Plo
+	-rm -f ./$(DEPDIR)/CAPool.Plo
+	-rm -f ./$(DEPDIR)/CAPriceInfo.Plo
+	-rm -f ./$(DEPDIR)/CAQueue.Plo
+	-rm -f ./$(DEPDIR)/CAReplayControlChannel.Plo
+	-rm -f ./$(DEPDIR)/CAReplayCtrlChannelMsgProc.Plo
+	-rm -f ./$(DEPDIR)/CASemaphore.Plo
+	-rm -f ./$(DEPDIR)/CASignature.Plo
+	-rm -f ./$(DEPDIR)/CASingleSocketGroup.Plo
+	-rm -f ./$(DEPDIR)/CASocket.Plo
+	-rm -f ./$(DEPDIR)/CASocketAddrINet.Plo
+	-rm -f ./$(DEPDIR)/CASocketAddrUnix.Plo
+	-rm -f ./$(DEPDIR)/CASocketGroup.Plo
+	-rm -f ./$(DEPDIR)/CASocketGroupEpoll.Plo
+	-rm -f ./$(DEPDIR)/CASocketList.Plo
+	-rm -f ./$(DEPDIR)/CAStatusManager.Plo
+	-rm -f ./$(DEPDIR)/CASymCipher.Plo
+	-rm -f ./$(DEPDIR)/CASymCipherCTR.Plo
+	-rm -f ./$(DEPDIR)/CASymCipherGCM.Plo
+	-rm -f ./$(DEPDIR)/CASymCipherOFB.Plo
+	-rm -f ./$(DEPDIR)/CASyncControlChannel.Plo
+	-rm -f ./$(DEPDIR)/CATLSClientSocket.Plo
+	-rm -f ./$(DEPDIR)/CATempIPBlockList.Plo
+	-rm -f ./$(DEPDIR)/CAThread.Plo
+	-rm -f ./$(DEPDIR)/CAThreadList.Plo
+	-rm -f ./$(DEPDIR)/CAThreadPool.Plo
+	-rm -f ./$(DEPDIR)/CAUtil.Plo
+	-rm -f ./$(DEPDIR)/CAXMLBI.Plo
+	-rm -f ./$(DEPDIR)/CAXMLCostConfirmation.Plo
+	-rm -f ./$(DEPDIR)/CAXMLErrorMessage.Plo
+	-rm -f ./$(DEPDIR)/CAXMLPriceCert.Plo
+	-rm -f ./$(DEPDIR)/Hashtable.Plo
+	-rm -f ./$(DEPDIR)/InnerMiddleMix.Plo
+	-rm -f ./$(DEPDIR)/StdAfx.Plo
+	-rm -f ./$(DEPDIR)/TermsAndConditions.Plo
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAASymCipher.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAAbstractControlChannel.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAAbstractXMLEncodable.Po
@@ -3870,6 +3073,7 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/libproxytest_a-TermsAndConditions.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-packetintro.Po
 	-rm -f ./$(DEPDIR)/mix-proxytest.Po
+	-rm -f ./$(DEPDIR)/packetintro.Plo
 	-rm -f ./$(DEPDIR)/proxytest.Plo
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -3918,87 +3122,86 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-		-rm -f ./$(DEPDIR)/libmix_la-CAASymCipher.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAbstractControlChannel.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAbstractXMLEncodable.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAbstractXMLSignable.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAccountingBIInterface.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAccountingControlChannel.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAccountingDBInterface.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAccountingInstance.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAAccountingSettleThread.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CABase64.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CACacheLoadBalancing.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CACertStore.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CACertificate.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAClientSocket.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CACmdLnOptions.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAConditionVariable.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAControlChannelDispatcher.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAControlChannelTest.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CADataRetentionLog.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CADataRetentionLogFile.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CADatabase.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CADatagramSocket.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CADynaNetworking.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CADynamicCascadeConfigurator.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAFileSystemDirectory.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAFirstMix.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAFirstMixChannelList.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAHttpClient.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAIPAddrWithNetmask.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAIPList.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAInfoService.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAInfoServiceAware.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CALastMix.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CALastMixChannelList.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CALibProxytest.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAListenerInterface.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CALocalProxy.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CALogPacketStats.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMiddleMix.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMiddleMixChannelList.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMix.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMixWithReplayDB.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMsg.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMultiSignature.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMutex.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAMuxSocket.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAPool.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAPriceInfo.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAQueue.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAReplayControlChannel.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAReplayCtrlChannelMsgProc.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASemaphore.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASignature.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASingleSocketGroup.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASocket.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASocketAddrINet.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASocketAddrUnix.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASocketGroup.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASocketGroupEpoll.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASocketList.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAStatusManager.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASymCipher.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASymCipherCTR.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASymCipherGCM.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASymCipherOFB.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CASyncControlChannel.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CATLSClientSocket.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CATempIPBlockList.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAThread.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAThreadList.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAThreadPool.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAUtil.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAXMLBI.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAXMLCostConfirmation.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAXMLErrorMessage.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-CAXMLPriceCert.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-Hashtable.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-InnerMiddleMix.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-StdAfx.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-TermsAndConditions.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-packetintro.Plo
+		-rm -f ./$(DEPDIR)/CAASymCipher.Plo
+	-rm -f ./$(DEPDIR)/CAAbstractControlChannel.Plo
+	-rm -f ./$(DEPDIR)/CAAbstractXMLEncodable.Plo
+	-rm -f ./$(DEPDIR)/CAAbstractXMLSignable.Plo
+	-rm -f ./$(DEPDIR)/CAAccountingBIInterface.Plo
+	-rm -f ./$(DEPDIR)/CAAccountingControlChannel.Plo
+	-rm -f ./$(DEPDIR)/CAAccountingDBInterface.Plo
+	-rm -f ./$(DEPDIR)/CAAccountingInstance.Plo
+	-rm -f ./$(DEPDIR)/CAAccountingSettleThread.Plo
+	-rm -f ./$(DEPDIR)/CABase64.Plo
+	-rm -f ./$(DEPDIR)/CACacheLoadBalancing.Plo
+	-rm -f ./$(DEPDIR)/CACertStore.Plo
+	-rm -f ./$(DEPDIR)/CACertificate.Plo
+	-rm -f ./$(DEPDIR)/CAClientSocket.Plo
+	-rm -f ./$(DEPDIR)/CACmdLnOptions.Plo
+	-rm -f ./$(DEPDIR)/CAConditionVariable.Plo
+	-rm -f ./$(DEPDIR)/CAControlChannelDispatcher.Plo
+	-rm -f ./$(DEPDIR)/CAControlChannelTest.Plo
+	-rm -f ./$(DEPDIR)/CADataRetentionLog.Plo
+	-rm -f ./$(DEPDIR)/CADataRetentionLogFile.Plo
+	-rm -f ./$(DEPDIR)/CADatabase.Plo
+	-rm -f ./$(DEPDIR)/CADatagramSocket.Plo
+	-rm -f ./$(DEPDIR)/CADynaNetworking.Plo
+	-rm -f ./$(DEPDIR)/CADynamicCascadeConfigurator.Plo
+	-rm -f ./$(DEPDIR)/CAFileSystemDirectory.Plo
+	-rm -f ./$(DEPDIR)/CAFirstMix.Plo
+	-rm -f ./$(DEPDIR)/CAFirstMixChannelList.Plo
+	-rm -f ./$(DEPDIR)/CAHttpClient.Plo
+	-rm -f ./$(DEPDIR)/CAIPAddrWithNetmask.Plo
+	-rm -f ./$(DEPDIR)/CAIPList.Plo
+	-rm -f ./$(DEPDIR)/CAInfoService.Plo
+	-rm -f ./$(DEPDIR)/CAInfoServiceAware.Plo
+	-rm -f ./$(DEPDIR)/CALastMix.Plo
+	-rm -f ./$(DEPDIR)/CALastMixChannelList.Plo
+	-rm -f ./$(DEPDIR)/CALibProxytest.Plo
+	-rm -f ./$(DEPDIR)/CAListenerInterface.Plo
+	-rm -f ./$(DEPDIR)/CALocalProxy.Plo
+	-rm -f ./$(DEPDIR)/CALogPacketStats.Plo
+	-rm -f ./$(DEPDIR)/CAMiddleMix.Plo
+	-rm -f ./$(DEPDIR)/CAMiddleMixChannelList.Plo
+	-rm -f ./$(DEPDIR)/CAMix.Plo
+	-rm -f ./$(DEPDIR)/CAMixWithReplayDB.Plo
+	-rm -f ./$(DEPDIR)/CAMsg.Plo
+	-rm -f ./$(DEPDIR)/CAMultiSignature.Plo
+	-rm -f ./$(DEPDIR)/CAMutex.Plo
+	-rm -f ./$(DEPDIR)/CAMuxSocket.Plo
+	-rm -f ./$(DEPDIR)/CAPool.Plo
+	-rm -f ./$(DEPDIR)/CAPriceInfo.Plo
+	-rm -f ./$(DEPDIR)/CAQueue.Plo
+	-rm -f ./$(DEPDIR)/CAReplayControlChannel.Plo
+	-rm -f ./$(DEPDIR)/CAReplayCtrlChannelMsgProc.Plo
+	-rm -f ./$(DEPDIR)/CASemaphore.Plo
+	-rm -f ./$(DEPDIR)/CASignature.Plo
+	-rm -f ./$(DEPDIR)/CASingleSocketGroup.Plo
+	-rm -f ./$(DEPDIR)/CASocket.Plo
+	-rm -f ./$(DEPDIR)/CASocketAddrINet.Plo
+	-rm -f ./$(DEPDIR)/CASocketAddrUnix.Plo
+	-rm -f ./$(DEPDIR)/CASocketGroup.Plo
+	-rm -f ./$(DEPDIR)/CASocketGroupEpoll.Plo
+	-rm -f ./$(DEPDIR)/CASocketList.Plo
+	-rm -f ./$(DEPDIR)/CAStatusManager.Plo
+	-rm -f ./$(DEPDIR)/CASymCipher.Plo
+	-rm -f ./$(DEPDIR)/CASymCipherCTR.Plo
+	-rm -f ./$(DEPDIR)/CASymCipherGCM.Plo
+	-rm -f ./$(DEPDIR)/CASymCipherOFB.Plo
+	-rm -f ./$(DEPDIR)/CASyncControlChannel.Plo
+	-rm -f ./$(DEPDIR)/CATLSClientSocket.Plo
+	-rm -f ./$(DEPDIR)/CATempIPBlockList.Plo
+	-rm -f ./$(DEPDIR)/CAThread.Plo
+	-rm -f ./$(DEPDIR)/CAThreadList.Plo
+	-rm -f ./$(DEPDIR)/CAThreadPool.Plo
+	-rm -f ./$(DEPDIR)/CAUtil.Plo
+	-rm -f ./$(DEPDIR)/CAXMLBI.Plo
+	-rm -f ./$(DEPDIR)/CAXMLCostConfirmation.Plo
+	-rm -f ./$(DEPDIR)/CAXMLErrorMessage.Plo
+	-rm -f ./$(DEPDIR)/CAXMLPriceCert.Plo
+	-rm -f ./$(DEPDIR)/Hashtable.Plo
+	-rm -f ./$(DEPDIR)/InnerMiddleMix.Plo
+	-rm -f ./$(DEPDIR)/StdAfx.Plo
+	-rm -f ./$(DEPDIR)/TermsAndConditions.Plo
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAASymCipher.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAAbstractControlChannel.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAAbstractXMLEncodable.Po
@@ -4081,6 +3284,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/libproxytest_a-TermsAndConditions.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-packetintro.Po
 	-rm -f ./$(DEPDIR)/mix-proxytest.Po
+	-rm -f ./$(DEPDIR)/packetintro.Plo
 	-rm -f ./$(DEPDIR)/proxytest.Plo
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
@@ -4127,6 +3331,173 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-sbinPROGRAMS
 
 
 export SGXTOOLCHAIN=@SCONE_TOOLCHAIN@
+@ONLY_LIB_TRUE@CAAbstractControlChannel.cpp\
+@ONLY_LIB_TRUE@		    CAAbstractXMLEncodable.cpp\
+@ONLY_LIB_TRUE@		    CAAbstractXMLSignable.cpp\
+@ONLY_LIB_TRUE@		    CAAccountingBIInterface.cpp\
+@ONLY_LIB_TRUE@		    CAAccountingControlChannel.cpp\
+@ONLY_LIB_TRUE@		    CAAccountingDBInterface.cpp\
+@ONLY_LIB_TRUE@		    CAAccountingInstance.cpp\
+@ONLY_LIB_TRUE@		    CAAccountingSettleThread.cpp\
+@ONLY_LIB_TRUE@		    CAASymCipher.cpp \
+@ONLY_LIB_TRUE@		    CABase64.cpp \
+@ONLY_LIB_TRUE@		    CACacheLoadBalancing.cpp\
+@ONLY_LIB_TRUE@		    CACertificate.cpp\
+@ONLY_LIB_TRUE@		    CACertStore.cpp\
+@ONLY_LIB_TRUE@		    CAClientSocket.cpp\
+@ONLY_LIB_TRUE@		    CACmdLnOptions.cpp \
+@ONLY_LIB_TRUE@		    CAConditionVariable.cpp\
+@ONLY_LIB_TRUE@		    CAControlChannelDispatcher.cpp\
+@ONLY_LIB_TRUE@		    CAControlChannelTest.cpp\
+@ONLY_LIB_TRUE@		    CADatabase.cpp\
+@ONLY_LIB_TRUE@		    CADatagramSocket.cpp \
+@ONLY_LIB_TRUE@		    CADataRetentionLog.cpp\
+@ONLY_LIB_TRUE@		    CADataRetentionLogFile.cpp\
+@ONLY_LIB_TRUE@		    CADynaNetworking.cpp \
+@ONLY_LIB_TRUE@		    CADynamicCascadeConfigurator.cpp \
+@ONLY_LIB_TRUE@		    CAFileSystemDirectory.cpp \
+@ONLY_LIB_TRUE@		    CAFirstMix.cpp \
+@ONLY_LIB_TRUE@		    CAFirstMixChannelList.cpp \
+@ONLY_LIB_TRUE@		    CAHttpClient.cpp \
+@ONLY_LIB_TRUE@		    CAInfoService.cpp \
+@ONLY_LIB_TRUE@		    CAInfoServiceAware.cpp \
+@ONLY_LIB_TRUE@		    CAIPList.cpp \
+@ONLY_LIB_TRUE@		    CAIPAddrWithNetmask.cpp \
+@ONLY_LIB_TRUE@		    CALastMix.cpp \
+@ONLY_LIB_TRUE@		    CALastMixChannelList.cpp\
+@ONLY_LIB_TRUE@		    CAListenerInterface.cpp\
+@ONLY_LIB_TRUE@		    CALibProxytest.cpp\
+@ONLY_LIB_TRUE@		    CALocalProxy.cpp \
+@ONLY_LIB_TRUE@		    CALogPacketStats.cpp\
+@ONLY_LIB_TRUE@		    CAMiddleMix.cpp \
+@ONLY_LIB_TRUE@		    CAMiddleMixChannelList.cpp \
+@ONLY_LIB_TRUE@		    CAMix.cpp \
+@ONLY_LIB_TRUE@		    CAMixWithReplayDB.cpp\
+@ONLY_LIB_TRUE@		    CAMsg.cpp \
+@ONLY_LIB_TRUE@		    CAMultiSignature.cpp\
+@ONLY_LIB_TRUE@		    CAMutex.cpp\
+@ONLY_LIB_TRUE@		    CAMuxSocket.cpp \
+@ONLY_LIB_TRUE@		    CAPriceInfo.cpp \
+@ONLY_LIB_TRUE@		    CAPool.cpp\
+@ONLY_LIB_TRUE@		    CAQueue.cpp \
+@ONLY_LIB_TRUE@		    CAReplayControlChannel.cpp\
+@ONLY_LIB_TRUE@		    CAReplayCtrlChannelMsgProc.cpp\
+@ONLY_LIB_TRUE@		    CASemaphore.cpp\
+@ONLY_LIB_TRUE@		    CASignature.cpp \
+@ONLY_LIB_TRUE@		    CASingleSocketGroup.cpp\
+@ONLY_LIB_TRUE@		    CASocket.cpp \
+@ONLY_LIB_TRUE@		    CASocketAddrINet.cpp \
+@ONLY_LIB_TRUE@		    CASocketAddrUnix.cpp \
+@ONLY_LIB_TRUE@		    CASocketGroup.cpp \
+@ONLY_LIB_TRUE@		    CASocketGroupEpoll.cpp\
+@ONLY_LIB_TRUE@		    CASocketList.cpp \
+@ONLY_LIB_TRUE@		    CAStatusManager.cpp \
+@ONLY_LIB_TRUE@		    CATLSClientSocket.cpp\
+@ONLY_LIB_TRUE@		    CASymCipher.cpp \
+@ONLY_LIB_TRUE@		CASymCipherCTR.cpp \
+@ONLY_LIB_TRUE@			CASymCipherGCM.cpp \
+@ONLY_LIB_TRUE@			CASymCipherOFB.cpp \
+@ONLY_LIB_TRUE@		    CASyncControlChannel.cpp\
+@ONLY_LIB_TRUE@		    CATempIPBlockList.cpp\
+@ONLY_LIB_TRUE@		    CAThread.cpp \
+@ONLY_LIB_TRUE@		    CAThreadPool.cpp\
+@ONLY_LIB_TRUE@		    CAThreadList.cpp \
+@ONLY_LIB_TRUE@		    CAUtil.cpp \
+@ONLY_LIB_TRUE@		    CAXMLBI.cpp \
+@ONLY_LIB_TRUE@		    CAXMLCostConfirmation.cpp\
+@ONLY_LIB_TRUE@		    CAXMLErrorMessage.cpp\
+@ONLY_LIB_TRUE@		    CAXMLPriceCert.cpp\
+@ONLY_LIB_TRUE@		    Hashtable.cpp\
+@ONLY_LIB_TRUE@		    TermsAndConditions.cpp \
+@ONLY_LIB_TRUE@		    packetintro.cpp \
+@ONLY_LIB_TRUE@		    StdAfx.cpp \
+@ONLY_LIB_TRUE@		    InnerMiddleMix.cpp\
+@ONLY_LIB_TRUE@		    InnerMiddleMix.hpp\
+@ONLY_LIB_TRUE@		    CAAbstractControlChannel.hpp\
+@ONLY_LIB_TRUE@		    CAAbstractXMLEncodable.hpp\
+@ONLY_LIB_TRUE@		    CAAbstractXMLSignable.hpp\
+@ONLY_LIB_TRUE@		    CAAccountingBIInterface.hpp\
+@ONLY_LIB_TRUE@		    CAAccountingControlChannel.hpp\
+@ONLY_LIB_TRUE@		    CAAccountingDBInterface.hpp\
+@ONLY_LIB_TRUE@		    CAAccountingInstance.hpp\
+@ONLY_LIB_TRUE@		    CAAccountingSettleThread.hpp\
+@ONLY_LIB_TRUE@		    CAASymCipher.hpp \
+@ONLY_LIB_TRUE@		    CABase64.hpp \
+@ONLY_LIB_TRUE@		    CACacheLoadBalancing.hpp\
+@ONLY_LIB_TRUE@		    CACertificate.hpp\
+@ONLY_LIB_TRUE@		    CACertStore.hpp\
+@ONLY_LIB_TRUE@		    CAConditionVariable.hpp\
+@ONLY_LIB_TRUE@		    CAControlChannelDispatcher.hpp\
+@ONLY_LIB_TRUE@		    CAControlChannelTest.hpp\
+@ONLY_LIB_TRUE@		    CACmdLnOptions.hpp \
+@ONLY_LIB_TRUE@		    CADatabase.hpp\
+@ONLY_LIB_TRUE@		    CADatagramSocket.hpp\
+@ONLY_LIB_TRUE@		    CADataRetentionLog.hpp\
+@ONLY_LIB_TRUE@		    CADataRetentionLogFile.hpp\
+@ONLY_LIB_TRUE@		    CADynaNetworking.hpp \
+@ONLY_LIB_TRUE@		    CADynamicCascadeConfigurator.hpp \
+@ONLY_LIB_TRUE@		    CAFileSystemDirectory.hpp \
+@ONLY_LIB_TRUE@		    CAFirstMix.hpp \
+@ONLY_LIB_TRUE@		    CAFirstMixChannelList.hpp \
+@ONLY_LIB_TRUE@		    CAHttpClient.hpp \
+@ONLY_LIB_TRUE@		    CAInfoService.hpp \
+@ONLY_LIB_TRUE@		    CAInfoServiceAware.hpp \
+@ONLY_LIB_TRUE@		    CAIPList.hpp \
+@ONLY_LIB_TRUE@		    CAIPAddrWithNetmask.hpp \
+@ONLY_LIB_TRUE@		    CALastMix.hpp \
+@ONLY_LIB_TRUE@		    CALastMixChannelList.hpp\
+@ONLY_LIB_TRUE@		    CAListenerInterface.hpp\
+@ONLY_LIB_TRUE@		    CALibProxytest.hpp\
+@ONLY_LIB_TRUE@		    CALocalProxy.hpp \
+@ONLY_LIB_TRUE@		    CALockAble.hpp\
+@ONLY_LIB_TRUE@		    CALogPacketStats.hpp\
+@ONLY_LIB_TRUE@		    CAMiddleMix.hpp \
+@ONLY_LIB_TRUE@		    CAMiddleMixChannelList.hpp \
+@ONLY_LIB_TRUE@		    CAMix.hpp \
+@ONLY_LIB_TRUE@		    CAMixWithReplayDB.hpp\
+@ONLY_LIB_TRUE@		    CAMsg.hpp \
+@ONLY_LIB_TRUE@		    CAMultiSignature.hpp\
+@ONLY_LIB_TRUE@		    CAMutex.hpp\
+@ONLY_LIB_TRUE@		    CAMuxSocket.hpp \
+@ONLY_LIB_TRUE@		    CAPriceInfo.hpp \
+@ONLY_LIB_TRUE@		    CAPool.hpp\
+@ONLY_LIB_TRUE@		    CAQueue.hpp \
+@ONLY_LIB_TRUE@		    CAReplayControlChannel.hpp\
+@ONLY_LIB_TRUE@		    CAReplayCtrlChannelMsgProc.hpp\
+@ONLY_LIB_TRUE@		    CASemaphore.hpp\
+@ONLY_LIB_TRUE@		    CASignature.hpp \
+@ONLY_LIB_TRUE@		    CASingleSocketGroup.hpp\
+@ONLY_LIB_TRUE@		    CASocket.hpp \
+@ONLY_LIB_TRUE@		    CASocketAddr.hpp \
+@ONLY_LIB_TRUE@		    CASocketAddrINet.hpp \
+@ONLY_LIB_TRUE@		    CASocketAddrUnix.hpp \
+@ONLY_LIB_TRUE@		    CASocketGroup.hpp \
+@ONLY_LIB_TRUE@		    CASocketGroupEpoll.hpp\
+@ONLY_LIB_TRUE@		    CASocketList.hpp \
+@ONLY_LIB_TRUE@		    CAStatusManager.hpp \
+@ONLY_LIB_TRUE@		    CATLSClientSocket.hpp\
+@ONLY_LIB_TRUE@		    CAClientSocket.hpp\
+@ONLY_LIB_TRUE@		    CASymChannelCipher.hpp \
+@ONLY_LIB_TRUE@		    CASymChannelCipherFactory.hpp \
+@ONLY_LIB_TRUE@		    CASymCipher.hpp \
+@ONLY_LIB_TRUE@			CASymCipherCTR.hpp \
+@ONLY_LIB_TRUE@			CASymCipherGCM.hpp \
+@ONLY_LIB_TRUE@			CASymCipherOFB.hpp \
+@ONLY_LIB_TRUE@		    CASyncControlChannel.hpp \
+@ONLY_LIB_TRUE@		    CATempIPBlockList.hpp\
+@ONLY_LIB_TRUE@		    CAThread.hpp \
+@ONLY_LIB_TRUE@		    CAThreadPool.hpp\
+@ONLY_LIB_TRUE@		    CAThreadList.hpp \
+@ONLY_LIB_TRUE@		    CAUtil.hpp \
+@ONLY_LIB_TRUE@		    CAXMLBI.hpp \
+@ONLY_LIB_TRUE@		    CAXMLCostConfirmation.hpp\
+@ONLY_LIB_TRUE@		    CAXMLErrorMessage.hpp\
+@ONLY_LIB_TRUE@		    CAXMLPriceCert.hpp\
+@ONLY_LIB_TRUE@		    Hashtable.hpp\
+@ONLY_LIB_TRUE@		    TermsAndConditions.hpp \
+@ONLY_LIB_TRUE@		    packetintro.h\
+@ONLY_LIB_TRUE@		    StdAfx.h\
+@ONLY_LIB_TRUE@		    basetypedefs.h
 
 @ALL_FROM_SOURCE_TRUE@external.h:
 #Make MXML

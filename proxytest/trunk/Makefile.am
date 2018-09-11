@@ -6,7 +6,7 @@ ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 
 export SGXTOOLCHAIN=@SCONE_TOOLCHAIN@
-mix_LDADD = 
+mix_LDADD =
 
 proxytest_sources = CAAbstractControlChannel.cpp\
 		    CAAbstractXMLEncodable.cpp\
@@ -183,7 +183,7 @@ proxytest_sources = CAAbstractControlChannel.cpp\
 
 
 if ONLY_LIB
-lib_LTLIBRARIES = libmix.la			
+lib_LTLIBRARIES = libmix.la
 libmix_la_CPPFLAGS = -DSOMEFLAG
 libmix_la_SOURCES = $proxtest_sources
 CAAbstractControlChannel.cpp\
@@ -249,7 +249,7 @@ CAAbstractControlChannel.cpp\
 		    CAStatusManager.cpp \
 		    CATLSClientSocket.cpp\
 		    CASymCipher.cpp \
-			CASymCipherCTR.cpp \
+		CASymCipherCTR.cpp \
 			CASymCipherGCM.cpp \
 			CASymCipherOFB.cpp \
 		    CASyncControlChannel.cpp\
@@ -365,18 +365,17 @@ else #only lib
 
 if BUILD_AS_SHADOW_PLUGIN
 
-lib_LTLIBRARIES = libmixshadow.la	
+lib_LTLIBRARIES = libmixshadow.la
 libmixshadow_la_SOURCES = $(proxytest_sources) proxytest.cpp
 
-libmixshadow_la_LIBADD = 
-	    $(top_builddir)/xml/libxml.a \
+libmixshadow_la_LIBADD = $(top_builddir)/xml/libxml.a \
 	    $(top_builddir)/popt/libpopt.a \
 	    $(top_builddir)/trio/libtrio.a \
 	    $(top_builddir)/tre/libtre.a \
 	    $(top_builddir)/gcm/libgcm.a \
 	    $(top_builddir)/TypeA/libmixa.a \
 	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
-
+libmixshadow_la_LDFLAGS = -Wl,--no-as-needed
 else #BUILD_AS_SHADOW_PLUGIN
 
 noinst_LIBRARIES = libproxytest.a
