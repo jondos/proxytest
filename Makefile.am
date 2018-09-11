@@ -362,7 +362,8 @@ libproxytest_a_SOURCES = CAAbstractControlChannel.cpp\
 
 
 mix_SOURCES = proxytest.cpp
-
+mix_CFLAGS = $(AM_CFLAGS)
+mix_CPPFLAGS = $(AM_CPPFLAGS)
 mix_LDADD += $(top_builddir)/libproxytest.a \
 	    $(top_builddir)/xml/libxml.a \
 	    $(top_builddir)/popt/libpopt.a \
@@ -371,6 +372,8 @@ mix_LDADD += $(top_builddir)/libproxytest.a \
 	    $(top_builddir)/gcm/libgcm.a \
 	    $(top_builddir)/TypeA/libmixa.a \
 	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
+
+
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
