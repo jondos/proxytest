@@ -377,10 +377,10 @@ EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
 if BUILD_AS_SHADOW_PLUGIN
 
-lib_LTLIBRARIES = libmix-shadow.la	
-libmix-shadow_la_SOURCES = proxytest.cpp
+lib_LTLIBRARIES = libmixshadow.la	
+libmixshadow_la_SOURCES = proxytest.cpp
 
-libmix-shadow_la_LDADD = $(top_builddir)/libproxytest.a \
+libmixshadow_la_LDADD = $(top_builddir)/libproxytest.a \
 	    $(top_builddir)/xml/libxml.a \
 	    $(top_builddir)/popt/libpopt.a \
 	    $(top_builddir)/trio/libtrio.a \
