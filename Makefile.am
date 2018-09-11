@@ -6,6 +6,7 @@ ACLOCAL_AMFLAGS = -I m4
 AUTOMAKE_OPTIONS = foreign
 
 export SGXTOOLCHAIN=@SCONE_TOOLCHAIN@
+mix_LDADD = 
 
 proxytest_sources = CAAbstractControlChannel.cpp\
 		    CAAbstractXMLEncodable.cpp\
@@ -369,7 +370,7 @@ libproxytest_a_SOURCES = $(proxytest_sources)
 mix_SOURCES = proxytest.cpp
 mix_CFLAGS = $(AM_CFLAGS)
 mix_CPPFLAGS = $(AM_CPPFLAGS)
-mix_LDADD = $(top_builddir)/libproxytest.a \
+mix_LDADD += $(top_builddir)/libproxytest.a \
 	    $(top_builddir)/xml/libxml.a \
 	    $(top_builddir)/popt/libpopt.a \
 	    $(top_builddir)/trio/libtrio.a \
