@@ -377,7 +377,7 @@ libmixshadow_la_LIBADD =
 	    $(top_builddir)/TypeA/libmixa.a \
 	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
 
-else BUILD_AS_SHADOW_PLUGIN
+else #BUILD_AS_SHADOW_PLUGIN
 
 noinst_LIBRARIES = libproxytest.a
 sbin_PROGRAMS = mix
