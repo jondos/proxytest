@@ -728,8 +728,8 @@ exit(0);
 //End Test CAAsymCrypto
 
 
-squidloghelp_main();
-return 0;
+//squidloghelp_main();
+//return 0;
 		if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"An error occurred before we could finish parsing the configuration file. Exiting...\n");
