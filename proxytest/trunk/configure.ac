@@ -962,6 +962,7 @@ AC_ARG_WITH(SCONE,
 )
 
 build_as_shadow_plugin="false"
+BUILD_AS_SHADOW_PLUGIN_CFLAGS=""
 AC_ARG_ENABLE(build-as-shadow-plugin,
 	AS_HELP_STRING([--enable-build-as-shadow-plugin],[Build as Shadow simulator plugin]),
 	[
