@@ -19689,6 +19689,7 @@ fi
 
 
 build_as_shadow_plugin="false"
+BUILD_AS_SHADOW_PLUGIN_CFLAGS=""
 # Check whether --enable-build-as-shadow-plugin was given.
 if test "${enable_build_as_shadow_plugin+set}" = set; then :
   enableval=$enable_build_as_shadow_plugin;
