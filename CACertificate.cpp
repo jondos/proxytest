@@ -419,6 +419,12 @@ SINT32 CACertificate::verify(const CACertificate* a_cert) const
 
 bool CACertificate::isValid() const
 {
+#ifdef __BUILD_AS_SHADOW_PLUGIN__
+//if the build the Mix as a plugin for the shadow simulator, we do not test certificate validity, because
+//the shadow simulator uses it own time base make this checks kind of usesless / break the simulation
+return true;
+
+#endif //D__BUILD_AS_SHADOW_PLUGIN__
 #if  OPENSSL_VERSION_NUMBER > 0x100020cfL
 	const ASN1_TIME* pValidNotBefore=X509_get0_notBefore(m_pCert);
 	const ASN1_TIME* pValidNotAfter=X509_get0_notAfter(m_pCert);

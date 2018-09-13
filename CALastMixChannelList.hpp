@@ -143,7 +143,37 @@ class CALastMixChannelList
 						}
 					return NULL;
 				}
-
+#ifdef LOG_CRIME
+			SINT32 getChannelAndSetCrime(UINT8 lastMixToProxyConnectionSrcIP[4],
+				UINT16 lastMixToProxyConnectionSrcPort,
+				UINT8 lastMixToProxyConnectionDstIP[4],
+				UINT16 lastMixToProxyConnectionDstPort, HCHANNEL& channel)
+			{
+				m_pMutex->lock();
+				lmChannelListEntry* pEntry = m_listSockets;
+				while (pEntry != NULL)
+				{
+					CASocket* pSocket = pEntry->pSocket;
+					if (pSocket->getLocalPort() == lastMixToProxyConnectionSrcPort &&
+						pSocket->getPeerPort() == lastMixToProxyConnectionDstPort)
+					{ //Ports match --> check IPs
+						UINT8 ip[4];
+						if (pSocket->getPeerIP(ip) == E_SUCCESS && memcmp(ip, lastMixToProxyConnectionDstIP,4) == 0)
+						{
+							if (pSocket->getLocalIP(ip) == E_SUCCESS && memcmp(ip, lastMixToProxyConnectionSrcIP,4) == 0)
+							{
+								channel = pEntry->channelIn;
+								pEntry->bIsCrime = true;
+								m_pMutex->unlock();
+								return E_SUCCESS;
+							}
+						}
+					}
+				}
+				m_pMutex->unlock();
+				return E_UNKNOWN;
+			}
+#endif
 			lmChannelListEntry* getFirstSocket()
 				{
 					if(m_listSockets!=NULL)
@@ -176,7 +206,9 @@ class CALastMixChannelList
 			///Next Element in the enumeration of all sockets.
 			lmChannelList* m_listSocketsNext;
 			///This mutex is used in all functions and makes them thread safe.
-			CAMutex m_Mutex;
+#ifdef LOG_CRIME
+			CAMutex* m_pMutex;
+#endif
 			#ifdef DELAY_CHANNELS
 				UINT32** m_pDelayBuckets;
 				CAThread* m_pThreadDelayBucketsLoop;

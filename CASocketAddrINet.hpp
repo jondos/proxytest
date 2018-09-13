@@ -80,9 +80,9 @@ class CASocketAddrINet:private sockaddr_in,public CASocketAddr
 				}
 
 			SINT32 setAddr(const UINT8* szIP,UINT16 port);
-      SINT32 setIP(UINT8 ip[4]);
+			SINT32 setIP(UINT8 ip[4]);
 			SINT32 setPort(UINT16 port);
-      UINT16 getPort() const;
+			UINT16 getPort() const;
 			SINT32 getHostName(UINT8* buff,UINT32 len)const;
 			SINT32 getIP(UINT8 buff[4]) const;
 			SINT32 getIPAsStr(UINT8* buff,UINT32 len) const;
@@ -98,6 +98,24 @@ class CASocketAddrINet:private sockaddr_in,public CASocketAddr
 			
 			static SINT32 getLocalHostName(UINT8* buff,UINT32 len);
 			static SINT32 getLocalHostIP(UINT8 ip[4]);
+			/*** Gets the IP for a doted IP string (a.b.c.d)
+			*/
+			static SINT32 getIPForString(UINT8* strIP, UINT8 ip[4])
+			{
+				UINT32 newAddr = inet_addr((const char*)strIP); //is it a doted string (a.b.c.d) ?
+				if (newAddr == INADDR_NONE) //no..
+				{
+					return E_UNKNOWN;
+				}
+				ip[3] = newAddr & 0x00FF;
+				newAddr >>= 8;
+				ip[2] = newAddr & 0x00FF;
+				newAddr >>= 8;
+				ip[1] = newAddr & 0x00FF;
+				newAddr >>= 8;
+				ip[0] = newAddr & 0x00FF;
+				return E_SUCCESS;
+			}
 //			operator LPSOCKADDR(){return (::LPSOCKADDR)m_pAddr;}
 
 			/** Returns a human readable representation of this address.

@@ -1120,4 +1120,36 @@ SINT32 CALastMix::initMixCascadeInfo(DOMElement*  mixes)
 		setDOMElementAttribute(cascade,"create",(UINT8*)"true");
 		return r;
 }
+
+
+#ifdef LOG_CRIME
+void CALastMix::externalCrimeNotifier(UINT8 lastMixToProxyConnectionSrcIP[4],
+	UINT16 lastMixToProxyConnectionSrcPort,
+	UINT8 lastMixToProxyConnectionDstIP[4],
+	UINT16 lastMixToProxyConnectionDstPort, UINT8* pstrExternalLogEntry)
+{
+	int log = LOG_ENCRYPTED;
+	if (!CALibProxytest::getOptions()->isEncryptedLogEnabled())
+		log = LOG_CRIT;
+	//Find corresponding channel and set channel to be a crime one
+
+	HCHANNEL channel;
+	if (m_pChannelList->getChannelAndSetCrime(lastMixToProxyConnectionSrcIP, lastMixToProxyConnectionSrcPort, lastMixToProxyConnectionDstIP, lastMixToProxyConnectionDstPort, channel) != E_SUCCESS)
+	{
+		CAMsg::printMsg(log, "Crime detected (external notification) -- but channel already closed! "
+			" -- External Log Entry: \n%s\n", pstrExternalLogEntry);
+		return;
+	}
+
+	tQueueEntry* pQueueEntryCrime = new tQueueEntry;
+	memset(pQueueEntryCrime, 0, sizeof(tQueueEntry));
+	m_pMuxIn->sigCrime(channel, &(pQueueEntryCrime->packet));
+	m_pQueueSendToMix->add(pQueueEntryCrime, sizeof(tQueueEntry));
+	CAMsg::printMsg(log, "Crime detected (external notification) -- previous mix channel: "
+		"%u -- Proxy Connection source port: %u -- External Log Entry: \n%s\n", channel, lastMixToProxyConnectionSrcPort,
+		pstrExternalLogEntry);
+
+}
+#endif //LOG_CRIME
+
 #endif //ONLY_LOCAL_PROXY

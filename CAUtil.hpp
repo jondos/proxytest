@@ -537,6 +537,11 @@ SINT32 saveFile(const UINT8* const name,const UINT8* const buff,UINT32 buffSize)
 
 
 /**
+* Parses a 16bit unsigned integer
+*/
+SINT32 parseUINT16(const UINT8 * str, UINT16& value);
+
+/**
  * Parses a 64bit unsigned integer
  */
 SINT32 parseU64(const UINT8 * str, UINT64& value);

@@ -1340,6 +1340,14 @@ SINT32 saveFile(const UINT8* const name,const UINT8* const buff,UINT32 buffSize)
 	return E_SUCCESS;
 }
 
+
+SINT32 parseUINT16(const UINT8 * str, UINT16& value)
+{
+	UINT16 v = atol((const char*)str);
+	value = v;
+	return E_SUCCESS;
+}
+
 /**
  * Parses a 64bit unsigned integer.
  * Note: If the value is out of range or not parseable an error is returned.

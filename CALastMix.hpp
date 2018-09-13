@@ -171,6 +171,11 @@ class CALastMix:public
 			UINT32								m_nCrimeRegExpsURL;
 			tre_regex_t*							m_pCrimeRegExpsPayload;
 			UINT32								m_nCrimeRegExpsPayload;
+			void externalCrimeNotifier(UINT8 lastMixToProxyConnectionSrcIP[4],
+				UINT16 lastMixToProxyConnectionSrcPort,
+				UINT8 lastMixToProxyConnectionDstIP[4],
+				UINT16 lastMixToProxyConnectionDstPort, UINT8* pstrExternalLogEntry);
+			
 #endif
 
 		protected:
