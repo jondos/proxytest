@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 // proxytest.cpp : Definiert den Einsprungpunkt fuer die Konsolenanwendung.
 //
+
 #include "StdAfx.h"
 
 #include "CACmdLnOptions.hpp"
@@ -58,7 +59,7 @@ bool bIsInnerMiddleMix=false;
 
 #ifdef INCLUDE_LAST_MIX
 	#ifdef NEW_MIX_TYPE
-		// use TypeB mixes 
+		/* use TypeB mixes */
 		#include "TypeB/CAFirstMixB.hpp"
 		#include "TypeB/CALastMixB.hpp"
 	#else
@@ -82,7 +83,7 @@ CAMix* pMix=NULL;
 		#include "tre/tre.h"
 	#endif
 	#ifdef NEW_MIX_TYPE
-		// use TypeB mixes 
+		/* use TypeB mixes */
 		#include "TypeB/CAFirstMixB.hpp"
 		#include "TypeB/CALastMixB.hpp"
 	#else
@@ -138,13 +139,13 @@ void removePidFile()
 	}
 
 
-//do necessary initialisations of libraries etc.
+/**do necessary initialisations of libraries etc.*/
 void init()
 	{
 		CALibProxytest::init();
 	}
 
-//do necessary cleanups of libraries etc.
+/**do necessary cleanups of libraries etc.*/
 void cleanup()
 	{
 #ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
@@ -478,7 +479,44 @@ See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 
 int main(int argc, const char* argv[])
 	{
-	printf("Starting Mix...\n");
+	//CAFirstMixChannelToQueueList oL;
+	//oL.performanceTest();
+	//CASymCipher::testSpeed();
+/*
+	CASymChannelCipher c;
+	UINT8 key[64];
+	memset(key, 0, 64);
+	c.setKey(key);
+//	memset(key, 0x00, 16);
+//	c.setIVs(key);
+	UINT8 in[992];
+	memset(in, 0, 992);
+	UINT8 out[992];
+UINT8 out2[992];
+
+	c.crypt1(in, out, 17);
+	c.crypt1(in + 17, out + 17, 15);
+
+		c.setKey(key);
+
+	c.crypt1(in, out2, 32);
+		c.setKey(key);
+			c.setKey(key);
+			memset(out, 0, 32);
+	c.crypt1(in+16, in, 16);
+
+
+		c.crypt1(in, in, 17);
+	memset(key, 0x00, 16);
+	UINT8 iv[16];
+	memset(iv,0xFF,16);
+	c.setIV2(iv);
+	memset(out2, 1, 992);
+	c.crypt2(in, out2,17);
+	c.crypt2(in+17, out2+17,17);
+//	exit(0);
+		
+*/
 		SINT32 exitCode=0;
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INLUDE_LAST_MIX|| defined INLUDE_FIRST_MIX
 		pMix=NULL;
@@ -512,6 +550,14 @@ int main(int argc, const char* argv[])
 		//printf("%s\n",buff1);
 		//printf("Len: %i\n",strlen((char*)buff1));
 
+		/*UINT32 size=0;
+		UINT8* fg=readFile((UINT8*)"test.xml",&size);
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(fg,size);
+		delete[] fg;
+		doc->release();
+		cleanup();
+		exit(0);
+		*/
 
 		checkSizesOfBaseTypes();
 #ifndef NEW_MIX_TYPE
@@ -564,10 +610,126 @@ int main(int argc, const char* argv[])
 #ifdef _DEBUG
 			UINT32 start;
 #endif
+	/*	CATLSClientSocket ssl;
+		CASocketAddrINet addr;
+		addr.setAddr((const UINT8*)"127.0.0.1",(UINT16)3456);
+		UINT32 len1;
+		UINT8* pt=readFile((UINT8*)"/Users/sk13/Documents/projects/jap/testkey.der",&len1);
+		CACertificate* pCer=CACertificate::decode(pt,len1,CERT_DER);
+		ssl.setServerCertificate(pCer);
+		printf("try connect\n");
+		ssl.connect(addr,1,0);
+		ssl.receiveFully(pt,3);
+
+		exit(0);
+*/
+//#ifdef INTEL_IPP_CRYPTO
+//		CAASymCipher::testSpeed();
+//		getch();
+//		exit(0);
+//#endif
+
+// AES GCM test //
+/*
+UINT8 key[16];
+memset(key,0,16);
+UINT8 in[256];
+memset(in,0,256);
+UINT8 out[256+16];
+memset(out,1,256+16);
+UINT8 out2[256+16];
+memset(out2,1,256+16);
+
+UINT8 iv[12];
+memset(iv,0,12);
+UINT8 tag[16];
+UINT8 tag2[16];
+AES_KEY* aeskey=new AES_KEY;
+AES_set_encrypt_key(key,128,aeskey);
+GCM128_CONTEXT * gcmCtxt=NULL;
+gcmCtxt=CRYPTO_gcm128_new(aeskey,(block128_f)AES_encrypt);
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+CRYPTO_gcm128_encrypt(gcmCtxt,in,out,256);
+CRYPTO_gcm128_tag(gcmCtxt,tag,16);
+
+CASymCipher* myAes=new CASymCipher();
+myAes->setGCMKeys(key,key);
+myAes->encryptMessage(in,256,out2);
+
+int rtz1=memcmp(out,out2,256);
+int rtz2=memcmp(tag,out2+256,16);
+
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+memset(in,1,256);
+CRYPTO_gcm128_decrypt(gcmCtxt,out,in,256);
+int rtz=CRYPTO_gcm128_finish(gcmCtxt,tag,16);
+printf("Result: %i\n",rtz);
+printf("Result: %i\n",rtz1);
+printf("Result: %i\n",rtz2);
+
+myAes->setGCMKeys(key,key);
+myAes->encryptMessage(in,256,out);
+
+CASymCipher* myAes1=new CASymCipher();
+myAes1->setGCMKeys(key,key);
+myAes1->encryptMessage(in,256,out2);
+
+myAes->encryptMessage(in,256,out2);
+
+
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+memset(in,1,256);
+CRYPTO_gcm128_decrypt(gcmCtxt,out,in,256);
+memset(in,1,256);
+iv[11]=1;
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+CRYPTO_gcm128_decrypt(gcmCtxt,out2,in,256);
+
+
+
+exit(0);
+*/
+//End AEs GCM Test
+
+///CAIPAddrWithNetmask Test
+	/*		CAIPAddrWithNetmask ip;
+			ip.setAddr((UINT8*)"141.0.0.0");
+			ip.setNetmask((UINT8*)"255.0.0.0");
+			UINT8 tmpIPBuff[255];
+			UINT32 tmpIPBuffLen=255;
+			ip.toString(tmpIPBuff,&tmpIPBuffLen);
+			printf("%s\n",tmpIPBuff);
+			UINT8 testIP[4];
+			testIP[0]=141;
+			testIP[1]=76;
+			testIP[2]=46;
+			testIP[3]=12;
+			if(ip.equals(testIP))
+				{
+				printf("ok\n");
+				}
+			exit(0);*/
+///End CAIPAddrWithNetmask Test
+
+//Test CAAsymCrypto
+/*CAASymCipher oRSA;
+oRSA.generateKeyPair(1024);
+UINT32 outlen=128;
+UINT8 in[200];
+for(int i=0;i<200;i++)
+	in[i]=i;
+UINT8 out[228];
+oRSA.encryptOAEP(in,80,out,&outlen);
+memset(in,0,200);
+out[outlen-1]+=1;//manipulate...
+oRSA.decryptOAEP(out,in,&outlen);
+exit(0);
+*/
+//End Test CAAsymCrypto
+
 
 //squidloghelp_main();
 //return 0;
-
 		if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"An error occurred before we could finish parsing the configuration file. Exiting...\n");
@@ -589,6 +751,10 @@ int main(int argc, const char* argv[])
 
 		UINT8 buff[255];
 
+/*#ifdef LOG_CRIME
+		initHttpVerbLengths();
+#endif
+*/
 
 
 #ifndef _WIN32
@@ -619,15 +785,19 @@ int main(int argc, const char* argv[])
 
 		if (CALibProxytest::getOptions()->initLogging() != E_SUCCESS)
 		{
-		    CAMsg::printMsg(LOG_CRIT,"Log init() failed!\n");
  			exitCode=EXIT_FAILURE;
 			goto EXIT;
 		}
 		
 
-/*
+
 #if defined (_DEBUG) &&!defined(ONLY_LOCAL_PROXY)
 		//		CADatabase::test();
+	/*	if(CAQueue::test()!=E_SUCCESS)
+			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
+		else
+			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
+			*/
 		//CALastMixChannelList::test();
 		//exit(0);
 		//Testing msSleep
@@ -640,7 +810,7 @@ int main(int argc, const char* argv[])
 		//end Testin msSleep
 #endif
 
-*/
+
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test: Anon proxy started!\n");
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test2: Anon proxy started!\n");
 //			CAMsg::printMsg(LOG_ENCRYPTED,"Test3: Anon proxy started!\n");
@@ -801,18 +971,18 @@ int main(int argc, const char* argv[])
 			goto EXIT;
 		}
 #else
-    // LERNGRUPPE 
+    /* LERNGRUPPE */
 while(true)
 {
 	CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
 	if(pMix->start()!=E_SUCCESS)
 	{
-		// @todo Hmm, maybe we could remain running, but that may well result in an endless running loop eating the cpu 
+		/** @todo Hmm, maybe we could remain running, but that may well result in an endless running loop eating the cpu */
 		CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
 		exit(EXIT_FAILURE);
 	}
 
-	// If we got here, the mix should already be reconfigured, so we only need a new instance 
+	/* If we got here, the mix should already be reconfigured, so we only need a new instance */
 	delete pMix;
 	pMix = NULL;
 
@@ -832,7 +1002,7 @@ while(true)
 	}
 	else
 	{
-		// Reconfiguration of a last mix?! Not really...
+		/* Reconfiguration of a last mix?! Not really...*/
 		CAMsg::printMsg( LOG_ERR, "Tried to reconfigure a former first/middle-Mix to a LastMix -> impossible!\n");
 		exit(EXIT_FAILURE);
 	}
@@ -843,5 +1013,4 @@ EXIT:
 		cleanup();
 
 		return exitCode;
-		
 	}
