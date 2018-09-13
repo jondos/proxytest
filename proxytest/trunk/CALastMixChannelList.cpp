@@ -53,7 +53,10 @@ CALastMixChannelList::CALastMixChannelList()
 #ifdef DELAY_CHANNELS_LATENCY
 		m_u32DelayChannelLatency=DELAY_CHANNEL_LATENCY;
 #endif
-	}
+#ifdef LOG_CRIME
+		m_pMutex=new CAMutex();
+#endif
+}
 
 CALastMixChannelList::~CALastMixChannelList()
 	{
@@ -81,6 +84,10 @@ CALastMixChannelList::~CALastMixChannelList()
 			}
 		delete[] m_HashTable;
 		m_HashTable = NULL;
+#ifdef LOG_CRIME
+		delete m_pMutex;
+#endif
+
 	}
 
 SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,
@@ -159,6 +166,9 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,
 				pEntry->list_Channels.prev=pNewEntry;
 			}
 		//Insert in SocketList
+#ifdef LOG_CRIME
+		m_pMutex->lock();
+#endif
 		if(m_listSockets==NULL)
 			{
 				m_listSockets=pNewEntry;
@@ -172,6 +182,9 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,
 				m_listSockets->list_Sockets.prev=pNewEntry;
 				m_listSockets=pNewEntry;				
 			}
+#ifdef LOG_CRIME
+		m_pMutex->unlock();
+#endif
 		m_HashTable[hash]=pNewEntry;
 		//if(m_listSocketsNext==NULL)
 		//	m_listSocketsNext=m_listSockets;
@@ -201,6 +214,9 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 								pEntry->list_Channels.next->list_Channels.prev=pEntry->list_Channels.prev;
 							}
 						//remove from SocketList
+#ifdef LOG_CRIME
+						m_pMutex->lock();
+#endif
 						if(pEntry->list_Sockets.prev==NULL)
 							m_listSockets=pEntry->list_Sockets.next;
 						else
@@ -227,6 +243,9 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 						delete pEntry;
 						pEntry = NULL;
 						m_nChannels--;					
+#ifdef LOG_CRIME
+						m_pMutex->lock();
+#endif
 						return E_SUCCESS;
 					}
 				pEntry=pEntry->list_Channels.next;

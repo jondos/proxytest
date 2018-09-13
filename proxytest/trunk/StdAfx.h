@@ -84,7 +84,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define INTEL_IPP_CRYPTO //define if you want to use the crypto routines of the Intel Performance Primitives
 //#define __UNIT_TEST__ //define if you want to compile the unit tests
 //#define EXPORT_ASYM_PRIVATE_KEY //define if you want to be able to export the private key of an assymetric key (only used for debugging purposes..)
-//#define LOG_CRIME
+#define LOG_CRIME
 //#define PAYMENT //to enable payment support, now use configure --enable-payment..
 //#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
 
