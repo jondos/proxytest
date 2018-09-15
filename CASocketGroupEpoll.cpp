@@ -39,7 +39,7 @@ CASocketGroupEpoll::CASocketGroupEpoll(bool bWrite)
 
 CASocketGroupEpoll::~CASocketGroupEpoll()
 	{
-		close(m_hEPFD);
+		epoll_close(m_hEPFD);
 		delete[] m_pEvents;
 		m_pEvents = NULL;
 		delete m_pEpollEvent;

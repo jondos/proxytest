@@ -475,7 +475,7 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 	SINT32 ret;
 	SINT32 aktTimeOut=0;
 	UINT64 startupTime, currentMillis;
-
+	CASingleSocketGroup* pSingleSocketGroup = NULL;
 
 	bool bWasNonBlocking;
 	getNonBlocking(&bWasNonBlocking);
@@ -495,6 +495,7 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 	}
 	else
 	{
+		SINT32 retval = E_UNKNOWN;
 		for(;;)
 		{
 			getcurrentTimeMillis(currentMillis);
@@ -505,25 +506,33 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 				#endif
 				setSendTimeOut(aktTimeOut);
 				SET_NET_ERROR(E_TIMEDOUT);
-				return E_TIMEDOUT;
+				retval=E_TIMEDOUT;
+				break;
 			}
 
 			ret=send(buff,len);
 			if((UINT32)ret==len)
 			{
 				setSendTimeOut(aktTimeOut);
-				return E_SUCCESS;
+				ret=E_SUCCESS;
+				break;
 			}
 			else if(ret==E_AGAIN)
 			{
-				ret=CASingleSocketGroup::select_once(*this,true,1000);
+				if (pSingleSocketGroup == NULL)
+				{
+					pSingleSocketGroup = new CASingleSocketGroup(true);
+					pSingleSocketGroup->add(*this);
+				}
+				ret= pSingleSocketGroup->select(1000);
 				if(ret>=0||ret==E_TIMEDOUT)
 					continue;
 				#ifdef _DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"CASocket::sendTimeOutFully() - error near select_once() ret=%i\n",ret);
 				#endif
 				setSendTimeOut(aktTimeOut);
-				return E_UNKNOWN;
+				retval=E_UNKNOWN;
+				break;
 			}
 			else if(ret<0)
 			{
@@ -531,12 +540,15 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 					CAMsg::printMsg(LOG_DEBUG,"CASocket::sendTimeOutFully() - send returned %i\n",ret);
 				#endif
 				setSendTimeOut(aktTimeOut);
-				return E_UNKNOWN;
+				retval=E_UNKNOWN;
+				break;
 			}
 			len-=ret;
 			buff+=ret;
 		}
-		//could never be here....
+		if (pSingleSocketGroup != NULL)
+			delete pSingleSocketGroup;
+		return retval;
 	}
 }
 
@@ -551,6 +563,8 @@ SINT32 CASocket::sendFully(const UINT8* buff,UINT32 len)
 	  if(len==0)
 			return E_SUCCESS; //nothing to send
 		SINT32 ret;
+		CASingleSocketGroup* pSingleSocketGroup = NULL;
+		SINT32 retval = E_UNKNOWN;
 		for(;;)
 			{
 				ret=send(buff,len);
@@ -558,26 +572,36 @@ SINT32 CASocket::sendFully(const UINT8* buff,UINT32 len)
 					return E_SUCCESS;
 				else if(ret==E_AGAIN)
 					{
-						ret=CASingleSocketGroup::select_once(*this,true,1000);
+						if (pSingleSocketGroup == NULL)
+						{
+							pSingleSocketGroup = new CASingleSocketGroup(true);
+							pSingleSocketGroup->add(*this);
+						}
+
+						ret= pSingleSocketGroup->select(1000);
 						if(ret>=0||ret==E_TIMEDOUT)
 							continue;
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFully() - error near select_once() ret=%i\n",ret);
 						#endif
-						return E_UNKNOWN;
+						retval=E_UNKNOWN;
+						break;
 					}
 				else if(ret<0)
 					{
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"CASocket::sendFully() - send returned %i\n",ret);
 						#endif
-						return E_UNKNOWN;
+						retval=E_UNKNOWN;
+						break;
 					}
 				len-=ret;
 				buff+=ret;
 			}
-			//could never be here....
-	}
+		if (pSingleSocketGroup != NULL)
+			delete pSingleSocketGroup;
+		return retval;
+}
 
 /** Will receive some bytes from the socket. May block or not depending on whatever this socket
 	* was set to blocking or non-blocking mode.

@@ -3726,6 +3726,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-IntelCrypto|Win32'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="wepoll\wepoll.c">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="xml\dom\mxml\mxmlDOMDocument.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </PrecompiledHeader>
@@ -3978,6 +3981,7 @@
     <ClInclude Include="TypeB\CALastMixB.hpp" />
     <ClInclude Include="TypeB\CALastMixBChannelList.hpp" />
     <ClInclude Include="typedefs.hpp" />
+    <ClInclude Include="wepoll\wepoll.h" />
     <ClInclude Include="xml\dom\mxml\mxmlDOM.hpp" />
     <ClInclude Include="xml\dom\mxml\mxmlDOMAttr.hpp" />
     <ClInclude Include="xml\dom\mxml\mxmlDOMDocument.hpp" />

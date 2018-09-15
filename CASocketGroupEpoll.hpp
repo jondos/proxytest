@@ -197,7 +197,7 @@ class CASocketGroupEpoll
 				}
 
 		private:
-			SINT32 m_hEPFD; //the EPoll file descriptor
+			EPOLL_HANDLE m_hEPFD; //the EPoll file descriptor
 			struct epoll_event* m_pEvents;
 			struct epoll_event* m_pEpollEvent;
 			SINT32 m_iNumOfReadyFD;

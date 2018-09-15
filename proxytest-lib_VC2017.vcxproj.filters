@@ -122,6 +122,9 @@
     <ClCompile Include="CASymCipherCTR.cpp" />
     <ClCompile Include="CASymCipherGCM.cpp" />
     <ClCompile Include="CASymCipherOFB.cpp" />
+    <ClCompile Include="wepoll\wepoll.c">
+      <Filter>wepoll</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basetypedefs.h" />
@@ -293,6 +296,9 @@
     <ClInclude Include="CASymChannelCipher.hpp" />
     <ClInclude Include="CASymChannelCipherFactory.hpp" />
     <ClInclude Include="CASymCipherNull.hpp" />
+    <ClInclude Include="wepoll\wepoll.h">
+      <Filter>wepoll</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="documentation\XML\FirstMixToInfoService.xml" />
@@ -310,6 +316,9 @@
     </Filter>
     <Filter Include="xml">
       <UniqueIdentifier>{ae9943bf-191a-48c1-81fa-87f87c498892}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="wepoll">
+      <UniqueIdentifier>{02405992-8bbf-434f-93d6-25be845f002d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -1,0 +1,538 @@
+
+int main(int argc, const char* argv[])
+	{
+	//CAFirstMixChannelToQueueList oL;
+	//oL.performanceTest();
+	//CASymCipher::testSpeed();
+/*
+	CASymChannelCipher c;
+	UINT8 key[64];
+	memset(key, 0, 64);
+	c.setKey(key);
+//	memset(key, 0x00, 16);
+//	c.setIVs(key);
+	UINT8 in[992];
+	memset(in, 0, 992);
+	UINT8 out[992];
+UINT8 out2[992];
+
+	c.crypt1(in, out, 17);
+	c.crypt1(in + 17, out + 17, 15);
+
+		c.setKey(key);
+
+	c.crypt1(in, out2, 32);
+		c.setKey(key);
+			c.setKey(key);
+			memset(out, 0, 32);
+	c.crypt1(in+16, in, 16);
+
+
+		c.crypt1(in, in, 17);
+	memset(key, 0x00, 16);
+	UINT8 iv[16];
+	memset(iv,0xFF,16);
+	c.setIV2(iv);
+	memset(out2, 1, 992);
+	c.crypt2(in, out2,17);
+	c.crypt2(in+17, out2+17,17);
+//	exit(0);
+		
+*/
+		SINT32 exitCode=0;
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INLUDE_LAST_MIX|| defined INLUDE_FIRST_MIX
+		pMix=NULL;
+#endif
+		UINT32 lLogOpts = 0;
+		SINT32 maxFiles,ret;
+#if defined(HAVE_CRTDBG)
+//			_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
+			_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
+//			_CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_FILE );
+			_CrtSetReportFile( _CRT_ERROR, _CRTDBG_FILE_STDOUT );
+//			_CrtSetReportMode( _CRT_ASSERT, _CRTDBG_MODE_FILE );
+			_CrtSetReportFile( _CRT_ASSERT, _CRTDBG_FILE_STDOUT );
+
+		UINT32 tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
+		tmpDbgFlag |= _CRTDBG_ALLOC_MEM_DF;
+		tmpDbgFlag |=_CRTDBG_LEAK_CHECK_DF;
+		_CrtSetDbgFlag(tmpDbgFlag);
+		s1=new _CrtMemState;
+		_CrtMemCheckpoint( s1 );
+#endif
+//Switch on debug infos
+#ifdef CWDEBUG
+		Debug(libcw_do.on());
+		Debug(dc::malloc.on());
+#endif
+		init();
+			//some test....
+		//UINT8 buff1[500];
+		//readPasswd(buff1,500);
+		//printf("%s\n",buff1);
+		//printf("Len: %i\n",strlen((char*)buff1));
+
+		/*UINT32 size=0;
+		UINT8* fg=readFile((UINT8*)"test.xml",&size);
+		XERCES_CPP_NAMESPACE::DOMDocument* doc=parseDOMDocument(fg,size);
+		delete[] fg;
+		doc->release();
+		cleanup();
+		exit(0);
+		*/
+
+		checkSizesOfBaseTypes();
+#ifndef NEW_MIX_TYPE
+		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
+			{
+				CAMsg::printMsg(LOG_CRIT,"MIXPACKET_SIZE [%u] != sizeof(MUXPACKET) [%u] --> maybe a compiler (optimization) problem!\n",MIXPACKET_SIZE,sizeof(MIXPACKET));
+				CAMsg::printMsg(LOG_CRIT,"Offsets:\n");
+				MIXPACKET oPacket;
+				UINT8 *p=(UINT8 *)&oPacket;
+				UINT32 soffsets[7]={0,4,6,6,6,8,9};
+				UINT32 hoffsets[7];
+				CAMsg::printMsg(LOG_CRIT,".channel %u (should be 0)\n",hoffsets[0]=(UINT8*)&(oPacket.channel)-p);
+				CAMsg::printMsg(LOG_CRIT,".flags: %u (should be 4)\n",hoffsets[1]=(UINT8*)&oPacket.flags-p);
+				CAMsg::printMsg(LOG_CRIT,".data: %u (should be 6)\n",hoffsets[2]=(UINT8*)&oPacket.data-p);
+				CAMsg::printMsg(LOG_CRIT,".payload: %u (should be 6)\n",hoffsets[3]=(UINT8*)&oPacket.payload-p);
+				CAMsg::printMsg(LOG_CRIT,".payload.len: %u (should be 6)\n",hoffsets[4]=(UINT8*)&oPacket.payload.len-p);
+				CAMsg::printMsg(LOG_CRIT,".payload.type: %u (should be 8)\n",hoffsets[5]=(UINT8*)&oPacket.payload.type-p);
+				CAMsg::printMsg(LOG_CRIT,".payload.data: %u (should be 9)\n",hoffsets[6]=(UINT8*)&oPacket.payload.data-p);
+				for(int i=0;i<7;i++)
+				 if(soffsets[i]!=hoffsets[i])
+					exit(EXIT_FAILURE);
+				CAMsg::printMsg(LOG_CRIT,"Hm, The Offsets seams to be ok - so we try to continue - hope that works...\n");
+			}
+#endif
+#ifdef LOG_CRIME
+//			testTre();
+#endif
+
+#ifdef REPLAY_DATABASE_PERFORMANCE_TEST
+		CAReplayDatabase::measurePerformance((UINT8*)"dbperformace.log",1,10000001,500000,10,100000);
+		exit(0);
+#endif
+
+
+#ifdef DATA_RETENTION_LOG
+		if(sizeof(t_dataretentionLogEntry)!=18)
+		{
+				CAMsg::printMsg(LOG_CRIT,"sizeof(tDataRetentionLogEntry) [%u] != 18 --> maybe a compiler (optimization) problem!\n",sizeof(t_dataretentionLogEntry));
+				exit(EXIT_FAILURE);
+		}
+#endif
+//		CADataRetentionLogFile::doCheckAndPerformanceTest();
+//		getch();
+//		exit(0);
+
+//				CAQueue::test();
+//				getch();
+//				exit(0);
+
+#ifdef _DEBUG
+			UINT32 start;
+#endif
+	/*	CATLSClientSocket ssl;
+		CASocketAddrINet addr;
+		addr.setAddr((const UINT8*)"127.0.0.1",(UINT16)3456);
+		UINT32 len1;
+		UINT8* pt=readFile((UINT8*)"/Users/sk13/Documents/projects/jap/testkey.der",&len1);
+		CACertificate* pCer=CACertificate::decode(pt,len1,CERT_DER);
+		ssl.setServerCertificate(pCer);
+		printf("try connect\n");
+		ssl.connect(addr,1,0);
+		ssl.receiveFully(pt,3);
+
+		exit(0);
+*/
+//#ifdef INTEL_IPP_CRYPTO
+//		CAASymCipher::testSpeed();
+//		getch();
+//		exit(0);
+//#endif
+
+// AES GCM test //
+/*
+UINT8 key[16];
+memset(key,0,16);
+UINT8 in[256];
+memset(in,0,256);
+UINT8 out[256+16];
+memset(out,1,256+16);
+UINT8 out2[256+16];
+memset(out2,1,256+16);
+
+UINT8 iv[12];
+memset(iv,0,12);
+UINT8 tag[16];
+UINT8 tag2[16];
+AES_KEY* aeskey=new AES_KEY;
+AES_set_encrypt_key(key,128,aeskey);
+GCM128_CONTEXT * gcmCtxt=NULL;
+gcmCtxt=CRYPTO_gcm128_new(aeskey,(block128_f)AES_encrypt);
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+CRYPTO_gcm128_encrypt(gcmCtxt,in,out,256);
+CRYPTO_gcm128_tag(gcmCtxt,tag,16);
+
+CASymCipher* myAes=new CASymCipher();
+myAes->setGCMKeys(key,key);
+myAes->encryptMessage(in,256,out2);
+
+int rtz1=memcmp(out,out2,256);
+int rtz2=memcmp(tag,out2+256,16);
+
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+memset(in,1,256);
+CRYPTO_gcm128_decrypt(gcmCtxt,out,in,256);
+int rtz=CRYPTO_gcm128_finish(gcmCtxt,tag,16);
+printf("Result: %i\n",rtz);
+printf("Result: %i\n",rtz1);
+printf("Result: %i\n",rtz2);
+
+myAes->setGCMKeys(key,key);
+myAes->encryptMessage(in,256,out);
+
+CASymCipher* myAes1=new CASymCipher();
+myAes1->setGCMKeys(key,key);
+myAes1->encryptMessage(in,256,out2);
+
+myAes->encryptMessage(in,256,out2);
+
+
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+memset(in,1,256);
+CRYPTO_gcm128_decrypt(gcmCtxt,out,in,256);
+memset(in,1,256);
+iv[11]=1;
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+CRYPTO_gcm128_decrypt(gcmCtxt,out2,in,256);
+
+
+
+exit(0);
+*/
+//End AEs GCM Test
+
+///CAIPAddrWithNetmask Test
+	/*		CAIPAddrWithNetmask ip;
+			ip.setAddr((UINT8*)"141.0.0.0");
+			ip.setNetmask((UINT8*)"255.0.0.0");
+			UINT8 tmpIPBuff[255];
+			UINT32 tmpIPBuffLen=255;
+			ip.toString(tmpIPBuff,&tmpIPBuffLen);
+			printf("%s\n",tmpIPBuff);
+			UINT8 testIP[4];
+			testIP[0]=141;
+			testIP[1]=76;
+			testIP[2]=46;
+			testIP[3]=12;
+			if(ip.equals(testIP))
+				{
+				printf("ok\n");
+				}
+			exit(0);*/
+///End CAIPAddrWithNetmask Test
+
+//Test CAAsymCrypto
+/*CAASymCipher oRSA;
+oRSA.generateKeyPair(1024);
+UINT32 outlen=128;
+UINT8 in[200];
+for(int i=0;i<200;i++)
+	in[i]=i;
+UINT8 out[228];
+oRSA.encryptOAEP(in,80,out,&outlen);
+memset(in,0,200);
+out[outlen-1]+=1;//manipulate...
+oRSA.decryptOAEP(out,in,&outlen);
+exit(0);
+*/
+//End Test CAAsymCrypto
+
+
+//squidloghelp_main();
+//return 0;
+		if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,"An error occurred before we could finish parsing the configuration file. Exiting...\n");
+ 			exitCode=EXIT_FAILURE;
+			goto EXIT;
+		}
+		if(!(	CALibProxytest::getOptions()->isFirstMix()||
+					CALibProxytest::getOptions()->isMiddleMix()||
+					CALibProxytest::getOptions()->isLastMix()||
+					CALibProxytest::getOptions()->isLocalProxy()))
+			{
+				CAMsg::printMsg(LOG_CRIT,"You must specify which kind of Mix you want to run!\n");
+				CAMsg::printMsg(LOG_CRIT,"Use -j or -c\n");
+				CAMsg::printMsg(LOG_CRIT,"Or try --help for more options.\n");
+				CAMsg::printMsg(LOG_CRIT,"Exiting...\n");
+	 			exitCode=EXIT_FAILURE;
+				goto EXIT;
+			}
+
+		UINT8 buff[255];
+
+/*#ifdef LOG_CRIME
+		initHttpVerbLengths();
+#endif
+*/
+
+
+#ifndef _WIN32
+		if(CALibProxytest::getOptions()->getDaemon()) 
+			{
+				CAMsg::printMsg(LOG_DEBUG,"Starting mix process as daemon...\n");
+				CAMsg::cleanup();
+				CAMsg::init();
+				pid_t pid;
+				pid=fork();
+				if(pid!=0)
+					{
+						CAMsg::printMsg(LOG_INFO,"Exiting parent shell process...\n");
+						exit(EXIT_SUCCESS);
+					}
+				setsid();
+				#ifndef DO_TRACE
+					chdir("/");
+					umask(0);
+				#endif
+			 // Close out the standard file descriptors
+        close(STDIN_FILENO);
+        close(STDOUT_FILENO);
+        close(STDERR_FILENO);
+			}
+#endif
+
+
+		if (CALibProxytest::getOptions()->initLogging() != E_SUCCESS)
+		{
+ 			exitCode=EXIT_FAILURE;
+			goto EXIT;
+		}
+		
+
+
+#if defined (_DEBUG) &&!defined(ONLY_LOCAL_PROXY)
+		//		CADatabase::test();
+	/*	if(CAQueue::test()!=E_SUCCESS)
+			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
+		else
+			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
+			*/
+		//CALastMixChannelList::test();
+		//exit(0);
+		//Testing msSleep
+		CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
+		start=time(NULL);
+		for(SINT32 i=0;i<10;i++)
+			msSleep(200);
+		start=time(NULL)-start;
+		CAMsg::printMsg(LOG_DEBUG,"done! Takes %u seconds\n",start);
+		//end Testin msSleep
+#endif
+
+
+//			CAMsg::printMsg(LOG_ENCRYPTED,"Test: Anon proxy started!\n");
+//			CAMsg::printMsg(LOG_ENCRYPTED,"Test2: Anon proxy started!\n");
+//			CAMsg::printMsg(LOG_ENCRYPTED,"Test3: Anon proxy started!\n");
+
+		CAMsg::printMsg(LOG_CRIT,"Anon proxy started!\n");
+		CAMsg::printMsg(LOG_CRIT, "LogLevel: %s\n", CAMsg::getLogLevelStr());
+
+#ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
+		ProfilerStart("gperf.cpuprofiler.data");
+		ProfilerRegisterThread();
+#endif
+
+#ifndef _WIN32
+	#ifdef _DEBUG
+			signal(SIGPIPE,signal_broken_pipe);
+	#else
+			signal(SIGPIPE,SIG_IGN);
+	#endif
+	#ifndef ONLY_LOCAL_PROXY
+		struct sigaction newAction;
+		memset(&newAction,0,sizeof(newAction));
+		newAction.sa_handler=signal_hup;
+		newAction.sa_flags=0;
+		sigaction(SIGHUP,&newAction,NULL);
+	#endif
+#endif
+		signal(SIGINT,signal_interrupt);
+		signal(SIGTERM,signal_term);
+#if !defined (_DEBUG) && !defined(NO_SIGSEV_CATCH)
+		signal(SIGSEGV,signal_segv);
+#endif
+		//Try to write pidfile....
+		UINT8 strPidFile[512];
+		if(CALibProxytest::getOptions()->getPidFile(strPidFile,512)==E_SUCCESS)
+			{
+				#ifndef _WIN32
+					int old_uid=geteuid(); //old uid... stored if we have to switch to root
+				#endif
+				pid_t pid=getpid();
+				UINT8 thePid[10];
+				sprintf((char*)thePid,"%i",pid);
+				int len=strlen((char*)thePid);
+				int hFile=open((char*)strPidFile,O_TRUNC|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
+#ifndef _WIN32
+				if(hFile==-1&&seteuid(0)!=-1) //probably we do not have enough rights (because we have already switch to an other uid --> try to go back temporaly..
+					{
+						hFile=open((char*)strPidFile,O_TRUNC|O_CREAT|O_WRONLY,S_IREAD|S_IWRITE);
+					}
+#endif
+				if(hFile==-1||len!=write(hFile,thePid,len))
+					{
+						#ifndef _WIN32
+										seteuid(old_uid);
+						#endif
+						CAMsg::printMsg(LOG_CRIT,"Could not write pidfile - exiting!\n");
+			 			exitCode=EXIT_FAILURE;
+						goto EXIT;
+					}
+				close(hFile);
+#ifndef _WIN32
+				seteuid(old_uid);
+#endif
+			}
+
+//		CARoundTripTime* pRTT=NULL;
+		if(CALibProxytest::getOptions()->isLocalProxy())
+			{
+				#ifndef NEW_MIX_TYPE
+					CALocalProxy* pProxy=new CALocalProxy();
+					CAMsg::printMsg(LOG_INFO,"Starting LocalProxy...\n");
+					if(pProxy->start()!=E_SUCCESS)
+						CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
+					delete pProxy;
+					pProxy = NULL;
+				#else
+					CAMsg::printMsg(LOG_CRIT,"Compiled without LocalProxy support!\n");
+					exit(EXIT_FAILURE);
+				#endif
+			}
+		else
+			{
+				//pRTT=new CARoundTripTime();
+				//CAMsg::printMsg(LOG_INFO,"Starting RoundTripTime...\n");
+				//if(pRTT->start()!=E_SUCCESS)
+				//	{
+				//		CAMsg::printMsg(LOG_CRIT,"RoundTripTime Startup FAILED - Exiting!\n");
+				//		goto EXIT;
+				//	}
+				//else
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INCLUDE_LAST_MIX 
+			SINT32 s32MaxSockets=10000;//CASocket::getMaxOpenSockets();
+			CAMsg::printMsg(LOG_INFO,"Max Number of sockets we can open: %i\n",s32MaxSockets);
+			
+#ifdef SERVER_MONITORING
+			CAStatusManager::init();
+#endif
+			
+			if(s32MaxSockets>100&&s32MaxSockets<10000)
+				{
+				CASocket::setMaxNormalSockets(s32MaxSockets-10);
+				}
+				MONITORING_FIRE_SYS_EVENT(ev_sys_start);
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_FIRST_MIX 
+				if(CALibProxytest::getOptions()->isFirstMix())
+				{
+					CAMsg::printMsg(LOG_INFO,"I am the First MIX...\n");
+					#if !defined(NEW_MIX_TYPE)
+						pMix=new CAFirstMixA();
+					#else
+						pMix=new CAFirstMixB();
+					#endif
+					MONITORING_FIRE_NET_EVENT(ev_net_firstMixInited);
+				}
+				else
+#endif
+				if(CALibProxytest::getOptions()->isMiddleMix())
+				{
+					CAMsg::printMsg(LOG_INFO,"I am a Middle MIX...\n");
+					pMix=new CAMiddleMix();
+					MONITORING_FIRE_NET_EVENT(ev_net_middleMixInited);
+				}
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX 
+				else
+				{
+					CAMsg::printMsg(LOG_INFO,"I am the Last MIX...\n");
+					#if !defined(NEW_MIX_TYPE)
+						pMix=new CALastMixA();
+					#else
+						pMix=new CALastMixB();
+					#endif
+					MONITORING_FIRE_NET_EVENT(ev_net_lastMixInited);
+				}
+#endif
+#ifdef WITH_SGX
+				else 
+				{
+					bIsInnerMiddleMix=true;
+					pIMix=new InnerMiddleMix();
+					CAMsg::printMsg(LOG_INFO, "Starting Inner Middle Mix");
+					pIMix->start();
+					if(pIMix!=NULL) delete pIMix;
+					pIMix=NULL;
+					goto EXIT;
+				}
+#endif // WTIH_SGX
+#else
+				CAMsg::printMsg(LOG_ERR,"this Mix is compiled to work only as local proxy!\n");
+				exit(EXIT_FAILURE);
+#endif
+			}
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INCLUDE_LAST_MIX || defined INCLUDE_FIRST_MIX 
+#ifndef DYNAMIC_MIX
+	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
+		if(pMix->start()!=E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
+ 			exitCode=EXIT_FAILURE;
+			goto EXIT;
+		}
+#else
+    /* LERNGRUPPE */
+while(true)
+{
+	CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
+	if(pMix->start()!=E_SUCCESS)
+	{
+		/** @todo Hmm, maybe we could remain running, but that may well result in an endless running loop eating the cpu */
+		CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
+		exit(EXIT_FAILURE);
+	}
+
+	/* If we got here, the mix should already be reconfigured, so we only need a new instance */
+	delete pMix;
+	pMix = NULL;
+
+	if(CALibProxytest::getOptions()->isFirstMix())
+	{
+		CAMsg::printMsg(LOG_INFO,"I am now the First MIX..\n");
+#if !defined(NEW_MIX_TYPE)
+            pMix=new CAFirstMixA();
+#else
+            pMix=new CAFirstMixB();
+#endif
+	}
+	else if(CALibProxytest::getOptions()->isMiddleMix())
+	{
+		CAMsg::printMsg(LOG_INFO,"I am now a Middle MIX..\n");
+		pMix=new CAMiddleMix();
+	}
+	else
+	{
+		/* Reconfiguration of a last mix?! Not really...*/
+		CAMsg::printMsg( LOG_ERR, "Tried to reconfigure a former first/middle-Mix to a LastMix -> impossible!\n");
+		exit(EXIT_FAILURE);
+	}
+}
+#endif //DYNAMIC_MIX
+#endif //ONLY_LOCAL_PROXY
+EXIT:
+		cleanup();
+
+		return exitCode;
+	}
