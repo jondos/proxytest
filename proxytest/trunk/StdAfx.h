@@ -433,7 +433,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif
 	#ifdef HAVE_EPOLL
 		#include <sys/epoll.h>
-		#define EPOLL_HANDLE HANDLE
+		#define EPOLL_HANDLE SINT32
 		#define epoll_close close
 	#endif
 	#include <sys/ioctl.h>
