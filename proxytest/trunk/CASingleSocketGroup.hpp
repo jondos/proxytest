@@ -70,7 +70,7 @@ class CASingleSocketGroup:public CASocketGroup
 
 #else
 #include "CAMuxSocket.hpp"
-#ifdef HAVE_POLL
+#if defined(HAVE_POLL) && !defined(HAVE_EPOLL)
 class CASingleSocketGroup
 	{
 		public:
@@ -162,45 +162,47 @@ class CASingleSocketGroup
 			CASingleSocketGroup(bool bWrite)
 				{
 					m_hEPFD=epoll_create(1);
+					m_pEvents = new struct epoll_event;
+					memset(m_pEvents, 0, sizeof(struct epoll_event));
 					setPoolForWrite(bWrite);
 				}
 
 			~CASingleSocketGroup()
 				{
-					close(hEPFD);
+					epoll_close(m_hEPFD);
 				}
+
+
 			
-			SINT32 add(CAMuxSocket&s)
+			SINT32 add(CASocket&s)
 				{
-					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,s.getSocket(),&m_pollAdd)!=0)
+					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,s.getSocket(), m_pEvents)!=0)
 						return E_UNKNOWN;
 					return E_SUCCESS;
 				}
 
 			SINT32 add(CAMuxSocket&s)
 				{
-					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,s.getSocket(),&m_pollAdd)!=0)
-						return E_UNKNOWN;
-					return E_SUCCESS;
+					return add(*(s.getCASocket()));
 				}
 
 			SINT32 setPoolForWrite(bool bWrite)
 				{
 					if(bWrite)
-						m_pollAdd->events=POLLOUT|POLLERR|POLLHUP;
+						m_pEvents->events=POLLOUT|POLLERR|POLLHUP;
 					else
-						m_pollfd->events=POLLIN|POLLERR|POLLHUP;
+						m_pEvents->events=POLLIN|POLLERR|POLLHUP;
 					return E_SUCCESS;
 				}
 
 			SINT32 select()
 				{
-					return ::epoll_wait(m_hEPFD,&m_Events,1,-1);
+					return ::epoll_wait(m_hEPFD,m_pEvents,1,-1);
 				}
 			
 			SINT32 select(UINT32 time_ms)
 				{
-					SINT32 ret=::epoll_wait(m_hEPFD,&m_Events,1,time_ms);
+					SINT32 ret=::epoll_wait(m_hEPFD,m_pEvents,1,time_ms);
 					if(ret>=1)
 						return 1;
 					else if(ret==0)
@@ -215,7 +217,7 @@ class CASingleSocketGroup
 					return E_UNKNOWN;
 				}
 
-			static SINT32 select_once(CASocket& s,bool bWrite,UINT32 time_ms)
+	/*		static SINT32 select_once(CASocket& s,bool bWrite,UINT32 time_ms)
 				{
 					struct epool_events events;
 					if(bWrite)
@@ -233,11 +235,10 @@ class CASingleSocketGroup
 					}
 					return E_UNKNOWN;
 				}
-
+*/
 		private:
-			struct epool_events m_epollAdd;
-			struct epool_events m_Events;
-			SINT32 m_hEPFD;
+			struct epoll_event* m_pEvents;
+			EPOLL_HANDLE m_hEPFD;
 	};
 #endif
 #endif
