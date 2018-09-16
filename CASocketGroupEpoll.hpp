@@ -42,6 +42,12 @@ class CASocketGroupEpoll
 			~CASocketGroupEpoll();
 			SINT32 setPoolForWrite(bool bWrite);
 			
+			/** Adds the socket s to the socket group. */
+			SINT32 add(CASocket&s)
+			{
+				return add(s,NULL);
+			}
+
 			/** Adds the socket s to the socket group. Additional one can set a parameter datapointer, which is
 			  * assoziated with the socke s*/
 			SINT32 add(CASocket&s,void * datapointer)
@@ -57,6 +63,13 @@ class CASocketGroupEpoll
 					m_csFD_SET.unlock();
 					return ret;
 				}
+
+
+			/** Adds the socket s to the socket group. */
+			SINT32 add(CAMuxSocket&s)
+			{
+				return add(s,NULL);
+			}
 
 			/** Adds the socket s to the socket group. Additional one can set a parameter datapointer, which is
 			  * assoziated with the socke s*/
@@ -133,15 +146,12 @@ class CASocketGroupEpoll
 					return E_UNKNOWN;
 				}
 
-	/**
-				* @remark temporarlly removed - can be enabled agian than requested...
-	*/
-		/*	bool isSignaled(CASocket&s)
+		bool isSignaled(CASocket&s)
 				{
 				SINT32 socket=s.getSocket();
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
 						{
-							if(socket==m_pEvents->data.fd)
+							if(socket==m_pEvents[i].data.fd)
 								return true;
 						}
 					return false;
@@ -152,7 +162,7 @@ class CASocketGroupEpoll
 				SINT32 socket=ps->getSocket();
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
 						{
-							if(socket==m_pEvents->data.fd)
+							if(socket==m_pEvents[i].data.fd)
 								return true;
 						}
 					return false;
@@ -163,18 +173,18 @@ class CASocketGroupEpoll
 					SINT32 socket=s.getSocket();
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
 						{
-							if(socket==m_pEvents->data.fd)
+							if(socket==m_pEvents[i].data.fd)
 								return true;
 						}
 					return false;
 				}
-*/		
+		
 
 			bool isSignaled(void* datapointer)
 				{
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
 						{
-							if(datapointer==m_pEvents->data.ptr)
+							if(datapointer==m_pEvents[i].data.ptr)
 								return true;
 						}
 					return false;
