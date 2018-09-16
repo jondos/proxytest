@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CALocalProxy.hpp"
 #include "CASocketList.hpp"
 #include "CASocketGroup.hpp"
+#include "CASocketGroupEpoll.hpp"
 #include "CAMsg.hpp"
 #include "CACmdLnOptions.hpp"
 #include "CAUtil.hpp"
@@ -210,7 +211,11 @@ SINT32 CALocalProxy::init()
 SINT32 CALocalProxy::loop()
 	{
 		CASocketList*  pSocketList = new CASocketList();
-		CASocketGroup* pSocketGroup=new CASocketGroup(false);
+#ifdef __BUILD_AS_SHADOW_PLUGIN__
+		CASocketGroupEpoll* pSocketGroup = new CASocketGroupEpoll(false);
+#else
+		CASocketGroup* pSocketGroup = new CASocketGroup(false);
+#endif
 		pSocketGroup->add(m_socketIn);
 		UINT16 socksPort=CALibProxytest::getOptions()->getSOCKSServerPort();
 		bool bHaveSocks=(socksPort!=0xFFFF);
