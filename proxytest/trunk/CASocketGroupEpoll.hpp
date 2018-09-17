@@ -55,11 +55,16 @@ class CASocketGroupEpoll
 					SINT32 ret=E_SUCCESS;
 					m_csFD_SET.lock();
 					SOCKET socket=s.getSocket();
-					m_pEpollEvent->data.ptr=datapointer;
-					
-					//if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent)!=0)
-					//	ret=E_UNKNOWN;
-					ret=epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent);
+					if (datapointer != NULL)
+						m_pEpollEvent->data.ptr = datapointer;
+					else
+						m_pEpollEvent->data.fd = socket;
+
+					if (epoll_ctl(m_hEPFD, EPOLL_CTL_ADD, socket, m_pEpollEvent) != 0)
+					{
+						CAMsg::printMsg(LOG_DEBUG, "Failed to add socket to epoll group\n");
+						ret = E_UNKNOWN;
+					}
 					m_csFD_SET.unlock();
 					return ret;
 				}
@@ -75,15 +80,7 @@ class CASocketGroupEpoll
 			  * assoziated with the socke s*/
 			SINT32 add(CAMuxSocket&s,void * datapointer)
 				{
-					SINT32 ret=E_SUCCESS;
-					m_csFD_SET.lock();
-					SOCKET socket=s.getSocket();
-					m_pEpollEvent->data.ptr=datapointer;
-					//if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent)!=0)
-					//	ret=E_UNKNOWN;
-					ret=epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,socket,m_pEpollEvent);
-					m_csFD_SET.unlock();
-					return ret;
+					return add(*(s.getCASocket()));
 				}
 
 			SINT32 remove(CASocket&s)
@@ -99,13 +96,7 @@ class CASocketGroupEpoll
 
 			SINT32 remove(CAMuxSocket&s)
 				{
-					SINT32 ret=E_SUCCESS;
-					m_csFD_SET.lock();
-					if(epoll_ctl(m_hEPFD,EPOLL_CTL_DEL,s.getSocket(),m_pEpollEvent)!=0)
-						ret=E_UNKNOWN;
-					ASSERT(ret==E_SUCCESS,"Error in Epoll socket group remove")
-					m_csFD_SET.unlock();
-					return ret;
+					return remove(*(s.getCASocket()));
 				}
 
 			SINT32 select()
@@ -148,7 +139,7 @@ class CASocketGroupEpoll
 
 		bool isSignaled(CASocket&s)
 				{
-				SINT32 socket=s.getSocket();
+					SINT32 socket=s.getSocket();
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
 						{
 							if(socket==m_pEvents[i].data.fd)
@@ -190,7 +181,7 @@ class CASocketGroupEpoll
 					return false;
 				}
 
-			void * getFirstSignaledSocketData()
+			void* getFirstSignaledSocketData()
 				{
 					m_iAktSignaledSocket=0;
 					if(m_iNumOfReadyFD>0)
@@ -198,7 +189,7 @@ class CASocketGroupEpoll
 					return NULL;
 				}
 
-			void * getNextSignaledSocketData()
+			void* getNextSignaledSocketData()
 				{
 					m_iAktSignaledSocket++;
 					if(m_iNumOfReadyFD>m_iAktSignaledSocket)
