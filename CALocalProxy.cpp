@@ -704,7 +704,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 								DOMElement* nodeDownstreamSendMe=NULL;
 								getDOMChildByName(tmpNode,"DownstreamSendMe",nodeDownstreamSendMe);
 								getDOMElementValue(nodeDownstreamSendMe,m_nFlowControlDownstreamSendMe,m_nFlowControlDownstreamSendMe);
-								CAMsg::printMsg(LOG_DEBUG,"Last Mix new flow control downstream sewnd me: %u\n",m_nFlowControlDownstreamSendMe);
+								CAMsg::printMsg(LOG_DEBUG,"Last Mix new flow control downstream send me: %u\n",m_nFlowControlDownstreamSendMe);
 							}
 							bIsLast=false;
 						}
@@ -778,9 +778,9 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				UINT32 encbufflen;
 				UINT8* encbuff=encryptXMLElement(buff,strlen((char*)buff),encbufflen,&m_arRSA[m_chainlen-1]);
 				UINT16 size2=htons((UINT16)(encbufflen+XML_HEADER_SIZE));
-				SINT32 ret=m_pmuxOut->getCASocket()->send((UINT8*)&size2,2);
-				ret=m_pmuxOut->getCASocket()->send((UINT8*)XML_HEADER,XML_HEADER_SIZE);
-				ret=m_pmuxOut->getCASocket()->send(encbuff,encbufflen);
+				SINT32 ret=m_pmuxOut->getCASocket()->sendFully((UINT8*)&size2,2);
+				ret=m_pmuxOut->getCASocket()->sendFully((UINT8*)XML_HEADER,XML_HEADER_SIZE);
+				ret=m_pmuxOut->getCASocket()->sendFully(encbuff,encbufflen);
 				delete[] encbuff;
 				encbuff = NULL;
 				delete[] buff;
