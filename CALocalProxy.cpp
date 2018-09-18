@@ -779,21 +779,38 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				UINT8* encbuff=encryptXMLElement(buff,strlen((char*)buff),encbufflen,&m_arRSA[m_chainlen-1]);
 				UINT16 size2=htons((UINT16)(encbufflen+XML_HEADER_SIZE));
 				SINT32 ret=m_pmuxOut->getCASocket()->sendFully((UINT8*)&size2,2);
-				ret=m_pmuxOut->getCASocket()->sendFully((UINT8*)XML_HEADER,XML_HEADER_SIZE);
-				ret=m_pmuxOut->getCASocket()->sendFully(encbuff,encbufflen);
+				if (ret == E_SUCCESS)
+					{
+						ret = m_pmuxOut->getCASocket()->sendFully((UINT8*)XML_HEADER, XML_HEADER_SIZE);
+					}
+				if (ret == E_SUCCESS)
+					{
+						ret=m_pmuxOut->getCASocket()->sendFully(encbuff,encbufflen);
+					}
 				delete[] encbuff;
 				encbuff = NULL;
 				delete[] buff;
 				buff = NULL;
+				if (ret != E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_DEBUG, "Error sending keys etc. \n");
+						return E_UNKNOWN;
+					}
+
+
 				// Checking Signature send from Mix
 				ret=m_pmuxOut->getCASocket()->receiveFully((UINT8*)&size2,2);
 				size2=ntohs(size2);
 				UINT8* xmlbuff=new UINT8[size2];
-				ret=m_pmuxOut->getCASocket()->receiveFully(xmlbuff,size2);
+				if (ret == E_SUCCESS)
+					{
+						ret = m_pmuxOut->getCASocket()->receiveFully(xmlbuff, size2);
+					}
 				delete[] xmlbuff;
 				if (ret != E_SUCCESS)
 					{
-						return E_UNKNOWN;
+					CAMsg::printMsg(LOG_DEBUG, "Error receiving final login message. \n");
+					return E_UNKNOWN;
 					}
 				xmlbuff = NULL;
 				m_pmuxOut->setSendKey(linkKeys,32);
