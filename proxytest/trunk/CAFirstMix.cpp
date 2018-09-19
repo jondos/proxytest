@@ -168,9 +168,6 @@ SINT32 CAFirstMix::init()
 		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET RecvBuffSize: %i\n",m_pMuxOut->getCASocket()->getRecvBuff());
 		CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendBuffSize: %i\n",m_pMuxOut->getCASocket()->getSendBuff());
 		//CAMsg::printMsg(LOG_INFO,"MUXOUT-SOCKET SendLowWatSize: %i\n",((*m_pMuxOut))->getSendLowWat());
-#ifdef __BUILD_AS_SHADOW_PLUGIN__
-		m_pMuxOut->getCASocket()->setNonBlocking(true);
-#endif
 
 		/** Connect to the next mix */
 		if((retSockets = connectToNextMix(pAddrNext)) != E_SUCCESS)
@@ -185,6 +182,9 @@ SINT32 CAFirstMix::init()
 		MONITORING_FIRE_NET_EVENT(ev_net_nextConnected);
 		CAMsg::printMsg(LOG_INFO,"Established socket connection to next mix. Starting key exchange...\n");
 		m_pMuxOut->getCASocket()->setKeepAlive((UINT32)1800);
+#ifdef __BUILD_AS_SHADOW_PLUGIN__
+		m_pMuxOut->getCASocket()->setNonBlocking(true);
+#endif
 
 
 		if(processKeyExchange()!=E_SUCCESS)
