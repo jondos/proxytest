@@ -450,7 +450,7 @@ SINT32 CALocalProxy::loop()
 														for(UINT32 c=0;c<m_chainlen;c++)
 															{
 #ifdef _DEBUG
-																CAMsg::printMsg(LOG_DEBUG,"Creating keys for Mixes for Open-packet - Mix %u - cipher array pointer: %p\n.", c, tmpCon->pCiphers);
+																CAMsg::printMsg(LOG_DEBUG,"Creating keys (size: %u) for Mixes for Open-packet - Mix %u - cipher array pointer: %p\n.", m_SymChannelKeySize,c, tmpCon->pCiphers);
 #endif
 																getRandom(buff,m_SymChannelKeySize);
 																buff[0]&=0x7F; // Hack for RSA to ensure m < n !!!!!

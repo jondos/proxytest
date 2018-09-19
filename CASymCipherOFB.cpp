@@ -93,7 +93,7 @@ SINT32 CASymCipherOFB::setKey(const UINT8* key,bool bEncrypt)
 SINT32 CASymCipherOFB::setKeys(const UINT8* key,UINT32 keysize)
 {
 #ifdef _DEBUG
-	CAMsg::printMsg(LOG_DEBUG, "CASymCipherOFB::setKeys()\n");
+	CAMsg::printMsg(LOG_DEBUG, "CASymCipherOFB::setKeys() - keysize %u\n",keysize);
 #endif
 	if(keysize==KEY_SIZE)
 		{
