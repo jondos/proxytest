@@ -122,7 +122,7 @@ SINT32 CASocketList::setThreadSafe(bool b)
 *	        E_UNKNOWN otherwise
 *
 */
-SINT32 CASocketList::add(CASocket* pSocket,CASymChannelCipher* pCiphers)
+SINT32 CASocketList::add(CASocket* pSocket,CASymChannelCipher** pCiphers)
 	{
 		if(m_bThreadSafe)
 			cs.lock();

@@ -227,7 +227,7 @@ SINT32 CALocalProxy::loop()
 		memset(pMixPacket,0,MIXPACKET_SIZE);
 		SINT32 len,ret;
 		CASocket* newSocket;//,*tmpSocket;
-		CASymChannelCipher* newCipher;
+		CASymChannelCipher** newCipher;
 		int countRead;
 		CONNECTION oConnection;
 
@@ -290,7 +290,9 @@ SINT32 CALocalProxy::loop()
 							}
 						else
 							{
-								newCipher=new CASymCipherOFB[m_chainlen];
+								newCipher=new CASymChannelCipher*[m_chainlen];
+								for (int i = 0; i < m_chainlen; i++)
+									newCipher[i] = new CASymCipherOFB();
 #ifdef _DEBUG
 								CAMsg::printMsg(LOG_DEBUG, "Create new ciphers for new channel - pointer is: %p\n", newCipher);
 #endif
@@ -315,7 +317,9 @@ SINT32 CALocalProxy::loop()
 							}
 						else
 							{
-								newCipher=new CASymCipherOFB[m_chainlen];
+								newCipher=new CASymChannelCipher*[m_chainlen];
+								for (int i = 0; i < m_chainlen; i++)
+									newCipher[i] = new CASymCipherOFB();
 								pSocketList->add(newSocket,newCipher);
 								pSocketGroup->add(*newSocket);
 							}
@@ -363,7 +367,7 @@ SINT32 CALocalProxy::loop()
 									else
 										{
 											for(UINT32 c=0;c<m_chainlen;c++)
-												oConnection.pCiphers[c].crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+												oConnection.pCiphers[c]->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 											UINT32 truelen=ntohs(pMixPacket->payload.len);
 											truelen=truelen&PAYLOAD_LEN_MASK;
 											oConnection.pSocket->send(pMixPacket->payload.data,truelen);
@@ -381,7 +385,7 @@ SINT32 CALocalProxy::loop()
 														pMixPacket->payload.len=htons(NEW_FLOW_CONTROL_FLAG);
 														pMixPacket->payload.type=MIX_PAYLOAD_HTTP;
 														for(UINT32 c=0;c<m_chainlen;c++)
-															oConnection.pCiphers[c].crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+															oConnection.pCiphers[c]->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 														m_pmuxOut->send(pMixPacket);
 														#ifdef _DEBUG
 															CAMsg::printMsg(LOG_DEBUG,"sent sendme!\n");
@@ -405,7 +409,7 @@ SINT32 CALocalProxy::loop()
 								if(pSocketGroup->isSignaled(*tmpCon->pSocket))
 									{
 										countRead--;
-										if(!tmpCon->pCiphers[0].isKeyValid())
+										if(!tmpCon->pCiphers[0]->isKeyValid())
 											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE-m_chainlen*m_SymChannelEncryptedKeySize);
 										else
 											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
@@ -441,7 +445,7 @@ SINT32 CALocalProxy::loop()
 													{
 														pMixPacket->payload.type=MIX_PAYLOAD_HTTP;
 													}
-												if(!tmpCon->pCiphers[0].isKeyValid()) //First time --> rsa key
+												if(!tmpCon->pCiphers[0]->isKeyValid()) //First time --> rsa key
 													{
 														//Has to bee optimized!!!!
 														UINT8 buff[DATA_SIZE];
@@ -454,7 +458,7 @@ SINT32 CALocalProxy::loop()
 #endif
 																getRandom(buff,m_SymChannelKeySize);
 																buff[0]&=0x7F; // Hack for RSA to ensure m < n !!!!!
-																tmpCon->pCiphers[c].setKeys(buff,m_SymChannelKeySize);
+																tmpCon->pCiphers[c]->setKeys(buff,m_SymChannelKeySize);
 																/*
 																	PROTOCOL CHANGE:
 																	This is a change in the protocol between JAP and the mixes:
@@ -479,8 +483,8 @@ SINT32 CALocalProxy::loop()
 																		m_pSymCipher->crypt1(buff,buff,m_SymChannelKeySize);
 																		UINT8 iv[16];
 																		memset(iv,0xFF,16);
-																		tmpCon->pCiphers[c].setIV2(iv);
-																		tmpCon->pCiphers[c].crypt1(buff+m_SymChannelKeySize,buff+m_SymChannelKeySize,DATA_SIZE-m_SymChannelKeySize);
+																		tmpCon->pCiphers[c]->setIV2(iv);
+																		tmpCon->pCiphers[c]->crypt1(buff+m_SymChannelKeySize,buff+m_SymChannelKeySize,DATA_SIZE-m_SymChannelKeySize);
 																	  //log symcrypto
 																		//tmpstr=bytes2hex(buff, DATA_SIZE);
 																		//CAMsg::printMsg(LOG_DEBUG, "Plain Packet for FirstMix: %s\n", tmpstr);
@@ -495,13 +499,13 @@ SINT32 CALocalProxy::loop()
 																			UINT8 tmpBuff[1000];
 																			UINT32 lk=1000;
 																			m_arRSA[c].encryptOAEP(buff,128-42,tmpBuff,&lk);
-																			tmpCon->pCiphers[c].crypt1(buff+RSA_SIZE-42,tmpBuff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
+																			tmpCon->pCiphers[c]->crypt1(buff+RSA_SIZE-42,tmpBuff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
 																			memcpy(buff,tmpBuff,DATA_SIZE);
 																		}
 																		else
 																		{
 																			m_arRSA[c].encrypt(buff,buff);
-																			tmpCon->pCiphers[c].crypt1(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
+																			tmpCon->pCiphers[c]->crypt1(buff+RSA_SIZE,buff+RSA_SIZE,DATA_SIZE-RSA_SIZE);
 																		}
 																		// Does RSA_SIZE need to be increased by RSA_SIZE/KEY_SIZE*TIMESTAMP_SIZE?
 																	}
@@ -514,7 +518,7 @@ SINT32 CALocalProxy::loop()
 												else //sonst
 													{
 														for(UINT32 c=0;c<m_chainlen;c++)
-															tmpCon->pCiphers[c].crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
+															tmpCon->pCiphers[c]->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 														pMixPacket->flags=CHANNEL_DATA;
 													}
 
