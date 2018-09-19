@@ -48,6 +48,12 @@ class CASocketGroupEpoll
 				return add(s,NULL);
 			}
 
+			/** Adds the socket s to the socket group. */
+			SINT32 add(CAMuxSocket&s)
+			{
+				return add(s, NULL);
+			}
+
 			/** Adds the socket s to the socket group. Additional one can set a parameter datapointer, which is
 			  * assoziated with the socke s*/
 			SINT32 add(CASocket&s,void * datapointer)
@@ -70,17 +76,11 @@ class CASocketGroupEpoll
 				}
 
 
-			/** Adds the socket s to the socket group. */
-			SINT32 add(CAMuxSocket&s)
-			{
-				return add(s,NULL);
-			}
-
 			/** Adds the socket s to the socket group. Additional one can set a parameter datapointer, which is
 			  * assoziated with the socke s*/
-			SINT32 add(CAMuxSocket&s,void * datapointer)
+			SINT32 add(CAMuxSocket&s,void* datapointer)
 				{
-					return add(*(s.getCASocket()));
+					return add(*(s.getCASocket()),datapointer);
 				}
 
 			SINT32 remove(CASocket&s)
