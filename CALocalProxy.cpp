@@ -279,7 +279,7 @@ SINT32 CALocalProxy::loop()
 						#ifdef _DEBUG
 							CAMsg::printMsg(LOG_DEBUG,"New Connection from Browser!\n");
 						#endif
-						newSocket=new CASocket;
+						newSocket=new CASocket();
 						if(m_socketIn.accept(*newSocket)!=E_SUCCESS)
 							{
 								#ifdef _DEBUG
@@ -393,7 +393,7 @@ SINT32 CALocalProxy::loop()
 										}
 								}
 						}
-				if(countRead>0)
+				if(countRead>0)//incoming data from browser
 					{
 						CONNECTION* tmpCon=NULL;
 						tmpCon=pSocketList->getFirst();
@@ -402,7 +402,7 @@ SINT32 CALocalProxy::loop()
 								if(pSocketGroup->isSignaled(*tmpCon->pSocket))
 									{
 										countRead--;
-											if(!tmpCon->pCiphers[0].isKeyValid())
+										if(!tmpCon->pCiphers[0].isKeyValid())
 											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE-m_chainlen*m_SymChannelEncryptedKeySize);
 										else
 											len=tmpCon->pSocket->receive(pMixPacket->payload.data,PAYLOAD_SIZE);
@@ -447,7 +447,7 @@ SINT32 CALocalProxy::loop()
 														for(UINT32 c=0;c<m_chainlen;c++)
 															{
 #ifdef _DEBUG
-															CAMsg::printMsg(LOG_DEBUG,"Creating keys for Mixes for Open-packet - Mix %u\n.", c);
+																CAMsg::printMsg(LOG_DEBUG,"Creating keys for Mixes for Open-packet - Mix %u\n.", c);
 #endif
 																getRandom(buff,m_SymChannelKeySize);
 																buff[0]&=0x7F; // Hack for RSA to ensure m < n !!!!!

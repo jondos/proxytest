@@ -44,6 +44,7 @@ class CALocalProxy
 					m_arRSA=NULL;
 					m_pSymCipher=NULL;
 					m_pmuxOut = new CAMuxSocket(OFB);
+					m_chainlen = 0;
 				}
 			
 			~CALocalProxy(){clean();}
