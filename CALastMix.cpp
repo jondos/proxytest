@@ -357,7 +357,11 @@ SINT32 CALastMix::processKeyExchange()
 		SINT32 ret;
 		//Now receiving the symmetric key
 		CAMsg::printMsg(LOG_INFO,"Waiting for length of symmetric key from previous Mix...\n");
+#ifdef __BUILD_AS_SHADOW_PLUGIN__
+		if ((ret = m_pMuxIn->receiveFully((UINT8*)&tmp, sizeof(tmp))) != E_SUCCESS)
+#else
 		if((ret = m_pMuxIn->receiveFully((UINT8*) &tmp, sizeof(tmp), TIMEOUT_MIX_CONNECTION_ESTABLISHEMENT)) != E_SUCCESS)
+#endif
 		{
 			if (ret != E_UNKNOWN)
 			{
