@@ -446,6 +446,9 @@ SINT32 CALocalProxy::loop()
 														//tmpCon->pCipher->generateEncryptionKey(); //generate Key
 														for(UINT32 c=0;c<m_chainlen;c++)
 															{
+#ifdef _DEBUG
+															CAMsg::printMsg(LOG_DEBUG,"Creating keys for Mixes for Open-packet - Mix %u\n.", c);
+#endif
 																getRandom(buff,m_SymChannelKeySize);
 																buff[0]&=0x7F; // Hack for RSA to ensure m < n !!!!!
 																tmpCon->pCiphers[c].setKeys(buff,m_SymChannelKeySize);
