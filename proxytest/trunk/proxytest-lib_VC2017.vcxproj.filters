@@ -125,6 +125,7 @@
     <ClCompile Include="wepoll\wepoll.c">
       <Filter>wepoll</Filter>
     </ClCompile>
+    <ClCompile Include="CAClientSocket.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basetypedefs.h" />
