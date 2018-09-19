@@ -160,7 +160,7 @@ SINT32 CALocalProxy::init()
 		CALibProxytest::getOptions()->getMixHost(strTarget,255);
 		addrNext.setAddr(strTarget,CALibProxytest::getOptions()->getMixPort());
 		CAMsg::printMsg(LOG_INFO,"Try connecting to next Mix...\n");
-
+		m_pmuxOut = new CAMuxSocket(OFB);
 		m_pmuxOut->getCASocket()->create();
 		m_pmuxOut->getCASocket()->setSendBuff(MIXPACKET_SIZE*50);
 		m_pmuxOut->getCASocket()->setRecvBuff(MIXPACKET_SIZE*50);
