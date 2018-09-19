@@ -1272,6 +1272,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 	{
 		INIT_STACK;
 		BEGIN_STACK("CAFirstMix::fm_loopAcceptUsers");
+		CAMsg::printMsg(LOG_DEBUG, "Start acceptusers\n");
 
 		CAFirstMix* pFirstMix=(CAFirstMix*)param;
 		CASocket** socketsIn=pFirstMix->m_arrSocketsIn;
@@ -1302,6 +1303,8 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 				}
 				delete socketsIn[i];
 		}
+		CAMsg::printMsg(LOG_DEBUG, "Creating incoming sockets\n");
+
 		if (CALibProxytest::getOptions()->createSockets(false,pFirstMix-> m_arrSocketsIn, pFirstMix->m_nSocketsIn) != E_SUCCESS)
 		{
 			goto END_THREAD;
