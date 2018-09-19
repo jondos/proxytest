@@ -291,6 +291,9 @@ SINT32 CALocalProxy::loop()
 						else
 							{
 								newCipher=new CASymCipherOFB[m_chainlen];
+#ifdef _DEBUG
+								CAMsg::printMsg(LOG_DEBUG, "Create new ciphers for new channel - pointer is: %p\n", newCipher);
+#endif
 								pSocketList->add(newSocket,newCipher);
 								pSocketGroup->add(*newSocket);
 							}
@@ -447,7 +450,7 @@ SINT32 CALocalProxy::loop()
 														for(UINT32 c=0;c<m_chainlen;c++)
 															{
 #ifdef _DEBUG
-																CAMsg::printMsg(LOG_DEBUG,"Creating keys for Mixes for Open-packet - Mix %u\n.", c);
+																CAMsg::printMsg(LOG_DEBUG,"Creating keys for Mixes for Open-packet - Mix %u - cipher array pointer: %p\n.", c, tmpCon->pCiphers);
 #endif
 																getRandom(buff,m_SymChannelKeySize);
 																buff[0]&=0x7F; // Hack for RSA to ensure m < n !!!!!
