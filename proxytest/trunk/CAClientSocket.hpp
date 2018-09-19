@@ -28,7 +28,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CA_CLIENT_SOCKET__
 #define __CA_CLIENT_SOCKET__
 #include "CAUtil.hpp"
-#include "CASingleSocketGroup.hpp"
 
 class CAClientSocket
 	{
@@ -67,39 +66,6 @@ class CAClientSocket
 				* @return E_UNKNOWN, in case of an error
 				* @return E_SUCCESS otherwise
 			***/
-			SINT32 receiveFully(UINT8* buff,UINT32 len)
-			{
-				SINT32 ret;
-				UINT32 pos=0;
-#ifdef	__BUILD_AS_SHADOW_PLUGIN__
-				CASingleSocketGroup* pSocketGroup = new CASingleSocketGroup(false);
-				pSocketGroup->add(getSocket());
-#endif
-				do
-					{
-#ifdef	__BUILD_AS_SHADOW_PLUGIN__
-					pSocketGroup->select();
-#endif
-					ret=receive(buff+pos,len);
-					if(ret<=0)
-						{
-							if(ret==E_AGAIN)
-							{
-#ifndef	__BUILD_AS_SHADOW_PLUGIN__
-								msSleep(100);
-#endif
-								continue;
-							}
-							else
-							{
-								return E_UNKNOWN;
-							}
-						}
-						pos+=ret;
-						len-=ret;
-					}
-				while(len>0);
-				return E_SUCCESS;	    	    
-			}
+			SINT32 receiveFully(UINT8* buff, UINT32 len);
 	};
 #endif

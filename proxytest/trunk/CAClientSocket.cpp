@@ -25,92 +25,42 @@ OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABIL
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
-/*
+
 #include "StdAfx.h"
 #include "CAClientSocket.hpp"
-#include "CASocket.hpp"
-#include "CAUtil.hpp"
-#include "CASocketAddrINet.hpp"
-#ifdef HAVE_UNIX_DOMAIN_PROTOCOL
-	#include "CASocketAddrUnix.hpp"
-#endif
 #include "CASingleSocketGroup.hpp"
-#include "CAMsg.hpp";
 
-
-SINT32 CAClientSocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
+SINT32 CAClientSocket::receiveFully(UINT8* buff, UINT32 len)
 {
 	SINT32 ret;
-	UINT32 pos=0;
-	UINT64 currentTime,endTime;
-	bool bWasNonBlocking; 
-	
-	getcurrentTimeMillis(currentTime);
-	set64(endTime,currentTime);
-	add64(endTime,msTimeOut);
-	
-	getSocket()->getNonBlocking(&bWasNonBlocking);
-	if (!bWasNonBlocking)
+	UINT32 pos = 0;
+#ifdef	__BUILD_AS_SHADOW_PLUGIN__
+	CASingleSocketGroup* pSocketGroup = new CASingleSocketGroup(false);
+	pSocketGroup->add(getSocket());
+#endif
+	do
 	{
-		getSocket()->setNonBlocking(true);
-	}
-	
-	CASingleSocketGroup oSG(false);
-	oSG.add(*getSocket());
-	ret = 1;
-	for(;;)
-	{
-		getcurrentTimeMillis(currentTime);
-		if(!isLesser64(currentTime,endTime))
+#ifdef	__BUILD_AS_SHADOW_PLUGIN__
+		pSocketGroup->select();
+#endif
+		ret = receive(buff + pos, len);
+		if (ret <= 0)
 		{
-			if (!bWasNonBlocking)
+			if (ret == E_AGAIN)
 			{
-				getSocket()->setNonBlocking(false);
+#ifndef	__BUILD_AS_SHADOW_PLUGIN__
+				msSleep(100);
+#endif
+				continue;
 			}
-			return E_TIMEDOUT;
-		}
-		msTimeOut=diff64(endTime,currentTime);
-		
-		if(ret==1)
-		{
-			ret=receive(buff+pos,len);								
-			if(ret<=0)
+			else
 			{
-				if(ret==E_AGAIN)
-				{
-					//CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: Select\n");
-					ret=oSG.select(msTimeOut);
-					//CAMsg::printMsg(LOG_DEBUG, "CAClientSocket:: After select\n");
-					continue;
-				}
-				else
-				{
-					if (!bWasNonBlocking)
-					{
-						getSocket()->setNonBlocking(false);
-					}
-					return E_UNKNOWN;
-				}
+				return E_UNKNOWN;
 			}
-			pos+=ret;
-			len-=ret;
 		}
-		else if(ret==E_TIMEDOUT)
-		{
-			if (!bWasNonBlocking)
-			{
-				getSocket()->setNonBlocking(false);
-			}
-			return E_TIMEDOUT;
-		}
+		pos += ret;
+		len -= ret;
+	} while (len > 0);
+	return E_SUCCESS;
+}
 
-		if(len==0)
-		{
-			if (!bWasNonBlocking)
-			{
-				getSocket()->setNonBlocking(false);
-			}
-			return E_SUCCESS;
-		}		
-	}
-}*/
