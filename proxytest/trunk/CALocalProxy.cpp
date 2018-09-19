@@ -291,7 +291,7 @@ SINT32 CALocalProxy::loop()
 						else
 							{
 								newCipher=new CASymChannelCipher*[m_chainlen];
-								for (int i = 0; i < m_chainlen; i++)
+								for (UINT32 i = 0; i < m_chainlen; i++)
 									newCipher[i] = new CASymCipherOFB();
 #ifdef _DEBUG
 								CAMsg::printMsg(LOG_DEBUG, "Create new ciphers for new channel - pointer is: %p\n", newCipher);
@@ -318,7 +318,7 @@ SINT32 CALocalProxy::loop()
 						else
 							{
 								newCipher=new CASymChannelCipher*[m_chainlen];
-								for (int i = 0; i < m_chainlen; i++)
+								for (UINT32 i = 0; i < m_chainlen; i++)
 									newCipher[i] = new CASymCipherOFB();
 								pSocketList->add(newSocket,newCipher);
 								pSocketGroup->add(*newSocket);
@@ -353,6 +353,8 @@ SINT32 CALocalProxy::loop()
 													#endif
 													delete oConnection.pSocket;
 													oConnection.pSocket = NULL;
+													for (UINT32 i = 0; i < m_chainlen; i++)
+														delete oConnection.pCiphers [i];
 													delete [] oConnection.pCiphers;
 													oConnection.pCiphers = NULL;
 
@@ -427,6 +429,8 @@ SINT32 CALocalProxy::loop()
 														tmpSocket->close();
 														delete tmpSocket;
 														tmpSocket = NULL;
+														for (UINT32 i = 0; i < m_chainlen; i++)
+															delete tmpCon->pCiphers[i];
 														delete [] tmpCon->pCiphers;
 														tmpCon->pCiphers = NULL;
 													}
@@ -560,6 +564,8 @@ MIX_CONNECTION_ERROR:
 		CONNECTION* tmpCon=pSocketList->getFirst();
 		while(tmpCon!=NULL)
 			{
+				for (UINT32 i = 0; i < m_chainlen; i++)
+					delete tmpCon->pCiphers[i];
 				delete [] tmpCon->pCiphers;
 				tmpCon->pCiphers = NULL;
 				delete tmpCon->pSocket;
