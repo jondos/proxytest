@@ -145,6 +145,9 @@ SINT32 CALastMix::init()
 
 		m_pMuxIn=new CAMuxSocket(OFB);
 		SINT32 ret=m_pMuxIn->accept(*pAddr);
+#ifdef __BUILD_AS_SHADOW_PLUGIN__
+		m_pMuxIn->getCASocket()->setNonBlocking(true);
+#endif
 		delete pAddr;
 		pAddr = NULL;
 		if(ret!=E_SUCCESS)
