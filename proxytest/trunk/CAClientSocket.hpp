@@ -28,6 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CA_CLIENT_SOCKET__
 #define __CA_CLIENT_SOCKET__
 #include "CAUtil.hpp"
+#include "CASingleSocketGroup.hpp"
 
 class CAClientSocket
 	{
