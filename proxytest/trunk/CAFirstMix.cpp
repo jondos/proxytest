@@ -1327,6 +1327,8 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 		}
 		CAMsg::printMsg(LOG_DEBUG,"All Replay Timestamp received\n");
 #endif
+		CAMsg::printMsg(LOG_DEBUG, "Start accpet users inner loop\n");
+
 		while(!pFirstMix->m_bRestart)
 			{
 				if (pIPBlockList->count()>40)
