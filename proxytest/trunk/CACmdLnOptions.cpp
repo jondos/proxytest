@@ -5133,90 +5133,95 @@ SINT32 CACmdLnOptions::createSockets(bool a_bMessages, CASocket** a_sockets, UIN
 		
 
 		aktSocket = 0;
-		for(currentInterface=0;currentInterface < getListenerInterfaceCount(); currentInterface++)
+		for (currentInterface = 0; currentInterface < getListenerInterfaceCount(); currentInterface++)
+		{
+			CAListenerInterface* pListener = NULL;
+			pListener = getListenerInterface(currentInterface + 1);
+			if (pListener == NULL)
 			{
-				CAListenerInterface* pListener=NULL;
-				pListener=getListenerInterface(currentInterface+1);
-				if(pListener==NULL)
-					{
-						CAMsg::printMsg(LOG_CRIT,"Error: Listener interface %d is invalid.\n", currentInterface+1);
-					
-						delete[] arrayVirtualPorts;
-						delete[] arrayHiddenPorts;
-					
-						return E_UNKNOWN;
-					}
-				
-				pAddr=pListener->getAddr();
-				pAddr->toString(buff,255);
-				
-				if(pAddr->getType()==AF_INET)
-				{
-					if (pListener->isVirtual())
-					{
-						arrayVirtualPorts[iVirtualPortsLen] = ((CASocketAddrINet*)pAddr)->getPort();
-						iVirtualPortsLen++;
-					}
-					else if (pListener->isHidden())
-					{
-						arrayHiddenPorts[iHiddenPortsLen] = ((CASocketAddrINet*)pAddr)->getPort();
-						iHiddenPortsLen++;
-					}
-				}
-				
-				if(pListener->isVirtual())
-				{
-					delete pListener;
-					pListener = NULL;
-					delete pAddr;
-					pAddr = NULL;
-					continue;
-				}
-				
-				if (a_socketsLen < aktSocket )
-				{
-					CAMsg::printMsg(LOG_CRIT, 
-						"Found %d listener sockets, but we have only reserved memory for %d sockets. This seems to be an implementation error in the code.\n", 
-						(aktSocket + 1), a_socketsLen);
+				CAMsg::printMsg(LOG_CRIT, "Error: Listener interface %d is invalid.\n", currentInterface + 1);
 
-					delete[] arrayVirtualPorts;
-					delete[] arrayHiddenPorts;
-					delete pAddr;
-					
-					return E_SPACE;
+				delete[] arrayVirtualPorts;
+				delete[] arrayHiddenPorts;
+
+				return E_UNKNOWN;
+			}
+
+			pAddr = pListener->getAddr();
+			pAddr->toString(buff, 255);
+
+			if (pAddr->getType() == AF_INET)
+			{
+				if (pListener->isVirtual())
+				{
+					arrayVirtualPorts[iVirtualPortsLen] = ((CASocketAddrINet*)pAddr)->getPort();
+					iVirtualPortsLen++;
 				}
-				
-				ret = E_SUCCESS;
-				a_sockets[aktSocket] = new CASocket();
-				a_sockets[aktSocket]->create(pAddr->getType());
-				a_sockets[aktSocket]->setReuseAddr(true);
-				
+				else if (pListener->isHidden())
+				{
+					arrayHiddenPorts[iHiddenPortsLen] = ((CASocketAddrINet*)pAddr)->getPort();
+					iHiddenPortsLen++;
+				}
+			}
+
+			if (pListener->isVirtual())
+			{
 				delete pListener;
 				pListener = NULL;
-#ifndef _WIN32
-				//we have to be a temporary superuser if port <1024...
-				int old_uid=geteuid();
-				if(pAddr->getType()==AF_INET&&((CASocketAddrINet*)pAddr)->getPort()<1024)
-				{
-					if(seteuid(0)==-1) //changing to root
-					{
-						CAMsg::printMsg(LOG_CRIT,"Setuid failed! We might not be able to listen on interface %d (%s) as we cannot change to the root user.\n",
-								currentInterface+1, buff);
-					}
-				}
-#endif
-				ret=a_sockets[aktSocket]->listen(*pAddr);
 				delete pAddr;
 				pAddr = NULL;
+				continue;
+			}
 
-				if(ret!=E_SUCCESS)
+			if (a_socketsLen < aktSocket)
+			{
+				CAMsg::printMsg(LOG_CRIT,
+					"Found %d listener sockets, but we have only reserved memory for %d sockets. This seems to be an implementation error in the code.\n",
+					(aktSocket + 1), a_socketsLen);
+
+				delete[] arrayVirtualPorts;
+				delete[] arrayHiddenPorts;
+				delete pAddr;
+
+				return E_SPACE;
+			}
+
+			ret = E_SUCCESS;
+			a_sockets[aktSocket] = new CASocket();
+			a_sockets[aktSocket]->create(pAddr->getType());
+			a_sockets[aktSocket]->setReuseAddr(true);
+
+			delete pListener;
+			pListener = NULL;
+#ifndef _WIN32
+			//we have to be a temporary superuser if port <1024...
+			int old_uid = -1;
+
+			if (pAddr->getType() == AF_INET && ((CASocketAddrINet*)pAddr)->getPort() < 1024)
+			{
+				old_uid = geteuid();
+				if (seteuid(0) == -1) //changing to root
 				{
-					CAMsg::printMsg(LOG_CRIT,"Socket error while listening on interface %d (%s). Reason: %s (%i)\n",currentInterface+1, buff,
-							GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+					CAMsg::printMsg(LOG_CRIT, "Setuid failed! We might not be able to listen on interface %d (%s) as we cannot change to the root user.\n",
+						currentInterface + 1, buff);
 				}
+			}
+#endif
+			ret = a_sockets[aktSocket]->listen(*pAddr);
+			delete pAddr;
+			pAddr = NULL;
+
+			if (ret != E_SUCCESS)
+			{
+				CAMsg::printMsg(LOG_CRIT, "Socket error while listening on interface %d (%s). Reason: %s (%i)\n", currentInterface + 1, buff,
+					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
+			}
 
 #ifndef _WIN32
+			if (old_uid != -1)
+			{
 				seteuid(old_uid);
+			}
 #endif
 				if(ret!=E_SUCCESS)
 				{
