@@ -1350,7 +1350,9 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 					sSleep(1);
 				}
 #ifdef	__BUILD_AS_SHADOW_PLUGIN__
+				CAMsg::printMsg(LOG_DEBUG, "Before acceptusers->select()\n");
 				countRead=psocketgroupAccept->select();
+				CAMsg::printMsg(LOG_DEBUG, "after acceptusers->select()\n");
 #else
 				countRead = psocketgroupAccept->select(10000);
 #endif
