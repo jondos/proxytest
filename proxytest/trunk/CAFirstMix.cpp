@@ -1309,6 +1309,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 		{
 			goto END_THREAD;
 		}
+		CAMsg::printMsg(LOG_DEBUG, "Add sockets to select group\n");
 		for(i=0;i<nSocketsIn;i++)
 		{
 			psocketgroupAccept->add(*socketsIn[i]);
@@ -1327,7 +1328,7 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 		}
 		CAMsg::printMsg(LOG_DEBUG,"All Replay Timestamp received\n");
 #endif
-		CAMsg::printMsg(LOG_DEBUG, "Start accpet users inner loop\n");
+		CAMsg::printMsg(LOG_DEBUG, "Start accept users inner loop\n");
 
 		while(!pFirstMix->m_bRestart)
 			{
