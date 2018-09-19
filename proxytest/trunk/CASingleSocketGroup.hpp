@@ -181,6 +181,13 @@ class CASingleSocketGroup
 					return E_SUCCESS;
 				}
 
+			SINT32 add(SOCKET s)
+			{
+				if (epoll_ctl(m_hEPFD, EPOLL_CTL_ADD, s, m_pEvents) != 0)
+					return E_UNKNOWN;
+				return E_SUCCESS;
+			}
+
 			SINT32 add(CAMuxSocket&s)
 				{
 					return add(*(s.getCASocket()));

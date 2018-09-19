@@ -54,6 +54,14 @@ class CAClientSocket
 			***/
 			virtual	SINT32 receive(UINT8* buff,UINT32 len)=0;
 			
+			/** Returns the number of the Socket used. Which will be always the same number,
+				* even after close(), until the Socket
+				* is recreated using create()
+				* @return number of the associated socket
+			**/
+			virtual SOCKET getSocket() = 0;
+
+
 			/** Receives all len bytes. This blocks until all bytes are received or an error occured.
 				* @return E_UNKNOWN, in case of an error
 				* @return E_SUCCESS otherwise
@@ -62,14 +70,23 @@ class CAClientSocket
 			{
 				SINT32 ret;
 				UINT32 pos=0;
+#ifdef	__BUILD_AS_SHADOW_PLUGIN__
+				CASingleSocketGroup* pSocketGroup = new CASingleSocketGroup(false);
+				pSocketGroup->add(getSocket());
+#endif
 				do
 					{
-						ret=receive(buff+pos,len);
-						if(ret<=0)
+#ifdef	__BUILD_AS_SHADOW_PLUGIN__
+					pSocketGroup->select();
+#endif
+					ret=receive(buff+pos,len);
+					if(ret<=0)
 						{
 							if(ret==E_AGAIN)
 							{
+#ifndef	__BUILD_AS_SHADOW_PLUGIN__
 								msSleep(100);
+#endif
 								continue;
 							}
 							else
