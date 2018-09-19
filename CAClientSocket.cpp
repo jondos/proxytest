@@ -55,12 +55,18 @@ SINT32 CAClientSocket::receiveFully(UINT8* buff, UINT32 len)
 			}
 			else
 			{
+#ifdef	__BUILD_AS_SHADOW_PLUGIN__
+				delete pSocketGroup;
+#endif
 				return E_UNKNOWN;
 			}
 		}
 		pos += ret;
 		len -= ret;
 	} while (len > 0);
+#ifdef	__BUILD_AS_SHADOW_PLUGIN__
+	delete pSocketGroup;
+#endif
 	return E_SUCCESS;
 }
 
