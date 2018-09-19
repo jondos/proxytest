@@ -1279,7 +1279,11 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 		CATempIPBlockList* pIPBlockList = pFirstMix->m_pIPBlockList;
 		CAThreadPool* pthreadsLogin=pFirstMix->m_pthreadsLogin;
 		UINT32 nSocketsIn=pFirstMix->m_nSocketsIn;
-		CASocketGroup* psocketgroupAccept=new CASocketGroup(false);
+#ifdef __BUILD_AS_SHADOW_PLUGIN__
+		CASocketGroupEpoll* psocketgroupAccept=new CASocketGroupEpoll(false);
+#else
+		CASocketGroup* psocketgroupAccept = new CASocketGroup(false);
+#endif
 		CAMuxSocket* pNewMuxSocket;
 		UINT8* peerIP=new UINT8[4];
 		UINT32 i=0;
