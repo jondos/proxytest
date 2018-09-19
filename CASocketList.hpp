@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 typedef struct connlist
 	{
-		CASymChannelCipher* pCiphers;
+		CASymChannelCipher** pCiphers;
 		CASocket* pSocket;
 		connlist* next;
 		HCHANNEL outChannel;
@@ -50,7 +50,7 @@ class CASocketList
 			CASocketList();
 			CASocketList(bool bThreadSafe);
 			~CASocketList();
-			SINT32 add(CASocket* pSocket,CASymChannelCipher* pCiphers);
+			SINT32 add(CASocket* pSocket,CASymChannelCipher** pCiphers);
 			SINT32 get(HCHANNEL in,CONNECTION* out);
 			
 			CASocket* remove(HCHANNEL id);
