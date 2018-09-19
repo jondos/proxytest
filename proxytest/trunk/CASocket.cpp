@@ -485,6 +485,9 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 	if(bWasNonBlocking)
 	{
 		//we are in non-blocking mode
+#ifdef _DEBUG
+		CAMsg::printMsg(LOG_DEBUG, "CASocket::sendFullyTimeOut() -->non-blocking case\n");
+#endif
 		return sendFully(buff, len);
 	}
 	else if (setSendTimeOut(msTimeOutSingleSend)!=E_SUCCESS)
