@@ -2422,7 +2422,7 @@ loop_break:
 		m_arpsocketgroupUsersRead[threadID]->add(*pNewUser,pChannelList->get(pNewUser)); // add user socket to the established ones that we read data from.
 		m_arpsocketgroupUsersWrite[threadID]->add(*pNewUser,pChannelList->get(pNewUser));
 #endif
-#else
+#else //no E_POLL
 #ifndef MULTI_THREADED_PACKET_PROCESSING
 		if(m_psocketgroupUsersRead->add(*pNewUser)!=E_SUCCESS)// add user socket to the established ones that we read data from.
 		{
