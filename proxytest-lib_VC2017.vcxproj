@@ -1002,6 +1002,7 @@
       <BasicRuntimeChecks Condition="'$(Configuration)|$(Platform)'=='Debug-IntelCrypto|Win32'">EnableFastChecks</BasicRuntimeChecks>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug-IntelCrypto|Win32'">true</BrowseInformation>
     </ClCompile>
+    <ClCompile Include="CAClientSocket.cpp" />
     <ClCompile Include="CACmdLnOptions.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug with LLVM|Win32'">Disabled</Optimization>

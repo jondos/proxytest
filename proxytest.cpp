@@ -612,17 +612,6 @@ int main(int argc, const char* argv[])
 		
 
 
-#if defined (_DEBUG) &&!defined(ONLY_LOCAL_PROXY)
-		//Testing msSleep
-		CAMsg::printMsg(LOG_DEBUG,"Should sleep now for aprox 2 seconds....\n");
-		start=time(NULL);
-		for(SINT32 i=0;i<10;i++)
-			msSleep(200);
-		start=time(NULL)-start;
-		CAMsg::printMsg(LOG_DEBUG,"done! Takes %u seconds\n",start);
-		//end Testin msSleep
-#endif
-
 		CAMsg::printMsg(LOG_CRIT,"Anon proxy started!\n");
 		CAMsg::printMsg(LOG_CRIT, "LogLevel: %s\n", CAMsg::getLogLevelStr());
 
