@@ -30,6 +30,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef _DEBUG
 	#include "CAMsg.hpp"
 #endif
+#include "CASocket.hpp"
+#include "CAMuxSocket.hpp"
 /** Not thread safe!*/
 #if !defined(HAVE_POLL)&&!defined(HAVE_EPOLL)
 	#include "CASocketGroup.hpp"
