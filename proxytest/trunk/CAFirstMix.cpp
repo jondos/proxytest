@@ -1732,6 +1732,11 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 	
 		INIT_STACK;
 		BEGIN_STACK("CAFirstMix::doUserLogin");
+
+#ifdef __BUILD_AS_SHADOW_PLUGIN__ //the shadow simulator seems to love non-blocking I/O...
+		pNewUser->getCASocket()->setNonBlocking(true);
+#endif
+
 			ret=pNewUser->getCASocket()->setKeepAlive(true);
 			if(ret!=E_SUCCESS)
 				CAMsg::printMsg(LOG_DEBUG,"Error setting KeepAlive for user login connection!");
