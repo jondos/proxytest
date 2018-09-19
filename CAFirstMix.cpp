@@ -1349,7 +1349,11 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 					}
 					sSleep(1);
 				}
-				countRead=psocketgroupAccept->select(10000);
+#ifdef	__BUILD_AS_SHADOW_PLUGIN__
+				countRead=psocketgroupAccept->select();
+#else
+				countRead = psocketgroupAccept->select(10000);
+#endif
 				if(countRead<0)
 					{ //check for Error - are we restarting ?
 						if(pFirstMix->m_bRestart ||countRead!=E_TIMEDOUT)
