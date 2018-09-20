@@ -11,6 +11,7 @@ AlwaysBreakBeforeMultilineStrings: false
 BreakBeforeBinaryOperators: false
 BreakBeforeTernaryOperators: true
 BreakConstructorInitializersBeforeComma: false
+BinPackArguments: true
 BinPackParameters: true
 ColumnLimit:     0
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
@@ -40,11 +41,21 @@ SpaceInEmptyParentheses: false
 SpacesInCStyleCastParentheses: false
 SpaceAfterControlStatementKeyword: true
 SpaceBeforeAssignmentOperators: true
+SortIncludes: false
 ContinuationIndentWidth: 2
 BreakBeforeBraces: 'Custom'
-BraceWrapping: {
-AfterClass : true,
-AfterFunction: true,
-IndentBraces : true,
-AfterControlStatement: true
-}
+BraceWrapping:
+  AfterClass: true
+  AfterFunction: true
+  IndentBraces: true
+  AfterEnum: true
+  AfterNamespace: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterExternBlock: true
+  BeforeCatch: true
+  BeforeElse: true
+  IndentBraces: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
+  AfterControlStatement: true
