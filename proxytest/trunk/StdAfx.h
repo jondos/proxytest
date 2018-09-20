@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.12.03"
+#define MIX_VERSION "00.12.04"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -107,9 +107,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define MUXSOCKET_CIPHER_NO_ENCRYPTION //!!!WARNING!! if defined, no encryption on the MuxSocket will happen! Only use in BSL-4 laboratory!
 //#define FAST_PROCESSING //make all polling as fast as possible, may lead to very high processor utilisation in case of low traffic/workload; usefull for performance measurements
 //#define MULTI_THREADED_PACKET_PROCESSING //utilise multiple threads for packet processing, which could lead to a performacne improvement on multi core machines
+//#define __BUILD_AS_SHADOW_PLUGIN__ //define if you want to compile the Mix as a plugin for the Shadow simulator
+ 
 
-
-#define __BUILD_AS_SHADOW_PLUGIN__
 #if defined(NO_ENCRYPTION) && !defined(MUXSOCKET_CIPHER_NO_ENCRYPTION)
 	#define MUXSOCKET_CIPHER_NO_ENCRYPTION
 #endif
