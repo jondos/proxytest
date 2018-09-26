@@ -86,7 +86,8 @@ SINT32 CASymCipherCTR::crypt1(const UINT8* in,UINT8* out,UINT32 len)
 	{
 		UINT32 i=2000;
 		UINT8 tmpBuff[2000];
-		int ret=EVP_DecryptUpdate(m_ctxAES1, tmpBuff, (int*)&i, in, len);
+		/*int ret=*/
+		EVP_DecryptUpdate(m_ctxAES1, tmpBuff, (int*)&i, in, len);
 		/*if (ret != 1)
 			{
 				CAMsg::printMsg(LOG_ERR, "Error in CASymCipher::crypt1()\n ");
