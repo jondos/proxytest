@@ -259,8 +259,10 @@ void signal_hup(int)
 ///Check what the sizes of base types are as expected -- if not kill the programm
 void checkSizesOfBaseTypes()
 	{
+#ifdef _MSC_VER
 		#pragma warning( push )
 		#pragma warning( disable : 4127 ) //Disable: Bedingter Ausdruck ist konstant
+#endif
 		if(sizeof(SINT8)!=1)
 			{
 				CAMsg::printMsg(LOG_CRIT,"sizeof(SINT8) != 1 --> maybe a compiler (optimization) problem!\n");
@@ -298,7 +300,9 @@ void checkSizesOfBaseTypes()
 					exit(-1);
 				}
 		#endif
+#ifdef _MSC_VER
 		#pragma warning( pop )
+#endif
 	}
 
 
@@ -571,10 +575,6 @@ int main(int argc, const char* argv[])
 	 			exitCode=EXIT_FAILURE;
 				goto EXIT;
 			}
-
-		UINT8 buff[255];
-
-
 
 #ifndef _WIN32
 		if(CALibProxytest::getOptions()->getDaemon()) 
