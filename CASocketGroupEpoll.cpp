@@ -30,6 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef HAVE_EPOLL
 CASocketGroupEpoll::CASocketGroupEpoll(bool bWrite)
 	{
+		m_pcsFD_SET = new CAMutex();
 		m_hEPFD=epoll_create(MAX_POLLFD);
 		m_pEpollEvent=new struct epoll_event;
 		memset(m_pEpollEvent,0,sizeof(struct epoll_event));
@@ -44,6 +45,7 @@ CASocketGroupEpoll::~CASocketGroupEpoll()
 		m_pEvents = NULL;
 		delete m_pEpollEvent;
 		m_pEpollEvent = NULL;
+		delete m_pcsFD_SET;
 	}
 
 SINT32 CASocketGroupEpoll::setPoolForWrite(bool bWrite)
@@ -51,7 +53,7 @@ SINT32 CASocketGroupEpoll::setPoolForWrite(bool bWrite)
 		if(bWrite)
 			m_pEpollEvent->events=EPOLLOUT|EPOLLERR|EPOLLHUP;
 		else
-			m_pEpollEvent->events=EPOLLIN|EPOLLERR|EPOLLHUP;
+			m_pEpollEvent->events=EPOLLIN| EPOLLERR|EPOLLHUP;
 		return E_SUCCESS;
 	}
 #endif
