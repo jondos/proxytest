@@ -27,6 +27,7 @@
  */
 #include "StdAfx.h"
 #ifndef ONLY_LOCAL_PROXY
+#ifdef PAYMENT
 #include "CADatabase.hpp"
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
@@ -435,4 +436,5 @@ SINT32 CADatabase::simulateInsert(UINT8 key[16])
 		 m_pMutex->unlock();
 		 return E_SUCCESS;	*/
 	}
+#endif //PAYMENT
 #endif //Only_LOCAL_PROXY
