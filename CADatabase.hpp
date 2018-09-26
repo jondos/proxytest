@@ -26,7 +26,6 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #ifndef ONLY_LOCAL_PROXY
-#ifdef PAYMENT
 #include "CAMutex.hpp"
 #include "CAThread.hpp"
 #ifndef __CA_DATABASE__
@@ -50,6 +49,7 @@ typedef struct _t_database_info
 
 THREAD_RETURN db_loopMaintenance(void *param);
 
+/*** Database for dedecting replays.***/
 class CADatabase
 	{
 		public:
@@ -111,5 +111,4 @@ class CADatabase
 			CAThread* m_pThread;
 	};
 #endif //__CA_DATABASE__
-#endif //PAYMENT
 #endif //ONLY_LOCAL_PROXY
