@@ -32,7 +32,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 
 #include "StdAfx.h"
-
+#ifdef PAYMENT
 #include "Hashtable.hpp"
 #include "CAMsg.hpp"
 #include "CAUtil.hpp"
@@ -460,3 +460,4 @@ struct Entry *Hashtable::getHashEntry(void *key)
 	return NULL;
 }
 
+#endif //define PAYMENT

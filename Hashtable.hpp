@@ -28,7 +28,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
-
+#ifdef PAYMENT
 #include "CAMutex.hpp"
 
 #define HASH_EMPTY_NONE (SINT8)0
@@ -119,5 +119,5 @@ class Hashtable
 	private:
 		CAMutex *m_pMutex;
 };
-
+#endif
 #endif  // HASHTABLE_H
