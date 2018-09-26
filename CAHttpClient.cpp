@@ -36,10 +36,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 * @retval E_NOT_CONNECTED if the connection was lost
 * @retval E_SUCCESS if all is OK
 */
-SINT32 CAHttpClient::sendGetRequest(const UINT8 * url)
+SINT32 CAHttpClient::sendGetRequest(const UINT8* url)
 	{
-		static const UINT8* requestF = "GET %s HTTP/1.0\r\n\r\n";
-		static const UINT32 requestFLen=strlen((char *)requestF);
+		static const char* requestF = "GET %s HTTP/1.0\r\n\r\n";
+		static const UINT32 requestFLen=strlen(requestF);
 		if(m_pSocket==NULL)
 			{
 				return E_NOT_CONNECTED;
@@ -48,7 +48,7 @@ SINT32 CAHttpClient::sendGetRequest(const UINT8 * url)
 		// put request together
 		UINT32 len = requestFLen + strlen((char *)url);
 		UINT8* requestS = new UINT8[len+1];
-		sprintf((char *)requestS, (const char *)requestF, (const char *)url);
+		sprintf((char *)requestS, requestF, (const char *)url);
 		len = strlen((char *)requestS);
 	
 		#ifdef DEBUG
