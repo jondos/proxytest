@@ -38,7 +38,7 @@ void xercesdomparser_sax_callback (mxml_node_t * node, mxml_sax_event_t sax_even
 							curNode->appendChild(elem);
 							pParser->m_curNode=elem;
 						}
-					for(UINT32 i=0;i<node->value.element.num_attrs;i++)
+					for(int i=0;i<node->value.element.num_attrs;i++)
 						{
 							setDOMElementAttribute(elem,node->value.element.attrs[i].name,(UINT8*)node->value.element.attrs[i].value);
 						}
@@ -56,8 +56,16 @@ void xercesdomparser_sax_callback (mxml_node_t * node, mxml_sax_event_t sax_even
 							curNode->appendChild(t);
 						}
 				break;
+				
 				case MXML_SAX_CDATA: 
 				break;
+
+				case MXML_SAX_COMMENT:
+				break;
+
+				case MXML_SAX_DIRECTIVE:
+				break;
+
 			}
 	}
 #endif //MXML_DOM
