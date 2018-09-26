@@ -7,6 +7,7 @@
 
 typedef UINT8 XMLCh;
 typedef UINT8 XMLByte;
+typedef UINT32 XMLSize_t;
 
 const XMLCh chOpenAngle='<';
 const XMLCh chCloseAngle='>';
