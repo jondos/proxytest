@@ -174,8 +174,10 @@ SINT32 CALastMixA::loop()
 													CAMsg::printMsg(LOG_DEBUG,"Received a channel open packet for incoming channel: %u\n",pMixPacket->channel);
 											#endif
 
-											
-											SINT32 retAsymDecryption=m_pRSA->decryptOAEP(pMixPacket->data,rsaBuff,&rsaOutLen);
+#ifdef _DEBUG											
+											SINT32 retAsymDecryption=
+#endif
+											m_pRSA->decryptOAEP(pMixPacket->data,rsaBuff,&rsaOutLen);
 											#ifdef _DEBUG
 												if(retAsymDecryption==E_UNKNOWN)
 													{
