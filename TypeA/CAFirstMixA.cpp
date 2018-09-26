@@ -45,11 +45,10 @@ void CAFirstMixA::shutDown()
 {
 	m_bIsShuttingDown = true;
 	m_bLoop=false;
-//#ifdef PAYMENT
+#ifdef PAYMENT
 	UINT32 connectionsClosed = 0;
 	fmHashTableEntry* timeoutHashEntry;
 
-#ifdef PAYMENT
 
 	/* make sure no reconnect is possible when shutting down */
 	if(m_pthreadAcceptUsers!=NULL)
