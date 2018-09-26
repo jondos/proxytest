@@ -483,8 +483,6 @@ int main(int argc, const char* argv[])
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INLUDE_LAST_MIX|| defined INLUDE_FIRST_MIX
 		pMix=NULL;
 #endif
-		UINT32 lLogOpts = 0;
-		SINT32 maxFiles,ret;
 #if defined(HAVE_CRTDBG)
 //			_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
 			_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
