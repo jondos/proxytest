@@ -1034,7 +1034,10 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 	{
 		CAMiddleMix* pMix=(CAMiddleMix*)param;
-		HCHANNEL channelOut = 0, channelIn = 0;
+		HCHANNEL channelOut = 0;
+#ifdef LOG_CRIME
+		HCHANNEL channelIn = 0;
+#endif
 		tPoolEntry* pPoolEntry=new tPoolEntry;
 		MIXPACKET* pMixPacket=&pPoolEntry->packet;
 
@@ -1147,8 +1150,9 @@ SGX MIX							unlocksem(pMix->upstreamSemPreId, SN_FULL);
 							#endif
 							pQueue->add(pPoolEntry,sizeof(tPoolEntry));
 */
-
+#ifdef LOG_CRIME
 							channelIn = pMixPacket->channel;
+#endif
 							if(pMix->m_pMiddleMixChannelList->getInToOut(pMixPacket->channel,&channelOut,&pCipher)!=E_SUCCESS)
 							{//new connection ?
 								if(pMixPacket->flags & CHANNEL_OPEN) //if not channel-open flag set -->drop this packet

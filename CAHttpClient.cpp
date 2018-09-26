@@ -38,7 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 SINT32 CAHttpClient::sendGetRequest(const UINT8 * url)
 	{
-		static const UINT8 requestF[] = "GET %s HTTP/1.0\r\n\r\n";
+		static const UINT8* requestF = "GET %s HTTP/1.0\r\n\r\n";
 		static const UINT32 requestFLen=strlen((char *)requestF);
 		if(m_pSocket==NULL)
 			{
