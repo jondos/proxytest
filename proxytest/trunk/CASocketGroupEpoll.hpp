@@ -35,6 +35,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef DEBUG
 	#include "CAMsg.hpp"
 #endif
+
+/*** A socket group implemented using epoll() call. You can use a socket group to query a et of sockets
+for new events.
+***/
 class CASocketGroupEpoll
 	{
 		public:
@@ -54,12 +58,14 @@ class CASocketGroupEpoll
 				return add(s, NULL);
 			}
 
-			/** Adds the socket s to the socket group. Additional one can set a parameter datapointer, which is
-			  * assoziated with the socke s*/
+			/*** Adds the socket s to the socket group. Additional one can set a parameter datapointer, which is
+			  * assoziated with the socket s. 
+				Note: if datapointer!=NULL than you cannot use the isSignaled(socket) functions.!
+				***/
 			SINT32 add(CASocket&s,void * datapointer)
 				{
 					SINT32 ret=E_SUCCESS;
-					m_csFD_SET.lock();
+					m_pcsFD_SET->lock();
 					SOCKET socket=s.getSocket();
 					if (datapointer != NULL)
 						m_pEpollEvent->data.ptr = datapointer;
@@ -71,13 +77,13 @@ class CASocketGroupEpoll
 						CAMsg::printMsg(LOG_DEBUG, "Failed to add socket to epoll group\n");
 						ret = E_UNKNOWN;
 					}
-					m_csFD_SET.unlock();
+					m_pcsFD_SET->unlock();
 					return ret;
 				}
 
 
 			/** Adds the socket s to the socket group. Additional one can set a parameter datapointer, which is
-			  * assoziated with the socke s*/
+			  * assoziated with the socket s*/
 			SINT32 add(CAMuxSocket&s,void* datapointer)
 				{
 					return add(*(s.getCASocket()),datapointer);
@@ -86,11 +92,11 @@ class CASocketGroupEpoll
 			SINT32 remove(CASocket&s)
 				{
 					SINT32 ret=E_SUCCESS;
-					m_csFD_SET.lock();
+					m_pcsFD_SET->lock();
 					if(epoll_ctl(m_hEPFD,EPOLL_CTL_DEL,s.getSocket(),m_pEpollEvent)!=0)
 						ret=E_UNKNOWN;
 					ASSERT(ret==E_SUCCESS,"Error in Epoll socket group remove")
-					m_csFD_SET.unlock();
+						m_pcsFD_SET->unlock();
 					return ret;
 				}
 
@@ -101,14 +107,14 @@ class CASocketGroupEpoll
 
 			SINT32 select()
 				{
-					m_csFD_SET.lock();
+				m_pcsFD_SET->lock();
 					m_iNumOfReadyFD=epoll_wait(m_hEPFD,m_pEvents,MAX_POLLFD,-1);
 					if(m_iNumOfReadyFD>0)
 						{
-							m_csFD_SET.unlock();
+							m_pcsFD_SET->unlock();
 							return m_iNumOfReadyFD;
 						}
-					m_csFD_SET.unlock();
+					m_pcsFD_SET->unlock();
 					return E_UNKNOWN;
 				}
 			
@@ -121,22 +127,23 @@ class CASocketGroupEpoll
 			***/
 			SINT32 select(UINT32 time_ms)
 				{
-					m_csFD_SET.lock();
+					m_pcsFD_SET->lock();
 					m_iNumOfReadyFD=epoll_wait(m_hEPFD,m_pEvents,MAX_POLLFD,time_ms);
 					if(m_iNumOfReadyFD>0)
 						{
-							m_csFD_SET.unlock();
+							m_pcsFD_SET->unlock();
 							return m_iNumOfReadyFD;
 						}
 					else if(m_iNumOfReadyFD==0)
 						{
-							m_csFD_SET.unlock();
+							m_pcsFD_SET->unlock();
 							return E_TIMEDOUT;
 						}
-					m_csFD_SET.unlock();
+					m_pcsFD_SET->unlock();
 					return E_UNKNOWN;
 				}
 
+    /*** Note: only works, if datapointer was not set!***/
 		bool isSignaled(CASocket&s)
 				{
 					SINT32 socket=s.getSocket();
@@ -148,7 +155,8 @@ class CASocketGroupEpoll
 					return false;
 				}
 
-			bool isSignaled(CASocket*ps)
+		/*** Note: only works, if datapointer was not set!***/
+		bool isSignaled(CASocket*ps)
 				{
 				SINT32 socket=ps->getSocket();
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
@@ -159,7 +167,8 @@ class CASocketGroupEpoll
 					return false;
 				}
 
-			bool isSignaled(CAMuxSocket&s)
+		/*** Note: only works, if datapointer was not set!***/
+		bool isSignaled(CAMuxSocket&s)
 				{
 					SINT32 socket=s.getSocket();
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
@@ -170,7 +179,7 @@ class CASocketGroupEpoll
 					return false;
 				}
 		
-
+		/*** Note: only works, if datapointer was set!***/
 			bool isSignaled(void* datapointer)
 				{
 					for(SINT32 i=0;i<m_iNumOfReadyFD;i++)
@@ -181,6 +190,7 @@ class CASocketGroupEpoll
 					return false;
 				}
 
+			/*** Note: only works, if datapointer was set!***/
 			void* getFirstSignaledSocketData()
 				{
 					m_iAktSignaledSocket=0;
@@ -189,6 +199,7 @@ class CASocketGroupEpoll
 					return NULL;
 				}
 
+			/*** Note: only works, if datapointer was set!***/
 			void* getNextSignaledSocketData()
 				{
 					m_iAktSignaledSocket++;
@@ -203,7 +214,7 @@ class CASocketGroupEpoll
 			struct epoll_event* m_pEpollEvent;
 			SINT32 m_iNumOfReadyFD;
 			SINT32 m_iAktSignaledSocket;
-			CAMutex m_csFD_SET;
+			CAMutex* m_pcsFD_SET;
 	};
 #endif
 #endif
