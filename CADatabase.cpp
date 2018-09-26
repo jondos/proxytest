@@ -45,7 +45,7 @@ CADatabase::CADatabase()
 t_databaseInfo* CADatabase::createDBInfo()
 	{
 		t_databaseInfo* pInfo = new t_databaseInfo;
-		memset(pInfo, NULL, sizeof(t_databaseInfo));
+		memset(pInfo, 0, sizeof(t_databaseInfo));
 		return pInfo;
 	}
 
