@@ -28,7 +28,7 @@ class DOMNodeList
 					return NULL;
 				};
 
-			UINT32 getLength() const
+			XMLSize_t getLength() const
 				{
 					return m_uSize;
 				}
