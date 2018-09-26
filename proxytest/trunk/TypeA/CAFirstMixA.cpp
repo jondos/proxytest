@@ -445,8 +445,9 @@ SINT32 CAFirstMixA::loop()
 														#if defined (LOG_CHANNEL) ||defined(DATA_RETENTION_LOG)
 															HCHANNEL tmpC=pMixPacket->channel;
 														#endif
-
+#if defined LOG_CRIME || defined _DEBUG
 														HCHANNEL inChannel = pMixPacket->channel;
+#endif
 														if(m_pChannelList->addChannel(pMuxSocket,pMixPacket->channel,pCipher,&pMixPacket->channel)!=E_SUCCESS)
 														{ //todo move up ?
 															delete pCipher;
@@ -772,7 +773,10 @@ NEXT_USER:
  */
 bool CAFirstMixA::sendToUsers()
 {
-	SINT32 countRead = m_psocketgroupUsersWrite->select(/*true,*/0);
+#ifndef HAVE_EPOLL
+	SINT32 countRead = 
+#endif
+	m_psocketgroupUsersWrite->select(/*true,*/0);
 	tQueueEntry *packetToSend = NULL;
 	SINT32 packetSize = sizeof(tQueueEntry);
 	CAQueue *controlMessageUserQueue = NULL;
