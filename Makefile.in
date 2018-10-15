@@ -193,7 +193,8 @@ am__libproxytest_a_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CAAccountingSettleThread.hpp CAASymCipher.hpp CABase64.hpp \
 	CACacheLoadBalancing.hpp CACertificate.hpp CACertStore.hpp \
 	CAConditionVariable.hpp CAControlChannelDispatcher.hpp \
-	CAControlChannelTest.hpp CACmdLnOptions.hpp CADatabase.hpp \
+	CAControlChannelTest.hpp CACryptoBenchmark.cpp \
+	CACryptoBenchmark.hpp CACmdLnOptions.hpp CADatabase.hpp \
 	CADatagramSocket.hpp CADataRetentionLog.hpp \
 	CADataRetentionLogFile.hpp CADynaNetworking.hpp \
 	CADynamicCascadeConfigurator.hpp CAFileSystemDirectory.hpp \
@@ -298,7 +299,8 @@ am__objects_1 = libproxytest_a-CAAbstractControlChannel.$(OBJEXT) \
 	libproxytest_a-TermsAndConditions.$(OBJEXT) \
 	libproxytest_a-packetintro.$(OBJEXT) \
 	libproxytest_a-StdAfx.$(OBJEXT) \
-	libproxytest_a-InnerMiddleMix.$(OBJEXT)
+	libproxytest_a-InnerMiddleMix.$(OBJEXT) \
+	libproxytest_a-CACryptoBenchmark.$(OBJEXT)
 @BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@am_libproxytest_a_OBJECTS = $(am__objects_1)
 libproxytest_a_OBJECTS = $(am_libproxytest_a_OBJECTS)
 @ONLY_LIB_TRUE@libmix_la_DEPENDENCIES = $(top_builddir)/xml/libxml.a \
@@ -306,7 +308,6 @@ libproxytest_a_OBJECTS = $(am_libproxytest_a_OBJECTS)
 @ONLY_LIB_TRUE@	$(top_builddir)/trio/libtrio.a \
 @ONLY_LIB_TRUE@	$(top_builddir)/tre/libtre.a \
 @ONLY_LIB_TRUE@	$(top_builddir)/gcm/libgcm.a
-am__libmix_la_SOURCES_DIST = $proxtest_sources
 am_libmix_la_OBJECTS =
 libmix_la_OBJECTS = $(am_libmix_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -358,7 +359,8 @@ am__libmixshadow_la_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CAAccountingSettleThread.hpp CAASymCipher.hpp CABase64.hpp \
 	CACacheLoadBalancing.hpp CACertificate.hpp CACertStore.hpp \
 	CAConditionVariable.hpp CAControlChannelDispatcher.hpp \
-	CAControlChannelTest.hpp CACmdLnOptions.hpp CADatabase.hpp \
+	CAControlChannelTest.hpp CACryptoBenchmark.cpp \
+	CACryptoBenchmark.hpp CACmdLnOptions.hpp CADatabase.hpp \
 	CADatagramSocket.hpp CADataRetentionLog.hpp \
 	CADataRetentionLogFile.hpp CADynaNetworking.hpp \
 	CADynamicCascadeConfigurator.hpp CAFileSystemDirectory.hpp \
@@ -411,7 +413,8 @@ am__objects_2 = CAAbstractControlChannel.lo CAAbstractXMLEncodable.lo \
 	CAThreadPool.lo CAThreadList.lo CAUtil.lo CAXMLBI.lo \
 	CAXMLCostConfirmation.lo CAXMLErrorMessage.lo \
 	CAXMLPriceCert.lo Hashtable.lo TermsAndConditions.lo \
-	packetintro.lo StdAfx.lo InnerMiddleMix.lo
+	packetintro.lo StdAfx.lo InnerMiddleMix.lo \
+	CACryptoBenchmark.lo
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@am_libmixshadow_la_OBJECTS =  \
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(am__objects_2) \
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	proxytest.lo
@@ -456,6 +459,7 @@ am__depfiles_remade = ./$(DEPDIR)/CAASymCipher.Plo \
 	./$(DEPDIR)/CAConditionVariable.Plo \
 	./$(DEPDIR)/CAControlChannelDispatcher.Plo \
 	./$(DEPDIR)/CAControlChannelTest.Plo \
+	./$(DEPDIR)/CACryptoBenchmark.Plo \
 	./$(DEPDIR)/CADataRetentionLog.Plo \
 	./$(DEPDIR)/CADataRetentionLogFile.Plo \
 	./$(DEPDIR)/CADatabase.Plo ./$(DEPDIR)/CADatagramSocket.Plo \
@@ -516,6 +520,7 @@ am__depfiles_remade = ./$(DEPDIR)/CAASymCipher.Plo \
 	./$(DEPDIR)/libproxytest_a-CAConditionVariable.Po \
 	./$(DEPDIR)/libproxytest_a-CAControlChannelDispatcher.Po \
 	./$(DEPDIR)/libproxytest_a-CAControlChannelTest.Po \
+	./$(DEPDIR)/libproxytest_a-CACryptoBenchmark.Po \
 	./$(DEPDIR)/libproxytest_a-CADataRetentionLog.Po \
 	./$(DEPDIR)/libproxytest_a-CADataRetentionLogFile.Po \
 	./$(DEPDIR)/libproxytest_a-CADatabase.Po \
@@ -620,8 +625,7 @@ am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(libproxytest_a_SOURCES) $(libmix_la_SOURCES) \
 	$(libmixshadow_la_SOURCES) $(mix_SOURCES)
-DIST_SOURCES = $(am__libproxytest_a_SOURCES_DIST) \
-	$(am__libmix_la_SOURCES_DIST) \
+DIST_SOURCES = $(am__libproxytest_a_SOURCES_DIST) $(libmix_la_SOURCES) \
 	$(am__libmixshadow_la_SOURCES_DIST) $(am__mix_SOURCES_DIST)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
@@ -949,6 +953,8 @@ proxytest_sources = CAAbstractControlChannel.cpp\
 		    CAConditionVariable.hpp\
 		    CAControlChannelDispatcher.hpp\
 		    CAControlChannelTest.hpp\
+		    CACryptoBenchmark.cpp \
+		    CACryptoBenchmark.hpp \
 		    CACmdLnOptions.hpp \
 		    CADatabase.hpp\
 		    CADatagramSocket.hpp\
@@ -1024,7 +1030,7 @@ proxytest_sources = CAAbstractControlChannel.cpp\
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@lib_LTLIBRARIES = libmixshadow.la
 @ONLY_LIB_TRUE@lib_LTLIBRARIES = libmix.la
 @ONLY_LIB_TRUE@libmix_la_CPPFLAGS = -DSOMEFLAG
-@ONLY_LIB_TRUE@libmix_la_SOURCES = $proxtest_sources
+@ONLY_LIB_TRUE@libmix_la_SOURCES = $(proxtest_sources)
 @ONLY_LIB_TRUE@libmix_la_LIBADD = $(top_builddir)/xml/libxml.a \
 @ONLY_LIB_TRUE@	    $(top_builddir)/popt/libpopt.a \
 @ONLY_LIB_TRUE@	    $(top_builddir)/trio/libtrio.a \
@@ -1232,6 +1238,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAConditionVariable.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAControlChannelDispatcher.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAControlChannelTest.Plo@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CACryptoBenchmark.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADataRetentionLog.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADataRetentionLogFile.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CADatabase.Plo@am__quote@ # am--include-marker
@@ -1312,6 +1319,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAConditionVariable.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAControlChannelDispatcher.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAControlChannelTest.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CACryptoBenchmark.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CADataRetentionLog.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CADataRetentionLogFile.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CADatabase.Po@am__quote@ # am--include-marker
@@ -2543,6 +2551,20 @@ libproxytest_a-InnerMiddleMix.obj: InnerMiddleMix.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-InnerMiddleMix.obj `if test -f 'InnerMiddleMix.cpp'; then $(CYGPATH_W) 'InnerMiddleMix.cpp'; else $(CYGPATH_W) '$(srcdir)/InnerMiddleMix.cpp'; fi`
 
+libproxytest_a-CACryptoBenchmark.o: CACryptoBenchmark.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-CACryptoBenchmark.o -MD -MP -MF $(DEPDIR)/libproxytest_a-CACryptoBenchmark.Tpo -c -o libproxytest_a-CACryptoBenchmark.o `test -f 'CACryptoBenchmark.cpp' || echo '$(srcdir)/'`CACryptoBenchmark.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-CACryptoBenchmark.Tpo $(DEPDIR)/libproxytest_a-CACryptoBenchmark.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CACryptoBenchmark.cpp' object='libproxytest_a-CACryptoBenchmark.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-CACryptoBenchmark.o `test -f 'CACryptoBenchmark.cpp' || echo '$(srcdir)/'`CACryptoBenchmark.cpp
+
+libproxytest_a-CACryptoBenchmark.obj: CACryptoBenchmark.cpp
+@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-CACryptoBenchmark.obj -MD -MP -MF $(DEPDIR)/libproxytest_a-CACryptoBenchmark.Tpo -c -o libproxytest_a-CACryptoBenchmark.obj `if test -f 'CACryptoBenchmark.cpp'; then $(CYGPATH_W) 'CACryptoBenchmark.cpp'; else $(CYGPATH_W) '$(srcdir)/CACryptoBenchmark.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-CACryptoBenchmark.Tpo $(DEPDIR)/libproxytest_a-CACryptoBenchmark.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='CACryptoBenchmark.cpp' object='libproxytest_a-CACryptoBenchmark.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-CACryptoBenchmark.obj `if test -f 'CACryptoBenchmark.cpp'; then $(CYGPATH_W) 'CACryptoBenchmark.cpp'; else $(CYGPATH_W) '$(srcdir)/CACryptoBenchmark.cpp'; fi`
+
 mix-proxytest.o: proxytest.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(mix_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mix-proxytest.o -MD -MP -MF $(DEPDIR)/mix-proxytest.Tpo -c -o mix-proxytest.o `test -f 'proxytest.cpp' || echo '$(srcdir)/'`proxytest.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/mix-proxytest.Tpo $(DEPDIR)/mix-proxytest.Po
@@ -2929,6 +2951,7 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/CAConditionVariable.Plo
 	-rm -f ./$(DEPDIR)/CAControlChannelDispatcher.Plo
 	-rm -f ./$(DEPDIR)/CAControlChannelTest.Plo
+	-rm -f ./$(DEPDIR)/CACryptoBenchmark.Plo
 	-rm -f ./$(DEPDIR)/CADataRetentionLog.Plo
 	-rm -f ./$(DEPDIR)/CADataRetentionLogFile.Plo
 	-rm -f ./$(DEPDIR)/CADatabase.Plo
@@ -3009,6 +3032,7 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAConditionVariable.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAControlChannelDispatcher.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAControlChannelTest.Po
+	-rm -f ./$(DEPDIR)/libproxytest_a-CACryptoBenchmark.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CADataRetentionLog.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CADataRetentionLogFile.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CADatabase.Po
@@ -3140,6 +3164,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/CAConditionVariable.Plo
 	-rm -f ./$(DEPDIR)/CAControlChannelDispatcher.Plo
 	-rm -f ./$(DEPDIR)/CAControlChannelTest.Plo
+	-rm -f ./$(DEPDIR)/CACryptoBenchmark.Plo
 	-rm -f ./$(DEPDIR)/CADataRetentionLog.Plo
 	-rm -f ./$(DEPDIR)/CADataRetentionLogFile.Plo
 	-rm -f ./$(DEPDIR)/CADatabase.Plo
@@ -3220,6 +3245,7 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAConditionVariable.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAControlChannelDispatcher.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAControlChannelTest.Po
+	-rm -f ./$(DEPDIR)/libproxytest_a-CACryptoBenchmark.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CADataRetentionLog.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CADataRetentionLogFile.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CADatabase.Po
@@ -3331,173 +3357,6 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-sbinPROGRAMS
 
 
 export SGXTOOLCHAIN=@SCONE_TOOLCHAIN@
-@ONLY_LIB_TRUE@CAAbstractControlChannel.cpp\
-@ONLY_LIB_TRUE@		    CAAbstractXMLEncodable.cpp\
-@ONLY_LIB_TRUE@		    CAAbstractXMLSignable.cpp\
-@ONLY_LIB_TRUE@		    CAAccountingBIInterface.cpp\
-@ONLY_LIB_TRUE@		    CAAccountingControlChannel.cpp\
-@ONLY_LIB_TRUE@		    CAAccountingDBInterface.cpp\
-@ONLY_LIB_TRUE@		    CAAccountingInstance.cpp\
-@ONLY_LIB_TRUE@		    CAAccountingSettleThread.cpp\
-@ONLY_LIB_TRUE@		    CAASymCipher.cpp \
-@ONLY_LIB_TRUE@		    CABase64.cpp \
-@ONLY_LIB_TRUE@		    CACacheLoadBalancing.cpp\
-@ONLY_LIB_TRUE@		    CACertificate.cpp\
-@ONLY_LIB_TRUE@		    CACertStore.cpp\
-@ONLY_LIB_TRUE@		    CAClientSocket.cpp\
-@ONLY_LIB_TRUE@		    CACmdLnOptions.cpp \
-@ONLY_LIB_TRUE@		    CAConditionVariable.cpp\
-@ONLY_LIB_TRUE@		    CAControlChannelDispatcher.cpp\
-@ONLY_LIB_TRUE@		    CAControlChannelTest.cpp\
-@ONLY_LIB_TRUE@		    CADatabase.cpp\
-@ONLY_LIB_TRUE@		    CADatagramSocket.cpp \
-@ONLY_LIB_TRUE@		    CADataRetentionLog.cpp\
-@ONLY_LIB_TRUE@		    CADataRetentionLogFile.cpp\
-@ONLY_LIB_TRUE@		    CADynaNetworking.cpp \
-@ONLY_LIB_TRUE@		    CADynamicCascadeConfigurator.cpp \
-@ONLY_LIB_TRUE@		    CAFileSystemDirectory.cpp \
-@ONLY_LIB_TRUE@		    CAFirstMix.cpp \
-@ONLY_LIB_TRUE@		    CAFirstMixChannelList.cpp \
-@ONLY_LIB_TRUE@		    CAHttpClient.cpp \
-@ONLY_LIB_TRUE@		    CAInfoService.cpp \
-@ONLY_LIB_TRUE@		    CAInfoServiceAware.cpp \
-@ONLY_LIB_TRUE@		    CAIPList.cpp \
-@ONLY_LIB_TRUE@		    CAIPAddrWithNetmask.cpp \
-@ONLY_LIB_TRUE@		    CALastMix.cpp \
-@ONLY_LIB_TRUE@		    CALastMixChannelList.cpp\
-@ONLY_LIB_TRUE@		    CAListenerInterface.cpp\
-@ONLY_LIB_TRUE@		    CALibProxytest.cpp\
-@ONLY_LIB_TRUE@		    CALocalProxy.cpp \
-@ONLY_LIB_TRUE@		    CALogPacketStats.cpp\
-@ONLY_LIB_TRUE@		    CAMiddleMix.cpp \
-@ONLY_LIB_TRUE@		    CAMiddleMixChannelList.cpp \
-@ONLY_LIB_TRUE@		    CAMix.cpp \
-@ONLY_LIB_TRUE@		    CAMixWithReplayDB.cpp\
-@ONLY_LIB_TRUE@		    CAMsg.cpp \
-@ONLY_LIB_TRUE@		    CAMultiSignature.cpp\
-@ONLY_LIB_TRUE@		    CAMutex.cpp\
-@ONLY_LIB_TRUE@		    CAMuxSocket.cpp \
-@ONLY_LIB_TRUE@		    CAPriceInfo.cpp \
-@ONLY_LIB_TRUE@		    CAPool.cpp\
-@ONLY_LIB_TRUE@		    CAQueue.cpp \
-@ONLY_LIB_TRUE@		    CAReplayControlChannel.cpp\
-@ONLY_LIB_TRUE@		    CAReplayCtrlChannelMsgProc.cpp\
-@ONLY_LIB_TRUE@		    CASemaphore.cpp\
-@ONLY_LIB_TRUE@		    CASignature.cpp \
-@ONLY_LIB_TRUE@		    CASingleSocketGroup.cpp\
-@ONLY_LIB_TRUE@		    CASocket.cpp \
-@ONLY_LIB_TRUE@		    CASocketAddrINet.cpp \
-@ONLY_LIB_TRUE@		    CASocketAddrUnix.cpp \
-@ONLY_LIB_TRUE@		    CASocketGroup.cpp \
-@ONLY_LIB_TRUE@		    CASocketGroupEpoll.cpp\
-@ONLY_LIB_TRUE@		    CASocketList.cpp \
-@ONLY_LIB_TRUE@		    CAStatusManager.cpp \
-@ONLY_LIB_TRUE@		    CATLSClientSocket.cpp\
-@ONLY_LIB_TRUE@		    CASymCipher.cpp \
-@ONLY_LIB_TRUE@		CASymCipherCTR.cpp \
-@ONLY_LIB_TRUE@			CASymCipherGCM.cpp \
-@ONLY_LIB_TRUE@			CASymCipherOFB.cpp \
-@ONLY_LIB_TRUE@		    CASyncControlChannel.cpp\
-@ONLY_LIB_TRUE@		    CATempIPBlockList.cpp\
-@ONLY_LIB_TRUE@		    CAThread.cpp \
-@ONLY_LIB_TRUE@		    CAThreadPool.cpp\
-@ONLY_LIB_TRUE@		    CAThreadList.cpp \
-@ONLY_LIB_TRUE@		    CAUtil.cpp \
-@ONLY_LIB_TRUE@		    CAXMLBI.cpp \
-@ONLY_LIB_TRUE@		    CAXMLCostConfirmation.cpp\
-@ONLY_LIB_TRUE@		    CAXMLErrorMessage.cpp\
-@ONLY_LIB_TRUE@		    CAXMLPriceCert.cpp\
-@ONLY_LIB_TRUE@		    Hashtable.cpp\
-@ONLY_LIB_TRUE@		    TermsAndConditions.cpp \
-@ONLY_LIB_TRUE@		    packetintro.cpp \
-@ONLY_LIB_TRUE@		    StdAfx.cpp \
-@ONLY_LIB_TRUE@		    InnerMiddleMix.cpp\
-@ONLY_LIB_TRUE@		    InnerMiddleMix.hpp\
-@ONLY_LIB_TRUE@		    CAAbstractControlChannel.hpp\
-@ONLY_LIB_TRUE@		    CAAbstractXMLEncodable.hpp\
-@ONLY_LIB_TRUE@		    CAAbstractXMLSignable.hpp\
-@ONLY_LIB_TRUE@		    CAAccountingBIInterface.hpp\
-@ONLY_LIB_TRUE@		    CAAccountingControlChannel.hpp\
-@ONLY_LIB_TRUE@		    CAAccountingDBInterface.hpp\
-@ONLY_LIB_TRUE@		    CAAccountingInstance.hpp\
-@ONLY_LIB_TRUE@		    CAAccountingSettleThread.hpp\
-@ONLY_LIB_TRUE@		    CAASymCipher.hpp \
-@ONLY_LIB_TRUE@		    CABase64.hpp \
-@ONLY_LIB_TRUE@		    CACacheLoadBalancing.hpp\
-@ONLY_LIB_TRUE@		    CACertificate.hpp\
-@ONLY_LIB_TRUE@		    CACertStore.hpp\
-@ONLY_LIB_TRUE@		    CAConditionVariable.hpp\
-@ONLY_LIB_TRUE@		    CAControlChannelDispatcher.hpp\
-@ONLY_LIB_TRUE@		    CAControlChannelTest.hpp\
-@ONLY_LIB_TRUE@		    CACmdLnOptions.hpp \
-@ONLY_LIB_TRUE@		    CADatabase.hpp\
-@ONLY_LIB_TRUE@		    CADatagramSocket.hpp\
-@ONLY_LIB_TRUE@		    CADataRetentionLog.hpp\
-@ONLY_LIB_TRUE@		    CADataRetentionLogFile.hpp\
-@ONLY_LIB_TRUE@		    CADynaNetworking.hpp \
-@ONLY_LIB_TRUE@		    CADynamicCascadeConfigurator.hpp \
-@ONLY_LIB_TRUE@		    CAFileSystemDirectory.hpp \
-@ONLY_LIB_TRUE@		    CAFirstMix.hpp \
-@ONLY_LIB_TRUE@		    CAFirstMixChannelList.hpp \
-@ONLY_LIB_TRUE@		    CAHttpClient.hpp \
-@ONLY_LIB_TRUE@		    CAInfoService.hpp \
-@ONLY_LIB_TRUE@		    CAInfoServiceAware.hpp \
-@ONLY_LIB_TRUE@		    CAIPList.hpp \
-@ONLY_LIB_TRUE@		    CAIPAddrWithNetmask.hpp \
-@ONLY_LIB_TRUE@		    CALastMix.hpp \
-@ONLY_LIB_TRUE@		    CALastMixChannelList.hpp\
-@ONLY_LIB_TRUE@		    CAListenerInterface.hpp\
-@ONLY_LIB_TRUE@		    CALibProxytest.hpp\
-@ONLY_LIB_TRUE@		    CALocalProxy.hpp \
-@ONLY_LIB_TRUE@		    CALockAble.hpp\
-@ONLY_LIB_TRUE@		    CALogPacketStats.hpp\
-@ONLY_LIB_TRUE@		    CAMiddleMix.hpp \
-@ONLY_LIB_TRUE@		    CAMiddleMixChannelList.hpp \
-@ONLY_LIB_TRUE@		    CAMix.hpp \
-@ONLY_LIB_TRUE@		    CAMixWithReplayDB.hpp\
-@ONLY_LIB_TRUE@		    CAMsg.hpp \
-@ONLY_LIB_TRUE@		    CAMultiSignature.hpp\
-@ONLY_LIB_TRUE@		    CAMutex.hpp\
-@ONLY_LIB_TRUE@		    CAMuxSocket.hpp \
-@ONLY_LIB_TRUE@		    CAPriceInfo.hpp \
-@ONLY_LIB_TRUE@		    CAPool.hpp\
-@ONLY_LIB_TRUE@		    CAQueue.hpp \
-@ONLY_LIB_TRUE@		    CAReplayControlChannel.hpp\
-@ONLY_LIB_TRUE@		    CAReplayCtrlChannelMsgProc.hpp\
-@ONLY_LIB_TRUE@		    CASemaphore.hpp\
-@ONLY_LIB_TRUE@		    CASignature.hpp \
-@ONLY_LIB_TRUE@		    CASingleSocketGroup.hpp\
-@ONLY_LIB_TRUE@		    CASocket.hpp \
-@ONLY_LIB_TRUE@		    CASocketAddr.hpp \
-@ONLY_LIB_TRUE@		    CASocketAddrINet.hpp \
-@ONLY_LIB_TRUE@		    CASocketAddrUnix.hpp \
-@ONLY_LIB_TRUE@		    CASocketGroup.hpp \
-@ONLY_LIB_TRUE@		    CASocketGroupEpoll.hpp\
-@ONLY_LIB_TRUE@		    CASocketList.hpp \
-@ONLY_LIB_TRUE@		    CAStatusManager.hpp \
-@ONLY_LIB_TRUE@		    CATLSClientSocket.hpp\
-@ONLY_LIB_TRUE@		    CAClientSocket.hpp\
-@ONLY_LIB_TRUE@		    CASymChannelCipher.hpp \
-@ONLY_LIB_TRUE@		    CASymChannelCipherFactory.hpp \
-@ONLY_LIB_TRUE@		    CASymCipher.hpp \
-@ONLY_LIB_TRUE@			CASymCipherCTR.hpp \
-@ONLY_LIB_TRUE@			CASymCipherGCM.hpp \
-@ONLY_LIB_TRUE@			CASymCipherOFB.hpp \
-@ONLY_LIB_TRUE@		    CASyncControlChannel.hpp \
-@ONLY_LIB_TRUE@		    CATempIPBlockList.hpp\
-@ONLY_LIB_TRUE@		    CAThread.hpp \
-@ONLY_LIB_TRUE@		    CAThreadPool.hpp\
-@ONLY_LIB_TRUE@		    CAThreadList.hpp \
-@ONLY_LIB_TRUE@		    CAUtil.hpp \
-@ONLY_LIB_TRUE@		    CAXMLBI.hpp \
-@ONLY_LIB_TRUE@		    CAXMLCostConfirmation.hpp\
-@ONLY_LIB_TRUE@		    CAXMLErrorMessage.hpp\
-@ONLY_LIB_TRUE@		    CAXMLPriceCert.hpp\
-@ONLY_LIB_TRUE@		    Hashtable.hpp\
-@ONLY_LIB_TRUE@		    TermsAndConditions.hpp \
-@ONLY_LIB_TRUE@		    packetintro.h\
-@ONLY_LIB_TRUE@		    StdAfx.h\
-@ONLY_LIB_TRUE@		    basetypedefs.h
 
 @ALL_FROM_SOURCE_TRUE@external.h:
 #Make MXML
