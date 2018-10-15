@@ -1794,4 +1794,29 @@ SINT32 getDOMElementValue(const DOMElement* const pElem,UINT16* value)
 }
 
 
+
+void formatBytesPerSecond(UINT8* buff, UINT32 buffsize, UINT64 bytespersecond)
+{
+	if (bytespersecond < 1000)
+	{
+		snprintf((char*)buff, buffsize, "%llu Bytes/s", bytespersecond);
+	}
+	else if (bytespersecond < 1000000)
+	{
+		snprintf((char*)buff, buffsize, "%.2f KBytes/s", bytespersecond/1000.0);
+
+	}
+	else if (bytespersecond < 1000000000)
+	{
+		snprintf((char*)buff, buffsize, "%.2f MBytes/s", bytespersecond/1000000.0);
+
+	}
+	else
+	{
+		snprintf((char*)buff, buffsize, "%.2f GBytes/s", bytespersecond/1000000000.0);
+	}
+
+}
+
+
 #endif

@@ -27,7 +27,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "StdAfx.h"
 
-#if defined (_DEBUG) && ! defined (ONLY_LOCAL_PROXY)
+#if ! defined (ONLY_LOCAL_PROXY)
 
 #include "CAThread.hpp"
 #include "CAThreadList.hpp"
@@ -167,5 +167,31 @@ void CAThreadList::removeAll()
 		m_pHead = NULL;
 		m_Size=0;
 	}
+
+// This only deletes the list entries not the corresponding threads!
+SINT32 CAThreadList::waitAndRemoveAll()
+{
+	thread_list_entry_t* iterator = NULL;
+
+	while (m_pHead != NULL)
+	{
+		iterator = m_pHead->tle_next;
+#ifdef _DEBUG
+		CAMsg::printMsg(LOG_INFO, "CAThreadList::waitAndRemoveAll: Thread %s, id %u\n",
+			m_pHead->tle_thread->getName(),
+			m_pHead->tle_thread->getID());
+#endif
+		m_pHead->tle_thread->join();
+		delete m_pHead->tle_thread;
+		delete m_pHead;
+		m_pHead = iterator;
+	}
+
+	m_pHead = NULL;
+	m_Size = 0;
+	return E_SUCCESS;
+}
+
+
 
 #endif

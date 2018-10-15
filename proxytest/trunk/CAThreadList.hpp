@@ -31,7 +31,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
  * @author Simon Pecher, JonDos GmbH
  */
-#if defined (DEBUG) && !defined(ONLY_LOCAL_PROXY)
+#if !defined(ONLY_LOCAL_PROXY)
 struct thread_list_entry
 {
 	CAThread* tle_thread;
@@ -50,6 +50,11 @@ public:
 	
 	SINT32	put(const CAThread* const thread);
 	SINT32	remove(const CAThread* const thread);
+	
+	/** Waits for finishing of all threads in list and removes them.
+	The memory of each CAThread object is freed.*/
+	SINT32 waitAndRemoveAll();
+
 	//CAThread* get(CAThread *thread);
 	void showAll() const;
 	UINT32 getSize() const

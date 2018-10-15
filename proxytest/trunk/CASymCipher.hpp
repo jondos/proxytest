@@ -35,7 +35,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 /** This class could be used for encryption/decryption of data (streams) with
 	* AES using 128bit CBC mode.
 	*/
-//#define AES_NI
 class CASymCipher
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 	:public CALockAble
@@ -88,12 +87,12 @@ class CASymCipher
 					return m_bKeySet;
 				}
 
-			/** Sets the keys for crypt1() and crypt2() to the same key*/
+			/** Sets the key for encryption*/
 			SINT32 setKey(const UINT8* key);	
 			
 			/** Sets the keys for crypt1() and crypt2() either to the same key (if keysize==KEY_SIZE) or to
 			 * different values, if keysize==2* KEY_SIZE*/
-			SINT32 setKeys(const UINT8* key,UINT32 keysize);	
+			//SINT32 setKeys(const UINT8* key,UINT32 keysize);	
 			
 			SINT32 setKey(const UINT8* key,bool bEncrypt);	
 

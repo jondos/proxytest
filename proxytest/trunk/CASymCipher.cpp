@@ -71,7 +71,7 @@ SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
 	aesni_set_encrypt_key(key,128,m_keyAES1);
 
 #else
-			AES_set_encrypt_key(key,128,m_keyAES1);
+	AES_set_encrypt_key(key,128,m_keyAES1);
 #endif
 		}
 	else
@@ -87,6 +87,7 @@ SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
 	return E_SUCCESS;
 }
 
+/*
 SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
 {
 	if(keysize==KEY_SIZE)
@@ -118,7 +119,7 @@ SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
 		}
 	return E_UNKNOWN;
 }
-
+*/
 
 
 /** En-/Decryptes in to out using iv1 and key1. AES is used for en-/dcryption and the cryption

@@ -556,6 +556,12 @@ class CACmdLnOptions
 			return m_bAutoReconnect;
 		}
 
+		bool getCryptoBenchmark()
+		{
+			return m_bCryptoBenchmark;
+		}
+
+
 #ifdef LOG_CRIME
 		tre_regex_t* getCrimeRegExpsURL(UINT32* len)
 		{
@@ -817,6 +823,7 @@ class CACmdLnOptions
 		UINT32	m_maxLogFiles; //how many log files can be created before starting again with the first one
 		char*		m_strEncryptedLogDir;
 		bool		m_bCompressedLogs;
+		bool		m_bCryptoBenchmark;
 		bool 		m_bSocksSupport;
 		bool 		m_bVPNSupport;
 		bool		m_bSyslog;

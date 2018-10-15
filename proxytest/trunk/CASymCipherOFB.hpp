@@ -40,7 +40,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	* This class has a 2-in-1 feature: Two independent IVs are available. Therefore
 	* we have crypt1() and crypt2() depending on the used IV.
 	*/
-//#define AES_NI
 class CASymCipherOFB:public CASymChannelCipher
 
 	{

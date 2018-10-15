@@ -38,6 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAStatusManager.hpp"
 #include "CALibProxytest.hpp"
 #include "InnerMiddleMix.hpp"
+#include "CACryptoBenchmark.hpp"
 
 #include "SquidLogHelper/SquidLogHelper.hpp"
 
@@ -553,8 +554,7 @@ int main(int argc, const char* argv[])
 			UINT32 start;
 #endif
 
-
-
+	
 
 
 	if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
@@ -563,7 +563,17 @@ int main(int argc, const char* argv[])
  			exitCode=EXIT_FAILURE;
 			goto EXIT;
 		}
-		if(!(	CALibProxytest::getOptions()->isFirstMix()||
+
+	if (CALibProxytest::getOptions()->getCryptoBenchmark())
+	{
+		CACryptoBenchmark* pCryptoBenchmark = new CACryptoBenchmark();
+		pCryptoBenchmark->doBenchmark();
+		exit(0);
+	}
+
+
+
+	if(!(	CALibProxytest::getOptions()->isFirstMix()||
 					CALibProxytest::getOptions()->isMiddleMix()||
 					CALibProxytest::getOptions()->isLastMix()||
 					CALibProxytest::getOptions()->isLocalProxy()))

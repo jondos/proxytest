@@ -463,6 +463,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	int iCompressedLogs=0;
 	char* serverPort=NULL;
 	int iVersion=0;
+	int iCryptoBenchmark = 0;
 	char* configfile=NULL;
 	int iAutoReconnect=0;
 	char* strPidFile=NULL;
@@ -490,6 +491,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		{"pidfile",'r',POPT_ARG_STRING,&strPidFile,0,"file where the PID will be stored","<file>"},
 		{"createConf",0,POPT_ARG_STRING,&strCreateConf,0,"creates a generic configuration for MixOnCD","[<file>]"},
 		{"credential",0,POPT_ARG_STRING,&strCredential,0,"credential for connetion to cascade [only for local proxy]","<credential>"},
+		{"cryptobenchmark",0,POPT_ARG_NONE,&iCryptoBenchmark,0,"do a benchamrk of the cryptographic functions",NULL},
 #ifdef EXPORT_ASYM_PRIVATE_KEY
 		{"exportKey",0,POPT_ARG_STRING,&strExportKey,0,"export private encryption key to file","<file>"},
 		{"importKey",0,POPT_ARG_STRING,&strImportKey,0,"import private encryption key from file","<file>"},
@@ -530,10 +532,9 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 			exit(0);
 		}
 #endif
-	if(iLocalProxy!=0)
-		m_bLocalProxy=true;
-	if(m_bLocalProxy&&iAutoReconnect!=0)
-		m_bAutoReconnect=true;
+	m_bLocalProxy=(iLocalProxy != 0);
+	m_bCryptoBenchmark = (iCryptoBenchmark != 0);
+	m_bAutoReconnect = (m_bLocalProxy&&iAutoReconnect != 0);
 
 		/* LERNGRUPPE: Also try to use default config file for Mix Category 1 */
 	if(configfile == NULL)
@@ -705,7 +706,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 
 	m_iSOCKSServerPort=(UINT16)SOCKSport;
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
-	if(!m_bLocalProxy)
+	if(!m_bLocalProxy&&!m_bCryptoBenchmark)
 		{
 			ret=processXmlConfiguration(m_docMixXml);
 #ifndef DYNAMIC_MIX
