@@ -7,7 +7,7 @@ dos2unix -ascii -f -o configure
 
 if [ -z "$1" ] ; then
 
-svn commit -m "Auto generate through doAutoReconf.sh" --cl missing aclocal.m4 Makefile.in config.h.in popt/Makefile.in xml/Makefile.in trio/Makefile.in tre/Makefile.in TypeA/Makefile.in TypeB/Makefile.in gcm/Makefile.in test/Makefile.in wireshark/Makefile.in
+svn commit -m "Auto generate through doAutoReconf.sh" --cl missing aclocal.m4 Makefile.in config.h.in popt/Makefile.in xml/Makefile.in trio/Makefile.in tre/Makefile.in TypeA/Makefile.in TypeB/Makefile.in gcm/Makefile.in test/Makefile.in wireshark/Makefile.in SquidLogHelper/Makefile.in
 
 svn commit -m "Auto generate through doAutoReconf.sh"
 
