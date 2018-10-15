@@ -126,6 +126,7 @@
       <Filter>wepoll</Filter>
     </ClCompile>
     <ClCompile Include="CAClientSocket.cpp" />
+    <ClCompile Include="CACryptoBenchmark.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basetypedefs.h" />
@@ -301,6 +302,7 @@
       <Filter>wepoll</Filter>
     </ClInclude>
     <ClInclude Include="TermsAndConditions.hpp" />
+    <ClInclude Include="CACryptoBenchmark.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="documentation\XML\FirstMixToInfoService.xml" />

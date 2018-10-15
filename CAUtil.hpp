@@ -555,6 +555,10 @@ SINT32 parseS64(const UINT8 * str, SINT64& value);
 	*/
 SINT32 readPasswd(UINT8* buff,UINT32 len);
 
+/*** Formats the "bytes per second" input value as human readable string.***/
+
+void formatBytesPerSecond(UINT8* buff, UINT32 buffsize, UINT64 bytespersecond);
+
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX
 void logMemoryUsage();
 #endif //ONLY_LOCAL_PROXY

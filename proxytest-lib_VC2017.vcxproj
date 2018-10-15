@@ -1123,6 +1123,7 @@
     </ClCompile>
     <ClCompile Include="CAControlChannelDispatcher.cpp" />
     <ClCompile Include="CAControlChannelTest.cpp" />
+    <ClCompile Include="CACryptoBenchmark.cpp" />
     <ClCompile Include="CADatabase.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug-with-googleperftools|Win32'">Disabled</Optimization>
@@ -3729,6 +3730,7 @@
     </ClCompile>
     <ClCompile Include="wepoll\wepoll.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="xml\dom\mxml\mxmlDOMDocument.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -3889,6 +3891,7 @@
     <ClInclude Include="CAConditionVariable.hpp" />
     <ClInclude Include="CAControlChannelDispatcher.hpp" />
     <ClInclude Include="CAControlChannelTest.hpp" />
+    <ClInclude Include="CACryptoBenchmark.hpp" />
     <ClInclude Include="CADatabase.hpp" />
     <ClInclude Include="CADatagramSocket.hpp" />
     <ClInclude Include="CADataRetentionLog.hpp" />

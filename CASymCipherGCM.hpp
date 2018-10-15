@@ -35,7 +35,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 /** This class could be used for encryption/decryption of data (streams) with
 	* AES using 128bit GCM mode.
 	*/
-//#define AES_NI
 class CASymCipherGCM
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 	:public CALockAble
