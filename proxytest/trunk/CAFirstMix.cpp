@@ -1756,9 +1756,9 @@ SINT32 CAFirstMix::doUserLogin_internal(CAMuxSocket* pNewUser,UINT8 peerIP[4])
 		pNewUser->getCASocket()->setNonBlocking(true);
 #endif
 
-			ret=pNewUser->getCASocket()->setKeepAlive(true);
-			if(ret!=E_SUCCESS)
-				CAMsg::printMsg(LOG_DEBUG,"Error setting KeepAlive for user login connection!");
+		ret=pNewUser->getCASocket()->setKeepAlive(true);
+		if(ret!=E_SUCCESS)
+			CAMsg::printMsg(LOG_DEBUG,"Error setting KeepAlive for user login connection!");
 
 		#ifdef DEBUG
 			CAMsg::printMsg(LOG_DEBUG,"User login: start\n");
