@@ -1047,7 +1047,7 @@ SINT32 CALastMix::clean()
 			{
 				m_pMuxIn->close();
 			}
-		//writng some bytes to the queue...
+		//writing some bytes to the queue...
 		if(m_pQueueSendToMix!=NULL)
 			{
 				UINT8 b[sizeof(tQueueEntry)+1];
@@ -1066,6 +1066,7 @@ SINT32 CALastMix::clean()
 			{
 				CAMsg::printMsg(LOG_CRIT,"Wait for LoopReadFromMix!\n");
 				m_pthreadReadFromMix->join();
+				CAMsg::printMsg(LOG_CRIT, "Thread LoopReadFromMix joind successful!\n");
 				delete m_pthreadReadFromMix;
 				m_pthreadReadFromMix = NULL;
 			}
@@ -1117,6 +1118,7 @@ SINT32 CALastMix::clean()
 		delete m_pRSA;
 		m_pRSA = NULL;
 		#endif
+		CAMsg::printMsg(LOG_CRIT, "LastMix:clean() finished!\n");
 		return E_SUCCESS;
 	}
 
