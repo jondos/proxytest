@@ -515,12 +515,12 @@ SINT32 CASocket::sendFullyTimeOut(const UINT8* buff,UINT32 len, UINT32 msTimeOut
 
 			ret=send(buff,len);
 #ifdef DEBUG
-			CAMsg::printMsg(LOG_DEBUG, "CASocket::sendFullyTimeOut() - send returned %i!\n",ret);
+			CAMsg::printMsg(LOG_DEBUG, "CASocket::sendFullyTimeOut() - send returned %i (expected: %u)!\n",ret,len);
 #endif
 			if((UINT32)ret==len)
 			{
 				setSendTimeOut(aktTimeOut);
-				ret=E_SUCCESS;
+				retval=E_SUCCESS;
 				break;
 			}
 			else if(ret==E_AGAIN)
