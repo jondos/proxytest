@@ -95,6 +95,7 @@ SINT32 CALastMixA::loop()
 		set64((UINT64&)m_logUploadedBytes,(UINT32)0);
 		set64((UINT64&)m_logDownloadedBytes,(UINT32)0);
 		CAThread* pLogThread=new CAThread((UINT8*)"CALastMixA - LogLoop");
+		m_bRunLog = true;
 		pLogThread->setMainLoop(lm_loopLog);
 		pLogThread->start(this);
 
@@ -954,7 +955,7 @@ SINT32 CALastMixA::loop()
 
 
 //ERR:
-		CAMsg::printMsg(LOG_CRIT,"Seems that we are restarting now!!\n");
+		CAMsg::printMsg(LOG_CRIT,"CALastMixA - loop() - Seems that we are restarting now!!\n");
 		m_bRunLog=false;
 		clean();
 #ifdef LOG_CRIME
@@ -979,6 +980,7 @@ SINT32 CALastMixA::loop()
 		delete psocketgroupCacheRead;
 		psocketgroupCacheRead = NULL;
 #endif //! NEW_MIX_TYPE
+		CAMsg::printMsg(LOG_CRIT, "CALastMixA - loop() - finished!!\n");
 		return E_UNKNOWN;
 	}
 

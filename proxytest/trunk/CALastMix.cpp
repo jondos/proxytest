@@ -584,7 +584,6 @@ SINT32 CALastMix::reconfigure()
 THREAD_RETURN lm_loopLog(void* param)
 	{
 		CALastMix* pLastMix=static_cast<CALastMix*>(param);
-		pLastMix->m_bRunLog=true;
 		UINT32 countLog=0;
 		UINT8 buff[256];
 		while(pLastMix->m_bRunLog)
