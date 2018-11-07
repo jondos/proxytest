@@ -1381,7 +1381,9 @@ THREAD_RETURN fm_loopAcceptUsers(void* param)
 						#endif
 						#ifdef SYM_CHANNEL_CIPHER_CTR
 							pNewMuxSocket=new CAMuxSocket(CTR);
-						#else
+						#elif defined NO_ENCRYPTION
+							pNewMuxSocket = new CAMuxSocket(NULL_CIPHER);
+#else
 							pNewMuxSocket=new CAMuxSocket(OFB);
 						#endif
 						ret=socketsIn[i]->accept(*(pNewMuxSocket->getCASocket()));
