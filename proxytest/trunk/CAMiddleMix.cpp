@@ -1031,6 +1031,8 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 #define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
 #define MIDDLE_MIX_ASYM_PADDING_SIZE 42
 
+/*** Read and process Mix packets from previous mix/
+*/
 THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 	{
 		CAMiddleMix* pMix=(CAMiddleMix*)param;

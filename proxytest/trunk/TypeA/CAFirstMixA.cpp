@@ -1599,7 +1599,7 @@ THREAD_RETURN fm_loopPacketProcessing(void *params)
 												}
 												else		                                     // finally! a normal mix packet
 												{
-													CASymCipher* pCipher=NULL;
+													CASymChannelCipher* pCipher=NULL;
 													fmChannelListEntry* pEntry;
 													pEntry=pChannelList->get(pMuxSocket,pMixPacket->channel);
 													if (pEntry != NULL&&pMixPacket->flags == CHANNEL_DATA)
@@ -1645,7 +1645,7 @@ THREAD_RETURN fm_loopPacketProcessing(void *params)
 																continue;
 															}
 														#endif
-														pCipher= new CASymCipher();
+														pCipher= CASymChannelCipherFactory::createCipher(CALibProxytest::getOptions()->getSymChannelCipherAlgorithm());
 														pCipher->setKeys(rsaBuff,FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 														for(int i=0;i<16;i++)
 															rsaBuff[i]=0xFF;

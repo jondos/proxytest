@@ -1184,8 +1184,8 @@ THREAD_RETURN lm_loopPacketProcessing(void *params)
 														continue;
 													}
 											#endif
-											CASymCipher* newCipher = new CASymCipher();
 											#ifdef WITH_INTEGRITY_CHECK
+												CASymCipherGCM* newCipher = new  CASymCipherGCM();
 												newCipher->setGCMKeys(rsaBuff, rsaBuff + KEY_SIZE);
 
 												//Decrypt only the first two bytes to get the payload length
@@ -1203,6 +1203,7 @@ THREAD_RETURN lm_loopPacketProcessing(void *params)
 														retval = newCipher->decryptMessage(pMixPacket->data +RSA_SIZE-rsaOutLen+LAST_MIX_SIZE_OF_SYMMETRIC_KEYS,  payloadLen+ GCM_MAC_SIZE + PAYLOAD_HEADER_SIZE , pMixPacket->data, true);
 													}
 											#else
+												CASymChannelCipher* newCipher = CASymChannelCipherFactory::createCipher(CALibProxytest::getOptions()->getSymChannelCipherAlgorithm());
 												newCipher->setKeys(rsaBuff,LAST_MIX_SIZE_OF_SYMMETRIC_KEYS);
 												newCipher->crypt1(
 														pMixPacket->data+RSA_SIZE,
