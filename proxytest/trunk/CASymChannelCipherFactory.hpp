@@ -59,6 +59,26 @@ class CASymChannelCipherFactory
 							}	
 						return NULL;
 					}
+
+			static SYMCHANNELCIPHER_ALGORITHM getAlgIDFromString(UINT8* strAlgID)
+			{
+				if (strAlgID == NULL)
+					return UNDEFINED_CIPHER;
+				if (strcmp((const char*)SYMCHANNELCIPHER_ALG_NAME_OFB, (const char*)strAlgID) == 0)
+				{
+					return OFB;
+				}
+				if (strcmp((const char*)SYMCHANNELCIPHER_ALG_NAME_CTR, (const char*)strAlgID) == 0)
+				{
+					return CTR;
+				}
+				if (strcmp((const char*)SYMCHANNELCIPHER_ALG_NAME_NULL, (const char*)strAlgID) == 0)
+				{
+					return CTR;
+				}
+				return UNDEFINED_CIPHER;
+
+			}
 	};
 
 

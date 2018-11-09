@@ -68,6 +68,7 @@ class CALocalProxy
 			UINT32 m_chainlen;
 			UINT32 m_MixCascadeProtocolVersion;
 			CAASymCipher* m_arRSA;
+			SYMCHANNELCIPHER_ALGORITHM* m_arSymCipherAlgorithms;
 			CASymChannelCipher* m_pSymCipher;
 			UINT32 m_nFlowControlDownstreamSendMe;
 			bool m_bWithNewFlowControl;

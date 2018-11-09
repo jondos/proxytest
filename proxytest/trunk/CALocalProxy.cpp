@@ -39,6 +39,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "xml/DOM_Output.hpp"
 #include "CASymChannelCipher.hpp"
 #include "CASymCipherOFB.hpp"
+#include "CASymChannelCipherFactory.hpp"
 #ifndef NEW_MIX_TYPE
 
 // signals the main loop whether to capture or replay packets
@@ -292,7 +293,7 @@ SINT32 CALocalProxy::loop()
 							{
 								newCipher=new CASymChannelCipher*[m_chainlen];
 								for (UINT32 i = 0; i < m_chainlen; i++)
-									newCipher[i] = new CASymCipherOFB();
+									newCipher[i] = CASymChannelCipherFactory::createCipher(m_arSymCipherAlgorithms[i]);//new CASymCipherOFB();
 #ifdef _DEBUG
 								CAMsg::printMsg(LOG_DEBUG, "Create new ciphers for new channel - pointer is: %p\n", newCipher);
 #endif
@@ -319,7 +320,7 @@ SINT32 CALocalProxy::loop()
 							{
 								newCipher=new CASymChannelCipher*[m_chainlen];
 								for (UINT32 i = 0; i < m_chainlen; i++)
-									newCipher[i] = new CASymCipherOFB();
+									newCipher[i] = CASymChannelCipherFactory::createCipher(m_arSymCipherAlgorithms[i]);// new CASymCipherOFB();
 								pSocketList->add(newSocket,newCipher);
 								pSocketGroup->add(*newSocket);
 							}
@@ -683,8 +684,9 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				return E_UNKNOWN;
 #endif
 			}
-		UINT32 i=0;
+		UINT32 iMixIndex =0;
 		m_arRSA=new CAASymCipher[m_chainlen];
+		m_arSymCipherAlgorithms = new SYMCHANNELCIPHER_ALGORITHM[m_chainlen];
 		DOMNode* child=elemMixes->getLastChild();
 		bool bIsLast=true;
 		while(child!= NULL&&chainlen>0)
@@ -692,19 +694,27 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				if(equals(child->getNodeName(),"Mix"))
 					{
 						DOMNode* nodeKey=child->getFirstChild();
-						if(m_arRSA[i++].setPublicKeyAsDOMNode(nodeKey)!=E_SUCCESS)
+						if(m_arRSA[iMixIndex].setPublicKeyAsDOMNode(nodeKey)!=E_SUCCESS)
 							{
 #ifdef _DEBUG
 								CAMsg::printMsg(LOG_ERR,"Error in parsing the public key of a Mix\n");
 								return E_UNKNOWN;
 #endif
 							}
+						DOMNode* tmpNode = NULL;
+						UINT8 tmpBuff[255];
+						UINT32 tmpBuffLen = 255;
+						getDOMChildByName(child, "SymChannelCipher", tmpNode);
+						getDOMElementValue(tmpNode, tmpBuff, &tmpBuffLen);
+						m_arSymCipherAlgorithms[iMixIndex] = CASymChannelCipherFactory::getAlgIDFromString(tmpBuff);	
+						if (m_arSymCipherAlgorithms[iMixIndex] == UNDEFINED_CIPHER)
+						{
+							m_arSymCipherAlgorithms[iMixIndex] = OFB;
+						}
 						if(bIsLast)
 						{
-							DOMNode* tmpNode=NULL;
 							getDOMChildByName(child,"MixProtocolVersion",tmpNode);
-							UINT8 tmpBuff[255];
-							UINT32 tmpBuffLen=255;
+							tmpBuffLen=255;
 							if(getDOMElementValue(tmpNode,tmpBuff,&tmpBuffLen)==E_SUCCESS)
 							{
 								CAMsg::printMsg(LOG_DEBUG,"Last Mix Protcol Version %s\n",tmpBuff);
@@ -724,6 +734,8 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 							}
 							bIsLast=false;
 						}
+
+						iMixIndex++;
 						chainlen--;
 					}
 				child=child->getPreviousSibling();
@@ -735,6 +747,10 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				return E_UNKNOWN;
 #endif
 			}
+
+		m_pmuxOut->setCipher(m_arSymCipherAlgorithms[0]);//)
+
+
 		//Now sending SymKeys....
 		if(m_MixCascadeProtocolVersion==MIX_CASCADE_PROTOCOL_VERSION_0_2)
 			{
@@ -774,7 +790,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 				//DOM_Element elemMixEnc = doc.createElement("MixEncryption");
 				UINT8 mixKeys[32];
 				getRandom(mixKeys,32);
-				m_pSymCipher=new CASymCipherOFB();
+				m_pSymCipher= CASymChannelCipherFactory::createCipher(m_arSymCipherAlgorithms[0]);//new CASymCipherOFB();
 				m_pSymCipher->setKey(mixKeys);
 				m_pSymCipher->setIVs(mixKeys+16);
 				UINT8 outBuffMixKey[512];
