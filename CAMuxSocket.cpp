@@ -58,13 +58,9 @@ CAMuxSocket::CAMuxSocket(SYMCHANNELCIPHER_ALGORITHM algCipher)
 		m_pHashKeyEntry=ms_phashkeylistAvailableHashKeys;
 		ms_phashkeylistAvailableHashKeys=m_pHashKeyEntry->next;
 		ms_pcsHashKeyList->unlock();
-#ifndef MUXSOCKET_CIPHER_NO_ENCRYPTION
-		m_pCipherIn = CASymChannelCipherFactory::createCipher(algCipher);
-		m_pCipherOut = CASymChannelCipherFactory::createCipher(algCipher);
-#else
-		m_pCipherIn = CASymChannelCipherFactory::createCipher(NULL_CIPHER);
-		m_pCipherOut = CASymChannelCipherFactory::createCipher(NULL_CIPHER);
-#endif
+		m_pCipherIn = NULL;
+		m_pCipherOut = NULL;
+		setCipher(algCipher);
 	}
 	
 CAMuxSocket::~CAMuxSocket()
@@ -79,6 +75,28 @@ CAMuxSocket::~CAMuxSocket()
 		delete m_pCipherIn;
 		delete m_pCipherOut;
 	}	
+
+SINT32 CAMuxSocket::setCipher(SYMCHANNELCIPHER_ALGORITHM algCipher)
+{
+	if (algCipher == UNDEFINED_CIPHER)
+		return E_UNKNOWN;
+	if (m_pCipherIn != NULL)
+	{
+		delete m_pCipherIn;
+	}
+	if (m_pCipherOut != NULL)
+	{
+		delete m_pCipherOut;
+	}
+#ifndef MUXSOCKET_CIPHER_NO_ENCRYPTION
+	m_pCipherIn = CASymChannelCipherFactory::createCipher(algCipher);
+	m_pCipherOut = CASymChannelCipherFactory::createCipher(algCipher);
+#else
+	m_pCipherIn = CASymChannelCipherFactory::createCipher(NULL_CIPHER);
+	m_pCipherOut = CASymChannelCipherFactory::createCipher(NULL_CIPHER);
+#endif
+	return E_SUCCESS;
+}
 
 SINT32 CAMuxSocket::setCrypt(bool b)
 	{

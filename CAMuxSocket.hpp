@@ -90,6 +90,11 @@ class CAMuxSocket
 					return m_bIsCrypted;
 				}
 
+
+			/***Sets the cipher algorithm used. Note: the current values for keys and IVs will not be carried over to the new cipher algorithm!
+			**/
+			SINT32 setCipher(SYMCHANNELCIPHER_ALGORITHM algCipher);
+
 			/** Sets the symmetric keys used for de-/encrypting the Mux connection
 				*
 				* @param key buffer conntaining the key bits
