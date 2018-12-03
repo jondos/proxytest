@@ -5,14 +5,14 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice,
-	  this list of conditions and the following disclaimer in the documentation and/or
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-	  may be used to endorse or promote products derived from this software without specific
+		may be used to endorse or promote products derived from this software without specific
 		prior written permission.
 
 
@@ -35,21 +35,20 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CASignature.hpp"
 #include "CASocket.hpp"
 #include "CAMultiSignature.hpp"
+#include "CAIPAddrWithNetmask.hpp"
 #include "CACertificate.hpp"
 #include "CAThread.hpp"
 #include "CAMix.hpp"
 #include "CAListenerInterface.hpp"
+#include "CATargetInterface.hpp"
 #include "CAXMLBI.hpp"
 #include "CAXMLPriceCert.hpp"
 //#ifdef LOG_CRIME
-	#include "tre/regex.h"
+	#include "tre/tre.h"
 //#endif
 
 #define REGEXP_BUFF_SIZE 4096
 
-#define TARGET_MIX			1
-#define TARGET_HTTP_PROXY	2
-#define TARGET_SOCKS_PROXY	3
 
 // LERNGRUPPE moved this define from CACmdLnOptions.cpp
 #define DEFAULT_TARGET_PORT 6544
@@ -73,7 +72,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define OPTIONS_NODE_USER_ID "UserID"
 #define OPTIONS_NODE_FD_NR "NrOfFileDescriptors"
 #define OPTIONS_NODE_DAEMON "Daemon"
+#define OPTIONS_NODE_CREDENTIAL "AccessControlCredential"
 #define OPTIONS_NODE_MAX_USERS "MaxUsers"
+#define OPTIONS_NODE_PAYMENT_REMINDER "PaymentReminderProbability"
 #define OPTIONS_NODE_LOGGING "Logging"
 #define OPTIONS_NODE_LOGGING_CONSOLE "Console"
 #define OPTIONS_NODE_LOGGING_FILE "File"
@@ -181,6 +182,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define OPTIONS_NODE_CRIME_REGEXP_URL "RegExpURL"
 #define OPTIONS_NODE_CRIME_REGEXP_PAYLOAD "RegExpPayload"
 #define OPTIONS_NODE_CRIME_SURVEILLANCE_IP "SurveillanceIP"
+#define OPTIONS_NODE_CRIME_SURVEILLANCE_IP_NETMASK "netmask"
 #define OPTIONS_NODE_CRIME_SURVEILLANCE_ACCOUNT "PayAccountNumber"
 #define OPTIONS_ATTRIBUTE_LOG_PAYLOAD "logPayload"
 
@@ -188,6 +190,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define MIXINFO_NODE_MIX_NAME "Name"
 #define MIXINFO_NODE_SOFTWARE "Software"
 #define MIXINFO_NODE_VERSION "Version"
+
+#define MIXINFO_NODE_PAYMENTREMINDER "PaymentReminderProbability"
 
 #define MIXINFO_ATTRIBUTE_MIX_ID "id"
 
@@ -224,15 +228,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define ASSERT_CRIME_DETECTION_OPTIONS_PARENT(Parentname, Childname) \
 	ASSERT_PARENT_NODE_NAME(Parentname, OPTIONS_NODE_CRIME_DETECTION, Childname)
-
-struct t_TargetInterface
-{
-	UINT32 target_type;
-	NetworkType net_type;
-	CASocketAddr* addr;
-};
-
-typedef struct t_TargetInterface TargetInterface;
 
 THREAD_RETURN threadReConfigure(void *param);
 
@@ -290,20 +285,30 @@ class CACmdLnOptions
 		 * @retval E_SUCCESS if successful
 		 * @retval E_UNKNOWN if \c nr is out of range
 		*/
-		SINT32 getTargetInterface(TargetInterface& oTargetInterface, UINT32 nr)
+		SINT32 getTargetInterface(CATargetInterface& oTargetInterface, UINT32 nr)
 		{
 			if(nr>0&&nr<=m_cnTargets)
 			{
-				oTargetInterface.net_type=m_arTargetInterfaces[nr-1].net_type;
-				oTargetInterface.target_type=m_arTargetInterfaces[nr-1].target_type;
-				oTargetInterface.addr=m_arTargetInterfaces[nr-1].addr->clone();
-				return E_SUCCESS;
+				return m_arTargetInterfaces[nr-1].cloneInto(oTargetInterface);
 			}
 			else
 				return E_UNKNOWN;
 		};
 
 #ifndef ONLY_LOCAL_PROXY
+
+		UINT16 getSOCKSPort();
+		SINT32 getSOCKSHost(UINT8* host,UINT32 len);
+		
+#endif //ONLY_LOCAL_PROXY
+
+		SINT32 getMaxOpenFiles()
+		{
+			return m_nrOfOpenFiles;
+		}
+
+
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 		//for last Mixes: number of outside visible addresses
 		UINT32 getVisibleAddressesCount(){return m_cnVisibleAddresses;}
 
@@ -317,20 +322,92 @@ class CACmdLnOptions
 		 */
 		SINT32 getVisibleAddress(UINT8* strAddressBuff, UINT32 len,UINT32 nr);
 
-		UINT16 getSOCKSPort();
-		SINT32 getSOCKSHost(UINT8* host,UINT32 len);
-		CAListenerInterface** getInfoServices(UINT32& r_size);
-#endif //ONLY_LOCAL_PROXY
-
-		SINT32 getMaxOpenFiles()
-		{
-			return m_nrOfOpenFiles;
-		}
-
-
-#ifndef ONLY_LOCAL_PROXY
 		//TODO maybe clone MultiSignature object!
 		CAMultiSignature* getMultiSigner(){ return m_pMultiSignature; }
+		bool verifyMixCertificates() {return m_bVerifyMixCerts;}
+		CACertStore* getTrustedCertificateStore()
+			{
+					return m_pTrustedRootCertificates;
+			}
+		CACertificate* getNextMixTestCertificate()
+			{
+				if(m_pNextMixCertificate!=NULL)
+					return m_pNextMixCertificate->clone();
+				return NULL;
+			}
+				
+		SINT32 setNextMixTestCertificate(CACertificate* cert)
+			{
+					if(cert != NULL)
+					{
+							m_pNextMixCertificate = cert->clone();
+							return E_SUCCESS;
+					}
+					return E_UNKNOWN;
+			}
+		CACertificate* getPrevMixTestCertificate()
+			{
+				if(m_pPrevMixCertificate!=NULL)
+					return m_pPrevMixCertificate->clone();
+				return NULL;
+			}
+
+		SINT32 setPrevMixTestCertificate(CACertificate* cert)
+			{
+				if(cert != NULL)
+					{
+						m_pPrevMixCertificate = cert->clone();
+						return E_SUCCESS;
+					}
+				return E_UNKNOWN;
+			}
+
+		bool hasPrevMixTestCertificate()
+		{
+			return m_pPrevMixCertificate!=NULL;
+		}
+
+		bool hasNextMixTestCertificate()
+		{
+			return m_pNextMixCertificate!=NULL;
+		}
+
+		UINT32 getKeepAliveSendInterval()
+			{
+				return m_u32KeepAliveSendInterval;
+			}
+
+		UINT32 getKeepAliveRecvInterval()
+			{
+				return m_u32KeepAliveRecvInterval;
+			}
+
+		SINT32 getMixXml(XERCES_CPP_NAMESPACE::DOMDocument* & docMixInfo);
+
+		bool acceptReconfiguration() { return m_bAcceptReconfiguration; }
+		bool isInfoServiceEnabled()
+		{
+			return (m_addrInfoServicesSize>0);
+		}
+		UINT32 getMaxNrOfUsers()
+		{
+			return m_maxNrOfUsers;
+		}
+
+		SINT32 getCascadeName(UINT8* name,UINT32 len) const;
+		CAListenerInterface** getInfoServices(UINT32& r_size);
+
+		// added by ronin <ronin2@web.de>
+		SINT32 setCascadeName(const UINT8* name)
+		{
+			delete[] m_strCascadeName;
+			m_strCascadeName = new UINT8[strlen((const char*)name)+1];
+			strcpy((char*)m_strCascadeName,(const char*)name);
+			return E_SUCCESS;
+		}
+#endif
+#ifndef ONLY_LOCAL_PROXY
+
 		/*CASignature* getSignKey()
 		{
 			if(m_pSignKey!=NULL)
@@ -374,53 +451,7 @@ class CACmdLnOptions
 #ifdef COUNTRY_STATS
 		SINT32 getCountryStatsDBConnectionLoginData(char** db_host,char**db_user,char**db_passwd);
 #endif
-		bool hasPrevMixTestCertificate()
-		{
-			return m_pPrevMixCertificate!=NULL;
-		}
 
-		CACertificate* getPrevMixTestCertificate()
-		{
-			if(m_pPrevMixCertificate!=NULL)
-				return m_pPrevMixCertificate->clone();
-			return NULL;
-		}
-
-		SINT32 setPrevMixTestCertificate(CACertificate* cert)
-		{
-			if(cert != NULL)
-			{
-				m_pPrevMixCertificate = cert->clone();
-				return E_SUCCESS;
-			}
-            return E_UNKNOWN;
-        }
-
-		bool hasNextMixTestCertificate()
-		{
-			return m_pNextMixCertificate!=NULL;
-		}
-
-		CACertificate* getNextMixTestCertificate()
-		{
-			if(m_pNextMixCertificate!=NULL)
-				return m_pNextMixCertificate->clone();
-			return NULL;
-		}
-        
-        SINT32 setNextMixTestCertificate(CACertificate* cert)
-        {
-            if(cert != NULL)
-            {
-                m_pNextMixCertificate = cert->clone();
-                return E_SUCCESS;
-            }
-            return E_UNKNOWN;
-        }
-        CACertStore* getTrustedCertificateStore()
-        {
-            return m_pTrustedRootCertificates;
-        }
 
 		/** Returns if the encrpyted Log could/should be used**/
 		bool isEncryptedLogEnabled()
@@ -452,16 +483,9 @@ class CACmdLnOptions
 			return m_pCascadeXML;
 		}
 
-		SINT32 getCascadeName(UINT8* name,UINT32 len) const;
 
-		// added by ronin <ronin2@web.de>
-		SINT32 setCascadeName(const UINT8* name)
-		{
-			delete[] m_strCascadeName;
-			m_strCascadeName = new UINT8[strlen((const char*)name)+1];
-			strcpy((char*)m_strCascadeName,(const char*)name);
-			return E_SUCCESS;
-		}
+
+
 
 		SINT32 reread(CAMix* pMix);
 
@@ -470,25 +494,20 @@ class CACmdLnOptions
 
 		/** Get the XML describing the Mix. this is not a string!*/
 		//SINT32 getMixXml(UINT8* strxml,UINT32* len);
-		SINT32 getMixXml(XERCES_CPP_NAMESPACE::DOMDocument* & docMixInfo);
 
 		UINT32 getNumberOfTermsAndConditionsTemplates();
 		XERCES_CPP_NAMESPACE::DOMDocument **getAllTermsAndConditionsTemplates();
 		XERCES_CPP_NAMESPACE::DOMElement *getTermsAndConditions();
 
-		UINT32 getKeepAliveSendInterval()
-		{
-			return m_u32KeepAliveSendInterval;
-		}
 
-		UINT32 getKeepAliveRecvInterval()
-		{
-			return m_u32KeepAliveRecvInterval;
-		}
-		bool isInfoServiceEnabled()
-		{
-			return (m_addrInfoServicesSize>0);
-		}
+
+		SINT32 getAccessControlCredential(UINT8* outbuff, UINT32* outbuffsize);
+
+		bool isAccessControlEnabled()
+			{
+			return m_strAccessControlCredential != NULL;
+			}
+
 #endif //ONLY_LOCAL_PROXY
 		bool getCompressLogs()
 		{
@@ -496,6 +515,8 @@ class CACmdLnOptions
 		}
 		SINT32 getLogDir(UINT8* name,UINT32 len);
 		SINT32 setLogDir(const UINT8* name,UINT32 len);
+		SINT32 getCredential(UINT8* name,UINT32 len);
+
 		SINT64 getMaxLogFileSize()
 		{
 			return m_maxLogFileSize;
@@ -532,13 +553,13 @@ class CACmdLnOptions
 		}
 
 #ifdef LOG_CRIME
-		regex_t* getCrimeRegExpsURL(UINT32* len)
+		tre_regex_t* getCrimeRegExpsURL(UINT32* len)
 		{
 			*len=m_nCrimeRegExpsURL;
 			return m_arCrimeRegExpsURL;
 		}
 
-		regex_t* getCrimeRegExpsPayload(UINT32* len)
+		tre_regex_t* getCrimeRegExpsPayload(UINT32* len)
 		{
 			*len=m_nCrimeRegExpsPayload;
 			return m_arCrimeRegExpsPayload;
@@ -555,7 +576,7 @@ class CACmdLnOptions
 		}
 		
 		
-		CASocketAddrINet* getCrimeSurveillanceIPs()
+		CAIPAddrWithNetmask* getCrimeSurveillanceIPs()
 		{
 			return m_surveillanceIPs;
 		}
@@ -619,22 +640,52 @@ class CACmdLnOptions
 		}
 #endif
 
+#ifdef EXPORT_ASYM_PRIVATE_KEY
+		SINT32 getEncryptionKeyImportFile(const UINT8* strFile,UINT32 len)
+			{
+				if(m_strImportKeyFile==NULL)
+					return E_UNKNOWN;
+				if(len<=(UINT32)strlen((char*)m_strImportKeyFile))
+					{
+						return E_SPACE;
+					}
+				strcpy((char*)strFile,(char*)m_strImportKeyFile);
+				return E_SUCCESS;
+			}
+		SINT32 getEncryptionKeyExportFile(const UINT8* strFile,UINT32 len)
+			{
+				if(m_strExportKeyFile==NULL)
+					return E_UNKNOWN;
+				if(len<=(UINT32)strlen((char*)m_strExportKeyFile))
+					{
+						return E_SPACE;
+					}
+				strcpy((char*)strFile,(char*)m_strExportKeyFile);
+				return E_SUCCESS;
+			}
+		bool isImportKey()
+			{
+				return m_strImportKeyFile!=NULL;
+			}
+		bool isExportKey()
+			{
+				return m_strExportKeyFile!=NULL;
+			}
+#endif
+
+
 #ifndef ONLY_LOCAL_PROXY
 		// added by ronin <ronin2@web.de>
 		// needed for autoconfiguration
 		SINT32 setNextMix(XERCES_CPP_NAMESPACE::DOMDocument* pDoc);
 		SINT32 setPrevMix(XERCES_CPP_NAMESPACE::DOMDocument* pDoc);
-		bool acceptReconfiguration() { return m_bAcceptReconfiguration; }
 
 		friend THREAD_RETURN threadReConfigure(void *param);
 
 		/** Writes a default configuration file into the file named by filename*/
 		static SINT32 createMixOnCDConfiguration(const UINT8* strFileName);
 		static SINT32 saveToFile(XERCES_CPP_NAMESPACE::DOMDocument* a_doc, const UINT8* a_strFileName);
-		UINT32 getMaxNrOfUsers()
-		{
-			return m_maxNrOfUsers;
-		}
+
 
 #ifdef DYNAMIC_MIX
 		/* LERNGRUPPE (refactoring + new) */
@@ -677,7 +728,6 @@ class CACmdLnOptions
 #endif // DYNAMIC_MIX
 		XERCES_CPP_NAMESPACE::DOMDocument **m_termsAndConditionsTemplates;
 		UINT32 m_nrOfTermsAndConditionsTemplates;
-        bool verifyMixCertificates() {return m_bVerifyMixCerts;}
 	private:
 #ifdef DYNAMIC_MIX
 		UINT8* m_strLastCascadeProposal;
@@ -687,8 +737,6 @@ class CACmdLnOptions
 		SINT32 checkListenerInterfaces();
 		SINT32 checkCertificates();
 #endif //DYNAMIC_MIX
-		bool m_bDynamic;
-		SINT32 parseInfoServices(DOMElement* a_infoServiceNode);
 		/* END LERNGRUPPE */
 		static SINT32 buildDefaultConfig(XERCES_CPP_NAMESPACE::DOMDocument* a_doc,bool bForLastMix);
 #endif //only_LOCAL_PROXY
@@ -699,60 +747,70 @@ class CACmdLnOptions
 		char*		m_strTargetHost; //only for the local proxy...
 		char*		m_strSOCKSHost;
 		UINT16	m_iSOCKSPort;
+		char*		m_strCredential; //credential for connection to cascade
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+		CAMultiSignature* 	m_pMultiSignature;
+		/* for mix certificate verification */
+		bool				m_bVerifyMixCerts;
+		CACertStore*		m_pTrustedRootCertificates;
+		CACertificate*	m_pNextMixCertificate;
+		CACertificate*	m_pPrevMixCertificate;
+		UINT32 m_u32KeepAliveSendInterval;
+		UINT32 m_u32KeepAliveRecvInterval;
+		bool m_bAcceptReconfiguration;
+		UINT32 m_addrInfoServicesSize;
+		UINT32	m_maxNrOfUsers;
+		XERCES_CPP_NAMESPACE::DOMDocument* m_docMixInfo;
+		CAListenerInterface**	m_addrInfoServices;
+		DOMNodeList*		m_opCertList;
+		CACertificate* 		m_OpCert;
+		CACertificate*	m_pLogEncryptionCertificate;
+		bool m_bDynamic;
+	
+#endif
 #ifndef ONLY_LOCAL_PROXY
 		bool		m_bIsRunReConfigure; //true, if an async reconfigure is under way
 		CAMutex* m_pcsReConfigure; //Ensures that reconfigure is running only once at the same time;
 		CAThread m_threadReConfigure; //Thread, that does the actual reconfigure work
-		CAListenerInterface**	m_addrInfoServices;
-		UINT32 m_addrInfoServicesSize;
+		
 
 		//CASignature*		m_pSignKey;
 		//CACertificate*		m_pOwnCertificate;
-		CAMultiSignature* 	m_pMultiSignature;
 		//CACertificate** 	m_ownCerts;
 		//UINT32 				m_ownCertsLength;
 #ifdef PAYMENT
 		CAXMLPriceCert*		m_pPriceCertificate;
 #endif
 
-		CACertificate* 		m_OpCert;
 		//CACertificate** 	m_opCerts;
 		//UINT32 				m_opCertsLength;
-		DOMNodeList*		m_opCertList;
 
-		/* for mix certificate verification */
-		bool				m_bVerifyMixCerts;
-		CACertStore*		m_pTrustedRootCertificates;
 
-		CACertificate*	m_pPrevMixCertificate;
-		CACertificate*	m_pNextMixCertificate;
-		CACertificate*	m_pLogEncryptionCertificate;
 
-		UINT32 m_maxNrOfUsers;
+		
+		SINT32	m_PaymentReminderProbability;
 
 		// added by ronin <ronin2@web.de>
 		DOMElement* m_pCascadeXML;
-		bool m_bAcceptReconfiguration;
-		XERCES_CPP_NAMESPACE::DOMDocument* m_docMixInfo;
-		XERCES_CPP_NAMESPACE::DOMDocument* m_docMixXml;
 		XERCES_CPP_NAMESPACE::DOMDocument* m_docOpTnCs;
 
-		UINT32 m_u32KeepAliveSendInterval;
-		UINT32 m_u32KeepAliveRecvInterval;
 
 		bool m_perfTestEnabled;
+
+		UINT8* m_strAccessControlCredential;
 #endif //ONLY_LOCAL_PROXY
 
 		bool		m_bLocalProxy,m_bFirstMix,m_bMiddleMix,m_bLastMix;
 		bool		m_bAutoReconnect; //auto reconnect if connection to first mix lost ??
 		UINT8*	m_strCascadeName;
 		char*		m_strLogDir;
-		char* 		m_strLogLevel;
+		char* 	m_strLogLevel;
 		SINT64	m_maxLogFileSize;
 		UINT32	m_maxLogFiles; //how many log files can be created before starting again with the first one
 		char*		m_strEncryptedLogDir;
 		bool		m_bCompressedLogs;
 		bool 		m_bSocksSupport;
+		bool 		m_bVPNSupport;
 		bool		m_bSyslog;
 		bool		m_bLogConsole;
 		char*		m_strUser;
@@ -765,7 +823,7 @@ class CACmdLnOptions
 
 		bool m_bIsEncryptedLogEnabled;
 
-		TargetInterface*			m_arTargetInterfaces;
+		CATargetInterface*		m_arTargetInterfaces;
 		UINT32								m_cnTargets;
 		CAListenerInterface**	m_arListenerInterfaces;
 		UINT32								m_cnListenerInterfaces;
@@ -775,20 +833,35 @@ class CACmdLnOptions
 
 #ifdef LOG_CRIME
 		bool m_logPayload;
-		regex_t* m_arCrimeRegExpsURL;
+		tre_regex_t* m_arCrimeRegExpsURL;
 		UINT32 m_nCrimeRegExpsURL;
-		regex_t* m_arCrimeRegExpsPayload;
+		tre_regex_t* m_arCrimeRegExpsPayload;
 		UINT32 m_nCrimeRegExpsPayload;
 		UINT32 m_nrOfSurveillanceIPs;
-		CASocketAddrINet* m_surveillanceIPs;
+		CAIPAddrWithNetmask* m_surveillanceIPs;
 		UINT64* m_surveillanceAccounts;
 		UINT32 m_nrOfSurveillanceAccounts;
+		/* Crime Logging Options */
+		#define CRIME_DETECTION_OPTIONS_NR 4
+		optionSetter_pt *crimeDetectionOptionSetters;
+		SINT32 setCrimeURLRegExp(DOMElement *elemCrimeDetection);
+		SINT32 setCrimePayloadRegExp(DOMElement *elemCrimeDetection);
+		SINT32 setCrimeSurveillanceIP(DOMElement *elemCrimeDetection);
+		SINT32 setCrimeSurveillanceAccounts(DOMElement *elemCrimeDetection);
+		void initCrimeDetectionOptionSetters();
+		SINT32 setCrimeDetectionOptions(DOMElement *elemRoot);
 #endif
 
 #ifdef DATA_RETENTION_LOG
 		UINT8*				m_strDataRetentionLogDir;
 		CAASymCipher* m_pDataRetentionPublicEncryptionKey;
 #endif
+
+#ifdef EXPORT_ASYM_PRIVATE_KEY
+		UINT8* m_strImportKeyFile;
+		UINT8* m_strExportKeyFile;
+#endif
+
 
 #if defined (DELAY_CHANNELS) ||defined(DELAY_USERS)
 		UINT32 m_u32DelayChannelUnlimitTraffic;
@@ -815,16 +888,13 @@ class CACmdLnOptions
 		UINT32 m_iPaymentSoftLimit;
 		UINT32 m_iPrepaidInterval;
 		UINT32 m_iPaymentSettleInterval;
-
-
+		optionSetter_pt *accountingOptionSetters;
 #endif
 		optionSetter_pt *mainOptionSetters;
 		optionSetter_pt *generalOptionSetters;
 		optionSetter_pt *certificateOptionSetters;
-		optionSetter_pt *accountingOptionSetters;
 		optionSetter_pt *networkOptionSetters;
-		optionSetter_pt *termsAndConditionsOptionSetters;
-		optionSetter_pt *crimeDetectionOptionSetters;
+		optionSetter_pt * m_arpTermsAndConditionsOptionSetters;
 
 #ifdef SERVER_MONITORING
 	private:
@@ -835,11 +905,6 @@ class CACmdLnOptions
 	private:
 		SINT32 setNewValues(CACmdLnOptions& newOptions);
 #ifndef ONLY_LOCAL_PROXY
-		SINT32 readXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* & docConfig,const UINT8* const configFileName);
-		SINT32 readXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* & docConfig,const UINT8* const buf, UINT32 len);
-		SINT32 processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* docConfig);
-		SINT32 clearVisibleAddresses();
-		SINT32 addVisibleAddresses(DOMNode* nodeProxy);
 #ifdef COUNTRY_STATS
 		char* m_dbCountryStatsHost;
 		char* m_dbCountryStatsUser;
@@ -850,6 +915,16 @@ class CACmdLnOptions
 		SINT32 clearListenerInterfaces();
 
 
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+		SINT32 parseInfoServices(DOMElement* a_infoServiceNode);
+
+		SINT32 clearVisibleAddresses();
+		SINT32 addVisibleAddresses(DOMNode* nodeProxy);
+		XERCES_CPP_NAMESPACE::DOMDocument* m_docMixXml;
+	
+		SINT32 readXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* & docConfig,const UINT8* const configFileName);
+		SINT32 readXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* & docConfig,const UINT8* const buf, UINT32 len);
+		SINT32 processXmlConfiguration(XERCES_CPP_NAMESPACE::DOMDocument* docConfig);
 
 		/* NR of all Option types, i.e. General, Certificates, Networking, etc. (excluding *mainOptionSetters)
 		 * these options are all direct children of <MixConfiguration>*/
@@ -857,14 +932,16 @@ class CACmdLnOptions
 		SINT32 setGeneralOptions(DOMElement* elemRoot);
 		SINT32 setMixDescription(DOMElement* elemRoot); /* mix decription for the mix info */
 		SINT32 setCertificateOptions(DOMElement* elemRoot);
-		SINT32 setAccountingOptions(DOMElement *elemRoot);
 		SINT32 setNetworkOptions(DOMElement *elemRoot);
 		SINT32 setRessourceOptions(DOMElement *elemRoot);
 		SINT32 setTermsAndConditions(DOMElement *elemRoot);
-		SINT32 setCrimeDetectionOptions(DOMElement *elemRoot);
 
 		/* General Options */
-#define GENERAL_OPTIONS_NR 11
+#if !defined ONLY_LOCAL_PROXY || defined INLUCDE_MIDDLE_MIX
+	#define GENERAL_OPTIONS_NR 13
+#else
+	#define GENERAL_OPTIONS_NR 10
+#endif
 		SINT32 setMixType(DOMElement* elemGeneral);
 		SINT32 setMixName(DOMElement* elemGeneral);
 		SINT32 setMixID(DOMElement* elemGeneral);
@@ -874,9 +951,13 @@ class CACmdLnOptions
 		SINT32 setUserID(DOMElement* elemGeneral);
 		SINT32 setNrOfFileDescriptors(DOMElement* elemGeneral);
 		SINT32 setDaemonMode(DOMElement* elemGeneral);
-		SINT32 setMaxUsers(DOMElement* elemGeneral);
 		SINT32 setLoggingOptions(DOMElement* elemGeneral);
 
+#if !defined ONLY_LOCAL_PROXY || defined INLUCDE_MIDDLE_MIX
+		SINT32 setPaymentReminder(DOMElement* elemGeneral);
+		SINT32 setAccessControlCredential(DOMElement* elemGeneral);
+		SINT32 setMaxUsers(DOMElement* elemGeneral);
+#endif
 		/* Certificate Options */
 #define MAX_CERTIFICATE_OPTIONS_NR 6
 		UINT32 m_nCertificateOptionsSetters;
@@ -887,6 +968,7 @@ class CACmdLnOptions
 		SINT32 setPrevMixCertificate(DOMElement *elemCertificates);
 		SINT32 setTrustedRootCertificates(DOMElement *elemCertificates);
 
+#ifdef PAYMENT
 		/* Payment Options */
 #define ACCOUNTING_OPTIONS_NR 7
 		SINT32 setPriceCertificate(DOMElement *elemAccounting);
@@ -896,7 +978,9 @@ class CACmdLnOptions
 		SINT32 setPrepaidInterval(DOMElement *elemAccounting);
 		SINT32 setSettleInterval(DOMElement *elemAccounting);
 		SINT32 setAccountingDatabase(DOMElement *elemAccounting);
-
+		void initAccountingOptionSetters();
+		SINT32 setAccountingOptions(DOMElement *elemRoot);
+#endif
 		/* Network Options */
 #define NETWORK_OPTIONS_NR 5
 		SINT32 setInfoServices(DOMElement *elemNetwork);
@@ -910,12 +994,6 @@ class CACmdLnOptions
 		SINT32 setTermsAndConditionsTemplates(DOMElement *elemTnCs);
 		SINT32 setTermsAndConditionsList(DOMElement *elemTnCs);
 
-		/* Crime Logging Options */
-#define CRIME_DETECTION_OPTIONS_NR 4
-		SINT32 setCrimeURLRegExp(DOMElement *elemCrimeDetection);
-		SINT32 setCrimePayloadRegExp(DOMElement *elemCrimeDetection);
-		SINT32 setCrimeSurveillanceIP(DOMElement *elemCrimeDetection);
-		SINT32 setCrimeSurveillanceAccounts(DOMElement *elemCrimeDetection);
 
 		SINT32 appendMixInfo_internal(DOMNode* a_node, bool with_subtree);
 		inline SINT32 addMixIdToMixInfo();
@@ -926,14 +1004,14 @@ class CACmdLnOptions
 		void initGeneralOptionSetters();
 		void initMixDescriptionSetters();
 		void initCertificateOptionSetters();
-		void initAccountingOptionSetters();
 		void initNetworkOptionSetters();
 		void initTermsAndConditionsOptionSetters();
-		void initCrimeDetectionOptionSetters();
+#endif //ONLY_LOCAL_PROXY
+
 };
 
 SINT32 setRegExpressions(DOMElement *rootElement, const char* const childElementName,
-		regex_t **regExContainer, UINT32* regExNr);
+		tre_regex_t **regExContainer, UINT32* regExNr);
 
 #endif
 

@@ -27,13 +27,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CAINFOSERVICE__
 #define __CAINFOSERVICE__
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY
 //#include "CAMultiSignature.hpp"
+
 #include "CAFirstMix.hpp"
+#include "CAXMLBI.hpp"
+
+#endif
+
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "CAThread.hpp"
 #include "CAMutex.hpp"
 #include "CACmdLnOptions.hpp"
-#include "CAXMLBI.hpp"
 
 #define NR_REQUEST_TYPES 2
 #define REQUEST_TYPE_POST 0
@@ -65,49 +70,94 @@ class CAInfoService
 			CAInfoService(CAMix* pMix);
 			~CAInfoService();
 			SINT32 sendMixHelo(SINT32 requestCommand=-1,const UINT8* param=NULL);
-			//SINT32 sendMixInfo(const UINT8* pMixID);
-			SINT32 sendCascadeHelo();
 			SINT32 sendStatus(bool bIncludeCerts);
-			SINT32 start();
-			SINT32 stop();
-			SINT32 signal();
-			SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
-			SINT32 getMixedPackets(UINT64& ppackets);
-#ifdef PAYMENT
-			SINT32 getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** pXMLBI);
-#endif
 			bool isRunning()
 				{
 					return m_bRun;
 				}
-			//remove me
-			/*SINT32 setSignature(CASignature* pSignature, CACertificate* a_ownCert,
-								CACertificate* a_opCert);*/
-			SINT32 setMultiSignature(CAMultiSignature* pMultiSignature);
-
-			// added by ronin <ronin2@web.de>
-			bool isConfiguring()
-			{
-					return m_bConfiguring;
-			}
 
 			void setConfiguring(bool a_configuring)
 			{
 					m_bConfiguring = a_configuring;
 			}
-
+		// added by ronin <ronin2@web.de>
+			bool isConfiguring()
+			{
+					return m_bConfiguring;
+			}
 			void setSerial(UINT64 a_serial)
 			{
 				m_serial = a_serial;
 			}
+			SINT32 start();
+			SINT32 stop();
+			SINT32 signal();
+			SINT32 setMultiSignature(CAMultiSignature* pMultiSignature);
 
-			UINT8* getStatusXMLAsString(bool bIncludeCerts,UINT32& len);
+#if !defined ONLY_LOCAL_PROXY
+			//SINT32 sendMixInfo(const UINT8* pMixID);
+			SINT32 sendCascadeHelo();
+#ifdef PAYMENT
+			SINT32 getPaymentInstance(const UINT8* a_pstrPIID,CAXMLBI** pXMLBI);
+#endif
+	
+			//remove me
+			/*SINT32 setSignature(CASignature* pSignature, CACertificate* a_ownCert,
+								CACertificate* a_opCert);*/
+
+	
+
+
+
 
 #ifdef DYNAMIC_MIX
 			/** LERNGRUPPE */
 			SINT32 dynamicCascadeConfiguration();
 			bool newCascadeAvailable();
 #endif
+
+		private:
+			static THREAD_RETURN TCascadeHelo(void *p);
+			UINT8* getCascadeHeloXMLAsString(UINT32& len);
+			SINT32 sendCascadeHelo(const UINT8* xml,UINT32 len,const CASocketAddrINet* a_socketAddress) const;
+
+			UINT8 **getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrOfTnCs);
+			SINT32 sendOperatorTnCData();
+
+
+			// added by ronin <ronin2@web.de>
+			SINT32 handleConfigEvent(XERCES_CPP_NAMESPACE::DOMDocument* doc) const;
+
+			//CASignature*		m_pSignature;
+#ifdef DYNAMIC_MIX
+			bool m_bReconfig;
+#endif
+#endif
+			private:
+				SINT32 sendMixHelo(const UINT8* strMixHeloXML,UINT32 len,SINT32 requestCommand,const UINT8* param,
+								const CASocketAddrINet* a_socketAddress);
+				UINT8 *getMixHeloXMLAsString(UINT32& len);
+				UINT8 *xmlDocToStringWithSignature(DOMNode *a_node, UINT32& a_len, bool bIncludeCerts);
+				SINT32 sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_thread)(void *), UINT8* a_strThreadName, SINT32 requestCommand, const UINT8* param = NULL);
+				SINT32 getLevel(SINT32* puser,SINT32* prisk,SINT32* ptraffic);
+				SINT32 getMixedPackets(UINT64& ppackets);
+				UINT8* getStatusXMLAsString(bool bIncludeCerts,UINT32& len);
+				SINT32 sendStatus(const UINT8* strStatusXML,UINT32 len,const CASocketAddrINet* a_socketAddress) const;
+				static THREAD_RETURN TCascadeStatus(void *p);
+				static THREAD_RETURN TMixHelo(void *p);
+				static THREAD_RETURN InfoLoop(void *p);
+				volatile bool m_bRun;
+				UINT64				m_serial;
+				bool					m_bConfiguring;
+				CAMix*				m_pMix;
+				CAConditionVariable *	m_pLoopCV;
+				CAMultiSignature* 	m_pMultiSignature;
+				UINT64				m_lastMixedPackets;
+				UINT32				m_minuts;
+				SINT32				m_expectedMixRelPos;
+				CAThread*			m_pthreadRunLoop;
+				struct InfoServiceHeloMsg;
+
 		public:
 			static const UINT64 MINUTE;
 			static const UINT64 SEND_LOOP_SLEEP;
@@ -115,43 +165,7 @@ class CAInfoService
 			static const UINT64 SEND_MIX_INFO_WAIT;
 			static const UINT64 SEND_STATUS_INFO_WAIT;
 			static const UINT32 SEND_INFO_TIMEOUT_MS;
-			static const UINT32 REPEAT_ON_STATUS_SENT_ERROR;
-		private:
-			static THREAD_RETURN TCascadeHelo(void *p);
-			static THREAD_RETURN TCascadeStatus(void *p);
-			static THREAD_RETURN TMixHelo(void *p);
-			static THREAD_RETURN InfoLoop(void *p);
-			SINT32 sendHelo(UINT8* a_strXML, UINT32 a_len, THREAD_RETURN (*a_thread)(void *), UINT8* a_strThreadName, SINT32 requestCommand, const UINT8* param = NULL);
-			UINT8* getCascadeHeloXMLAsString(UINT32& len);
-			SINT32 sendCascadeHelo(const UINT8* xml,UINT32 len,const CASocketAddrINet* a_socketAddress) const;
-
-			SINT32 sendStatus(const UINT8* strStatusXML,UINT32 len,const CASocketAddrINet* a_socketAddress) const;
-			UINT8 **getOperatorTnCsAsStrings(UINT32 **lengths, XMLSize_t *nrOfTnCs);
-			SINT32 sendOperatorTnCData();
-
-			UINT8 *getMixHeloXMLAsString(UINT32& len);
-			UINT8 *xmlDocToStringWithSignature(DOMNode *a_node, UINT32& a_len, bool bIncludeCerts);
-
-			SINT32 sendMixHelo(const UINT8* strMixHeloXML,UINT32 len,SINT32 requestCommand,const UINT8* param,
-								const CASocketAddrINet* a_socketAddress);
-			// added by ronin <ronin2@web.de>
-			SINT32 handleConfigEvent(XERCES_CPP_NAMESPACE::DOMDocument* doc) const;
-
-			struct InfoServiceHeloMsg;
-			volatile bool m_bRun;
-			//CASignature*		m_pSignature;
-			CAMultiSignature* 	m_pMultiSignature;
-			CAMix*				m_pMix;
-			CAThread*			m_pthreadRunLoop;
-			CAConditionVariable *	m_pLoopCV;
-			UINT64				m_lastMixedPackets;
-			UINT64				m_serial;
-			UINT32				m_minuts;
-			SINT32				m_expectedMixRelPos;
-			bool					m_bConfiguring;
-#ifdef DYNAMIC_MIX
-			bool m_bReconfig;
-#endif
+			static const UINT32 REPEAT_ON_STATUS_SENT_ERROR;	
 };
 #endif
 #endif //ONLY_LOCAL_PROXY

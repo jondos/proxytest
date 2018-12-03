@@ -27,6 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 
 #include "StdAfx.h"
+#ifndef ONLY_LOCAL_PROXY
 #include "CASyncControlChannel.hpp"
 
 CASyncControlChannel::~CASyncControlChannel()
@@ -34,3 +35,4 @@ CASyncControlChannel::~CASyncControlChannel()
 	delete[] m_MsgBuff;
 	m_MsgBuff = NULL;	
 }
+#endif// ONLY_LOCAL_PROXY

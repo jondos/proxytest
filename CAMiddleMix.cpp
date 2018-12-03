@@ -5,14 +5,14 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice,
-	  this list of conditions and the following disclaimer in the documentation and/or
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-	  may be used to endorse or promote products derived from this software without specific
+		may be used to endorse or promote products derived from this software without specific
 		prior written permission.
 
 
@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "CAMiddleMix.hpp"
 #include "CASingleSocketGroup.hpp"
 #include "CAMsg.hpp"
@@ -44,6 +44,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "xml/DOM_Output.hpp"
 #include "CAStatusManager.hpp"
 #include "CALibProxytest.hpp"
+#include "CAControlChannelDispatcher.hpp"
 
 SINT32 CAMiddleMix::initOnce()
 	{
@@ -66,12 +67,12 @@ SINT32 CAMiddleMix::initOnce()
 	* \li Step 1: Opens TCP/IP-Connection to Mix \e n+1. \n
 	* \li Step 2: Receives info about Mix \e n+1 .. LastMix as XML struct
 	*         (see \ref  XMLInterMixInitSendFromLast "XML struct") \n
-  * \li Step 3: Verfies signature, generates symetric Keys used for link encryption
+	* \li Step 3: Verifies signature, generates symetric Keys used for link encryption
 	*         with Mix \n+1. \n
 	* \li Step 4: Sends symetric Key to Mix \e n+1, encrypted with PubKey of Mix \e n+1
 	*         (see \ref XMLInterMixInitAnswer "XML struct") \n
 	* \li Step 5: Sends info about Mix \e n .. LastMix as XML struct
-	*         (see \ref  XMLInterMixInitSendFromLast "XML struct")to Mix \e n-1 \n
+	*         (see \ref  XMLInterMixInitSendFromLast "XML struct") to Mix \e n-1 \n
 	* \li Step 6: Recevies symetric Key used for link encrpytion with Mix \e n-1
 	*					(see \ref XMLInterMixInitAnswer "XML struct") \n
 	*
@@ -219,15 +220,15 @@ SINT32 CAMiddleMix::processKeyExchange()
 						oRSA.setPublicKeyAsDOMNode(rsaKey);
 						UINT8 key[64];
 						getRandom(key,64);
-						XERCES_CPP_NAMESPACE::DOMDocument* docSymKey=createDOMDocument();
+						XERCES_CPP_NAMESPACE::DOMDocument* docSymKey=::createDOMDocument();
 						DOMElement* elemRoot=NULL;
-						encodeXMLEncryptedKey(key,64,elemRoot,docSymKey,&oRSA);
+						::encodeXMLEncryptedKey(key,64,elemRoot,docSymKey,&oRSA);
 						docSymKey->appendChild(elemRoot);
 
 						appendCompatibilityInfo(elemRoot);
 
 						DOMElement* elemNonceHash=createDOMElement(docSymKey,"Nonce");
-						setDOMElementValue(elemNonceHash,arNonce);
+						::setDOMElementValue(elemNonceHash,arNonce);
 						elemRoot->appendChild(elemNonceHash);
 
 						///Getting the KeepAlive Traffice...
@@ -313,27 +314,27 @@ SINT32 CAMiddleMix::processKeyExchange()
 			{
 				MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
 				if (doc != NULL)
-				{
-					doc->release();
-					doc = NULL;
-				}
+					{
+						doc->release();
+						doc = NULL;
+					}
 				return E_UNKNOWN;
 			}
 		count++;
-		setDOMElementAttribute(root,"count",count);
+		::setDOMElementAttribute(root,"count",count);
 
 		addMixInfo(root, true);
-		DOMElement* mixNode;
-		getDOMChildByName(root, "Mix", mixNode, false);
+		DOMElement* mixNode=NULL;
+		::getDOMChildByName(root, "Mix", mixNode, false);
 
 
 		UINT8 tmpBuff[50];
 		CALibProxytest::getOptions()->getMixId(tmpBuff,50); //the mix id...
-		setDOMElementAttribute(mixNode,"id",tmpBuff);
+		::setDOMElementAttribute(mixNode,"id",tmpBuff);
 		//Supported Mix Protocol -->currently "0.3"
 		DOMElement* elemMixProtocolVersion=createDOMElement(doc,"MixProtocolVersion");
 		mixNode->appendChild(elemMixProtocolVersion);
-		setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
+		::setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
 
 		DOMElement* elemKey=NULL;
 		m_pRSA->getPublicKeyAsDOMElement(elemKey,doc); //the key
@@ -371,12 +372,13 @@ SINT32 CAMiddleMix::processKeyExchange()
 		 * Extensions, (nodes that can be removed from the KeyInfo without
 		 * destroying the signature of the "Mix"-node).
 		 */
+#ifdef PAYMENT
 		if(CALibProxytest::getOptions()->getTermsAndConditions() != NULL)
 		{
 			appendTermsAndConditionsExtension(doc, root);
 			mixNode->appendChild(termsAndConditionsInfoNode(doc));
 		}
-
+#endif
 		// create signature
 		if(signXML(mixNode)!=E_SUCCESS)
 		{
@@ -400,7 +402,7 @@ SINT32 CAMiddleMix::processKeyExchange()
 		ret=m_pMuxIn->getCASocket()->send(out, outlen);
 		delete[] out;
 		out = NULL;
-		if( (ret < 0) || (ret != outlen) )
+		if( (ret < 0) || (ret != (SINT32)outlen) )
 		{
 			CAMsg::printMsg(LOG_DEBUG,"Error sending new New Key Info\n");
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangeNextFailed);
@@ -550,7 +552,48 @@ SINT32 CAMiddleMix::processKeyExchange()
 		UINT8 key[150];
 		UINT32 keySize=150;
 
-		ret=decodeXMLEncryptedKey(key,&keySize,elemRoot,m_pRSA);
+		ret=::decodeXMLEncryptedKey(key,&keySize,elemRoot,m_pRSA);
+/*
+SGX Mix
+		ret=E_SUCCESS;
+		DOMNode* elemCipherValue=NULL;
+		if(getDOMChildByName(elemRoot,"CipherValue",elemCipherValue,true)!=E_SUCCESS)
+			ret=E_UNKNOWN;
+		UINT8 buff[2048];
+		UINT32 bufflen=2048;
+		if(getDOMElementValue(elemCipherValue,buff,&bufflen)!=E_SUCCESS)
+			ret = E_UNKNOWN;
+		//send cipher value
+		locksem(upstreamSemPostId, SN_EMPTY);
+		memcpy(upstreamPostBuffer, &buff, 2048);
+		unlocksem(upstreamSemPostId, SN_FULL);
+		//send new bufflen
+		locksem(downstreamSemPostId,SN_EMPTY);
+		memcpy(downstreamPostBuffer, &bufflen, sizeof(UINT32));
+		unlocksem(downstreamSemPostId,SN_FULL);
+		
+		CABase64::decode(buff,bufflen,buff,&bufflen);		
+
+		UINT8 buff2[bufflen];
+		//get keys
+		locksem(upstreamSemPostId, SN_FULL);
+		memcpy(&buff2,upstreamPostBuffer,bufflen);
+		unlocksem(upstreamSemPostId,SN_EMPTY);
+		for(SINT32 i=127;i>=0;i--)
+			{
+				if(buff2[i]!=0)
+					{
+						if(i>32)
+							keySize=64;
+						else if(i>16)
+							keySize=32;
+						else
+							keySize=16;
+					}
+			}
+		memcpy(key,buff2+128-(keySize),(keySize));
+*/
+
 		if(ret!=E_SUCCESS||keySize!=64)
 		{
 			MONITORING_FIRE_NET_EVENT(ev_net_keyExchangePrevFailed);
@@ -601,28 +644,156 @@ SINT32 CAMiddleMix::init()
 #ifdef DYNAMIC_MIX
 		m_bBreakNeeded = m_bReconfigured;
 #endif
+#ifdef WITH_SGX
+		if(m_bShMemConfigured==false){
+		
+			CAMsg::printMsg(LOG_INFO,"start sh mem conf");
+			int upstreamShMemPre_fd,upstreamShMemPost_fd;
+			int downstreamShMemPre_fd,downstreamShMemPost_fd;
+	   		void *upstreamShMemPreData, *upstreamShMemPostData;		
+	   		void *downstreamShMemPreData, *downstreamShMemPostData;		
+		
+			upstreamShMemPre_fd = shm_open(upstreamMemoryPreName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IWOTH | S_IROTH);
+			upstreamShMemPost_fd = shm_open(upstreamMemoryPostName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IWOTH | S_IROTH);
+			downstreamShMemPre_fd = shm_open(downstreamMemoryPreName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IWOTH | S_IROTH);
+			downstreamShMemPost_fd = shm_open(downstreamMemoryPostName, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IWOTH | S_IROTH);	
+		
+			ftruncate(upstreamShMemPre_fd,SIZE);
+			ftruncate(upstreamShMemPost_fd, SIZE);
+			ftruncate(downstreamShMemPre_fd,SIZE);
+			ftruncate(downstreamShMemPost_fd, SIZE);
+		
+			upstreamShMemPreData = mmap(0,SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, upstreamShMemPre_fd, 0);
+			if (upstreamShMemPreData == MAP_FAILED) {
+				printf("Map failed\n");
+				return -1;
+			}
+			upstreamShMemPostData = mmap(0,SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, upstreamShMemPost_fd, 0);
+			if (upstreamShMemPostData == MAP_FAILED) {
+				printf("Map failed\n");
+				return -1;
+			}
+			downstreamShMemPreData = mmap(0,SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, downstreamShMemPre_fd, 0);
+			if (downstreamShMemPreData == MAP_FAILED) {
+				printf("Map failed\n");
+				return -1;
+			}
+			downstreamShMemPostData = mmap(0,SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, downstreamShMemPost_fd, 0);
+			if (downstreamShMemPostData == MAP_FAILED) {
+				printf("Map failed\n");
+				return -1;
+			}
+
+			/*Semaphoren*/
+		   	union semun sunionUpstreamPre;
+		   	union semun sunionUpstreamPost;
+		   	union semun sunionDownstreamPre;
+		   	union semun sunionDownstreamPost;
+
+		   	/* Ein Semaphor erstellen */
+		   	upstreamSemPreId = safesemget (IPC_PRIVATE, 2, SHM_R | SHM_W);
+		   	upstreamSemPostId = safesemget(IPC_PRIVATE, 2, SHM_R | SHM_W);
+		   	downstreamSemPreId = safesemget (IPC_PRIVATE, 2, SHM_R | SHM_W);
+		   	downstreamSemPostId = safesemget(IPC_PRIVATE, 2, SHM_R | SHM_W);
+
+
+		   	/* Semaphor initialisieren */
+		   	sunionUpstreamPre.val = 1;
+		   	safesemctl (upstreamSemPreId, SN_EMPTY, SETVAL, sunionUpstreamPre);
+		   	sunionUpstreamPre.val = 0;
+		   	safesemctl (upstreamSemPreId, SN_FULL, SETVAL, sunionUpstreamPre);
+		   	sunionUpstreamPost.val = 1;
+		   	safesemctl (upstreamSemPostId, SN_EMPTY, SETVAL, sunionUpstreamPost);
+		   	sunionUpstreamPost.val = 0;
+		   	safesemctl (upstreamSemPostId, SN_FULL, SETVAL, sunionUpstreamPost); 
+		   	
+		   	sunionDownstreamPre.val = 1;
+		   	safesemctl (downstreamSemPreId, SN_EMPTY, SETVAL, sunionDownstreamPre);
+		   	sunionDownstreamPre.val = 0;
+		   	safesemctl (downstreamSemPreId, SN_FULL, SETVAL, sunionDownstreamPre);
+		   	sunionDownstreamPost.val = 1;
+		   	safesemctl (downstreamSemPostId, SN_EMPTY, SETVAL, sunionDownstreamPost);
+		   	sunionDownstreamPost.val = 0;
+		   	safesemctl (downstreamSemPostId, SN_FULL, SETVAL, sunionDownstreamPost); 
+		   	
+		   	*(int *) upstreamShMemPreData = upstreamSemPreId;
+		   	*(int *) upstreamShMemPostData = upstreamSemPostId;
+		   	*(int *) downstreamShMemPreData = downstreamSemPreId;
+		   	*(int *) downstreamShMemPostData = downstreamSemPostId;
+		   		
+			upstreamPreBuffer=upstreamShMemPreData + sizeof(int);
+			upstreamPostBuffer=upstreamShMemPostData  + sizeof(int);
+			downstreamPreBuffer=downstreamShMemPreData + sizeof(int);
+			downstreamPostBuffer=downstreamShMemPostData  + sizeof(int);
+			//shared memory + semaphoren ende
+		
+			//get RSA from inner mix
+			m_pRSA= new CAASymCipher();
+			UINT32 keyFileBuffLen=8096;
+	
+			UINT8* keyFileBuff=new UINT8[keyFileBuffLen];
+		
+			UINT8* keyBuff=new UINT8[keyFileBuffLen];
+			locksem(upstreamSemPostId,SN_FULL);
+			memcpy(keyBuff,upstreamPostBuffer,keyFileBuffLen);
+			unlocksem(upstreamSemPostId,SN_EMPTY);
+			m_pRSA->setPublicKeyAsXML(keyBuff,keyFileBuffLen);
+			delete[] keyBuff;	
+			m_bShMemConfigured=true;
+			
+		}
+		
+#endif
+
 
 		CAMsg::printMsg(LOG_INFO,"Creating Key...\n");
 		m_pRSA=new CAASymCipher();
-		if(m_pRSA->generateKeyPair(1024)!=E_SUCCESS)
+#ifdef EXPORT_ASYM_PRIVATE_KEY
+		if(CALibProxytest::getOptions()->isImportKey())
 			{
-				CAMsg::printMsg(LOG_CRIT,"Init: Error generating Key-Pair...\n");
-				return E_UNKNOWN;
+				UINT32 keyFileBuffLen=8096;
+				UINT8* keyFileBuff=new UINT8[keyFileBuffLen];
+				CALibProxytest::getOptions()->getEncryptionKeyImportFile(keyFileBuff,keyFileBuffLen);
+				UINT8* keyBuff=readFile(keyFileBuff,&keyFileBuffLen);
+				m_pRSA->setPrivateKeyAsXML(keyBuff,keyFileBuffLen);
+				delete[] keyFileBuff;
+				delete[] keyBuff;
 			}
+		else
+#endif
+			{
+				if(m_pRSA->generateKeyPair(1024)!=E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Could not generate a valid key pair\n");
+						return E_UNKNOWN;
+					}
+			}
+#ifdef EXPORT_ASYM_PRIVATE_KEY
+		if(CALibProxytest::getOptions()->isExportKey())
+			{
+				UINT32 keyFileBuffLen=8096;
+				UINT8* keyFileBuff=new UINT8[keyFileBuffLen];
+				UINT8* keyBuff=new UINT8[keyFileBuffLen];
+				CALibProxytest::getOptions()->getEncryptionKeyExportFile(keyFileBuff,keyFileBuffLen);
+				m_pRSA->getPrivateKeyAsXML(keyBuff,&keyFileBuffLen);
+				saveFile(keyFileBuff,keyBuff,keyFileBuffLen);
+				delete[] keyFileBuff;
+				delete[] keyBuff;
+			}
+#endif
 
-    // connect to next mix
+		// connect to next mix
 		CASocketAddr* pAddrNext=NULL;
 		for(UINT32 i=0;i<CALibProxytest::getOptions()->getTargetInterfaceCount();i++)
 			{
-				TargetInterface oNextMix;
+				CATargetInterface oNextMix;
 				CALibProxytest::getOptions()->getTargetInterface(oNextMix,i+1);
-				if(oNextMix.target_type==TARGET_MIX)
+				if(oNextMix.getTargetType()==TARGET_MIX)
 					{
-						pAddrNext=oNextMix.addr;
+						pAddrNext=oNextMix.getAddr();
 						break;
 					}
-				delete oNextMix.addr;
-				oNextMix.addr = NULL;
+				oNextMix.cleanAddr();
 			}
 		if(pAddrNext==NULL)
 			{
@@ -711,7 +882,7 @@ SINT32 CAMiddleMix::init()
 		m_pMuxOut->getCASocket()->setKeepAlive((UINT32)1800);
 
 
-	    if((ret = processKeyExchange())!=E_SUCCESS)
+			if((ret = processKeyExchange())!=E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Error in proccessKeyExchange()!\n");
 				return ret;
@@ -740,8 +911,8 @@ THREAD_RETURN mm_loopSendToMixAfter(void* param)
 		INIT_STACK;
 		BEGIN_STACK("CAFirstMix::fm_loopSendToMixAfter");
 
-		CAMiddleMix* pMiddleMix=(CAMiddleMix*)param;
-		CAQueue* pQueue=((CAMiddleMix*)param)->m_pQueueSendToMixAfter;
+		CAMiddleMix* pMiddleMix = static_cast<CAMiddleMix*>(param);
+		CAQueue* pQueue = pMiddleMix->m_pQueueSendToMixAfter;
 		CAMuxSocket* pMuxSocket=pMiddleMix->m_pMuxOut;
 
 		UINT32 len;
@@ -779,7 +950,7 @@ THREAD_RETURN mm_loopSendToMixAfter(void* param)
 						break;
 					}
 #ifdef LOG_PACKET_TIMES
- 				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
+				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
 					{
 						getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
 						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,pMixPacket->flags,true);
@@ -801,8 +972,8 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 		INIT_STACK;
 		BEGIN_STACK("CAFirstMix::fm_loopSendToMixBefore");
 
-		CAMiddleMix* pMiddleMix=(CAMiddleMix*)param;
-		CAQueue* pQueue=((CAMiddleMix*)param)->m_pQueueSendToMixBefore;
+		CAMiddleMix* pMiddleMix = static_cast<CAMiddleMix*>(param);
+		CAQueue* pQueue=pMiddleMix->m_pQueueSendToMixBefore;
 		CAMuxSocket* pMuxSocket=pMiddleMix->m_pMuxIn;
 
 		UINT32 len;
@@ -839,7 +1010,7 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 						break;
 					}
 #ifdef LOG_PACKET_TIMES
- 				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
+				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
 					{
 						getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
 						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,pMixPacket->flags,true);
@@ -855,13 +1026,8 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 
-#ifdef NEW_CHANNEL_ENCRYPTION
-	#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
-	#define MIDDLE_MIX_ASYM_PADDING_SIZE 42
-#else
-	#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS KEY_SIZE
-	#define MIDDLE_MIX_ASYM_PADDING_SIZE 0
-#endif
+#define MIDDLE_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
+#define MIDDLE_MIX_ASYM_PADDING_SIZE 42
 
 THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 	{
@@ -909,6 +1075,15 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 									pMixPacket->flags=CHANNEL_DUMMY;
 									getRandom(pMixPacket->data,DATA_SIZE);
 									pPool->pool(pPoolEntry);
+/*
+									locksem(upstreamSemPreId, SN_EMPTY);
+									memcpy(upstreamPreBuffer,pPoolEntry, sizeof(tPoolEntry));
+									unlocksem(upstreamSemPreId, SN_FULL);
+									
+									locksem(upstreamSemPostId, SN_FULL);
+									memcpy(pPoolEntry,upstreamPostBuffer, sizeof(tPoolEntry));
+									unlocksem(upstreamSemPostId, SN_EMPTY);
+*/
 									if(m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 										pMix->m_bRun=false;
 								#endif
@@ -943,6 +1118,13 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 							pMixPacket->flags=CHANNEL_DUMMY;
 							getRandom(pMixPacket->data,DATA_SIZE);
 							pPool->pool(pPoolEntry);
+/*	SGX MIX						locksem(upstreamSemPreId, SN_EMPTY);
+							memcpy(upstreamPreBuffer,pPoolEntry, sizeof(tPoolEntry));
+							unlocksem(upstreamSemPreId, SN_FULL);
+							locksem(upstreamSemPostId, SN_FULL);
+							memcpy(pPoolEntry,upstreamPostBuffer, sizeof(tPoolEntry));
+							unlocksem(upstreamSemPostId, SN_EMPTY);
+*/
 							if(pMix->m_pMuxOut->send(pMixPacket)==SOCKET_ERROR)
 								pMix->m_bRun=false;
 						}
@@ -950,6 +1132,20 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 
 						else //receive successful
 						{
+
+/*							locksem(pMix->upstreamSemPreId, SN_EMPTY);
+							memcpy(pMix->upstreamPreBuffer,pPoolEntry, sizeof(tPoolEntry));
+SGX MIX							unlocksem(pMix->upstreamSemPreId, SN_FULL);
+							locksem(pMix->upstreamSemPostId, SN_FULL);
+							memcpy(pPoolEntry,pMix->upstreamPostBuffer, sizeof(tPoolEntry));
+							unlocksem(pMix->upstreamSemPostId, SN_EMPTY);
+							if(pMixPacket->channel==0) continue;
+							#ifdef LOG_CRIME
+							crimeSurveillanceUpstream(pMixPacket, channelIn);
+							#endif
+							pQueue->add(pPoolEntry,sizeof(tPoolEntry));
+*/
+
 							channelIn = pMixPacket->channel;
 							if(pMix->m_pMiddleMixChannelList->getInToOut(pMixPacket->channel,&channelOut,&pCipher)!=E_SUCCESS)
 							{//new connection ?
@@ -958,11 +1154,7 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 									#ifdef _DEBUG
 										CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 									#endif
-									#ifdef NEW_CHANNEL_ENCRYPTION
-										pMix->m_pRSA->decryptOAEP(pMixPacket->data,tmpRSABuff,&rsaOutLen);
-									#else
-										pMix->m_pRSA->decrypt(pMixPacket->data,tmpRSABuff);
-									#endif
+									pMix->m_pRSA->decryptOAEP(pMixPacket->data,tmpRSABuff,&rsaOutLen);
 									#ifdef REPLAY_DETECTION
 										// replace time(NULL) with the real timestamp ()
 										// packet-timestamp + m_u64ReferenceTime
@@ -1026,7 +1218,7 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 		{
 			pMix->m_pQueueSendToMixAfter->add(b,sizeof(tQueueEntry)+1);
 		}
-		delete tmpRSABuff;
+		delete[] tmpRSABuff;
 		tmpRSABuff = NULL;
 		delete pPoolEntry;
 		pPoolEntry = NULL;
@@ -1040,9 +1232,9 @@ THREAD_RETURN mm_loopReadFromMixBefore(void* param)
 
 THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 	{
-		CAMiddleMix* pMix=(CAMiddleMix*)param;
+	CAMiddleMix* pMix = static_cast<CAMiddleMix*>(param);
 		HCHANNEL channelIn;
-		CASymCipher* pCipher;
+		CASymCipher* pCipher=NULL;
 
 		tPoolEntry* pPoolEntry=new tPoolEntry;
 		MIXPACKET* pMixPacket=&pPoolEntry->packet;
@@ -1082,6 +1274,15 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 									pMixPacket->flags=CHANNEL_DUMMY;
 									getRandom(pMixPacket->data,DATA_SIZE);
 									pPool->pool(pPoolEntry);
+/* SGX MIX
+									locksem(downstreamSemPreId, SN_EMPTY);
+									memcpy(downstreamPreBuffer,pPoolEntry, sizeof(tPoolEntry));
+									unlocksem(downstreamSemPreId, SN_FULL);
+									
+									locksem(downstreamSemPostId, SN_FULL);
+									memcpy(pPoolEntry,downstreamPostBuffer, sizeof(tPoolEntry));
+									unlocksem(downstreamSemPostId, SN_EMPTY);
+*/
 									if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 										pMix->m_bRun=false;
 								#endif
@@ -1115,6 +1316,15 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 								pMixPacket->flags=CHANNEL_DUMMY;
 								getRandom(pMixPacket->data,DATA_SIZE);
 								pPool->pool(pPoolEntry);
+/** SGX MIX
+								locksem(downstreamSemPreId, SN_EMPTY);
+								memcpy(downstreamPreBuffer,pPoolEntry, sizeof(tPoolEntry));
+								unlocksem(downstreamSemPreId, SN_FULL);
+									
+								locksem(downstreamSemPostId, SN_FULL);
+								memcpy(pPoolEntry,downstreamPostBuffer, sizeof(tPoolEntry));
+								unlocksem(downstreamSemPostId, SN_EMPTY);								getRandom(pMixPacket->data,DATA_SIZE);
+*/
 								if(pMix->m_pMuxIn->send(pMixPacket)==SOCKET_ERROR)
 									pMix->m_bRun=false;
 							}
@@ -1127,18 +1337,31 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 						#endif
 						else if(pMix->m_pMiddleMixChannelList->getOutToIn(&channelIn,pMixPacket->channel,&pCipher)==E_SUCCESS)
 							{//connection found
+
+/** SGX MIX
+								locksem(pMix->downstreamSemPreId, SN_EMPTY);
+								memcpy(pMix->downstreamPreBuffer,pPoolEntry, sizeof(tPoolEntry));
+								unlocksem(pMix->downstreamSemPreId, SN_FULL);
+								
+								locksem(pMix->downstreamSemPostId, SN_FULL);
+								memcpy(pPoolEntry,pMix->downstreamPostBuffer, sizeof(tPoolEntry));
+								unlocksem(pMix->downstreamSemPostId, SN_EMPTY);
+*/
+
+#ifdef LOG_CRIME
 								HCHANNEL channelOut = pMixPacket->channel;
+#endif
 								pMixPacket->channel=channelIn;
-								#ifdef LOG_CRIME
+#ifdef LOG_CRIME
 								if((pMixPacket->flags&CHANNEL_SIG_CRIME)==CHANNEL_SIG_CRIME)
-								{
-									getRandom(pMixPacket->data,DATA_SIZE);
-									//Log in and out channel number, to allow
-									CAMsg::printMsg(LOG_CRIT,"Detecting crime activity - previous mix channel: %u, "
-											"next mix channel: %u\n", channelIn, channelOut);
-								}
+									{
+										getRandom(pMixPacket->data,DATA_SIZE);
+										//Log in and out channel number, to allow
+										CAMsg::printMsg(LOG_CRIT,"Detecting crime activity - previous mix channel: %u, "
+												"next mix channel: %u\n", channelIn, channelOut);
+									}
 								else
-								#endif
+#endif
 								pCipher->crypt2(pMixPacket->data,pMixPacket->data,DATA_SIZE);
 								pCipher->unlock();
 								#ifdef USE_POOL
@@ -1200,7 +1423,7 @@ SINT32 CAMiddleMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 			{
 				err=GET_NET_ERROR;
 #ifdef _DEBUG
-			 	CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
+				CAMsg::printMsg(LOG_DEBUG,"Con-Error: %i\n",err);
 #endif
 				if(err!=ERR_INTERN_TIMEDOUT&&err!=ERR_INTERN_CONNREFUSED)
 				{
@@ -1302,6 +1525,48 @@ SINT32 CAMiddleMix::clean()
 		delete m_pRSA;
 		m_pRSA=NULL;
 
+///New SGX
+#ifdef WITH_SGX
+		if(m_bShutDown){
+		
+			delete m_pRSA;
+			m_pRSA=NULL;
+
+
+			//delete semaphors
+		   	if (semctl (upstreamSemPreId, 0, IPC_RMID, 0) == -1) {
+		      		printf ("Fehler beim Löschen des Semaphors  pre.\n");
+		   	}
+		  	if (semctl (upstreamSemPostId, 0, IPC_RMID, 0) == -1) {
+		      		printf ("Fehler beim Löschen des Semaphors post.\n");
+		   	}
+		   	if (semctl (downstreamSemPreId, 0, IPC_RMID, 0) == -1) {
+		      		printf ("Fehler beim Löschen des Semaphors  pre.\n");
+		   	}
+		  	if (semctl (downstreamSemPostId, 0, IPC_RMID, 0) == -1) {
+		      		printf ("Fehler beim Löschen des Semaphors post.\n");
+		   	}
+		   	
+		   	//remove shared memory segments
+		   	
+			if (shm_unlink(upstreamMemoryPreName) == -1) {
+				printf("Error removing %s\n",upstreamMemoryPreName);
+				exit(-1);
+			}
+			if (shm_unlink(upstreamMemoryPostName) == -1) {
+				printf("Error removing %s\n",upstreamMemoryPostName);
+				exit(-1);
+			}
+			if (shm_unlink(downstreamMemoryPreName) == -1) {
+				printf("Error removing %s\n",downstreamMemoryPreName);
+				exit(-1);
+			}
+			if (shm_unlink(downstreamMemoryPostName) == -1) {
+				printf("Error removing %s\n",downstreamMemoryPostName);
+				exit(-1);
+			}
+		}
+#endif //WITH_SGX
 		delete m_pMiddleMixChannelList;
 		m_pMiddleMixChannelList=NULL;
 		return E_SUCCESS;

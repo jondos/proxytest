@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CALASTMIX__
 #define __CALASTMIX__
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX
 #include "CAMix.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAASymCipher.hpp"
@@ -38,7 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAQueue.hpp"
 #include "CAInfoService.hpp"
 #ifdef LOG_CRIME
-	#include "tre/regex.h"
+	#include "tre/tre.h"
 #endif
 #include "CALogPacketStats.hpp"
 #ifndef NEW_MIX_TYPE // not TypeB mixes
@@ -77,6 +77,7 @@ class CALastMix:public
 					m_pQueueSendToMix=m_pQueueReadFromMix=NULL;
 					m_pCacheLB=new CACacheLoadBalancing();
 					m_pSocksLB=new CACacheLoadBalancing();
+					m_pVPNLB = new CACacheLoadBalancing();
 
 					#ifdef LOG_PACKET_STATS
 						m_pLogPacketStats=NULL;
@@ -84,12 +85,12 @@ class CALastMix:public
 					#ifdef LOG_CRIME
 					//OK lets try to use a regular expression for the task instead of a hand crafted parser...
 						const char* request_line_regexp="[\n\r]*([^ ]+)[ ]+([^ ]+)"; //
-						m_pregexpRequestLine=new regex_t;
-						regcomp(m_pregexpRequestLine,request_line_regexp,REG_EXTENDED );	
+						m_pregexpRequestLine=new tre_regex_t;
+						tre_regcomp(m_pregexpRequestLine,request_line_regexp,REG_EXTENDED );	
 						// Regexp for Domain of URI
 						const char* uri_regexp="[^:]+[:][/][/]([^:/]+)"; //
-						m_pregexpDomainOfURI=new regex_t;
-						regcomp(m_pregexpDomainOfURI,uri_regexp,REG_EXTENDED );
+						m_pregexpDomainOfURI=new tre_regex_t;
+						tre_regcomp(m_pregexpDomainOfURI,uri_regexp,REG_EXTENDED );
 					#endif
 				}
 
@@ -100,10 +101,12 @@ class CALastMix:public
 					m_pCacheLB = NULL;
 					delete m_pSocksLB;
 					m_pSocksLB = NULL;
+					delete m_pVPNLB;
+					m_pVPNLB = NULL;
 #ifdef LOG_CRIME
-					regfree(m_pregexpRequestLine);
+					tre_regfree(m_pregexpRequestLine);
 					delete m_pregexpRequestLine;
-					regfree(m_pregexpDomainOfURI);
+					tre_regfree(m_pregexpDomainOfURI);
 					delete m_pregexpDomainOfURI;
 #endif
 				}
@@ -152,6 +155,7 @@ class CALastMix:public
 			#endif
 			CACacheLoadBalancing*	m_pCacheLB;
 			CACacheLoadBalancing* m_pSocksLB;
+			CACacheLoadBalancing* m_pVPNLB;
 			CAASymCipher*					m_pRSA;
 			CAThread*							m_pthreadSendToMix;
 			CAThread*							m_pthreadReadFromMix;
@@ -161,11 +165,11 @@ class CALastMix:public
       #endif
 
 #ifdef LOG_CRIME
-			regex_t*							m_pregexpRequestLine; //Regexp used to find the URI of a request line
-			regex_t*							m_pregexpDomainOfURI; //Regexp to find Domain of URI
-			regex_t*							m_pCrimeRegExpsURL;
+			tre_regex_t*							m_pregexpRequestLine; //Regexp used to find the URI of a request line
+			tre_regex_t*							m_pregexpDomainOfURI; //Regexp to find Domain of URI
+			tre_regex_t*							m_pCrimeRegExpsURL;
 			UINT32								m_nCrimeRegExpsURL;
-			regex_t*							m_pCrimeRegExpsPayload;
+			tre_regex_t*							m_pCrimeRegExpsPayload;
 			UINT32								m_nCrimeRegExpsPayload;
 #endif
 

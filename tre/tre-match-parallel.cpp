@@ -22,6 +22,7 @@
   See `tre-match-backtrack.c'.
 */
 
+#include "../StdAfx.h"
 
 #ifdef HAVE_CONFIG_H
 #include <config.h>
@@ -62,7 +63,7 @@ char *alloca ();
 
 #include "tre-internal.h"
 #include "tre-match-utils.h"
-#include "regex.h"
+#include "tre.h"
 #include "xmalloc.h"
 
 
@@ -104,24 +105,24 @@ tre_print_reach(const tre_tnfa_t *tnfa, tre_tnfa_reach_t *reach, int num_tags)
 }
 #endif /* TRE_DEBUG */
 
-reg_errcode_t
+tre_reg_errcode_t
 tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 		      tre_str_type_t type, int *match_tags, int eflags,
 		      int *match_end_ofs)
 {
   /* State variables required by GET_NEXT_WCHAR. */
   tre_char_t prev_c = 0, next_c = 0;
-  const char *str_byte = (const char*)string;
+  const char *str_byte =(const char *) string;
   int pos = -1;
   unsigned int pos_add_next = 1;
 #ifdef TRE_WCHAR
-  const wchar_t *str_wide = string;
+  const wchar_t *str_wide = (const wchar_t *)string;
 #ifdef TRE_MBSTATE
   mbstate_t mbstate;
 #endif /* TRE_MBSTATE */
 #endif /* TRE_WCHAR */
   int reg_notbol = eflags & REG_NOTBOL;
-  int reg_noteol = eflags & REG_NOTEOL;
+  int reg_noteol = eflags & TRE_REG_NOTEOL;
   int reg_newline = tnfa->cflags & REG_NEWLINE;
   int str_user_end = 0;
 
@@ -166,12 +167,12 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 
     /* Allocate the memory. */
 #ifdef TRE_USE_ALLOCA
-    buf = alloca(total_bytes);
+    buf =(char *) alloca(total_bytes);
 #else /* !TRE_USE_ALLOCA */
-    buf = (char*)xmalloc((unsigned)total_bytes);
+    buf =(char *) xmalloc((unsigned)total_bytes);
 #endif /* !TRE_USE_ALLOCA */
     if (buf == NULL)
-      return REG_ESPACE;
+      return TRE_REG_ESPACE;
     memset(buf, 0, (size_t)total_bytes);
 
     /* Get the various pointers within tmp_buf (properly aligned). */
@@ -206,7 +207,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
       int first = tnfa->first_char;
 
       if (len >= 0)
-	str_byte =(const char*) memchr(orig_str, first, (size_t)len);
+	str_byte = (const char*)memchr(orig_str, first, (size_t)len);
       else
 	str_byte = strchr(orig_str, first);
       if (str_byte == NULL)
@@ -215,7 +216,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 	  if (buf)
 	    xfree(buf);
 #endif /* !TRE_USE_ALLOCA */
-	  return REG_NOMATCH;
+	  return TRE_REG_NOMATCH;
 	}
       DPRINT(("skipped %lu chars\n", (unsigned long)(str_byte - orig_str)));
       if (str_byte >= orig_str + 1)
@@ -269,7 +270,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
   DPRINT(("-------------+------------------------------------------------\n"));
 
   reach_next_i = reach_next;
-  while (/*CONSTCOND*/1)
+  while (/*CONSTCOND*/(void)1,1)
     {
       /* If no match found yet, add the initial states to `reach_next'. */
       if (match_eo < 0)
@@ -320,7 +321,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
       else
 	{
 	  if (num_tags == 0 || reach_next_i == reach_next)
-	    /* We have found a match. */
+	    /* We have found a match. */
 	    break;
 	}
 
@@ -495,7 +496,7 @@ tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 #endif /* !TRE_USE_ALLOCA */
 
   *match_end_ofs = match_eo;
-  return match_eo >= 0 ? REG_OK : REG_NOMATCH;
+  return match_eo >= 0 ? REG_OK : TRE_REG_NOMATCH;
 }
 
 /* EOF */

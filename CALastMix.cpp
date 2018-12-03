@@ -5,14 +5,14 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice,
-	  this list of conditions and the following disclaimer in the documentation and/or
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-	  may be used to endorse or promote products derived from this software without specific
+		may be used to endorse or promote products derived from this software without specific
 		prior written permission.
 
 
@@ -26,13 +26,13 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX
 #include "CALastMix.hpp"
 #ifdef NEW_MIX_TYPE // TypeB mixes
-  #include "TypeB/typedefsb.hpp"
+	#include "TypeB/typedefsb.hpp"
 #else // not TypeB mixes
-  /* TypeB mixes doesn't use the default-implementation */
-  #include "CALastMixChannelList.hpp"
+	/* TypeB mixes doesn't use the default-implementation */
+	#include "CALastMixChannelList.hpp"
 #endif
 #include "CALibProxytest.hpp"
 #include "CASocketGroup.hpp"
@@ -47,6 +47,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAPool.hpp"
 #include "xml/DOM_Output.hpp"
 #include "CAStatusManager.hpp"
+#include "CAControlChannelDispatcher.hpp"
 /*******************************************************************************/
 // ----------START NEW VERSION -----------------------
 //---------------------------------------------------------
@@ -72,19 +73,50 @@ SINT32 CALastMix::initOnce()
 				CAMsg::printMsg(LOG_CRIT,"No ListenerInterfaces specified!\n");
 				return E_UNKNOWN;
 			}
-    if(CALibProxytest::getOptions()->getCascadeXML() != NULL)
-    	initMixCascadeInfo(CALibProxytest::getOptions()->getCascadeXML());
+#ifndef INCLUDE_LAST_MIX
+/// TODO: Check what is done her and if this is important for any last mix or only in case of dynamic mixes...
+		if(CALibProxytest::getOptions()->getCascadeXML() != NULL)
+			initMixCascadeInfo(CALibProxytest::getOptions()->getCascadeXML());
+#endif
 		return E_SUCCESS;
 	}
 
 SINT32 CALastMix::init()
 	{
 		m_pRSA=new CAASymCipher();
-		if(m_pRSA->generateKeyPair(1024)!=E_SUCCESS)
+#ifdef EXPORT_ASYM_PRIVATE_KEY
+		if(CALibProxytest::getOptions()->isImportKey())
 			{
-				CAMsg::printMsg(LOG_CRIT,"Could not generate a valid key pair\n");
-				return E_UNKNOWN;
+				UINT32 keyFileBuffLen=8096;
+				UINT8* keyFileBuff=new UINT8[keyFileBuffLen];
+				CALibProxytest::getOptions()->getEncryptionKeyImportFile(keyFileBuff,keyFileBuffLen);
+				UINT8* keyBuff=readFile(keyFileBuff,&keyFileBuffLen);
+				m_pRSA->setPrivateKeyAsXML(keyBuff,keyFileBuffLen);
+				delete[] keyFileBuff;
+				delete[] keyBuff;
 			}
+		else
+#endif
+			{
+				if(m_pRSA->generateKeyPair(1024)!=E_SUCCESS)
+					{
+						CAMsg::printMsg(LOG_CRIT,"Could not generate a valid key pair\n");
+						return E_UNKNOWN;
+					}
+			}
+#ifdef EXPORT_ASYM_PRIVATE_KEY
+		if(CALibProxytest::getOptions()->isExportKey())
+			{
+				UINT32 keyFileBuffLen=8096;
+				UINT8* keyFileBuff=new UINT8[keyFileBuffLen];
+				UINT8* keyBuff=new UINT8[keyFileBuffLen];
+				CALibProxytest::getOptions()->getEncryptionKeyExportFile(keyFileBuff,keyFileBuffLen);
+				m_pRSA->getPrivateKeyAsXML(keyBuff,&keyFileBuffLen);
+				saveFile(keyFileBuff,keyBuff,keyFileBuffLen);
+				delete[] keyFileBuff;
+				delete[] keyBuff;
+			}
+#endif
 
 		CAListenerInterface*  pListener=NULL;
 		UINT32 interfaces=CALibProxytest::getOptions()->getListenerInterfaceCount();
@@ -116,11 +148,11 @@ SINT32 CALastMix::init()
 		delete pAddr;
 		pAddr = NULL;
 		if(ret!=E_SUCCESS)
-		    {
+				{
 				CAMsg::printMsg(LOG_CRIT,"Initialization failed! Reason: Call to accept() failed with error '%s' (%i)\n", 
 					GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 				return ret;
-		    }
+				}
 		// connected to previous mix
 		m_pMuxIn->getCASocket()->setRecvBuff(500*MIXPACKET_SIZE);
 		m_pMuxIn->getCASocket()->setSendBuff(500*MIXPACKET_SIZE);
@@ -130,9 +162,9 @@ SINT32 CALastMix::init()
 		CAMsg::printMsg(LOG_INFO,"connected!\n");
 
 #ifdef LOG_CRIME
-		m_nCrimeRegExpsURL=NULL;
+		m_nCrimeRegExpsURL=0;
 		m_pCrimeRegExpsURL=CALibProxytest::getOptions()->getCrimeRegExpsURL(&m_nCrimeRegExpsURL);
-		m_nCrimeRegExpsPayload = NULL;
+		m_nCrimeRegExpsPayload = 0;
 		m_pCrimeRegExpsPayload = CALibProxytest::getOptions()->getCrimeRegExpsPayload(&m_nCrimeRegExpsPayload);
 #endif
 		ret=processKeyExchange();
@@ -174,10 +206,10 @@ SINT32 CALastMix::init()
 		m_pLogPacketStats->setLogIntervallInMinutes(LM_PACKET_STATS_LOG_INTERVALL);
 		m_pLogPacketStats->start();
 #endif
-    #ifndef NEW_MIX_TYPE // not TypeB mixes
-      /* TypeB mixes are using an own implementation */
+		#ifndef NEW_MIX_TYPE // not TypeB mixes
+			/* TypeB mixes are using an own implementation */
 		m_pChannelList=new CALastMixChannelList;
-    #endif
+		#endif
 		return E_SUCCESS;
 	}
 
@@ -196,9 +228,9 @@ SINT32 CALastMix::processKeyExchange()
 		XERCES_CPP_NAMESPACE::DOMDocument* doc=createDOMDocument();
 		DOMElement* elemMixes=createDOMElement(doc,"Mixes");
 		setDOMElementAttribute(elemMixes,"count",(UINT32)1);
-    //UINT8 cName[128];
-    //CALibProxytest::getOptions()->getCascadeName(cName,128);
-    //setDOMElementAttribute(elemMixes,"cascadeName",cName);
+		//UINT8 cName[128];
+		//CALibProxytest::getOptions()->getCascadeName(cName,128);
+		//setDOMElementAttribute(elemMixes,"cascadeName",cName);
 		doc->appendChild(elemMixes);
 
 		addMixInfo(elemMixes, false);
@@ -208,40 +240,36 @@ SINT32 CALastMix::processKeyExchange()
 		//Inserting MixProtocol Version
 		// Version 0.3  - "normal", initial mix protocol
 		// Version 0.4  - with new flow control [was only used for tests]
-    // Version 0.5  - end-to-end 1:n channels (only between client and last mix)
+		// Version 0.5  - end-to-end 1:n channels (only between client and last mix)
 		// Version 0.6  - with new flow control for downstream [productive]
 		// Version 0.7  - with new flow control for downstream AND upstream
 		DOMElement* elemMixProtocolVersion=createDOMElement(doc,"MixProtocolVersion");
 		elemMix->appendChild(elemMixProtocolVersion);
-    #ifdef NEW_MIX_TYPE // TypeB mixes
-      setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.5");
-      DOM_Element elemDownstreamPackets = doc.createElement("DownstreamPackets");
-      setDOMElementValue(elemDownstreamPackets, (UINT32)CHANNEL_DOWNSTREAM_PACKETS);
-      elemMixProtocolVersion.appendChild(elemDownstreamPackets);
-      DOM_Element elemChannelTimeout = doc.createElement("ChannelTimeout");
-      /* let the client use our channel-timeout + 5 seconds */
-      setDOMElementValue(elemChannelTimeout, (UINT32)(CHANNEL_TIMEOUT + 5));
-      elemMixProtocolVersion.appendChild(elemChannelTimeout);
-      DOM_Element elemChainTimeout = doc.createElement("ChainTimeout");
-      /* let the client use our chain-timeout - 5 seconds */
-      setDOMElementValue(elemChainTimeout, (UINT32)(CHAIN_TIMEOUT - 5));
-      elemMixProtocolVersion.appendChild(elemChainTimeout);
-    #else
-      #ifdef NEW_FLOW_CONTROL
-				setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.6");
-				DOMElement* elemFlowControl=createDOMElement(doc,"FlowControl");
-				DOMElement* elemUpstreamSendMe=createDOMElement(doc,"UpstreamSendMe");
-				DOMElement* elemDownstreamSendMe=createDOMElement(doc,"DownstreamSendMe");
-				elemMix->appendChild(elemFlowControl);
-				elemFlowControl->appendChild(elemUpstreamSendMe);
-				elemFlowControl->appendChild(elemDownstreamSendMe);
-				setDOMElementValue(elemUpstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
-				setDOMElementValue(elemDownstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
-				setDOMElementAttribute(elemFlowControl,"withUpstreamFlowControl",true);
-      #else
-				setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.3");
-      #endif
-    #endif
+		#ifdef NEW_MIX_TYPE // TypeB mixes
+			setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.5");
+			DOM_Element elemDownstreamPackets = doc.createElement("DownstreamPackets");
+			setDOMElementValue(elemDownstreamPackets, (UINT32)CHANNEL_DOWNSTREAM_PACKETS);
+			elemMixProtocolVersion.appendChild(elemDownstreamPackets);
+			DOM_Element elemChannelTimeout = doc.createElement("ChannelTimeout");
+			/* let the client use our channel-timeout + 5 seconds */
+			setDOMElementValue(elemChannelTimeout, (UINT32)(CHANNEL_TIMEOUT + 5));
+			elemMixProtocolVersion.appendChild(elemChannelTimeout);
+			DOM_Element elemChainTimeout = doc.createElement("ChainTimeout");
+			/* let the client use our chain-timeout - 5 seconds */
+			setDOMElementValue(elemChainTimeout, (UINT32)(CHAIN_TIMEOUT - 5));
+			elemMixProtocolVersion.appendChild(elemChainTimeout);
+		#else
+			setDOMElementValue(elemMixProtocolVersion,(UINT8*)"0.6");
+			DOMElement* elemFlowControl=createDOMElement(doc,"FlowControl");
+			DOMElement* elemUpstreamSendMe=createDOMElement(doc,"UpstreamSendMe");
+			DOMElement* elemDownstreamSendMe=createDOMElement(doc,"DownstreamSendMe");
+			elemMix->appendChild(elemFlowControl);
+			elemFlowControl->appendChild(elemUpstreamSendMe);
+			elemFlowControl->appendChild(elemDownstreamSendMe);
+			setDOMElementValue(elemUpstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
+			setDOMElementValue(elemDownstreamSendMe,(UINT32)FLOW_CONTROL_SENDME_SOFT_LIMIT);
+			setDOMElementAttribute(elemFlowControl,"withUpstreamFlowControl",true);
+		#endif
 		//Inserting RSA-Key
 		DOMElement* nodeRsaKey=NULL;
 		m_pRSA->getPublicKeyAsDOMElement(nodeRsaKey,doc);
@@ -279,6 +307,7 @@ SINT32 CALastMix::processKeyExchange()
 
 		CAMsg::printMsg(LOG_DEBUG,"KeepAlive-Traffic: Offering -- SendInterval %u -- Receive Interval %u\n",u32KeepAliveSendInterval,u32KeepAliveRecvInterval);
 
+#ifdef PAYMENT
 		/* append the terms and conditions, if there are any, to the KeyInfo
 		 * Extensions, (nodes that can be removed from the KeyInfo without
 		 * destroying the signature of the "Mix"-node).
@@ -288,6 +317,7 @@ SINT32 CALastMix::processKeyExchange()
 			appendTermsAndConditionsExtension(doc, elemMixes);
 			elemMix->appendChild(termsAndConditionsInfoNode(doc));
 		}
+#endif
 
 		// create signature
 		if (signXML(elemMix) != E_SUCCESS)
@@ -509,8 +539,8 @@ SINT32 CALastMix::processKeyExchange()
 	}
 
 #ifdef NEW_MIX_TYPE // TypeB mixes
-  void CALastMix::reconfigureMix() {
-  }
+	void CALastMix::reconfigureMix() {
+	}
 #endif
 
 SINT32 CALastMix::reconfigure()
@@ -519,10 +549,10 @@ SINT32 CALastMix::reconfigure()
 		CAMsg::printMsg(LOG_DEBUG,"Re-read cache proxies\n");
 		if(setTargets()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_DEBUG,"Could not set new cache proxies\n");
-    #ifndef NEW_MIX_TYPE // not TypeB mixes
-      #if defined (DELAY_CHANNELS)||defined (DELAY_CHANNELS_LATENCY)
+		#ifndef NEW_MIX_TYPE // not TypeB mixes
+			#if defined (DELAY_CHANNELS)||defined (DELAY_CHANNELS_LATENCY)
 		CAMsg::printMsg(LOG_DEBUG,"Set new resources limitation parameters\n");
-        if(m_pChannelList!=NULL) {
+				if(m_pChannelList!=NULL) {
 		#if defined (DELAY_CHANNELS)
 			m_pChannelList->setDelayParameters(	CALibProxytest::getOptions()->getDelayChannelUnlimitTraffic(),
 																					CALibProxytest::getOptions()->getDelayChannelBucketGrow(),
@@ -533,16 +563,16 @@ SINT32 CALastMix::reconfigure()
 			m_pChannelList->setDelayLatencyParameters(	utemp);
 		#endif
 		}
-      #endif
-    #else // TypeB mixes
-      reconfigureMix();
-    #endif
+			#endif
+		#else // TypeB mixes
+			reconfigureMix();
+		#endif
 		return E_SUCCESS;
 	}
 
 THREAD_RETURN lm_loopLog(void* param)
 	{
-		CALastMix* pLastMix=(CALastMix*)param;
+		CALastMix* pLastMix=static_cast<CALastMix*>(param);
 		pLastMix->m_bRunLog=true;
 		UINT32 countLog=0;
 		UINT8 buff[256];
@@ -575,7 +605,11 @@ THREAD_RETURN lm_loopLog(void* param)
 */
 THREAD_RETURN lm_loopSendToMix(void* param)
 	{
-		CALastMix* pLastMix=(CALastMix*)param;
+		#ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
+			ProfilerRegisterThread();
+		#endif
+
+		CALastMix* pLastMix = static_cast<CALastMix*>(param);
 		CAQueue* pQueue=pLastMix->m_pQueueSendToMix;
 		CAMuxSocket* pMuxSocket=pLastMix->m_pMuxIn;
 		SINT32 ret;
@@ -602,14 +636,22 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 						MONITORING_FIRE_NET_EVENT(ev_net_prevConnectionClosed);
 						break;
 					}
-				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
+#ifdef ANON_DEBUG_MODE
+				if (pMixPacket->flags&CHANNEL_DEBUG)
+					{
+					UINT8 base64Payload[DATA_SIZE << 1];
+					EVP_EncodeBlock(base64Payload, pMixPacket->data, DATA_SIZE);//base64 encoding (without newline!)
+					CAMsg::printMsg(LOG_DEBUG, "Send Downstream AN.ON packet to previous Mix debug: %s\n", base64Payload);
+					}
+#endif
+				if (pMuxSocket->send(pMixPacket) != MIXPACKET_SIZE)
 					{
 						CAMsg::printMsg(LOG_ERR,"CALastMix::lm_loopSendToMix - Error in sending MixPaket\n");
 						MONITORING_FIRE_NET_EVENT(ev_net_prevConnectionClosed);
 						break;
 					}
 #ifdef LOG_PACKET_TIMES
- 				if(!isZero64(pQueueEntry->timestamp_proccessing_start))
+				if(!isZero64(pQueueEntry->timestamp_proccessing_start))
 					{
 						getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end);
 						pLastMix->m_pLogPacketStats->addToTimeingStats(*pQueueEntry,CHANNEL_DATA,false);
@@ -649,7 +691,7 @@ THREAD_RETURN lm_loopSendToMix(void* param)
 				if(pMuxSocket->send(pMixPacket)!=MIXPACKET_SIZE)
 					break;
 #ifdef LOG_PACKET_TIMES
- 				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
+				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
 					{
 						getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
 						pLastMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,CHANNEL_DATA,false);
@@ -671,7 +713,10 @@ THREAD_RETURN lm_loopSendToMix(void* param)
  */
 THREAD_RETURN lm_loopReadFromMix(void *pParam)
 	{
-		CALastMix* pLastMix=(CALastMix*)pParam;
+		#ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
+			ProfilerRegisterThread();
+		#endif
+		CALastMix* pLastMix = static_cast<CALastMix*>(pParam);
 		CAMuxSocket* pMuxSocket=pLastMix->m_pMuxIn;
 		CAQueue* pQueue=pLastMix->m_pQueueReadFromMix;
 		tQueueEntry* pQueueEntry=new tQueueEntry;
@@ -759,7 +804,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 			#endif
 		#endif
 				pQueue->add(pQueueEntry,sizeof(tQueueEntry));
-				getcurrentTimeMillis(keepaliveLast);
+				getcurrentTimeMillis(keepaliveLast);///ToDo: check if keep-alive is really correct here - should it not be moved upwards?
 			}
 		delete pQueueEntry;
 		pQueueEntry = NULL;
@@ -838,14 +883,14 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 
 			//OK lets try to use a regular expression for the task instead of a hand crafted parser...
 			//do the match...
-			regmatch_t theMatches[3];
-			int ret=regnexec(m_pregexpRequestLine,(const char*)payloadData,payloadDataLength,3,theMatches,0);
+			tre_regmatch_t theMatches[3];
+			int ret=tre_regnexec(m_pregexpRequestLine,(const char*)payloadData,payloadDataLength,3,theMatches,0);
 			if(ret!=0)
 				return NULL;
 
 			const UINT8* httpVerb=payloadData+theMatches[1].rm_so;
 			UINT8* domainName=NULL;
-			if((payloadData+theMatches[1].rm_eo-payloadData+theMatches[1].rm_so)>6 && memcmp("CONNECT",httpVerb,7)==0)
+			if((payloadData+theMatches[1].rm_eo-payloadData+theMatches[1].rm_so)>6 && strncasecmp("CONNECT",(const char*)httpVerb,7)==0)
 				{//Connect request --> URI is domain [:port]
 					UINT32 matchLen=theMatches[2].rm_eo-theMatches[2].rm_so;
 					domainName=new UINT8[matchLen+1];
@@ -856,8 +901,8 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 			else
 				{
 					//do the match...
-					regmatch_t theDomainMatches[2];
-					ret=regnexec(m_pregexpDomainOfURI,(const char*)payloadData+theMatches[2].rm_so,theMatches[2].rm_eo-theMatches[2].rm_so,2,theDomainMatches,0);
+					tre_regmatch_t theDomainMatches[2];
+					ret=tre_regnexec(m_pregexpDomainOfURI,(const char*)payloadData+theMatches[2].rm_so,theMatches[2].rm_eo-theMatches[2].rm_so,2,theDomainMatches,0);
 					if(ret!=0)
 						return NULL;
 					UINT32 matchLen=theDomainMatches[1].rm_eo-theDomainMatches[1].rm_so;
@@ -882,7 +927,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 						UINT32 strLen = strlen((char *)startOfUrl);
 						for(UINT32 i = 0; i < m_nCrimeRegExpsURL; i++)
 						{
-							if(regnexec(&m_pCrimeRegExpsURL[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
+							if(tre_regnexec(&m_pCrimeRegExpsURL[i],(char*)startOfUrl,strLen,0,NULL,0)==0)
 							{
 								delete [] startOfUrl;
 								return true;
@@ -893,7 +938,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 			}
 		for(UINT32 i = 0; i < m_nCrimeRegExpsPayload; i++)
 		{
-			if (regnexec(&m_pCrimeRegExpsPayload[i],(const char*)payLoad ,payLen,0,NULL,0)==0)
+			if (tre_regnexec(&m_pCrimeRegExpsPayload[i],(const char*)payLoad ,payLen,0,NULL,0)==0)
 			{
 				return true;
 			}
@@ -916,21 +961,25 @@ SINT32 CALastMix::setTargets()
 			}
 		m_pCacheLB->clean();
 		m_pSocksLB->clean();
+		m_pVPNLB->clean();
 		UINT32 i;
 		for(i=1;i<=cntTargets;i++)
 			{
-				TargetInterface oTargetInterface;
+				CATargetInterface oTargetInterface;
 				CALibProxytest::getOptions()->getTargetInterface(oTargetInterface,i);
-				if(oTargetInterface.target_type==TARGET_HTTP_PROXY)
+				if(oTargetInterface.getTargetType()==TARGET_HTTP_PROXY)
 				{
-					m_pCacheLB->add(oTargetInterface.addr);
+					m_pCacheLB->add(oTargetInterface.getAddr());
 				}
-				else if(oTargetInterface.target_type==TARGET_SOCKS_PROXY)
+				else if(oTargetInterface.getTargetType()==TARGET_SOCKS_PROXY)
 				{
-					m_pSocksLB->add(oTargetInterface.addr);
+					m_pSocksLB->add(oTargetInterface.getAddr());
 				}
-				delete oTargetInterface.addr;
-				oTargetInterface.addr = NULL;
+				else if (oTargetInterface.getTargetType() == TARGET_VPN_PROXY)
+					{
+					m_pVPNLB->add(oTargetInterface.getAddr());
+					}
+				oTargetInterface.cleanAddr();
 			}
 		CAMsg::printMsg(LOG_DEBUG,"This mix will use the following proxies:\n");
 		for(i=0;i<m_pCacheLB->getElementCount();i++)
@@ -948,6 +997,14 @@ SINT32 CALastMix::setTargets()
 				pAddr->getIP(ip);
 				UINT32 port=pAddr->getPort();
 				CAMsg::printMsg(LOG_DEBUG,"%u. SOCKS Proxy's Address: %u.%u.%u.%u:%u\n",i+1,ip[0],ip[1],ip[2],ip[3],port);
+			}
+		for (i = 0; i<m_pVPNLB->getElementCount(); i++)
+			{
+			CASocketAddrINet* pAddr = m_pVPNLB->get();
+			UINT8 ip[4];
+			pAddr->getIP(ip);
+			UINT32 port = pAddr->getPort();
+			CAMsg::printMsg(LOG_DEBUG, "%u. VPN Proxy's Address: %u.%u.%u.%u:%u\n", i + 1, ip[0], ip[1], ip[2], ip[3], port);
 			}
 
 
@@ -1035,8 +1092,8 @@ SINT32 CALastMix::clean()
 		m_pQueueReadFromMix = NULL;
 		delete m_pQueueSendToMix;
 		m_pQueueSendToMix = NULL;
-    #ifndef NEW_MIX_TYPE // not TypeB mixes
-      /* TypeB mixes are using an own implementation */
+		#ifndef NEW_MIX_TYPE // not TypeB mixes
+			/* TypeB mixes are using an own implementation */
 		delete m_pChannelList;
 		m_pChannelList = NULL;
 		if(m_pMuxIn != NULL)
@@ -1048,15 +1105,15 @@ SINT32 CALastMix::clean()
 
 		delete m_pRSA;
 		m_pRSA = NULL;
-    #endif
+		#endif
 		return E_SUCCESS;
 	}
 
 SINT32 CALastMix::initMixCascadeInfo(DOMElement*  mixes)
 {
-    SINT32 r = CAMix::initMixCascadeInfo(mixes);
-    DOMElement* cascade = m_docMixCascadeInfo->getDocumentElement();
-    setDOMElementAttribute(cascade,"create",(UINT8*)"true");
-    return r;
+		SINT32 r = CAMix::initMixCascadeInfo(mixes);
+		DOMElement* cascade = m_docMixCascadeInfo->getDocumentElement();
+		setDOMElementAttribute(cascade,"create",(UINT8*)"true");
+		return r;
 }
 #endif //ONLY_LOCAL_PROXY

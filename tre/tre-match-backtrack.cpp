@@ -29,7 +29,7 @@
 
 */
 
-
+#include "../StdAfx.h"
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
@@ -70,7 +70,7 @@ char *alloca ();
 #include "tre-internal.h"
 #include "tre-mem.h"
 #include "tre-match-utils.h"
-#include "regex.h"
+#include "tre.h"
 #include "xmalloc.h"
 
 typedef struct {
@@ -114,7 +114,7 @@ typedef struct tre_backtrack_struct {
 #ifdef TRE_USE_ALLOCA
 #define tre_bt_mem_new		  tre_mem_newa
 #define tre_bt_mem_alloc	  tre_mem_alloca
-#define tre_bt_mem_destroy(obj)	  do { } while (0)
+#define tre_bt_mem_destroy(obj)	  do { } while (0,0)
 #else /* !TRE_USE_ALLOCA */
 #define tre_bt_mem_new		  tre_mem_new
 #define tre_bt_mem_alloc	  tre_mem_alloc
@@ -139,7 +139,7 @@ typedef struct tre_backtrack_struct {
 		xfree(pmatch);						      \
 	      if (states_seen)						      \
 		xfree(states_seen);					      \
-	      return REG_ESPACE;					      \
+	      return TRE_REG_ESPACE;					      \
 	    }								      \
 	  s->prev = stack;						      \
 	  s->next = NULL;						      \
@@ -154,7 +154,7 @@ typedef struct tre_backtrack_struct {
 		xfree(pmatch);						      \
 	      if (states_seen)						      \
 		xfree(states_seen);					      \
-	      return REG_ESPACE;					      \
+	      return TRE_REG_ESPACE;					      \
 	    }								      \
 	  stack->next = s;						      \
 	  stack = s;							      \
@@ -171,7 +171,7 @@ typedef struct tre_backtrack_struct {
 	stack->item.tags[i] = (_tags)[i];				      \
       BT_STACK_MBSTATE_IN;						      \
     }									      \
-  while (/*CONSTCOND*/0)
+  while (/*CONSTCOND*/(void)0,0)
 
 #define BT_STACK_POP()							      \
   do									      \
@@ -184,35 +184,35 @@ typedef struct tre_backtrack_struct {
       str_byte = stack->item.str_byte;					      \
       BT_STACK_WIDE_OUT;						      \
       state = stack->item.state;					      \
-      next_c = stack->item.next_c;					      \
+      next_c = (tre_char_t) stack->item.next_c;					      \
       for (i = 0; i < tnfa->num_tags; i++)				      \
 	tags[i] = stack->item.tags[i];					      \
       BT_STACK_MBSTATE_OUT;						      \
       stack = stack->prev;						      \
     }									      \
-  while (/*CONSTCOND*/0)
+  while (/*CONSTCOND*/(void)0,0)
 
 #undef MIN
 #define MIN(a, b) ((a) <= (b) ? (a) : (b))
 
-reg_errcode_t
+tre_reg_errcode_t
 tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 		       int len, tre_str_type_t type, int *match_tags,
 		       int eflags, int *match_end_ofs)
 {
   /* State variables required by GET_NEXT_WCHAR. */
   tre_char_t prev_c = 0, next_c = 0;
-  const char *str_byte =( const char *) string;
+  const char *str_byte = (const char*)string;
   int pos = 0;
   unsigned int pos_add_next = 1;
 #ifdef TRE_WCHAR
-  const wchar_t *str_wide = string;
+  const wchar_t *str_wide =(const wchar_t*) string;
 #ifdef TRE_MBSTATE
   mbstate_t mbstate;
 #endif /* TRE_MBSTATE */
 #endif /* TRE_WCHAR */
   int reg_notbol = eflags & REG_NOTBOL;
-  int reg_noteol = eflags & REG_NOTEOL;
+  int reg_noteol = eflags & TRE_REG_NOTEOL;
   int reg_newline = tnfa->cflags & REG_NEWLINE;
   int str_user_end = 0;
 
@@ -244,7 +244,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
   tre_backtrack_t stack;
 
   tre_tnfa_transition_t *trans_i;
-  regmatch_t *pmatch = NULL;
+  tre_regmatch_t *pmatch = NULL;
   int ret;
 
 #ifdef TRE_MBSTATE
@@ -252,11 +252,11 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 #endif /* TRE_MBSTATE */
 
   if (!mem)
-    return REG_ESPACE;
-  stack = (tre_backtrack_t)tre_bt_mem_alloc(mem, sizeof(*stack));
+    return TRE_REG_ESPACE;
+  stack = (tre_backtrack_t) tre_bt_mem_alloc(mem, sizeof(*stack));
   if (!stack)
     {
-      ret = REG_ESPACE;
+      ret = TRE_REG_ESPACE;
       goto error_exit;
     }
   stack->prev = NULL;
@@ -266,34 +266,34 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
   DPRINT(("len = %d\n", len));
 
 #ifdef TRE_USE_ALLOCA
-  tags = alloca(sizeof(*tags) * tnfa->num_tags);
-  pmatch = alloca(sizeof(*pmatch) * tnfa->num_submatches);
-  states_seen = alloca(sizeof(*states_seen) * tnfa->num_states);
+  tags = (int *)alloca(sizeof(*tags) * tnfa->num_tags);
+  pmatch =(tre_regmatch_t*)alloca(sizeof(*pmatch) * tnfa->num_submatches);
+  states_seen =(int *) alloca(sizeof(*states_seen) * tnfa->num_states);
 #else /* !TRE_USE_ALLOCA */
   if (tnfa->num_tags)
     {
-      tags = (int*)xmalloc(sizeof(*tags) * tnfa->num_tags);
+      tags = xmalloc(sizeof(*tags) * tnfa->num_tags);
       if (!tags)
 	{
-	  ret = REG_ESPACE;
+	  ret = TRE_REG_ESPACE;
 	  goto error_exit;
 	}
     }
   if (tnfa->num_submatches)
     {
-      pmatch = (regmatch_t*)xmalloc(sizeof(*pmatch) * tnfa->num_submatches);
+      pmatch = xmalloc(sizeof(*pmatch) * tnfa->num_submatches);
       if (!pmatch)
 	{
-	  ret = REG_ESPACE;
+	  ret = TRE_REG_ESPACE;
 	  goto error_exit;
 	}
     }
   if (tnfa->num_states)
     {
-      states_seen = (int*)xmalloc(sizeof(*states_seen) * tnfa->num_states);
+      states_seen = xmalloc(sizeof(*states_seen) * tnfa->num_states);
       if (!states_seen)
 	{
-	  ret = REG_ESPACE;
+	  ret = TRE_REG_ESPACE;
 	  goto error_exit;
 	}
     }
@@ -370,7 +370,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
   if (state == NULL)
     goto backtrack;
 
-  while (/*CONSTCOND*/1)
+  while (/*CONSTCOND*/(void)1,1)
     {
       tre_tnfa_transition_t *next_state;
       int empty_br_match;
@@ -630,7 +630,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 		    }
 		}
 	      DPRINT(("restarting from next start position\n"));
-	      next_c = next_c_start;
+	      next_c = (tre_char_t) next_c_start;
 #ifdef TRE_MBSTATE
 	      mbstate = mbstate_start;
 #endif /* TRE_MBSTATE */
@@ -648,7 +648,7 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 	}
     }
 
-  ret = match_eo >= 0 ? REG_OK : REG_NOMATCH;
+  ret = match_eo >= 0 ? REG_OK : TRE_REG_NOMATCH;
   *match_end_ofs = match_eo;
 
  error_exit:
@@ -662,5 +662,5 @@ tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
     xfree(states_seen);
 #endif /* !TRE_USE_ALLOCA */
 
-  return (reg_errcode_t)ret;
+  return (tre_reg_errcode_t)ret;
 }

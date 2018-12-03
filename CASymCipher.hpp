@@ -5,14 +5,14 @@ Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice, 
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+		this list of conditions and the following disclaimer in the documentation and/or 
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
+		may be used to endorse or promote products derived from this software without specific 
 		prior written permission. 
 
 	
@@ -31,16 +31,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define KEY_SIZE 16
 
 #include "CALockAble.hpp"
-
+#include "CAMutex.hpp"
 /** This class could be used for encryption/decryption of data (streams) with
-  * AES using 128bit OFB mode. Because of the OFB mode technical encryption
+	* AES using 128bit OFB mode. Because of the OFB mode technical encryption
 	* and decrpytion are the same (depending on the kind of input). Therefore
 	* there is only a general crypt() function.
 	* This class has a 2-in-1 feature: Two independent IVs are available. Therefore
 	* we have crypt1() and crypt2() depending on the used IV.
 	*/
 class CASymCipher
-#ifndef ONLY_LOCAL_PROXY	
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 	:public CALockAble
 #endif
 	{
@@ -61,10 +61,10 @@ class CASymCipher
 					m_iv2=new UINT8[16];
 
 					m_nEncMsgCounter = 0;
-					m_pEncMsgIV = new UINT8[12];
+					m_pEncMsgIV = new UINT32[3];
 					memset(m_pEncMsgIV, 0, 12);
 					m_nDecMsgCounter = 0;
-					m_pDecMsgIV = new UINT8[12];
+					m_pDecMsgIV = new UINT32[3];
 					memset(m_pDecMsgIV, 0, 12);
 
 					m_pGCMCtxEnc = NULL;
@@ -98,10 +98,15 @@ class CASymCipher
 					delete [] m_pDecMsgIV;
 					m_pDecMsgIV = NULL;
 
+#ifndef USE_OPENSSL_GCM
 					delete m_pGCMCtxEnc;
-					m_pGCMCtxEnc = NULL;
-
 					delete m_pGCMCtxDec;
+#else
+					CRYPTO_gcm128_release(m_pGCMCtxEnc);
+					CRYPTO_gcm128_release(m_pGCMCtxDec);
+#endif
+
+					m_pGCMCtxEnc = NULL;
 					m_pGCMCtxDec = NULL;
 
 					delete m_pcsEnc;
@@ -158,12 +163,17 @@ class CASymCipher
 		private:
 			CAMutex* m_pcsEnc;
 			CAMutex* m_pcsDec;
+#ifndef USE_OPENSSL_GCM
 			gcm_ctx_64k* m_pGCMCtxEnc;
 			gcm_ctx_64k* m_pGCMCtxDec;
+#else
+			GCM128_CONTEXT* m_pGCMCtxEnc;
+			GCM128_CONTEXT* m_pGCMCtxDec;
+#endif
 			UINT32 m_nEncMsgCounter;
-			UINT8* m_pEncMsgIV;
+			UINT32* m_pEncMsgIV;
 			UINT32 m_nDecMsgCounter;
-			UINT8* m_pDecMsgIV;
+			UINT32* m_pDecMsgIV;
 
 		protected:
 

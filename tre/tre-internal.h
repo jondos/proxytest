@@ -18,13 +18,13 @@
 #endif /* !HAVE_WCTYPE_H */
 
 #include <ctype.h>
-#include "regex.h"
+#include "tre.h"
 
 #ifdef TRE_DEBUG
 #include <stdio.h>
-#define DPRINT(msg) do {printf msg; fflush(stdout);} while(/*CONSTCOND*/0)
+#define DPRINT(msg) do {printf msg; fflush(stdout);} while(/*CONSTCOND*/(void)0,0)
 #else /* !TRE_DEBUG */
-#define DPRINT(msg) //do { } while(/*CONSTCOND*/0)
+#define DPRINT(msg) do { } while(/*CONSTCOND*/(void)0,0)
 #endif /* !TRE_DEBUG */
 
 #define elementsof(x)	( sizeof(x) / sizeof(x[0]) )
@@ -164,7 +164,7 @@ struct tnfa_transition {
   /* Assertion parameters. */
   union {
     /* Character class assertion. */
-    tre_ctype_t my_class;
+    tre_ctype_t tre_class;
     /* Back reference assertion. */
     int backref;
   } u;
@@ -250,32 +250,32 @@ struct tnfa {
 };
 
 int
-tre_compile(regex_t *preg, const tre_char_t *regex, size_t n, int cflags);
+tre_compile(tre_regex_t *preg, const tre_char_t *regex, size_t n, int cflags);
 
 void
-tre_free(regex_t *preg);
+tre_free(tre_regex_t *preg);
 
 void
-tre_fill_pmatch(size_t nmatch, regmatch_t pmatch[], int cflags,
+tre_fill_pmatch(size_t nmatch, tre_regmatch_t pmatch[], int cflags,
 		const tre_tnfa_t *tnfa, int *tags, int match_eo);
 
-reg_errcode_t
+tre_reg_errcode_t
 tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 		      tre_str_type_t type, int *match_tags, int eflags,
 		      int *match_end_ofs);
 
-reg_errcode_t
+tre_reg_errcode_t
 tre_tnfa_run_parallel(const tre_tnfa_t *tnfa, const void *string, int len,
 		      tre_str_type_t type, int *match_tags, int eflags,
 		      int *match_end_ofs);
 
-reg_errcode_t
+tre_reg_errcode_t
 tre_tnfa_run_backtrack(const tre_tnfa_t *tnfa, const void *string,
 		       int len, tre_str_type_t type, int *match_tags,
 		       int eflags, int *match_end_ofs);
 
 #ifdef TRE_APPROX
-reg_errcode_t
+tre_reg_errcode_t
 tre_tnfa_run_approx(const tre_tnfa_t *tnfa, const void *string, int len,
 		    tre_str_type_t type, int *match_tags,
 		    regamatch_t *match, regaparams_t params,

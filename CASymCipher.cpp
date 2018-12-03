@@ -1,28 +1,28 @@
 /*
-Copyright (c) 2000, The JAP-Team 
+Copyright (c) 2000, The JAP-Team
 All rights reserved.
-Redistribution and use in source and binary forms, with or without modification, 
+Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-	- Redistributions of source code must retain the above copyright notice, 
-	  this list of conditions and the following disclaimer.
+	- Redistributions of source code must retain the above copyright notice,
+		this list of conditions and the following disclaimer.
 
-	- Redistributions in binary form must reproduce the above copyright notice, 
-	  this list of conditions and the following disclaimer in the documentation and/or 
+	- Redistributions in binary form must reproduce the above copyright notice,
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
-	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors 
-	  may be used to endorse or promote products derived from this software without specific 
-		prior written permission. 
+	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
+		may be used to endorse or promote products derived from this software without specific
+		prior written permission.
 
-	
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS 
-OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY 
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS ``AS IS'' AND ANY EXPRESS
+OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
 AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS
 BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER 
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY 
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
+OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
@@ -30,13 +30,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //AES
 
 /** Sets the key1 and key2 used for encryption/decryption. Also resets the IVs to zero!
-	* @param key 16 random bytes used as key 
+	* @param key 16 random bytes used as key
 	* @retval E_SUCCESS
 	*/
 SINT32 CASymCipher::setKey(const UINT8* key)
-	{
-		return setKey(key,true);
-	}
+{
+	return setKey(key,true);
+}
 
 /** Sets the key1 and key2 used for encryption/decryption to the same value of key. Also resets the IVs to zero!
 	* @param key 16 random bytes used as key
@@ -44,50 +44,50 @@ SINT32 CASymCipher::setKey(const UINT8* key)
 	* @retval E_SUCCESS
 	*/
 SINT32 CASymCipher::setKey(const UINT8* key,bool bEncrypt)
-	{
+{
 #ifdef INTEL_IPP_CRYPTO
-		ippsRijndael128Init(key, IppsRijndaelKey128,m_keyAES1);
-		ippsRijndael128Init(key, IppsRijndaelKey128,m_keyAES2);
+	ippsRijndael128Init(key, IppsRijndaelKey128,m_keyAES1);
+	ippsRijndael128Init(key, IppsRijndaelKey128,m_keyAES2);
 #else
-		if(bEncrypt)
-			{
-				AES_set_encrypt_key(key,128,m_keyAES1);
-				AES_set_encrypt_key(key,128,m_keyAES2);
-			}
-		else
-			{
-				AES_set_decrypt_key(key,128,m_keyAES1);
-				AES_set_decrypt_key(key,128,m_keyAES2);
-			}
+	if(bEncrypt)
+		{
+			AES_set_encrypt_key(key,128,m_keyAES1);
+			AES_set_encrypt_key(key,128,m_keyAES2);
+		}
+	else
+		{
+			AES_set_decrypt_key(key,128,m_keyAES1);
+			AES_set_decrypt_key(key,128,m_keyAES2);
+		}
 #endif
-		memset(m_iv1,0,16);
-		memset(m_iv2,0,16);
-		m_bKeySet=true;
-		return E_SUCCESS;
-	}
+	memset(m_iv1,0,16);
+	memset(m_iv2,0,16);
+	m_bKeySet=true;
+	return E_SUCCESS;
+}
 
 SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
-	{
-		if(keysize==KEY_SIZE)
-			{
-				return setKey(key);
-			}
-		else if(keysize==2*KEY_SIZE)
-			{
+{
+	if(keysize==KEY_SIZE)
+		{
+			return setKey(key);
+		}
+	else if(keysize==2*KEY_SIZE)
+		{
 #ifdef INTEL_IPP_CRYPTO
-				ippsRijndael128Init(key, IppsRijndaelKey128,m_keyAES1);
-				ippsRijndael128Init(key+KEY_SIZE, IppsRijndaelKey128,m_keyAES2);
+			ippsRijndael128Init(key, IppsRijndaelKey128,m_keyAES1);
+			ippsRijndael128Init(key+KEY_SIZE, IppsRijndaelKey128,m_keyAES2);
 #else
-				AES_set_encrypt_key(key,128,m_keyAES1);
-				AES_set_encrypt_key(key+KEY_SIZE,128,m_keyAES2);
+			AES_set_encrypt_key(key,128,m_keyAES1);
+			AES_set_encrypt_key(key+KEY_SIZE,128,m_keyAES2);
 #endif
-				memset(m_iv1,0,16);
-				memset(m_iv2,0,16);
-				m_bKeySet=true;
-				return E_SUCCESS;
-			}
-		return E_UNKNOWN;
-	}
+			memset(m_iv1,0,16);
+			memset(m_iv2,0,16);
+			m_bKeySet=true;
+			return E_SUCCESS;
+		}
+	return E_UNKNOWN;
+}
 
 /** Encryptes/Decrpytes in to out using iv1 and key1. AES is used for encryption and the encryption
 	* is done with a special
@@ -97,265 +97,317 @@ SINT32 CASymCipher::setKeys(const UINT8* key,UINT32 keysize)
 	* is created by calling AES-encrypt(iv).
 	* @param in input (plain text) bytes
 	* @param out output (encrpyted) bytes
-	* @param len len of input. because the cipher preserves the size, 
+	* @param len len of input. because the cipher preserves the size,
 	*													len of output=len of input
 	* @retval E_SUCCESS
 	*/
 SINT32 CASymCipher::crypt1(const UINT8* in,UINT8* out,UINT32 len)
-	{
+{
 #ifdef INTEL_IPP_CRYPTO
-				UINT32 k=len&0xFFFFFFF0;
-				ippsRijndael128EncryptOFB(in,out,k,16, m_keyAES1,m_iv1);
+	UINT32 k=len&0xFFFFFFF0;
+	ippsRijndael128EncryptOFB(in,out,k,16, m_keyAES1,m_iv1);
 //				if((len%16)!=0)
 //					{
-						ippsRijndael128EncryptOFB(in+k,out+k,len%16,len%16, m_keyAES1,m_iv1);
+	ippsRijndael128EncryptOFB(in+k,out+k,len%16,len%16, m_keyAES1,m_iv1);
 //					}
-				return E_SUCCESS;
+	return E_SUCCESS;
 #endif
-		UINT32 i=0;
-    while(i+15<len)
-    	{
+	UINT32 i=0;
+	while(i+15<len)
+		{
 #ifdef INTEL_IPP_CRYPTO
-				ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES1, IppsCPPaddingNONE);
+			ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES1, IppsCPPaddingNONE);
 #else
-				AES_encrypt(m_iv1,m_iv1,m_keyAES1);
+			AES_encrypt(m_iv1,m_iv1,m_keyAES1);
 #endif
-				out[i]=in[i]^m_iv1[0];
-				i++;
-				out[i]=in[i]^m_iv1[1];
-				i++;
-				out[i]=in[i]^m_iv1[2];
-				i++;
-				out[i]=in[i]^m_iv1[3];
-				i++;
-				out[i]=in[i]^m_iv1[4];
-				i++;
-				out[i]=in[i]^m_iv1[5];
-				i++;
-				out[i]=in[i]^m_iv1[6];
-				i++;
-				out[i]=in[i]^m_iv1[7];
-				i++;
-				out[i]=in[i]^m_iv1[8];
-				i++;
-				out[i]=in[i]^m_iv1[9];
-				i++;
-				out[i]=in[i]^m_iv1[10];
-				i++;
-				out[i]=in[i]^m_iv1[11];
-				i++;
-				out[i]=in[i]^m_iv1[12];
-				i++;
-				out[i]=in[i]^m_iv1[13];
-				i++;
-				out[i]=in[i]^m_iv1[14];
-				i++;
-				out[i]=in[i]^m_iv1[15];
-				i++;
-			}
-		if(i<len) //In this case len-i<16 !
-			{
+			out[i]=in[i]^m_iv1[0];
+			i++;
+			out[i]=in[i]^m_iv1[1];
+			i++;
+			out[i]=in[i]^m_iv1[2];
+			i++;
+			out[i]=in[i]^m_iv1[3];
+			i++;
+			out[i]=in[i]^m_iv1[4];
+			i++;
+			out[i]=in[i]^m_iv1[5];
+			i++;
+			out[i]=in[i]^m_iv1[6];
+			i++;
+			out[i]=in[i]^m_iv1[7];
+			i++;
+			out[i]=in[i]^m_iv1[8];
+			i++;
+			out[i]=in[i]^m_iv1[9];
+			i++;
+			out[i]=in[i]^m_iv1[10];
+			i++;
+			out[i]=in[i]^m_iv1[11];
+			i++;
+			out[i]=in[i]^m_iv1[12];
+			i++;
+			out[i]=in[i]^m_iv1[13];
+			i++;
+			out[i]=in[i]^m_iv1[14];
+			i++;
+			out[i]=in[i]^m_iv1[15];
+			i++;
+		}
+	if(i<len) //In this case len-i<16 !
+		{
 #ifdef INTEL_IPP_CRYPTO
-				ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES1, IppsCPPaddingNONE);
+			ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES1, IppsCPPaddingNONE);
 #else
-				AES_encrypt(m_iv1,m_iv1,m_keyAES1);
+			AES_encrypt(m_iv1,m_iv1,m_keyAES1);
 #endif
-				len-=i;
-				for(UINT32 k=0;k<len;k++)
-				 {
-					 out[i]=in[i]^m_iv1[k];
-					 i++;
-					}
-			}
-		return E_SUCCESS;
-	}
+			len-=i;
+			for(UINT32 k=0; k<len; k++)
+				{
+					out[i]=in[i]^m_iv1[k];
+					i++;
+				}
+		}
+	return E_SUCCESS;
+}
 
 /** Decryptes in to out using iv2 and key2.
 	* @param in input (encrypted) bytes
 	* @param out output (decrpyted) bytes
-	* @param len len of input. because the cipher preserves the size, 
+	* @param len len of input. because the cipher preserves the size,
 	*													len of output=len of input
 	* @retval E_SUCCESS
 	*/
 SINT32 CASymCipher::crypt2(const UINT8* in,UINT8* out,UINT32 len)
-	{
-		UINT32 i=0;
-		while(i+15<len)
-			{
+{
+	UINT32 i=0;
+	while(i+15<len)
+		{
 #ifdef INTEL_IPP_CRYPTO
-				ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES2, IppsCPPaddingNONE);
+			ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES2, IppsCPPaddingNONE);
 #else
-				AES_encrypt(m_iv2,m_iv2,m_keyAES2);
+			AES_encrypt(m_iv2,m_iv2,m_keyAES2);
 #endif
-				out[i]=in[i]^m_iv2[0];
-				i++;
-				out[i]=in[i]^m_iv2[1];
-				i++;
-				out[i]=in[i]^m_iv2[2];
-				i++;
-				out[i]=in[i]^m_iv2[3];
-				i++;
-				out[i]=in[i]^m_iv2[4];
-				i++;
-				out[i]=in[i]^m_iv2[5];
-				i++;
-				out[i]=in[i]^m_iv2[6];
-				i++;
-				out[i]=in[i]^m_iv2[7];
-				i++;
-				out[i]=in[i]^m_iv2[8];
-				i++;
-				out[i]=in[i]^m_iv2[9];
-				i++;
-				out[i]=in[i]^m_iv2[10];
-				i++;
-				out[i]=in[i]^m_iv2[11];
-				i++;
-				out[i]=in[i]^m_iv2[12];
-				i++;
-				out[i]=in[i]^m_iv2[13];
-				i++;
-				out[i]=in[i]^m_iv2[14];
-				i++;
-				out[i]=in[i]^m_iv2[15];
-				i++;
-			}
-		if(i<len)
-			{
+			out[i]=in[i]^m_iv2[0];
+			i++;
+			out[i]=in[i]^m_iv2[1];
+			i++;
+			out[i]=in[i]^m_iv2[2];
+			i++;
+			out[i]=in[i]^m_iv2[3];
+			i++;
+			out[i]=in[i]^m_iv2[4];
+			i++;
+			out[i]=in[i]^m_iv2[5];
+			i++;
+			out[i]=in[i]^m_iv2[6];
+			i++;
+			out[i]=in[i]^m_iv2[7];
+			i++;
+			out[i]=in[i]^m_iv2[8];
+			i++;
+			out[i]=in[i]^m_iv2[9];
+			i++;
+			out[i]=in[i]^m_iv2[10];
+			i++;
+			out[i]=in[i]^m_iv2[11];
+			i++;
+			out[i]=in[i]^m_iv2[12];
+			i++;
+			out[i]=in[i]^m_iv2[13];
+			i++;
+			out[i]=in[i]^m_iv2[14];
+			i++;
+			out[i]=in[i]^m_iv2[15];
+			i++;
+		}
+	if(i<len)
+		{
 #ifdef INTEL_IPP_CRYPTO
-				ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES2, IppsCPPaddingNONE);
+			ippsRijndael128EncryptECB(m_iv1,m_iv1,KEY_SIZE, m_keyAES2, IppsCPPaddingNONE);
 #else
-				AES_encrypt(m_iv2,m_iv2,m_keyAES2);
+			AES_encrypt(m_iv2,m_iv2,m_keyAES2);
 #endif
-				len-=i;
-				for(UINT32 k=0;k<len;k++)
-				 {
-					 out[i]=in[i]^m_iv2[k];
-					 i++;
-					}
+			len-=i;
+			for(UINT32 k=0; k<len; k++)
+				{
+					out[i]=in[i]^m_iv2[k];
+					i++;
 				}
-		return E_SUCCESS;
-	}
+		}
+	return E_SUCCESS;
+}
 
 /** En-/Decryptes in to out using iv1 and key1. AES is used for en-/dcryption and the cryption
 	* is done with CBC mode and PKCS7 padding.
 	* @param in input (plain or ciphertext) bytes
 	* @param out output (plain or ciphertext) bytes
-	* @param len len of input. on return the output len, 
+	* @param len len of input. on return the output len,
 	*													which is always <= len of input
 	* @retval E_SUCCESS
 	* @retval E_UNKNOWN, if error
 	*/
 SINT32 CASymCipher::decrypt1CBCwithPKCS7(const UINT8* in,UINT8* out,UINT32* len)
-	{
-		if(in==NULL||out==NULL||len==NULL||*len==0)
-			return E_UNKNOWN;
+{
+	if(in==NULL||out==NULL||len==NULL||*len==0)
+		return E_UNKNOWN;
 #ifdef INTEL_IPP_CRYPTO
 #else
-		AES_cbc_encrypt(in,out,*len,m_keyAES1,m_iv1,AES_DECRYPT);
-		//Now remove padding
-		UINT32 pad=out[*len-1];
-		if(pad>16||pad>*len)
+	AES_cbc_encrypt(in,out,*len,m_keyAES1,m_iv1,AES_DECRYPT);
+	//Now remove padding
+	UINT32 pad=out[*len-1];
+	if(pad>16||pad>*len)
+		return E_UNKNOWN;
+	for(UINT32 i=*len-pad; i<*len-1; i++)
+		if(out[i]!=pad)
 			return E_UNKNOWN;
-		for(UINT32 i=*len-pad;i<*len-1;i++)
-				if(out[i]!=pad)
-					return E_UNKNOWN;
-		*len-=pad;
+	*len-=pad;
 #endif
-		return E_SUCCESS;
-	}
+	return E_SUCCESS;
+}
 
 /** En-/Decryptes in to out using IV1 and key1. AES is used for en-/decryption and the cryption
 	* is done with CBC mode and PKCS7 padding.
 	* @param in input (plain or ciphertext) bytes
 	* @param inlen size of the input buffer
 	* @param out output (plain or ciphertext) bytes
-	* @param len on call len of output buffer; on return size of output buffer used, 
+	* @param len on call len of output buffer; on return size of output buffer used,
 	*													which is always > len of input
 	* @retval E_SUCCESS
 	*/
 SINT32 CASymCipher::encrypt1CBCwithPKCS7(const UINT8* in,UINT32 inlen,UINT8* out,UINT32* len)
-	{
+{
 #ifdef INTEL_IPP_CRYPTO
 #else
-		UINT32 padlen=16-(inlen%16);
-		if(inlen+padlen>(*len))
-			{
-				return E_SPACE;
-			}
-		UINT8* tmp=new UINT8[inlen+padlen];
-		memcpy(tmp,in,inlen);
-		for(UINT32 i=inlen;i<inlen+padlen;i++)
-			{
-				tmp[i]=(UINT8)padlen;
-			}
-		AES_cbc_encrypt(tmp,out,inlen+padlen,m_keyAES1,m_iv1,AES_ENCRYPT);
-		delete[] tmp;
-		tmp = NULL;
-		*len=inlen+padlen;
+	UINT32 padlen=16-(inlen%16);
+	if(inlen+padlen>(*len))
+		{
+			return E_SPACE;
+		}
+	UINT8* tmp=new UINT8[inlen+padlen];
+	memcpy(tmp,in,inlen);
+	for(UINT32 i=inlen; i<inlen+padlen; i++)
+		{
+			tmp[i]=(UINT8)padlen;
+		}
+	AES_cbc_encrypt(tmp,out,inlen+padlen,m_keyAES1,m_iv1,AES_ENCRYPT);
+	delete[] tmp;
+	tmp = NULL;
+	*len=inlen+padlen;
 #endif
-		return E_SUCCESS;
-	}	
+	return E_SUCCESS;
+}
 
+#ifndef ONLY_LOCAL_PROXY
 SINT32 CASymCipher::testSpeed()
-	{
-		const UINT32 runs=1000000;
-		CASymCipher* pCipher=new CASymCipher();
-		UINT8 key[16];
-		UINT8* inBuff=new UINT8[1024];
-		getRandom(key,16);
-		getRandom(inBuff,1024);
-		pCipher->setKey(key);
-		UINT64 start,end;
-		getcurrentTimeMillis(start);
-		for(UINT32 i=0;i<runs;i++)
-			{
-				pCipher->crypt1(inBuff,inBuff,1023);
-			}
-		getcurrentTimeMillis(end);
-		UINT32 d=diff64(end,start);
-		printf("CASymCiper::testSpeed() takes %u ms for %u * 1023 Bytes!\n",d,runs);
-		return E_SUCCESS;
-	}
+{
+	const UINT32 runs=1000000;
+	CASymCipher* pCipher=new CASymCipher();
+	UINT8 key[16];
+	UINT8* inBuff=new UINT8[1024];
+	getRandom(key,16);
+	getRandom(inBuff,1024);
+	pCipher->setKey(key);
+	UINT64 start,end;
+	getcurrentTimeMillis(start);
+	for(UINT32 i=0; i<runs; i++)
+		{
+			pCipher->crypt1(inBuff,inBuff,1023);
+		}
+	getcurrentTimeMillis(end);
+	UINT32 d=diff64(end,start);
+	printf("CASymCiper::testSpeed() takes %u ms for %u * 1023 Bytes!\n",d,runs);
+	return E_SUCCESS;
+}
+#endif
 
-void CASymCipher::setGCMKeys(UINT8* keyRecv, UINT8* keySend) {
+void CASymCipher::setGCMKeys(UINT8* keyRecv, UINT8* keySend)
+{
+
+#ifndef USE_OPENSSL_GCM
+	m_pGCMCtxEnc = new gcm_ctx_64k;
+	m_pGCMCtxDec = new gcm_ctx_64k;
+#else
+	//Note the have to provide *some* key (OpenSSL API enforced --> so the use the variables we have anyway..)
+	// The Key will be overriden by a call to setKeyGCM in any case!
+	AES_set_encrypt_key(m_iv1,128,m_keyAES1);
+	m_pGCMCtxEnc = CRYPTO_gcm128_new(m_keyAES1,(block128_f)AES_encrypt);
+	m_pGCMCtxDec = CRYPTO_gcm128_new(m_keyAES1,(block128_f)AES_encrypt);
+#endif
+
+
+
+#ifndef USE_OPENSSL_GCM
+	if(m_pGCMCtxDec!=NULL)
+		delete m_pGCMCtxDec;
+	if(m_pGCMCtxEnc!=NULL)
+		delete m_pGCMCtxEnc;
+
 	m_pGCMCtxEnc = new gcm_ctx_64k;
 	m_pGCMCtxDec = new gcm_ctx_64k;
 	gcm_init_64k(m_pGCMCtxEnc, keySend, 128);
 	gcm_init_64k(m_pGCMCtxDec, keyRecv, 128);
+#else
+	AES_set_encrypt_key(keyRecv,128,m_keyAES1);
+	AES_set_encrypt_key(keySend,128,m_keyAES2);
+	CRYPTO_gcm128_release(m_pGCMCtxEnc);
+	CRYPTO_gcm128_release(m_pGCMCtxDec);
+	m_pGCMCtxEnc=CRYPTO_gcm128_new(m_keyAES2,(block128_f)AES_encrypt);
+	m_pGCMCtxDec=CRYPTO_gcm128_new(m_keyAES1,(block128_f)AES_encrypt);
+#endif
+	//reset IV
+	m_nEncMsgCounter = 0;
+	memset(m_pEncMsgIV, 0, 12);
+	m_nDecMsgCounter = 0;
+	memset(m_pDecMsgIV, 0, 12);
 }
 
-SINT32 CASymCipher::encryptMessage(const UINT8* in, UINT32 inlen, UINT8* out) {
-	if (m_pGCMCtxEnc != NULL) {
-		m_pcsEnc->lock();
-		UINT32 iv = htonl(m_nEncMsgCounter);
-		m_nEncMsgCounter++;
-		memcpy(m_pEncMsgIV + 8, &iv, 4);
-		::gcm_encrypt_64k(m_pGCMCtxEnc, m_pEncMsgIV, 12, in, inlen, NULL, 0, out, out + inlen);
-		m_pcsEnc->unlock();
-		return E_SUCCESS;
-	} else {
-		memcpy(out, in, inlen);
-		return -1;
-	}
+SINT32 CASymCipher::encryptMessage(const UINT8* const in, UINT32 inlen, UINT8* out)
+{
+	//m_pcsEnc->lock();
+	m_pEncMsgIV[2] = htonl(m_nEncMsgCounter);
+	m_nEncMsgCounter++;
+#ifndef USE_OPENSSL_GCM
+	gcm_encrypt_64k(m_pGCMCtxEnc, m_pEncMsgIV, in, inlen, out, (UINT32*)(out + inlen));
+#else
+	CRYPTO_gcm128_setiv(m_pGCMCtxEnc,(UINT8*)m_pEncMsgIV,12);
+	CRYPTO_gcm128_encrypt(m_pGCMCtxEnc,in,out,inlen);
+	CRYPTO_gcm128_tag(m_pGCMCtxEnc,out+inlen,16);
+#endif
+	//m_pcsEnc->unlock();
+	return E_SUCCESS;
 }
 
-SINT32 CASymCipher::decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bool integrityCheck) {
-	SINT32 ret = 0;
-	if (m_pGCMCtxDec != NULL) {
-		m_pcsDec->lock();
-		UINT32 iv = htonl(m_nDecMsgCounter);
-		if (integrityCheck) m_nDecMsgCounter++;
-		memcpy(m_pDecMsgIV + 8, &iv, 4);
-		if (integrityCheck) {
-			ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, 12, in, inlen - 16, in + inlen - 16, 16, NULL, 0, out);
-		} else {
-			ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, 12, in, inlen, NULL, 0, NULL, 0, out);
+SINT32 CASymCipher::decryptMessage(const UINT8* in, UINT32 inlen, UINT8* out, bool integrityCheck)
+{
+	SINT32 ret = E_UNKNOWN;
+	//m_pcsDec->lock();
+	m_pDecMsgIV[2] = htonl(m_nDecMsgCounter);
+	if (integrityCheck)
+		{
+			m_nDecMsgCounter++;
+#ifndef USE_OPENSSL_GCM
+			ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, in, inlen - 16, in + inlen - 16, out);
+#else
+			CRYPTO_gcm128_setiv(m_pGCMCtxDec,(UINT8*)m_pDecMsgIV,12);
+			CRYPTO_gcm128_decrypt(m_pGCMCtxDec,in,out,inlen-16);
+			ret=CRYPTO_gcm128_finish(m_pGCMCtxDec,in + inlen - 16,16);
+#endif
 		}
-		m_pcsDec->unlock();
-		return ret;
-	} else {
-		memcpy(out, in, inlen);
-		return -1;
-	}
+	else
+		{
+#ifndef USE_OPENSSL_GCM
+			ret = ::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV, in, inlen, out);
+#else
+			CRYPTO_gcm128_setiv(m_pGCMCtxDec,(UINT8*)m_pDecMsgIV,12);
+			ret=CRYPTO_gcm128_decrypt(m_pGCMCtxDec,in,out,inlen);
+#endif
+		}
+	//m_pcsDec->unlock();
+#ifndef USE_OPENSSL_GCM
+	if(ret==0)
+#else
+	if(ret!=0)
+#endif
+		return E_UNKNOWN;
+	return E_SUCCESS;
 }

@@ -37,6 +37,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAThreadList.hpp"
 #include "CAStatusManager.hpp"
 #include "CALibProxytest.hpp"
+#include "InnerMiddleMix.hpp"
 
 #ifdef _DEBUG //For FreeBSD memory checking functionality
 	const char* _malloc_options="AX";
@@ -46,11 +47,38 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAReplayDatabase.hpp"
 #endif
 
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INLUDE_LAST_MIX
+
+#ifdef INCLUDE_MIDDLE_MIX
+#include "CAMiddleMix.hpp"
+InnerMiddleMix* pIMix =NULL;
+bool bIsInnerMiddleMix=false;
+#endif
+
+#ifdef INCLUDE_LAST_MIX
+	#ifdef NEW_MIX_TYPE
+		/* use TypeB mixes */
+		#include "TypeB/CAFirstMixB.hpp"
+		#include "TypeB/CALastMixB.hpp"
+	#else
+		#include "TypeA/CAFirstMixA.hpp"
+		#include "TypeA/CALastMixA.hpp"
+	#endif
+#endif
+
+
+// The Mix....
+CAMix* pMix=NULL;
+
+
+
+#endif
+
 #ifndef ONLY_LOCAL_PROXY
 	#include "xml/DOM_Output.hpp"
 	#include "CAMix.hpp"
 	#ifdef LOG_CRIME
-		#include "tre/regex.h"
+		#include "tre/tre.h"
 	#endif
 	#ifdef NEW_MIX_TYPE
 		/* use TypeB mixes */
@@ -60,18 +88,20 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#include "TypeA/CAFirstMixA.hpp"
 		#include "TypeA/CALastMixA.hpp"
 	#endif
-	#include "CAMiddleMix.hpp"
 	#include "CALogPacketStats.hpp"
 	#include "CATLSClientSocket.hpp"
 
 #ifdef REPLAY_DATABASE_PERFORMANCE_TEST
   #include "CAReplayDatabase.hpp"
 #endif
-// The Mix....
-CAMix* pMix=NULL;
 #endif
 
 bool bTriedTermination = false;
+
+#if defined(HAVE_CRTDBG)
+		_CrtMemState* s1;
+		_CrtMemState s2, s3;
+#endif
 
 #ifndef _WIN32
 	#ifdef _DEBUG
@@ -129,6 +159,19 @@ void cleanup()
 		CAMsg::printMsg(LOG_CRIT,"Terminating Programm!\n");
 		removePidFile();
 		CALibProxytest::cleanup();
+#if defined(HAVE_CRTDBG)
+		_CrtMemCheckpoint( &s2 );
+		if ( _CrtMemDifference( &s3, s1, &s2 ) )
+      _CrtMemDumpStatistics( &s3 );
+		else
+			{
+				printf("Memory leak check clean!\n");
+			}
+		delete s1;
+#endif
+#ifdef CWDEBUG
+		Debug(list_allocations_on(libcw_do));
+#endif
 	}
 
 ///Remark: terminate() might be already defined by the c lib -- do not use this name...
@@ -137,13 +180,13 @@ void my_terminate(void)
 	if(!bTriedTermination)
 	{
 		bTriedTermination = true;
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 		if(pMix!=NULL)
 		{
 			pMix->shutDown();
-			for (UINT32 i = 0; i < 20 && !(pMix->isShutDown()); i++)
+			for (UINT32 i = 0; i < 200 && !(pMix->isShutDown()); i++)
 			{
-				msSleep(100);
+				msSleep(1000);
 			}
 			delete pMix;
 			pMix=NULL;
@@ -165,7 +208,7 @@ void signal_segv( int )
 	sSleep(1);
 
 #ifdef PRINT_THREAD_STACK_TRACE
-	CAThread::METHOD_STACK* stack = CAThread::getCurrentStack();
+	METHOD_STACK* stack = CAThread::getCurrentStack();
 	if (stack != NULL)
 	{
 		CAMsg::printMsg( LOG_CRIT, "Stack trace: %s, \"%s\"\n", stack->strMethodName, stack->strPosition);
@@ -434,25 +477,26 @@ See \ref XMLMixCascadeStatus "[XML]" for a description of the XML struct send.
 
 int main(int argc, const char* argv[])
 	{
-#ifndef ONLY_LOCAL_PROXY
+		SINT32 exitCode=0;
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INLUDE_LAST_MIX
 		pMix=NULL;
 #endif
 		UINT32 lLogOpts = 0;
 		SINT32 maxFiles,ret;
 #if defined(HAVE_CRTDBG)
 //			_CrtSetReportMode( _CRT_WARN, _CRTDBG_MODE_FILE );
-//			_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
+			_CrtSetReportFile( _CRT_WARN, _CRTDBG_FILE_STDOUT );
 //			_CrtSetReportMode( _CRT_ERROR, _CRTDBG_MODE_FILE );
-//			_CrtSetReportFile( _CRT_ERROR, _CRTDBG_FILE_STDOUT );
+			_CrtSetReportFile( _CRT_ERROR, _CRTDBG_FILE_STDOUT );
 //			_CrtSetReportMode( _CRT_ASSERT, _CRTDBG_MODE_FILE );
-//			_CrtSetReportFile( _CRT_ASSERT, _CRTDBG_FILE_STDOUT );
+			_CrtSetReportFile( _CRT_ASSERT, _CRTDBG_FILE_STDOUT );
 
 		UINT32 tmpDbgFlag = _CrtSetDbgFlag(_CRTDBG_REPORT_FLAG);
 		tmpDbgFlag |= _CRTDBG_ALLOC_MEM_DF;
 		tmpDbgFlag |=_CRTDBG_LEAK_CHECK_DF;
 		_CrtSetDbgFlag(tmpDbgFlag);
-		_CrtMemState s1, s2, s3;
-		_CrtMemCheckpoint( &s1 );
+		s1=new _CrtMemState;
+		_CrtMemCheckpoint( s1 );
 #endif
 //Switch on debug infos
 #ifdef CWDEBUG
@@ -518,6 +562,11 @@ int main(int argc, const char* argv[])
 //		CADataRetentionLogFile::doCheckAndPerformanceTest();
 //		getch();
 //		exit(0);
+
+//				CAQueue::test();
+//				getch();
+//				exit(0);
+
 #ifdef _DEBUG
 			UINT32 start;
 #endif
@@ -540,10 +589,109 @@ int main(int argc, const char* argv[])
 //		exit(0);
 //#endif
 
+// AES GCM test //
+/*
+UINT8 key[16];
+memset(key,0,16);
+UINT8 in[256];
+memset(in,0,256);
+UINT8 out[256+16];
+memset(out,1,256+16);
+UINT8 out2[256+16];
+memset(out2,1,256+16);
+
+UINT8 iv[12];
+memset(iv,0,12);
+UINT8 tag[16];
+UINT8 tag2[16];
+AES_KEY* aeskey=new AES_KEY;
+AES_set_encrypt_key(key,128,aeskey);
+GCM128_CONTEXT * gcmCtxt=NULL;
+gcmCtxt=CRYPTO_gcm128_new(aeskey,(block128_f)AES_encrypt);
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+CRYPTO_gcm128_encrypt(gcmCtxt,in,out,256);
+CRYPTO_gcm128_tag(gcmCtxt,tag,16);
+
+CASymCipher* myAes=new CASymCipher();
+myAes->setGCMKeys(key,key);
+myAes->encryptMessage(in,256,out2);
+
+int rtz1=memcmp(out,out2,256);
+int rtz2=memcmp(tag,out2+256,16);
+
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+memset(in,1,256);
+CRYPTO_gcm128_decrypt(gcmCtxt,out,in,256);
+int rtz=CRYPTO_gcm128_finish(gcmCtxt,tag,16);
+printf("Result: %i\n",rtz);
+printf("Result: %i\n",rtz1);
+printf("Result: %i\n",rtz2);
+
+myAes->setGCMKeys(key,key);
+myAes->encryptMessage(in,256,out);
+
+CASymCipher* myAes1=new CASymCipher();
+myAes1->setGCMKeys(key,key);
+myAes1->encryptMessage(in,256,out2);
+
+myAes->encryptMessage(in,256,out2);
+
+
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+memset(in,1,256);
+CRYPTO_gcm128_decrypt(gcmCtxt,out,in,256);
+memset(in,1,256);
+iv[11]=1;
+CRYPTO_gcm128_setiv(gcmCtxt,iv,12);
+CRYPTO_gcm128_decrypt(gcmCtxt,out2,in,256);
+
+
+
+exit(0);
+*/
+//End AEs GCM Test
+
+///CAIPAddrWithNetmask Test
+	/*		CAIPAddrWithNetmask ip;
+			ip.setAddr((UINT8*)"141.0.0.0");
+			ip.setNetmask((UINT8*)"255.0.0.0");
+			UINT8 tmpIPBuff[255];
+			UINT32 tmpIPBuffLen=255;
+			ip.toString(tmpIPBuff,&tmpIPBuffLen);
+			printf("%s\n",tmpIPBuff);
+			UINT8 testIP[4];
+			testIP[0]=141;
+			testIP[1]=76;
+			testIP[2]=46;
+			testIP[3]=12;
+			if(ip.equals(testIP))
+				{
+				printf("ok\n");
+				}
+			exit(0);*/
+///End CAIPAddrWithNetmask Test
+
+//Test CAAsymCrypto
+/*CAASymCipher oRSA;
+oRSA.generateKeyPair(1024);
+UINT32 outlen=128;
+UINT8 in[200];
+for(int i=0;i<200;i++)
+	in[i]=i;
+UINT8 out[228];
+oRSA.encryptOAEP(in,80,out,&outlen);
+memset(in,0,200);
+out[outlen-1]+=1;//manipulate...
+oRSA.decryptOAEP(out,in,&outlen);
+exit(0);
+*/
+//End Test CAAsymCrypto
+
 		if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"An error occurred before we could finish parsing the configuration file. Exiting...\n");
-			exit(EXIT_FAILURE);
+ 			exitCode=EXIT_FAILURE;
+			goto EXIT;
 		}
 		if(!(	CALibProxytest::getOptions()->isFirstMix()||
 					CALibProxytest::getOptions()->isMiddleMix()||
@@ -554,7 +702,8 @@ int main(int argc, const char* argv[])
 				CAMsg::printMsg(LOG_CRIT,"Use -j or -c\n");
 				CAMsg::printMsg(LOG_CRIT,"Or try --help for more options.\n");
 				CAMsg::printMsg(LOG_CRIT,"Exiting...\n");
-				exit(EXIT_FAILURE);
+	 			exitCode=EXIT_FAILURE;
+				goto EXIT;
 			}
 
 		UINT8 buff[255];
@@ -593,18 +742,19 @@ int main(int argc, const char* argv[])
 
 		if (CALibProxytest::getOptions()->initLogging() != E_SUCCESS)
 		{
-				exit(EXIT_FAILURE);
+ 			exitCode=EXIT_FAILURE;
+			goto EXIT;
 		}
 		
 
 
 #if defined (_DEBUG) &&!defined(ONLY_LOCAL_PROXY)
 		//		CADatabase::test();
-		if(CAQueue::test()!=E_SUCCESS)
+	/*	if(CAQueue::test()!=E_SUCCESS)
 			CAMsg::printMsg(LOG_CRIT,"CAQueue::test() NOT passed! Exiting\n");
 		else
 			CAMsg::printMsg(LOG_DEBUG,"CAQueue::test() passed!\n");
-
+			*/
 		//CALastMixChannelList::test();
 		//exit(0);
 		//Testing msSleep
@@ -626,6 +776,7 @@ int main(int argc, const char* argv[])
 
 #ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
 		ProfilerStart("gperf.cpuprofiler.data");
+		ProfilerRegisterThread();
 #endif
 
 #ifndef _WIN32
@@ -671,7 +822,8 @@ int main(int argc, const char* argv[])
 										seteuid(old_uid);
 						#endif
 						CAMsg::printMsg(LOG_CRIT,"Could not write pidfile - exiting!\n");
-						exit(EXIT_FAILURE);
+			 			exitCode=EXIT_FAILURE;
+						goto EXIT;
 					}
 				close(hFile);
 #ifndef _WIN32
@@ -704,8 +856,8 @@ int main(int argc, const char* argv[])
 				//		goto EXIT;
 				//	}
 				//else
-#ifndef ONLY_LOCAL_PROXY
-			SINT32 s32MaxSockets=CASocket::getMaxOpenSockets();
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INCLUDE_LAST_MIX 
+			SINT32 s32MaxSockets=10000;//CASocket::getMaxOpenSockets();
 			CAMsg::printMsg(LOG_INFO,"Max Number of sockets we can open: %i\n",s32MaxSockets);
 			
 #ifdef SERVER_MONITORING
@@ -717,6 +869,7 @@ int main(int argc, const char* argv[])
 				CASocket::setMaxNormalSockets(s32MaxSockets-10);
 				}
 				MONITORING_FIRE_SYS_EVENT(ev_sys_start);
+#if !defined ONLY_LOCAL_PROXY
 				if(CALibProxytest::getOptions()->isFirstMix())
 				{
 					CAMsg::printMsg(LOG_INFO,"I am the First MIX...\n");
@@ -727,12 +880,15 @@ int main(int argc, const char* argv[])
 					#endif
 					MONITORING_FIRE_NET_EVENT(ev_net_firstMixInited);
 				}
-				else if(CALibProxytest::getOptions()->isMiddleMix())
+				else
+#endif
+				if(CALibProxytest::getOptions()->isMiddleMix())
 				{
 					CAMsg::printMsg(LOG_INFO,"I am a Middle MIX...\n");
 					pMix=new CAMiddleMix();
 					MONITORING_FIRE_NET_EVENT(ev_net_middleMixInited);
 				}
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX 
 				else
 				{
 					CAMsg::printMsg(LOG_INFO,"I am the Last MIX...\n");
@@ -743,18 +899,32 @@ int main(int argc, const char* argv[])
 					#endif
 					MONITORING_FIRE_NET_EVENT(ev_net_lastMixInited);
 				}
+#endif
+#ifdef WITH_SGX
+				else 
+				{
+					bIsInnerMiddleMix=true;
+					pIMix=new InnerMiddleMix();
+					CAMsg::printMsg(LOG_INFO, "Starting Inner Middle Mix");
+					pIMix->start();
+					if(pIMix!=NULL) delete pIMix;
+					pIMix=NULL;
+					goto EXIT;
+				}
+#endif // WTIH_SGX
 #else
 				CAMsg::printMsg(LOG_ERR,"this Mix is compiled to work only as local proxy!\n");
 				exit(EXIT_FAILURE);
 #endif
 			}
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INCLUDE_LAST_MIX 
 #ifndef DYNAMIC_MIX
 	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
 		if(pMix->start()!=E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"Error during MIX-Startup!\n");
-			exit(EXIT_FAILURE);
+ 			exitCode=EXIT_FAILURE;
+			goto EXIT;
 		}
 #else
     /* LERNGRUPPE */
@@ -797,13 +967,6 @@ while(true)
 #endif //ONLY_LOCAL_PROXY
 EXIT:
 		cleanup();
-#if defined(HAVE_CRTDBG)
-		_CrtMemCheckpoint( &s2 );
-		if ( _CrtMemDifference( &s3, &s1, &s2 ) )
-      _CrtMemDumpStatistics( &s3 );
-#endif
-#ifdef CWDEBUG
-		Debug(list_allocations_on(libcw_do));
-#endif
-		return 0;
+
+		return exitCode;
 	}

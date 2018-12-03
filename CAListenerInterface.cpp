@@ -34,7 +34,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include "CASocketAddrUnix.hpp"
 #endif
 
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 const char* CAListenerInterface::XML_ELEMENT_CONTAINER_NAME = "ListenerInterfaces";
 const char* CAListenerInterface::XML_ELEMENT_NAME = "ListenerInterface";
 #endif
@@ -87,7 +87,34 @@ CAListenerInterface* CAListenerInterface::getInstance(NetworkType type,const UIN
 		return pListener;
 	}
 
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+SINT32	CAListenerInterface::toDOMElement(DOMElement* & elemListenerInterface,XERCES_CPP_NAMESPACE::DOMDocument* ownerDoc) const
+	{
+		elemListenerInterface=createDOMElement(ownerDoc,"ListenerInterface");
+		DOMElement* elem=createDOMElement(ownerDoc,"Type");
+		elemListenerInterface->appendChild(elem);
+		setDOMElementValue(elem,(UINT8*)"RAW/TCP");
+		elem=createDOMElement(ownerDoc,"Port");
+		elemListenerInterface->appendChild(elem);
+		UINT32 port=((CASocketAddrINet*)m_pAddr)->getPort();
+		setDOMElementValue(elem,port);
+		elem=createDOMElement(ownerDoc,"Host");
+		elemListenerInterface->appendChild(elem);
+		UINT8 ip[50];
+		if(m_strHostname!=NULL)
+			setDOMElementValue(elem,m_strHostname);
+		else 
+			{
+				((CASocketAddrINet*)m_pAddr)->getIPAsStr(ip,50);
+				setDOMElementValue(elem,ip);
+			}
+		elem=createDOMElement(ownerDoc,"IP");
+		elemListenerInterface->appendChild(elem);
+		((CASocketAddrINet*)m_pAddr)->getIPAsStr(ip,50);
+		setDOMElementValue(elem,ip);
+		return E_SUCCESS;
+	}
+
 CAListenerInterface** CAListenerInterface::getInstance(DOMElement* a_elemListenerInterfaces, 
 													  UINT32& r_length)
 {
@@ -123,33 +150,6 @@ CAListenerInterface** CAListenerInterface::getInstance(DOMElement* a_elemListene
 	return interfaces;
 }
 
-
-SINT32	CAListenerInterface::toDOMElement(DOMElement* & elemListenerInterface,XERCES_CPP_NAMESPACE::DOMDocument* ownerDoc) const
-	{
-		elemListenerInterface=createDOMElement(ownerDoc,"ListenerInterface");
-		DOMElement* elem=createDOMElement(ownerDoc,"Type");
-		elemListenerInterface->appendChild(elem);
-		setDOMElementValue(elem,(UINT8*)"RAW/TCP");
-		elem=createDOMElement(ownerDoc,"Port");
-		elemListenerInterface->appendChild(elem);
-		UINT32 port=((CASocketAddrINet*)m_pAddr)->getPort();
-		setDOMElementValue(elem,port);
-		elem=createDOMElement(ownerDoc,"Host");
-		elemListenerInterface->appendChild(elem);
-		UINT8 ip[50];
-		if(m_strHostname!=NULL)
-			setDOMElementValue(elem,m_strHostname);
-		else 
-			{
-				((CASocketAddrINet*)m_pAddr)->getIPAsStr(ip,50);
-				setDOMElementValue(elem,ip);
-			}
-		elem=createDOMElement(ownerDoc,"IP");
-		elemListenerInterface->appendChild(elem);
-		((CASocketAddrINet*)m_pAddr)->getIPAsStr(ip,50);
-		setDOMElementValue(elem,ip);
-		return E_SUCCESS;
-	}
 
 CAListenerInterface* CAListenerInterface::getInstance(const DOMNode* elemListenerInterface)
 	{
@@ -252,4 +252,5 @@ ERR:
 		pListener = NULL;
 		return NULL;
 }
+
 #endif //ONLY_LOCAL_PROXY

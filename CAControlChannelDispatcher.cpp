@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX 
 #include "CAControlChannelDispatcher.hpp"
 #include "CAAbstractControlChannel.hpp"
 
@@ -91,10 +91,9 @@ SINT32 CAControlChannelDispatcher::encryptMessage(const UINT8* in,UINT32 inlen, 
 		if(m_pGCMCtxEnc!=NULL)
 		{
 			m_pcsEnc->lock();
-			UINT32 iv=htonl(m_nEncMsgCounter);
+			m_pEncMsgIV[2]=htonl(m_nEncMsgCounter);
 			m_nEncMsgCounter++;
-			memcpy(m_pEncMsgIV+8,&iv,4);
-			::gcm_encrypt_64k(m_pGCMCtxEnc, m_pEncMsgIV ,12, in,inlen,NULL,0,out,out+inlen);
+			::gcm_encrypt_64k(m_pGCMCtxEnc, m_pEncMsgIV , in,inlen,out,(UINT32*)(out+inlen));
 			*outlen=inlen+16;
 			m_pcsEnc->unlock();
 		}
@@ -114,7 +113,7 @@ SINT32 CAControlChannelDispatcher::decryptMessage(const UINT8* in,UINT32 inlen, 
 				UINT32 iv=htonl(m_nDecMsgCounter);
 				m_nDecMsgCounter++;
 				memcpy(m_pDecMsgIV+8,&iv,4);
-				::gcm_decrypt_64k(m_pGCMCtxDec, m_pDecMsgIV ,12, in,inlen-16,in+inlen-16,16,NULL,0,out);
+				::gcm_decrypt_64k(m_pGCMCtxDec,(UINT32*) m_pDecMsgIV , in,inlen-16,in+inlen-16,out);
 				*outlen=inlen-16;
 				m_pcsDec->unlock();
 			}

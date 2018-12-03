@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CASIGNATURE__
 #define __CASIGNATURE__
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #define SIGKEY_XML 1
 #define SIGKEY_PKCS12 2
 #define SHA1_REFERENCE "http://www.w3.org/2000/09/xmldsig#sha1"
@@ -96,7 +96,7 @@ class CASignature
 			SINT32 verify(UINT8* in, UINT32 inLen, UINT8* sig, const UINT32 sigLen);
 			bool isDSA() const;
 			bool isRSA() const;
-#ifdef ECC
+#ifdef HAVE_ECC
 			bool isECDSA() const;
 #endif //ECC
 			UINT8* getSignatureMethod();
@@ -116,7 +116,7 @@ class CASignature
 			SINT32 signRSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32* sigLen) const;
 			SINT32 verifyRSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32 sigLen) const;
 			SINT32 verifyDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32 sigLen) const;
-#ifdef ECC
+#ifdef HAVE_ECC
 			EC_KEY* m_pEC;
 			EC_KEY* getECKey(){ return m_pEC; }
 			SINT32 signECDSA(const UINT8* dgst, const UINT32 dgstLen, UINT8* sig, UINT32* sigLen) const;

@@ -168,10 +168,9 @@ fmHashTableEntry* CAFirstMixChannelList::add(CAMuxSocket* pMuxSocket,const UINT8
 #ifdef PAYMENT
 		pHashTableEntry->pAccountingInfo=NULL;
 #endif
-
 		SAVE_STACK("CAFirstMixChannelList::add", "copying peer IP");
 		memcpy(pHashTableEntry->peerIP,peerIP,4);
-#ifdef DATA_RETENTION_LOG
+#if defined(DATA_RETENTION_LOG) || defined(LOG_CRIME)
 		pHashTableEntry->peerPort=pMuxSocket->getCASocket()->getPeerPort();
 #endif
 #ifdef DELAY_USERS
@@ -272,6 +271,9 @@ SINT32 CAFirstMixChannelList::addChannel(CAMuxSocket* pMuxSocket,HCHANNEL channe
 #endif
 #ifdef SSL_HACK
 		pNewEntry->downStreamBytes = 0;
+#endif
+#ifdef ANON_DEBUG_MODE
+		pNewEntry->bDebug = false;
 #endif
 
 

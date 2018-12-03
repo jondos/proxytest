@@ -28,16 +28,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CATHREAD__
 #define __CATHREAD__
 
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 
 #include "CAMsg.hpp"
 
 class CAThreadList;
 
 #ifdef PRINT_THREAD_STACK_TRACE
-	#define INIT_STACK CAThread::METHOD_STACK* _stack
+	#define INIT_STACK METHOD_STACK* _stack
 	#define SAVE_STACK(methodName, methodPosition) \
-	_stack = new CAThread::METHOD_STACK; \
+	_stack = new METHOD_STACK; \
 	_stack->strMethodName = (methodName); \
 	_stack->strPosition = (methodPosition); \
 	CAThread::setCurrentStack(_stack)
@@ -68,6 +68,16 @@ typedef THREAD_RETURN(*THREAD_MAIN_TYP)(void *);
 
 ///Type of an ID for a thread which can be used to identify the current and other threads
 typedef unsigned long thread_id_t;
+
+#ifdef PRINT_THREAD_STACK_TRACE
+			struct __METHOD_STACK__
+			{
+				const char* strMethodName;
+				const char* strPosition;
+			};
+
+			typedef struct __METHOD_STACK__ METHOD_STACK;
+#endif
 
 /** @defgroup threading Classes for multithreaded programming
 	*
@@ -104,13 +114,6 @@ typedef unsigned long thread_id_t;
 class CAThread
 	{
 		public:
-#ifdef PRINT_THREAD_STACK_TRACE
-			struct METHOD_STACK
-			{
-				const char* strMethodName;
-				const char* strPosition;
-			};
-#endif
 			/** Creates a CAThread object but no actual thread.
 				*/
 			CAThread();

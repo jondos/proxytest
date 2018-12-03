@@ -43,11 +43,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 void CAFirstMixA::shutDown()
 {
 	m_bIsShuttingDown = true;
-
-#ifdef PAYMENT
+	m_bLoop=false;
+//#ifdef PAYMENT
 	UINT32 connectionsClosed = 0;
 	fmHashTableEntry* timeoutHashEntry;
 
+#ifdef PAYMENT
 
 	/* make sure no reconnect is possible when shutting down */
 	if(m_pthreadAcceptUsers!=NULL)
@@ -64,7 +65,6 @@ void CAFirstMixA::shutDown()
 		CAMsg::printMsg(LOG_DEBUG,"Shutting down infoservice.\n");
 		m_pInfoService->stop();
 	}
-
 	if(m_pChannelList!=NULL) // may happen if mixes did not yet connect to each other
 	{
 		while ((timeoutHashEntry = m_pChannelList->popTimeoutEntry(true)) != NULL)
@@ -153,11 +153,7 @@ SINT32 CAFirstMixA::closeConnection(fmHashTableEntry* pHashEntry)
 	return E_SUCCESS;
 }
 
-#ifdef NEW_CHANNEL_ENCRYPTION
-	#define FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
-#else
-	#define FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS KEY_SIZE
-#endif
+#define FIRST_MIX_SIZE_OF_SYMMETRIC_KEYS 2*KEY_SIZE
 
 SINT32 CAFirstMixA::loop()
 	{
@@ -201,7 +197,7 @@ SINT32 CAFirstMixA::loop()
 #endif
 
 #ifdef LOG_CRIME
-		CASocketAddrINet* surveillanceIPs = CALibProxytest::getOptions()->getCrimeSurveillanceIPs();
+		CAIPAddrWithNetmask* surveillanceIPs = CALibProxytest::getOptions()->getCrimeSurveillanceIPs();
 		UINT32 nrOfSurveillanceIPs = CALibProxytest::getOptions()->getNrOfCrimeSurveillanceIPs();
 #endif
 //		CAThread threadReadFromUsers;
@@ -302,6 +298,18 @@ SINT32 CAFirstMixA::loop()
 														goto NEXT_USER;
 													}
 												}
+#ifdef ANON_DEBUG_MODE
+												bool bIsDebugPacket=false;
+												if (pMixPacket->flags&CHANNEL_DEBUG)
+													{
+													bIsDebugPacket=true;
+													UINT8 base64Payload[DATA_SIZE << 1];
+													EVP_EncodeBlock(base64Payload, pMixPacket->data, DATA_SIZE);//base64 encoding (without newline!)
+													pMixPacket->flags &= ~CHANNEL_DEBUG;
+													CAMsg::printMsg(LOG_DEBUG, "AN.ON packet debug: %s\n", base64Payload);
+													}
+
+#endif
 #ifdef PAYMENT
 												if(accountTrafficUpstream(pHashEntry) != E_SUCCESS) goto NEXT_USER;
 #endif
@@ -371,20 +379,25 @@ SINT32 CAFirstMixA::loop()
 													CASymCipher* pCipher=NULL;
 													fmChannelListEntry* pEntry;
 													pEntry=m_pChannelList->get(pMuxSocket,pMixPacket->channel);
-													if(pEntry!=NULL&&pMixPacket->flags==CHANNEL_DATA)
-													{
-														pMixPacket->channel=pEntry->channelOut;
-														pCipher=pEntry->pCipher;
-														pCipher->crypt1(pMixPacket->data,pMixPacket->data,DATA_SIZE);
-														                     // queue the packet for sending to the next mix.
-														#ifdef LOG_PACKET_TIMES
-															getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
-														#endif
+													if (pEntry != NULL&&pMixPacket->flags == CHANNEL_DATA)
+														{
+														pMixPacket->channel = pEntry->channelOut;
+														pCipher = pEntry->pCipher;
+														pCipher->crypt1(pMixPacket->data, pMixPacket->data, DATA_SIZE);
+														// queue the packet for sending to the next mix.
+#ifdef LOG_PACKET_TIMES
+														getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
+#endif
 
 														//check if this IP must be logged due to crime detection
-														#ifdef LOG_CRIME
-															crimeSurveillance(surveillanceIPs, nrOfSurveillanceIPs,
-																pEntry->pHead->peerIP, pMixPacket);
+#ifdef LOG_CRIME
+														crimeSurveillance(surveillanceIPs, nrOfSurveillanceIPs, pEntry->pHead->peerIP,pEntry->pHead->peerPort, pMixPacket);
+#endif
+#ifdef ANON_DEBUG_MODE
+														if(bIsDebugPacket)
+															{
+															pMixPacket->flags|=CHANNEL_DEBUG;
+															}
 														#endif
 														m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
 														/* Don't delay upstream
@@ -463,10 +476,17 @@ SINT32 CAFirstMixA::loop()
 																pEntry=m_pChannelList->get(pMuxSocket, inChannel);
 																if(pEntry != NULL)
 																{
-																	crimeSurveillance(surveillanceIPs, nrOfSurveillanceIPs,
-																			pEntry->pHead->peerIP, pMixPacket);
+																	crimeSurveillance(surveillanceIPs, nrOfSurveillanceIPs, pEntry->pHead->peerIP,pEntry->pHead->peerPort, pMixPacket);
 																}
 															#endif
+#ifdef ANON_DEBUG_MODE
+																if (bIsDebugPacket)
+																	{
+																		pMixPacket->flags |= CHANNEL_DEBUG;
+																		pEntry = m_pChannelList->get(pMuxSocket, inChannel);
+																		pEntry->bDebug = true;
+																	}
+#endif
 															m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
 															/* Don't delay upstream
 															#ifdef DELAY_USERS
@@ -513,9 +533,21 @@ NEXT_USER:
 						countRead--;
 						ret=sizeof(tQueueEntry);
 						m_pQueueReadFromMix->get((UINT8*)pQueueEntry,(UINT32*)&ret);
+
 						#ifdef LOG_PACKET_TIMES
 							getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_start_OP);
 						#endif
+#ifdef ANON_DEBUG_MODE
+						if (pMixPacket->flags&CHANNEL_DEBUG)
+							{
+								UINT8 base64Payload[DATA_SIZE << 1];
+								EVP_EncodeBlock(base64Payload, pMixPacket->data, DATA_SIZE);//base64 encoding (without newline!)
+								CAMsg::printMsg(LOG_DEBUG, "Dequeued Downstream AN.ON packet from previous Mix debug: %s\n", base64Payload);
+								pMixPacket->flags &= ~CHANNEL_DEBUG;
+							}
+
+#endif
+
 						if(pMixPacket->flags==CHANNEL_CLOSE) //close event
 							{
 								#if defined(_DEBUG) && !defined(__MIX_TEST)
@@ -607,11 +639,12 @@ NEXT_USER:
 													if(!CALibProxytest::getOptions()->isEncryptedLogEnabled())
 														log=LOG_CRIT;
 													CAMsg::printMsg(log,"Detecting crime activity - next mix channel: %u -- "
-															"In-IP is: %u.%u.%u.%u \n", pMixPacket->channel,
+															"Incoming (User) IP:Port is: %u.%u.%u.%u:%u \n", pMixPacket->channel,
 															pEntry->pHead->peerIP[0],
 															pEntry->pHead->peerIP[1],
 															pEntry->pHead->peerIP[2],
-															pEntry->pHead->peerIP[3]);
+															pEntry->pHead->peerIP[3],
+															pEntry->pHead->peerPort);
 													continue;
 												}
 										#endif
@@ -628,7 +661,17 @@ NEXT_USER:
 										#ifdef LOG_PACKET_TIMES
 											getcurrentTimeMicros(pQueueEntry->timestamp_proccessing_end_OP);
 										#endif
-										pEntry->pHead->pQueueSend->add(pQueueEntry, sizeof(tQueueEntry));
+#ifdef ANON_DEBUG_MODE
+											if (pEntry->bDebug)
+												{	
+												pMixPacket->flags |= CHANNEL_DEBUG;
+												UINT8 base64Payload[DATA_SIZE << 1];
+												EVP_EncodeBlock(base64Payload, pMixPacket->data, DATA_SIZE);//base64 encoding (without newline!)
+												CAMsg::printMsg(LOG_DEBUG, "Send Dowwstream AN.ON packet debug: %s\n", base64Payload);
+												}
+
+#endif
+											pEntry->pHead->pQueueSend->add(pQueueEntry, sizeof(tQueueEntry));
 										/*CAMsg::printMsg(
 												LOG_INFO,"adding data packet to queue: %x, queue size: %u bytes\n",
 												pEntry->pHead->pQueueSend, pEntry->pHead->pQueueSend->getSize());*/
@@ -659,35 +702,6 @@ NEXT_USER:
 											m_psocketgroupUsersWrite->add(*pEntry->pHead->pMuxSocket);
 										#endif
 
-#ifndef NO_PARKING
-//										UINT32 uQueueSize=pEntry->pHead->pQueueSend->getSize();
-//										if(uQueueSize>200000)
-//											CAMsg::printMsg(LOG_INFO,"User Send Queue size is now %u\n",uQueueSize);
-										if(
-											#ifndef SSL_HACK
-											pEntry->pHead->pQueueSend->getSize() > MAX_USER_SEND_QUEUE
-											#else
-											/* a hack to solve the SSL problem:
-											 * only suspend channels with > MAX_DATA_PER_CHANNEL bytes
-											 */
-											pEntry->downStreamBytes > MAX_DATA_PER_CHANNEL
-											#endif
-											&& !pEntry->bIsSuspended)
-
-											{
-												pMixPacket->channel = pEntry->channelOut;
-												pMixPacket->flags = CHANNEL_SUSPEND;
-												#ifdef _DEBUG
-													CAMsg::printMsg(LOG_INFO,"Sending suspend for channel: %u\n",pMixPacket->channel);
-												#endif
-												#ifdef LOG_PACKET_TIMES
-													setZero64(pQueueEntry->timestamp_proccessing_start);
-												#endif
-												m_pQueueSendToMix->add(pQueueEntry, sizeof(tQueueEntry));
-												pEntry->bIsSuspended=true;
-												pEntry->pHead->cSuspend++;
-											}
-#endif
 										incMixedPackets();
 									}
 								else
@@ -717,7 +731,7 @@ NEXT_USER:
 //ERR:
 		CAMsg::printMsg(LOG_CRIT,"Seems that we are restarting now!!\n");
 		m_bRunLog=false;
-		//clean();
+		clean();
 		delete pQueueEntry;
 		pQueueEntry = NULL;
 		delete []tmpBuff;
@@ -731,7 +745,6 @@ NEXT_USER:
 #endif//NEW_MIX_TYPE
 		return E_UNKNOWN;
 	}
-#endif //ONLY_LOCAL_PROXY
 
 /* last part of the main loop:
  * return true if the loop when at least one packet was sent
@@ -804,6 +817,16 @@ bool CAFirstMixA::sendToUsers()
 #ifdef SSL_HACK
 					finishPacket(pfmHashEntry);
 #endif //SSL_HACK
+#ifdef ANON_DEBUG_MODE
+					if (packetToSend->packet.flags&CHANNEL_DEBUG)
+						{
+						UINT8 base64Payload[DATA_SIZE << 1];
+						EVP_EncodeBlock(base64Payload, packetToSend->packet.data, DATA_SIZE);//base64 encoding (without newline!)
+						CAMsg::printMsg(LOG_DEBUG, "Send Downstream AN.ON packet to user debug: %s\n", base64Payload);
+						packetToSend->packet.flags &= ~CHANNEL_DEBUG;
+						}
+
+#endif
 					pfmHashEntry->pMuxSocket->prepareForSend(&(packetToSend->packet));
 					pfmHashEntry->uAlreadySendPacketSize = 0;
 				}
@@ -819,7 +842,9 @@ bool CAFirstMixA::sendToUsers()
 
 				if(ret > 0)
 				{
+#ifdef PAYMENT
 					SINT32 accounting = E_SUCCESS;
+#endif
 					pfmHashEntry->uAlreadySendPacketSize += ret;
 
 					if(pfmHashEntry->uAlreadySendPacketSize == MIXPACKET_SIZE)
@@ -845,14 +870,6 @@ bool CAFirstMixA::sendToUsers()
 #endif
 					}
 
-					if(accounting == E_SUCCESS)
-					{
-						if( (pfmHashEntry->cSuspend > 0) &&
-							(dataMessageUserQueue->getSize() < USER_SEND_BUFFER_RESUME) )
-						{
-							resumeAllUserChannels(pfmHashEntry);
-						}
-					}
 				}
 				else if(ret<0&&ret!=E_AGAIN)
 				{
@@ -961,14 +978,10 @@ SINT32 CAFirstMixA::accountTrafficDownstream(fmHashTableEntry* pfmHashEntry)
 }
 #endif
 
-void CAFirstMixA::resumeAllUserChannels(fmHashTableEntry *pfmHashEntry)
-{
-	notifyAllUserChannels(pfmHashEntry, CHANNEL_RESUME);
-}
-
 void CAFirstMixA::notifyAllUserChannels(fmHashTableEntry *pfmHashEntry, UINT16 flags)
 {
-	if(pfmHashEntry == NULL) return;
+	if(pfmHashEntry == NULL) 
+		return;
 	fmChannelListEntry* pEntry = m_pChannelList->getFirstChannelForSocket(pfmHashEntry->pMuxSocket);
 	tQueueEntry* pQueueEntry=new tQueueEntry;
 	MIXPACKET *notifyPacket = &(pQueueEntry->packet);
@@ -1099,18 +1112,21 @@ void CAFirstMixA::checkUserConnections()
 #endif
 
 #ifdef LOG_CRIME
-void CAFirstMixA::crimeSurveillance(CASocketAddrINet* surveillanceIPs, UINT32 nrOfSurveillanceIPs,UINT8 *peerIP, MIXPACKET *pMixPacket)
+void CAFirstMixA::crimeSurveillance(CAIPAddrWithNetmask* surveillanceIPs, UINT32 nrOfSurveillanceIPs,UINT8 *peerIP,SINT32 peerPort, MIXPACKET *pMixPacket)
 {
 	if( (nrOfSurveillanceIPs > 0) && (surveillanceIPs != NULL) )
 	{
 		for(UINT32 i = 0; i < nrOfSurveillanceIPs; i++)
 		{
-			if(surveillanceIPs[i].equalsIP(peerIP))
+			if(surveillanceIPs[i].equals(peerIP))
 			{
-				CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, IP %u.%u.%u.%u with next mix channel %u\n",peerIP[0], peerIP[1], peerIP[2], peerIP[3],pMixPacket->channel);
+				CAMsg::printMsg(LOG_CRIT,"Crime detection: User surveillance, IP %u.%u.%u.%u Port %i with next mix channel %u\n",peerIP[0], peerIP[1], peerIP[2], peerIP[3],peerPort,pMixPacket->channel);
 				pMixPacket->flags |= CHANNEL_SIG_CRIME;
+				return;
 			}
 		}
 	}
 }
 #endif
+
+#endif //ONLY_LOCAL_PROXY

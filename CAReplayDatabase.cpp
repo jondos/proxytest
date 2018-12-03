@@ -277,7 +277,7 @@ SINT32 CAReplayDatabase::measurePerformance(	UINT8* strLogFile,
 		char buff[255];
 		const char* atemplate="%u,%u,%u\n";
 		const char* header="#The format is as follows: Number of Entries in DB, Number of Inserts done, Total time for Inserts (in micro seconds)\n";
-		write(file,header,strlen(header));
+		myfilewrite(file,header,strlen(header));
 		while(aktNrOfEntries<=upperBoundEntries)
 			{
 				CAMsg::printMsg(LOG_DEBUG,"Starting measurement with %u entries in the replay database\n",aktNrOfEntries);
@@ -305,7 +305,7 @@ SINT32 CAReplayDatabase::measurePerformance(	UINT8* strLogFile,
 							}
 						getcurrentTimeMicros(endTime);
 						sprintf(buff,atemplate,aktNrOfEntries,insertsPerMeasure,diff64(endTime,startTime));
-						write(file,buff,strlen(buff));
+						myfilewrite(file,buff,strlen(buff));
 						printf("Start delete \n");
 						getcurrentTimeMicros(startTime);
 						delete pDatabase;

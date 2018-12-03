@@ -26,7 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "CAQueue.hpp"
 #include "CAMsg.hpp"
 #include "CAUtil.hpp"
@@ -78,6 +78,8 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 		if(size==0)
 			return E_SUCCESS;
 		if(buff==NULL)
+			return E_UNKNOWN;
+		if (m_bClosed)
 			return E_UNKNOWN;
 		m_pcsQueue->lock();
 		//if(m_pHeap==NULL)
@@ -144,6 +146,7 @@ SINT32 CAQueue::add(const void* buff,UINT32 size)
 	* @param psize on call contains the size of pbuff, on return contains 
 	*								the size of returned data
 	* @retval E_SUCCESS if succesful
+	* @retval E_CLOSED if the queue is empty and closed 
 	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
@@ -155,6 +158,10 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 		if(m_Queue==NULL)
 			{
 				*psize=0;
+				if ((m_bClosed))
+					{
+						return E_CLOSED;
+					}
 				return E_SUCCESS;
 			}
 		m_pcsQueue->lock();
@@ -167,7 +174,7 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 				pbuff+=m_Queue->size;
 				space-=m_Queue->size;
 				m_nQueueSize-=m_Queue->size;
-				QUEUE* tmp=m_Queue;
+				QUEUE* tmp=(QUEUE*)m_Queue;
 				m_Queue=m_Queue->next;
 				//tmp->next=m_pHeap;
 				//m_pHeap=tmp;
@@ -200,13 +207,16 @@ SINT32 CAQueue::get(UINT8* pbuff,UINT32* psize)
 	* @param psize on call contains the size of pbuff, on return contains 
 	*								the size of returned data
 	* @retval E_SUCCESS if succesful
+	* @retval E_CLOSED if the queue is empty and closed 
 	* @retval E_UNKNOWN in case of an error
 	*/
 SINT32 CAQueue::getOrWait(UINT8* pbuff,UINT32* psize)
 	{
 		m_pconvarSize->lock();
-		while(m_Queue==NULL)
-			m_pconvarSize->wait();
+		while (m_Queue == NULL&&!m_bClosed)
+			{
+				m_pconvarSize->wait();
+			}
 		SINT32 ret=get(pbuff,psize);
 		m_pconvarSize->unlock();
 		return ret;
@@ -266,7 +276,7 @@ SINT32 CAQueue::peek(UINT8* pbuff,UINT32* psize)
 				m_pcsQueue->unlock();
 				return ret;
 			}
-		QUEUE* tmpQueue=m_Queue;
+		QUEUE* tmpQueue=(QUEUE*)m_Queue;
 		while(space>=tmpQueue->size)
 			{
 				memcpy(pbuff,tmpQueue->pBuff+tmpQueue->index,tmpQueue->size);
@@ -307,7 +317,7 @@ SINT32 CAQueue::remove(UINT32* psize)
 				*psize+=m_Queue->size;
 				space-=m_Queue->size;
 				m_nQueueSize-=m_Queue->size;
-				QUEUE* tmp=m_Queue;
+				QUEUE* tmp=(QUEUE*)m_Queue;
 				m_Queue=m_Queue->next;
 //				tmp->next=m_pHeap;
 //				m_pHeap=tmp;
@@ -339,6 +349,7 @@ struct __queue_test
 		SINT32 len;
 	};
 
+/*
 THREAD_RETURN producer(void* param)
 	{
 		struct __queue_test* pTest=(struct __queue_test *)param;
@@ -375,6 +386,56 @@ THREAD_RETURN consumer(void* param)
 				pTest->len-=aktSize;
 			}while(pTest->len>10);
 		THREAD_RETURN_SUCCESS;
+	}
+
+*/
+THREAD_RETURN producer(void* param)
+	{
+	struct __queue_test* pTest = (struct __queue_test *)param;
+	UINT8 buff[992];
+	UINT8 b = 0;
+	UINT32 burst=1;
+	while (pTest->len>10)
+		{
+		buff[0] = b;
+		b++;
+		if (pTest->pQueue->add(buff, 992) != E_SUCCESS)
+			THREAD_RETURN_ERROR;
+		burst--;
+		if (burst == 0)
+			{
+			burst = rand() % 10+1;
+				msSleep(rand() % 100);
+
+			}
+		}
+	THREAD_RETURN_SUCCESS;
+	}
+
+THREAD_RETURN consumer(void* param)
+	{
+	struct __queue_test* pTest = (struct __queue_test *)param;
+	UINT32 aktSize=992;
+	UINT8 buff[992];
+	UINT8 b = 0;
+	UINT32 burst=1;
+	do
+		{
+		aktSize = 992;
+		if (pTest->pQueue->getOrWait(buff, &aktSize) != E_SUCCESS)
+			THREAD_RETURN_ERROR;
+		if (buff[0]!=b)
+			THREAD_RETURN_ERROR;
+		b++;
+		burst--;
+		if (burst == 0)
+			{
+			burst = rand() % 10 + 1;
+			msSleep(rand() % 100);
+
+			}
+		} while (pTest->len>10);
+	THREAD_RETURN_SUCCESS;
 	}
 
 SINT32 CAQueue::test()
