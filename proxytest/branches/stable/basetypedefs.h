@@ -32,8 +32,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef _WIN32
 	#define HAVE_NATIVE_UINT64
 		//UINT64 already defined by Windows!
+#ifdef __clang__
+		typedef long long SINT64;
+#else
 		typedef _int64 SINT64;
-		typedef signed long SINT32;
+#endif
+		typedef signed int SINT32;
 		typedef unsigned short UINT16;
 		typedef signed short SINT16;
 		typedef unsigned char UINT8;

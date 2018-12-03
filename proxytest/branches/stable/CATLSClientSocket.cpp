@@ -94,7 +94,7 @@ SINT32 CATLSClientSocket::setServerCertificate(CACertificate* pCert)
  * Does the TLS handshake. The TCP Connection must be established first
  * and openSSL library must be initialized
  */
-SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa)
+SINT32 CATLSClientSocket::doTLSConnect(const CASocketAddr &psa)
 	{
 		SINT32 status;
 		#ifdef DEBUG
@@ -167,7 +167,7 @@ SINT32 CATLSClientSocket::doTLSConnect(CASocketAddr &psa)
 	* Establishes the TCP/IP connection, performs the TLS handshake and
 	* checks the server certificate validity
 	*/
-SINT32 CATLSClientSocket::connect(CASocketAddr & psa, UINT32 msTimeout)
+SINT32 CATLSClientSocket::connect(const CASocketAddr & psa, UINT32 msTimeout)
 	{
 		SINT32 rc;
 		// call base class connect function
@@ -224,7 +224,7 @@ SINT32 CATLSClientSocket::sendFully(const UINT8* buff, UINT32 len)
 	  if(len==0)
 			return E_SUCCESS; //nothing to send
 		SINT32 ret=::SSL_write(m_pSSL,(char*)buff,len);
-	  if(ret < 0 || ret < len)
+	  if(ret < 0 || ((UINT32)ret) < len)
 			return E_UNKNOWN;
 		return E_SUCCESS;
 	}

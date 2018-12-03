@@ -71,8 +71,6 @@
     <ClCompile Include="CAXMLCostConfirmation.cpp" />
     <ClCompile Include="CAXMLErrorMessage.cpp" />
     <ClCompile Include="CAXMLPriceCert.cpp" />
-    <ClCompile Include="gcm\gcm.cpp" />
-    <ClCompile Include="gcm\prp.cpp" />
     <ClCompile Include="Hashtable.cpp" />
     <ClCompile Include="popt\popt.cpp" />
     <ClCompile Include="popt\popthelp.cpp" />
@@ -102,6 +100,12 @@
     <ClCompile Include="xml\dom\mxml\mxmlXercesDOMParser.cpp" />
     <ClCompile Include="xml\DOM_Output.cpp" />
     <ClCompile Include="CALibProxytest.cpp" />
+    <ClCompile Include="gcm\gcm.cpp">
+      <Filter>gcm</Filter>
+    </ClCompile>
+    <ClCompile Include="gcm\prp.cpp">
+      <Filter>gcm</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CABase64.hpp" />
@@ -164,8 +168,6 @@
     <ClInclude Include="controlchannelids.h" />
     <ClInclude Include="doxygen.h" />
     <ClInclude Include="errorcodes.hpp" />
-    <ClInclude Include="gcm\gcm.h" />
-    <ClInclude Include="gcm\prp.h" />
     <ClInclude Include="Hashtable.hpp" />
     <ClInclude Include="popt\popt.h" />
     <ClInclude Include="popt\poptint.h" />
@@ -176,7 +178,6 @@
     <ClInclude Include="tre\tre-internal.h" />
     <ClInclude Include="tre\tre-match-utils.h" />
     <ClInclude Include="tre\tre-mem.h" />
-    <ClInclude Include="tre\xmalloc.h" />
     <ClInclude Include="trio\trio.hpp" />
     <ClInclude Include="trio\triodef.h" />
     <ClInclude Include="trio\trionan.h" />
@@ -246,6 +247,13 @@
     <ClInclude Include="CACmdLnOptions.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="CATargetInterface.hpp" />
+    <ClInclude Include="gcm\gcm.h">
+      <Filter>gcm</Filter>
+    </ClInclude>
+    <ClInclude Include="gcm\prp.h">
+      <Filter>gcm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="documentation\XML\FirstMixToInfoService.xml" />
@@ -260,6 +268,9 @@
   <ItemGroup>
     <Filter Include="Headers">
       <UniqueIdentifier>{42ea10e5-95b5-49e5-893e-cdc3f2d122a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gcm">
+      <UniqueIdentifier>{acbf3359-a3ac-400e-a8f8-5c74b95217a3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

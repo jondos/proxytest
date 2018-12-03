@@ -26,7 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "CAThread.hpp"
 #include "CAUtil.hpp"
 #include "CAMsg.hpp"
@@ -89,8 +89,7 @@ CAThread::CAThread(const UINT8* strName)
 #ifdef PRINT_THREAD_STACK_TRACE	
 void CAThread::destroyValue(void* a_value) 
 { 
-	delete a_value;
-	a_value = NULL; 
+	delete (METHOD_STACK* )a_value;
 }
 
 void CAThread::initKey() 
@@ -101,14 +100,12 @@ void CAThread::initKey()
 void CAThread::setCurrentStack(METHOD_STACK* a_value)
 {
 	pthread_once(&ms_threadKeyInit, initKey); 
-	void *value = pthread_getspecific(ms_threadKey); 
-
+	METHOD_STACK* value = (METHOD_STACK*)pthread_getspecific(ms_threadKey); 
 	delete value;
-	value = a_value; 
-	pthread_setspecific(ms_threadKey, value); 
+	pthread_setspecific(ms_threadKey, a_value); 
 }
 
-CAThread::METHOD_STACK* CAThread::getCurrentStack()
+METHOD_STACK* CAThread::getCurrentStack()
 {
 	pthread_once(&ms_threadKeyInit, initKey); 
 	return (METHOD_STACK*)pthread_getspecific(ms_threadKey); 
@@ -148,7 +145,7 @@ SINT32 CAThread::start(void* param,bool bDaemon,bool bSilent)
 				return E_UNKNOWN;
 			}
 		#endif
-#ifdef _DEBUG
+#if defined _DEBUG  && !defined(ONLY_LOCAL_PROXY)
 		if(m_pThreadList != NULL)
 		{
 			m_pThreadList->put(this);
@@ -201,7 +198,7 @@ SINT32 CAThread::join()
 	SINT32 ret=pthread_join(*m_pThread,NULL);
 	if(ret==0)
 	{
-#ifdef DEBUG
+#if defined DEBUG && !defined ONLY_LOCAL_PROXY
 			CAMsg::printMsg(LOG_DEBUG,"CAThread %s - join() successful\n", m_strName);
 			m_pThreadList->remove(this);
 #endif	

@@ -44,7 +44,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 volatile UINT32 CASocket::m_u32NormalSocketsOpen=0; //how many "normal" sockets are open
 UINT32 CASocket::m_u32MaxNormalSockets=0xFFFFFFFF; //how many "normal" sockets are allowed at max
-
+CAMutex* CASocket::m_pcsClose=NULL;
 
 CASocket::CASocket(bool bIsReservedSocket)
 	{
@@ -58,7 +58,7 @@ SINT32 CASocket::create()
 		return create(AF_INET, true);
 	}
 
-SINT32 CASocket::create(int type)
+SINT32 CASocket::create(SINT32 type)
 {
 	return create(type, true);
 }
@@ -69,13 +69,13 @@ SINT32 CASocket::create(bool a_bShowTypicalError)
 }
 
 ///@todo Not thread safe!
-SINT32 CASocket::create(int type, bool a_bShowTypicalError)
+SINT32 CASocket::create(SINT32 type, bool a_bShowTypicalError)
 	{
 		if(m_bSocketIsClosed)
 		{
 			if(m_bIsReservedSocket||m_u32NormalSocketsOpen<m_u32MaxNormalSockets)
 			{
-				m_Socket=socket(type,SOCK_STREAM,0);
+				m_Socket=::socket(type,SOCK_STREAM,0);
 				//CAMsg::printMsg(LOG_DEBUG,"Opened socket: %d\n", m_Socket);
 			}
 			else
@@ -105,12 +105,12 @@ SINT32 CASocket::create(int type, bool a_bShowTypicalError)
 				return E_SOCKET_CREATE;
 			}
 		m_bSocketIsClosed=false;
-		m_csClose.lock();
+		m_pcsClose->lock();
 		if(!m_bIsReservedSocket)
 		{
 			m_u32NormalSocketsOpen++;
 		}
-		m_csClose.unlock();
+		m_pcsClose->unlock();
 		return E_SUCCESS;
 	}
 
@@ -189,10 +189,10 @@ SINT32 CASocket::accept(CASocket &s)
 					return E_SOCKETCLOSED;
 				return E_UNKNOWN;
 			}
-		s.m_csClose.lock();
+		m_pcsClose->lock();
 		m_u32NormalSocketsOpen++;
 		s.m_bSocketIsClosed=false;
-		s.m_csClose.unlock();
+		m_pcsClose->unlock();
 		//CAMsg::printMsg(LOG_DEBUG,"Opened socket: %d\n", s.m_Socket);
 
 		return E_SUCCESS;
@@ -337,7 +337,7 @@ SINT32 CASocket::close()
 			return E_SUCCESS;
 		}
 
-		ret = m_csClose.lock();
+		ret = m_pcsClose->lock();
 		if (ret != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,
@@ -365,7 +365,7 @@ SINT32 CASocket::close()
 			ret = GET_NET_ERROR;
 		}
 
-		m_csClose.unlock();
+		m_pcsClose->unlock();
 		return ret;
 	}
 

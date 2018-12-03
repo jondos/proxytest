@@ -180,20 +180,18 @@ public:
 #endif
 				}
 
-    	/*virtual ~CAFirstMix()
-			{
-				delete m_pmutexNewConnections;
-				m_pmutexNewConnections = NULL;
-			}*/
+ 
     	virtual ~CAFirstMix()
 		{
-			//clean(); // speeds up shutdown
+			clean(); // speeds up shutdown
 			delete m_pmutexUser;
 			m_pmutexUser = NULL;
 			delete m_pmutexMixedPackets;
 			m_pmutexMixedPackets = NULL;
 			delete m_pmutexLoginThreads;
 			m_pmutexLoginThreads = NULL;
+			delete m_pmutexNewConnections ;
+			m_pmutexNewConnections=NULL;
 #ifdef PAYMENT
 			delete m_pmutexLogin;
 #endif

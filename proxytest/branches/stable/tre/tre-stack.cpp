@@ -35,10 +35,10 @@ tre_stack_new(int size, int max_size, int increment)
 {
   tre_stack_t *s;
 
-  s = (tre_stack_t *)xmalloc(sizeof(*s));
+  s =(tre_stack_t *) xmalloc(sizeof(*s));
   if (s != NULL)
     {
-      s->stack = (tre_stack_item *)xmalloc(sizeof(*s->stack) * size);
+      s->stack =(tre_stack_item*) xmalloc(sizeof(*s->stack) * size);
       if (s->stack == NULL)
 	{
 	  xfree(s);
@@ -65,7 +65,7 @@ tre_stack_num_objects(tre_stack_t *s)
   return s->ptr;
 }
 
-static reg_errcode_t
+static tre_reg_errcode_t
 tre_stack_push(tre_stack_t *s, union tre_stack_item value)
 {
   if (s->ptr < s->size)
@@ -78,7 +78,7 @@ tre_stack_push(tre_stack_t *s, union tre_stack_item value)
       if (s->size >= s->max_size)
 	{
 	  DPRINT(("tre_stack_push: stack full\n"));
-	  return REG_ESPACE;
+	  return TRE_REG_ESPACE;
 	}
       else
 	{
@@ -88,11 +88,11 @@ tre_stack_push(tre_stack_t *s, union tre_stack_item value)
 	  new_size = s->size + s->increment;
 	  if (new_size > s->max_size)
 	    new_size = s->max_size;
-	  new_buffer = (tre_stack_item*)xrealloc(s->stack, sizeof(*new_buffer) * new_size);
+	  new_buffer =(tre_stack_item *) xrealloc(s->stack, sizeof(*new_buffer) * new_size);
 	  if (new_buffer == NULL)
 	    {
 	      DPRINT(("tre_stack_push: realloc failed.\n"));
-	      return REG_ESPACE;
+	      return TRE_REG_ESPACE;
 	    }
 	  DPRINT(("tre_stack_push: realloc succeeded.\n"));
 	  assert(new_size > s->size);

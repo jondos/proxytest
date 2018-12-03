@@ -6,6 +6,7 @@
         <MixName>LastMix</MixName>
         <CascadeName>TestCascade</CascadeName>
         <Daemon>False</Daemon>
+        <PaymentReminderProbability enable="true">0</PaymentReminderProbability>
     </General>
     <Network>
         <ListenerInterfaces>

@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CAQUEUE__
 #define __CAQUEUE__
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "CAConditionVariable.hpp"
 #include "CAMsg.hpp"
 
@@ -79,6 +79,12 @@ class CAQueue
 					m_pcsQueue->lock();
 					m_bClosed=true;
 					m_pcsQueue->unlock();
+					if (m_Queue == NULL) //signal possible reader that the queue ist closed...
+						{
+							m_pconvarSize->lock();
+							m_pconvarSize->signal();
+							m_pconvarSize->unlock();
+						}
 					return E_SUCCESS;
 				}
 			
@@ -135,8 +141,8 @@ class CAQueue
 #endif
 		
 		private:
-			QUEUE* m_Queue; 
-			QUEUE* m_lastElem;
+			volatile QUEUE* m_Queue;
+			volatile QUEUE* m_lastElem;
 			volatile UINT32 m_nQueueSize;
 			volatile bool m_bClosed;
 			UINT32 m_nExpectedElementSize;

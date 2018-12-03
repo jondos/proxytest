@@ -1,4 +1,4 @@
-/* config.h.in.  Generated from configure.in by autoheader.  */
+/* config.h.in.  Generated from configure.ac by autoheader.  */
 
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
@@ -17,9 +17,6 @@
 /* Define to 1 if using `alloca.c'. */
 #undef C_ALLOCA
 
-/* Elliptic curve cryptography supported */
-#undef ECC
-
 /* Define to 1 if you have `alloca', as a function or macro. */
 #undef HAVE_ALLOCA
 
@@ -29,6 +26,12 @@
 
 /* Define to 1 if you have the `atoll' function. */
 #undef HAVE_ATOLL
+
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
+/* Elliptic curve cryptography supported */
+#undef HAVE_ECC
 
 /* Define if your OS support the epoll() syscall */
 #undef HAVE_EPOLL
@@ -52,7 +55,7 @@
 /* Define to 1 if you have the `mallinfo' function. */
 #undef HAVE_MALLINFO
 
-/* Define to 1 if you have the <malloc.h> header file. */
+/* Define if you have a working version of malloc.h */
 #undef HAVE_MALLOC_H
 
 /* Define to 1 if you have the <memory.h> header file. */
@@ -151,6 +154,9 @@
 /* This is the value, which is returned from inet_addr(), in case of an error
    */
 #undef INADDR_NONE
+
+/* Define to the sub-directory where libtool stores uninstalled libraries. */
+#undef LT_OBJDIR
 
 /* This is the maximum length of a file system path */
 #undef MAX_PATH

@@ -26,3 +26,12 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
+#ifdef NEED_GMTIME_R_WINDOWS
+struct tm * gmtime_r(const time_t *timep, struct tm *result)
+{
+	SINT32 ret = gmtime_s(result,timep);
+	if (ret != E_SUCCESS)
+		return NULL;
+	return result;
+}
+#endif

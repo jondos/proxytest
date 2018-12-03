@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __DOM_OUTPUT__
 #define __DOM_OUTPUT__
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "../CAQueue.hpp"
 
 enum OUTPUT_FORMAT { OF_DEFAULT, OF_NULL_TERMINATED, OF_NEWLINE };
@@ -43,7 +43,7 @@ class MemFormatTarget: public XMLFormatTarget
 					m_aktIndex=0;
 				}
 
-			~MemFormatTarget()
+			virtual ~MemFormatTarget()
 				{
 					delete m_pQueue;
 					m_pQueue = NULL;
@@ -130,12 +130,12 @@ class MemFormatTarget: public XMLFormatTarget
 						}
 					if (OF_NULL_TERMINATED == a_outputFormat)
 					{
-						tmp[*size] = NULL;
+						tmp[*size] =0;
 					}
 					else if (OF_NEWLINE == a_outputFormat)
 					{
-						tmp[*size+1] = NULL;
 						tmp[*size] = '\n';
+						tmp[*size+1] = 0;						
 					}
 					return tmp;
 				}
@@ -166,7 +166,6 @@ class DOM_Output
 					return out.m_pFormatTarget->dumpMem(buff,size);
 				}
 
-			
 			/** Dumps the Node an returns a pointer to the memory.
 				* Note that the string is NOT null-terminated.
 				* @param node Node to dump
@@ -276,6 +275,8 @@ class DOM_Output
 			static const XMLCh  m_XML[41]; 
 			static const XMLCh  m_UTF8[6]; 
 			static const XMLCh  m_1_0[4]; 
+
 };
+
 #endif
 #endif //ONLY_LOCAL_PROXY

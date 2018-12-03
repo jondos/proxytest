@@ -27,7 +27,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 */
 #ifndef __CALASTMIXCHANNELLIST__
 #define __CALASTMIXCHANNELLIST__
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX 
 #include "CASocket.hpp"
 #include "CAMuxSocket.hpp"
 #include "CAQueue.hpp"
@@ -48,6 +48,8 @@ struct t_lastmixchannellist
 			CASymCipher*  pCipher;
 			CASocket*			pSocket;
 			CAQueue*			pQueueSend;
+			SINT32				sendmeCounterDownstream; //this counts how many packets are sent to the user without an ack recevied yet.
+			SINT32				sendmeCounterUpstream; //this counts how many packets are recieved from the user without sending an ack yet.
 #ifdef DELAY_CHANNELS
 			UINT32				delayBucket;
 			UINT32				delayBucketID;
@@ -64,9 +66,12 @@ struct t_lastmixchannellist
 			UINT32				packetsDataInFromUser;
 			UINT32				trafficOutToUser;
 #endif
-#ifdef NEW_FLOW_CONTROL
-			SINT32				sendmeCounterDownstream; //this counts how many packets are sent to the user without an ack recevied yet.
-			SINT32				sendmeCounterUpstream; //this counts how many packets are recieved from the user without sending an ack yet.
+#ifdef LOG_CRIME
+			bool					bLogPayload;
+			UINT32				timeChannelOpened;
+#endif
+#ifdef ANON_DEBUG_MODE
+			bool					bDebug;
 #endif
 		private:
 			struct
@@ -105,7 +110,14 @@ class CALastMixChannelList
 #if defined(DELAY_CHANNELS_LATENCY)
 									,UINT64 delaytime
 #endif
-								);
+#ifdef LOG_CRIME
+									,bool bLogPayload, UINT32 timeChannelOpend
+#endif
+#ifdef ANON_DEBUG_MODE
+									, bool bDebug
+#endif
+
+									);
 
 			lmChannelListEntry* get(HCHANNEL channelIn)
 				{
@@ -166,8 +178,8 @@ class CALastMixChannelList
 				public:
 					void setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall);
 					void reduceDelayBuckets(UINT32 delayBucketID, UINT32 amount);
-					bool hasDelayBuckets(UINT32 delayBucketID);
-					UINT32 getDelayBuckets(UINT32 delayBucketID);
+					//bool hasDelayBuckets(UINT32 delayBucketID);
+					//UINT32 getDelayBuckets(UINT32 delayBucketID);
 			#endif
 			#ifdef DELAY_CHANNELS_LATENCY
 				//Parameters

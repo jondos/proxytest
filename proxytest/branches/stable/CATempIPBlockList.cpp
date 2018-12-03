@@ -59,6 +59,8 @@ CATempIPBlockList::~CATempIPBlockList()
 		//Now stop the cleanup thread...
 		m_bRunCleanupThread=false;
 		m_pCleanupThread->join(); //wait for cleanupthread to wakeup and exit
+		delete m_pCleanupThread;
+		m_pCleanupThread=NULL;
 		m_pMutex->lock();
 		//its safe to delete it because we have the lock...
 		for(UINT32 i=0;i<=0xFFFF;i++) 
@@ -105,29 +107,30 @@ SINT32 CATempIPBlockList::insertIP(const UINT8 ip[4])
 		m_hashTable[hashvalue] = newEntry;
 		m_iEntries++;
 	}
-	else {
-		PTEMPIPBLOCKLIST temp = m_hashTable[hashvalue];
-		do {
-			if(memcmp(temp->ip,ip,2)==0) 
-			{
-				// we have found the entry
-				delete newEntry;
-				m_pMutex->unlock();
-				return E_UNKNOWN;
-			}
-			if (temp->next)
-			{
-				temp = temp->next;
-			}
-			else
-			{
-				temp->next = newEntry;
-				m_iEntries++;
-				break;
-			}
+	else 
+		{
+			PTEMPIPBLOCKLIST temp = m_hashTable[hashvalue];
+			for(;;) 
+				{
+					if(memcmp(temp->ip,ip,2)==0) 
+						{
+							// we have found the entry
+							delete newEntry;
+							m_pMutex->unlock();
+							return E_UNKNOWN;
+						}
+					if (temp->next)
+						{
+							temp = temp->next;
+						}
+					else
+						{
+							temp->next = newEntry;
+							m_iEntries++;
+							break;
+						}
+				}
 		}
-		while(true);
-	}
 	m_pMutex->unlock();	
 	return E_SUCCESS;
 }

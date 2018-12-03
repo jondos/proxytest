@@ -29,6 +29,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef _CACONTROLCHANNELDISPATCHER_H_HEADER_
 #define _CACONTROLCHANNELDISPATCHER_H_HEADER_
 #include "CAQueue.hpp"
+#include "gcm/gcm.h"
 class CAAbstractControlChannel;
 
 /** This class "dispatches" messages which it receives via proccessMixPacket()
@@ -53,7 +54,7 @@ class CAControlChannelDispatcher
 				m_pcsEnc=new CAMutex();
 				m_pcsDec=new CAMutex();
 				m_nEncMsgCounter=0;
-				m_pEncMsgIV=new UINT8[12];
+				m_pEncMsgIV=new UINT32[3];
 				memset(m_pEncMsgIV,0,12);
 				m_nDecMsgCounter=0;
 				m_pDecMsgIV=new UINT8[12];
@@ -130,7 +131,7 @@ class CAControlChannelDispatcher
 		gcm_ctx_64k* m_pGCMCtxEnc;
 		gcm_ctx_64k* m_pGCMCtxDec;
 		UINT32 m_nEncMsgCounter;
-		UINT8* m_pEncMsgIV;
+		UINT32* m_pEncMsgIV;
 		UINT32 m_nDecMsgCounter;
 		UINT8* m_pDecMsgIV;
 };

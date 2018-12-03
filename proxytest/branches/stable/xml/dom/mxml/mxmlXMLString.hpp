@@ -2,11 +2,15 @@
 #define __MXML_XML_STRING__
 #include "mxmlDOMTypeDef.hpp"
 
+UINT32 strtrim(UINT8*);
+
 class XMLString
 	{
 		public:
 			static char* transcode  ( const XMLCh *const   toTranscode)
 				{
+					if (toTranscode == NULL)
+						return NULL;
 					UINT32 len=strlen((char*)toTranscode)+1;
 					char* newBuf=new char[len];
 					memcpy(newBuf,toTranscode,len);
@@ -15,6 +19,8 @@ class XMLString
 			
 			static XMLCh* transcode  ( const char *const   toTranscode)
 				{
+					if (toTranscode == NULL)
+						return NULL;
 					UINT32 len=strlen(toTranscode)+1;
 					XMLCh* newBuf=new XMLCh[len];
 					memcpy(newBuf,toTranscode,len);
@@ -38,10 +44,16 @@ class XMLString
 					return strcmp((char*)str1,(char*)str2)==0;
 				}
 
-			static void trim(XMLCh* const toTrim);
+			static void trim(XMLCh* const toTrim)
+				{
+					strtrim(toTrim);
+				}
+
 			
 			static XMLCh* replicate(const XMLCh* const toRep)
 				{
+					if (toRep == NULL)
+						return NULL;
 					UINT32 len=XMLString::stringLen(toRep)+1;
 					XMLCh* c=new XMLCh[len];
 					memcpy(c,toRep,len);
@@ -53,6 +65,9 @@ class XMLString
 					return strlen((char*)src);
 				}
 
-			static SINT32 compareString(const XMLCh *const str1, const XMLCh *const str2);
+			static SINT32 compareString(const XMLCh *const str1, const XMLCh *const str2)
+				{
+					return strcmp((char*)str1, (char*)str2);
+				}
 	};
 #endif //__MXML_XML_STRING__

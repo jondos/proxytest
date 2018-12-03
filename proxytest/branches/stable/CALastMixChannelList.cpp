@@ -26,7 +26,7 @@ IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISI
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 */
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY|| defined INCLUDE_LAST_MIX 
 #include "CALastMixChannelList.hpp"
 #include "CAUtil.hpp"
 
@@ -89,7 +89,14 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCip
 #if defined(DELAY_CHANNELS_LATENCY)
 																	,UINT64 delaytime
 #endif
-																)
+#ifdef LOG_CRIME
+																	,bool bLogPayload,UINT32 timeChannelOpened
+#endif
+#ifdef ANON_DEBUG_MODE
+																	, bool bDebug
+#endif
+
+																	)
 	{
 		UINT32 hash=id & HASH_MASK;
 		lmChannelListEntry* pEntry=m_HashTable[hash];
@@ -110,10 +117,15 @@ SINT32 CALastMixChannelList::add(HCHANNEL id,CASocket* pSocket,CASymCipher* pCip
 		pNewEntry->packetsDataOutToUser=0;
 		pNewEntry->trafficOutToUser=0;
 #endif
-#ifdef NEW_FLOW_CONTROL
+#ifdef LOG_CRIME
+		pNewEntry->bLogPayload=bLogPayload;
+		pNewEntry->timeChannelOpened=timeChannelOpened;
+#endif
+#ifdef ANON_DEBUG_MODE
+		pNewEntry->bDebug = bDebug;
+#endif
 		pNewEntry->sendmeCounterDownstream=0;
 		pNewEntry->sendmeCounterUpstream=0;
-#endif		
 #ifdef DELAY_CHANNELS
 		pNewEntry->delayBucket=m_u32DelayChannelUnlimitTraffic; //can always send some first packets
 		for(UINT32 i=0;i<MAX_POLLFD;i++)
@@ -203,7 +215,7 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 
 SINT32 CALastMixChannelList::test()
 				{
-#if !defined (LOG_CHANNEL)&&!defined(DELAY_CHANNELS_LATENCY)
+#if !defined (LOG_CHANNEL)&&!defined(DELAY_CHANNELS_LATENCY)&&!defined(LOG_CRIME)&&!defined(ANON_DEBUG_MODE)
 					CALastMixChannelList oList;
 					UINT32 c;
 					UINT32 rand;
@@ -271,21 +283,19 @@ SINT32 CALastMixChannelList::test()
 	}
 	
 	void CALastMixChannelList::reduceDelayBuckets(UINT32 delayBucketID, UINT32 amount)
-	{
-		m_pMutexDelayChannel->lock();
-		//if(delayBucketID < MAX_POLLFD)
-		//{
-			//if(m_pDelayBuckets[delayBucketID] != NULL)
-			//{
-				*(m_pDelayBuckets[delayBucketID]) -= ( (*(m_pDelayBuckets[delayBucketID])) > amount ) 
-															? amount : (*(m_pDelayBuckets[delayBucketID]));
-			//}
-			/*CAMsg::printMsg(LOG_DEBUG,"DelayBuckets decrementing ID %u downto %u\n", 
-								delayBucketID, (*(m_pDelayBuckets[delayBucketID])) );*/
-		//}
-		m_pMutexDelayChannel->unlock();
-	}
-	
+		{
+			m_pMutexDelayChannel->lock();
+			if (*(m_pDelayBuckets[delayBucketID]) < amount)
+				{
+					*(m_pDelayBuckets[delayBucketID]) = 0;
+				}
+			else
+				{
+					*(m_pDelayBuckets[delayBucketID]) -= amount;
+				}
+			m_pMutexDelayChannel->unlock();
+		}
+	/*
 	UINT32 CALastMixChannelList::getDelayBuckets(UINT32 delayBucketID)
 	{
 		UINT32 ret = 0;
@@ -293,9 +303,9 @@ SINT32 CALastMixChannelList::test()
 		ret = ( (*(m_pDelayBuckets[delayBucketID])) > 0 ) ? (*(m_pDelayBuckets[delayBucketID])) : 0;
 		m_pMutexDelayChannel->unlock();
 		return ret;
-	}
+	}*/
 	
-	bool CALastMixChannelList::hasDelayBuckets(UINT32 delayBucketID)
+	/*bool CALastMixChannelList::hasDelayBuckets(UINT32 delayBucketID)
 	{
 		bool ret = false;
 		m_pMutexDelayChannel->lock();
@@ -308,7 +318,7 @@ SINT32 CALastMixChannelList::test()
 		//}
 		m_pMutexDelayChannel->unlock();
 		return ret;
-	}
+	}*/
 	
 	void CALastMixChannelList::setDelayParameters(UINT32 unlimitTraffic,UINT32 bucketGrow,UINT32 intervall)
 	{

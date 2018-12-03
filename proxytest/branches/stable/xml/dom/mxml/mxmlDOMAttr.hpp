@@ -12,6 +12,13 @@ class DOMAttr : public DOMNode
 					m_xmlchNodeName=XMLString::replicate(name);
 					m_nodeType=DOMNode::ATTRIBUTE_NODE;
 				}
+
+			DOMAttr* clone(XERCES_CPP_NAMESPACE::DOMDocument* doc)
+				{
+					DOMAttr* pNode = new DOMAttr(doc,m_xmlchNodeName);
+					pNode->m_xmlchNodeValue = XMLString::replicate(m_xmlchNodeValue);
+					return pNode;
+				}
 			friend class XERCES_CPP_NAMESPACE::DOMDocument;
 	
 	};

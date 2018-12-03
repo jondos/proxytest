@@ -46,7 +46,7 @@ class CAThreadList
 
 public:
 	CAThreadList();
-	virtual ~CAThreadList();
+	~CAThreadList();
 	
 	SINT32	put(const CAThread* const thread);
 	SINT32	remove(const CAThread* const thread);

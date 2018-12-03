@@ -1,18 +1,18 @@
-/*
+ /*
 Copyright (c) 2000, The JAP-Team
 All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
 	- Redistributions of source code must retain the above copyright notice,
-	  this list of conditions and the following disclaimer.
+		this list of conditions and the following disclaimer.
 
 	- Redistributions in binary form must reproduce the above copyright notice,
-	  this list of conditions and the following disclaimer in the documentation and/or
+		this list of conditions and the following disclaimer in the documentation and/or
 		other materials provided with the distribution.
 
 	- Neither the name of the University of Technology Dresden, Germany nor the names of its contributors
-	  may be used to endorse or promote products derived from this software without specific
+		may be used to endorse or promote products derived from this software without specific
 		prior written permission.
 
 
@@ -33,9 +33,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.10.07.1"
+#define MIX_VERSION "00.11.22"
 
-// set to "true" if this is a testing/development version which is not meant for prodictive use
+// set to "true" if this is a testing/development version which is not meant for productive use
 #define MIX_VERSION_TESTING false
 
 #define MIX_VERSION_TESTING_TEXT "This is a testing/development version. Please do not expect it to work in a productive environment, and don't be surprised if you get unpredictive results or segmentation faults. If you don't like experiments, go and get the stable code.\n"
@@ -48,13 +48,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define DEBUG
 	#define _DEBUG
 #endif
-
-#ifndef DELAY_USERS
-	#ifndef PAYMENT
-		#define DELAY_USERS
-	#endif
-#endif
-
 
 //#define LOG_TRAFFIC_PER_USER //Log detail for traffic per user
 //#define LOG_CHANNEL //Log detail for traffic per channel
@@ -73,15 +66,38 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 /* LERNGRUPPE: define this to get dynamic mixes */
 //#define DYNAMIC_MIX
 //#define SDTFA // specific logic needed by SDTFA, http://www.sdtfa.com
+//#define USE_OPENSSL_GCM //define if you wnat to use the GCM implementation provided by OpenSSL (>=1.0.1)
+
+#define NO_INFOSERVICE_TRHEADS
 
 //#define LASTMIX_CHECK_MEMORY // only for internal debugging purpose
 //#define PRINT_THREAD_STACK_TRACE //Usefull for debugging output of stack trace if mix dies...
 //#define ENABLE_GPERFTOOLS_CPU_PROFILER //Enables the usage of the Goggle GPerfTools CPU Profiler for profiling the operation of the Mix
-//#define ENABLE_GPERFTOOLS_HEAP_CHECKER //Enables the usage of the Goggle GPerfTools heap chekcer for detecting memory leaks
+//#define ENABLE_GPERFTOOLS_HEAP_CHECKER //Enables the usage of the Goggle GPerfTools heap checker for detecting memory leaks
 
 //#define DATA_RETENTION_LOG //define if you need to store logs according to German data retention
 //#define INTEL_IPP_CRYPTO //define if you want to use the crypto routines of the Intel Performance Primitives
 //#define __UNIT_TEST__ //define if you want to compile the unit tests
+//#define EXPORT_ASYM_PRIVATE_KEY //define if you want to be able to export the private key of an assymetric key (only used for debugging purposes..)
+//#define LOG_CRIME
+//#define PAYMENT //to enable payment support, now use configure --enable-payment..
+//#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
+
+//#define USE_POOL
+//#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
+//#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
+#define NEW_FLOW_CONTROL //enable for the new flow control mechanism --> now enabled by default (i.e. can not be disbaled anymore!)
+#define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses RSA-OAEP for key transport and two keys for upstream/downstream channel cryption (--> now enabled by default (i.e. can not be disbaled anymore!)
+//#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
+
+//define WITH_SGX //should the Intel SGX support be enabled
+
+//#define REPLAY_DETECTION // enable to prevent replay of mix packets
+//#define HAVE_ECC // define if you have (and wnat to use) ECC cryptography
+//#define SSL_HACK //???
+
+//#define ANON_DEBUG_MODE //if defined this Mix operates in AN.ON protocol debug mode, which means that a lot of things are logged which should not be logged in productive mode. So NEVER enable this in productive environments!
+
 
 #if !defined(PRINT_THREAD_STACK_TRACE) && defined (DEBUG)&& ! defined(ONLY_LOCAL_PROXY)
 	#define PRINT_THREAD_STACK_TRACE
@@ -102,6 +118,13 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifdef COUNTRY_STATS
 	#define LOG_COUNTRIES_INTERVALL 6 //how often to log the country stats (multiplied by 10 seconds)
 #endif
+
+#if !defined DELAY_USERS && !defined HAVE_CONFIG_H
+	#ifndef PAYMENT
+		#define DELAY_USERS
+	#endif
+#endif
+
 
 #ifdef DELAY_CHANNELS
 	#ifndef DELAY_CHANNEL_TRAFFIC
@@ -134,45 +157,27 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define DELAY_USERS_BUCKET_GROW DELAY_USERS_PACKETS_PER_SECOND //Grow in bytes
 	#endif
 #endif
-#ifdef DELAY_CHANNELS_LATENCY
+
+#ifndef DELAY_CHANNELS_LATENCY
 	#define DELAY_CHANNEL_LATENCY 0 //min latency defaults to 0 milliseconds
 #endif
 
 #if defined LASTMIX_CHECK_MEMORY && ! defined(QUEUE_SIZE_LOG)
 	#define QUEUE_SIZE_LOG
 #endif
-//#define LOG_CRIME
-//#define PAYMENT //to enable payment support, now use configure --enable-payment..
-//#define NO_PARKING //to disable old control flow
-//#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
 
-//#define USE_POOL
-//#define NEW_MIX_TYPE // to enable the new 1:x mix protocol
-//#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
-//#define NEW_FLOW_CONTROL //enable for the new flow control mechanism
-//#define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses ECDH for key transport and two keys for upstream/downstream channel cryption
-//#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
-
-//#define REPLAY_DETECTION // enable to prevent replay of mix packets
 #define REPLAY_TIMESTAMP_PROPAGATION_INTERVALL 1 //How often (in minutes) should the current replay timestamps be propagate
 
 #define KEEP_ALIVE_TRAFFIC_RECV_WAIT_TIME  75000 //How long to wait for a Keep-Alive (or any other packet)
-																							       //before we believe that the connection is broken (in ms)
+																										 //before we believe that the connection is broken (in ms)
 #define KEEP_ALIVE_TRAFFIC_SEND_WAIT_TIME 65000 //How long to wait before we sent a dummy a Keep-Alive-Traffic
 
-//#define ECC
-//#define SSL_HACK //???
+#ifdef LOG_CRIME //Law Enforcement and AN.ON protocol debuggin cannot be done at the same time...
+	#undef ANON_DEBUG_MODE
+#endif 
 
 #if defined(PAYMENT) && ! defined(SSL_HACK)
 	#define SSL_HACK
-#endif
-
-#if defined (NEW_FLOW_CONTROL) && !defined(NO_PARKING)
-	#define NO_PARKING // disable old control flow
-#endif
-
-#if defined (WITH_INTEGRITY_CHECK) && !defined(NEW_CHANNEL_ENCRYPTION)
-	#define NEW_CHANNEL_ENCRYPTION
 #endif
 
 //#define REPLAY_DATABASE_PERFORMANCE_TEST //to perform a performance test of the replay db
@@ -207,8 +212,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define MAX_SIGNATURE_ELEMENTS 10  // maximum of interpreted XML signature elements
 
-#define FLOW_CONTROL_SENDME_HARD_LIMIT 160 //last mix stops sending after this unacked packets
-#define FLOW_CONTROL_SENDME_SOFT_LIMIT 80 //last mix expect to get a 'SENDME' after this unacked packets
+#define FLOW_CONTROL_SENDME_HARD_LIMIT 16000 //last mix stops sending after this unacked packets
+#define FLOW_CONTROL_SENDME_SOFT_LIMIT 8000 //last mix expect to get a 'SENDME' after this unacked packets
 
 #if defined(PAYMENT) || defined(MANIOQ)
 	#define MAX_READ_FROM_PREV_MIX_QUEUE_SIZE 10000000
@@ -217,10 +222,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define MAX_NEXT_MIX_QUEUE_SIZE 10000000
 #else
 	//EXPERIMENTAL: reduce intermix-buffers for free mixes by factor 10
-	#define MAX_READ_FROM_PREV_MIX_QUEUE_SIZE 1000000
-	#define MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE 1000000 //How many bytes could be in the incoming queue ??
-	#define MAX_MIXIN_SEND_QUEUE_SIZE 1000000
-	#define MAX_NEXT_MIX_QUEUE_SIZE 1000000
+	#define MAX_READ_FROM_PREV_MIX_QUEUE_SIZE 100000000
+	#define MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE 100000000 //How many bytes could be in the incoming queue ??
+	#define MAX_MIXIN_SEND_QUEUE_SIZE 100000000
+	#define MAX_NEXT_MIX_QUEUE_SIZE 100000000
 #endif
 //#define FORCED_DELAY
 //#define MIN_LATENCY 250
@@ -236,8 +241,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #define FM_PACKET_STATS_LOG_INTERVALL 1 //Intervall in Minutes for loggin packet stats for the first Mix
 #define LM_PACKET_STATS_LOG_INTERVALL 1 //Intervall in Minutes for loggin packet stats for the last Mix
 
-
-#define MIX_CASCADE_PROTOCOL_VERSION_0_1_1 11  //with integrity check and new channel encryption
+#define MIX_CASCADE_PROTOCOL_VERSION_0_1_2 12  //with integrity check and new channel encryption 
+#define MIX_CASCADE_PROTOCOL_VERSION_0_1_1 11  //with integrity check and new channel encryption --> never worked correctly
 #define MIX_CASCADE_PROTOCOL_VERSION_0_1_0 10  //with new channel encryption
 //#define MIX_CASCADE_PROTOCOL_VERSION_0_9 9  //with new payment protocol
 #define MIX_CASCADE_PROTOCOL_VERSION_0_8 8  //with replay detection + control channels + first mix symmetric
@@ -253,15 +258,19 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#elif defined(PAYMENT)
 	//#define MIX_CASCADE_PROTOCOL_VERSION "0.9"
 #elif defined (WITH_INTEGRITY_CHECK)
-	#define MIX_CASCADE_PROTOCOL_VERSION "0.11"
-#elif defined (NEW_CHANNEL_ENCRYPTION)
-	#define MIX_CASCADE_PROTOCOL_VERSION "0.10" //"0.10tc"
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.12"
 #else
-	#define MIX_CASCADE_PROTOCOL_VERSION "0.4" //"0.4tc"
+	#define MIX_CASCADE_PROTOCOL_VERSION "0.10" //"0.10tc"
 #endif
 
 
 #define PAYMENT_VERSION "2.0"
+
+#ifdef ONLY_MIDDLE_MIX
+	#define ONLY_LOCAL_PROXY
+	#define INCLUDE_MIDDLE_MIX
+	#define INCLUDE_LAST_MIX
+#endif
 
 #if defined (_WIN32) &&!defined(__CYGWIN__)
 	//For Visual C++    #if defined(_MSC_VER)
@@ -274,21 +283,24 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif // _MSC_VER > 1000
 	#define _WIN32_WINDOWS 0x0410
 	#include <winsock2.h>
-	#if defined(_MSC_VER) &&defined (_DEBUG)
-		#include <crtdbg.h>
-		#define HAVE_CRTDBG
-	#endif
+	//#if defined(_MSC_VER) &&defined (_DEBUG)
+	//	#include <crtdbg.h>
+	//	#define HAVE_CRTDBG
+	//#endif
 	#define socklen_t int
 	#define MSG_NOSIGNAL 0
-    #include <io.h>
+	#include <io.h>
 	#include <conio.h>
 	#include <sys/timeb.h>
 	#include <process.h>
 	#ifdef _MSC_VER
 		#define ftime _ftime
 		#define timeb _timeb
+		#define NEED_GMTIME_R_WINDOWS
+		struct tm * gmtime_r(const time_t *timep, struct tm *result);
+	
 	#endif
-	#include <malloc.h>
+	#define HAVE_MALLOC_H
 	#define SET_NET_ERROR(x)
 	#define GET_NET_ERROR (WSAGetLastError())
 	#define GET_NET_ERROR_STR(x) ("Unknown error")
@@ -307,9 +319,18 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#if _MSC_VER <1500
 		#define vsnprintf _vsnprintf
 	#endif
-	#define snprintf _snprintf
+	#if _MSC_VER <1900
+		#define snprintf _snprintf
+	#endif
 	#define getpid _getpid
 	#define strncasecmp _strnicmp
+	#define open _open
+	#define myfilewrite _write
+	#define close _close
+	#define read _read
+	#define access _access
+	#define getch _getch
+	#define alloca _alloca
 	#define HAVE_PTHREAD_MUTEX_INIT
 	#define HAVE_PTHREAD_COND_INIT
 	#define HAVE_SEM_INIT
@@ -320,11 +341,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 		#define __linux
 	#endif
 	#if defined(CWDEBUG)
-	  #include <libcw/sysd.h>
-	  #include <libcw/debug.h>
+		#include <libcw/sysd.h>
+		#include <libcw/debug.h>
 	#endif
 
-  #ifdef HAVE_CONFIG_H
+	#ifdef HAVE_CONFIG_H
 		#include "config.h"
 		#ifndef HAVE_SOCKLEN_T
 			typedef int socklen_t;
@@ -354,23 +375,23 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 			#define MSG_DONTWAIT 0
 		#endif
 		#if !defined(__FreeBSD__)&&!defined(__linux)
-    	typedef int socklen_t;
+			typedef int socklen_t;
 		#endif
-    #ifndef O_BINARY
+		#ifndef O_BINARY
 			#define O_BINARY 0
-    #endif
-    #ifndef MAX_PATH
+		#endif
+		#ifndef MAX_PATH
 			#define MAX_PATH 4096
-    #endif
+		#endif
 		#ifdef __sgi
 			#undef HAVE_VSNPRINTF
 			#undef HAVE_SNPRINTF
 			#include <alloca.h>
 		#endif
-    #if !defined( __linux) &&!defined(__CYGWIN__)
-    	#include <sys/filio.h>
-    	#define MSG_NOSIGNAL 0
-    #endif
+		#if !defined( __linux) &&!defined(__CYGWIN__)
+			#include <sys/filio.h>
+			#define MSG_NOSIGNAL 0
+		#endif
 	#endif //Have config.h
 
 	//Byte order defines
@@ -395,9 +416,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifdef HAVE_EPOLL
 		#include <sys/epoll.h>
 	#endif
-	#ifdef HAVE_MALLOC_H
-	    #include <malloc.h>
-	#endif
 	#include <sys/ioctl.h>
 	#include <sys/types.h>
 	#include <sys/socket.h>
@@ -416,20 +434,25 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <sys/resource.h>
 	#include <sys/wait.h>
 	#include <termios.h>
-
+	#include <fnmatch.h>
+	#include <dirent.h>
 	#include <ctype.h>
-    typedef struct sockaddr SOCKADDR;
-  typedef SOCKADDR* LPSOCKADDR;
-  #define SOCKET int
-  typedef struct hostent HOSTENT;
+
+#ifdef WITH_SGX
+	#include "shm_header.h"
+#endif
+	typedef struct sockaddr SOCKADDR;
+	typedef SOCKADDR* LPSOCKADDR;
+	#define SOCKET int
+	typedef struct hostent HOSTENT;
 	#define ioctlsocket(a,b,c) ioctl(a,b,c)
-  #define closesocket(s) close(s)
-  #define SOCKET_ERROR -1
-  #define INVALID_SOCKET -1
-  #define SD_RECEIVE 0
-  #define SD_SEND 1
-  #define SD_BOTH 2
-  #define GET_NET_ERROR (errno)
+	#define closesocket(s) close(s)
+	#define SOCKET_ERROR -1
+	#define INVALID_SOCKET -1
+	#define SD_RECEIVE 0
+	#define SD_SEND 1
+	#define SD_BOTH 2
+	#define GET_NET_ERROR (errno)
 	#define SET_NET_ERROR(x) (errno = x)
 	#define GET_NET_ERROR_STR(x) (errno == E_TIMEDOUT ? "Connection timed out." : (errno == E_SOCKETCLOSED ? "Socket is closed." : strerror(x)))
 	#define RESETERROR errno=0;
@@ -441,15 +464,27 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#ifndef INADDR_NONE
 		#define INADDR_NONE -1
 	#endif
-  #ifndef AF_LOCAL
+	#ifndef AF_LOCAL
 		#define AF_LOCAL AF_UNIX
-  #endif
+	#endif
 	#if !defined(HAVE_MSG_DONTWAIT)&&!defined(MSG_DONTWAIT)
 		#define MSG_DONTWAIT 0
 	#endif
+	#ifndef S_IREAD
+		#define S_IREAD S_IRUSR
+	#endif
+	#ifndef S_IWRITE
+		#define S_IWRITE S_IWUSR
+	#endif
+	#define myfilewrite write
 #endif //WIn32 ?
 
 #include "basetypedefs.h"
+
+#ifdef HAVE_MALLOC_H
+	#include <malloc.h>
+#endif
+
 
 #include <assert.h>
 
@@ -499,6 +534,16 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define ASSERT(cond,msg) {if(!(cond)){CAMsg::printMsg(LOG_DEBUG,"ASSERT: %s (File: %s, Line: %u)\n",msg,__FILE__,__LINE__);}}
 #endif
 
+#if defined(HAVE_VSNPRINTF) && defined(HAVE_SNPRINTF)
+#define WITHOUT_TRIO  //we do not need trio, if we have native versions of (v)snprintf
+#endif
+
+
+//For Google Test Framework Unit Tests
+#ifdef __GOOGLE_UNIT_TEST__
+#include <gtest/gtest.h>
+#endif
+
 
 #include <stdio.h>
 #include <time.h>
@@ -516,15 +561,27 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <openssl/aes.h>
 #include <openssl/rand.h>
 #include <openssl/evp.h>
+#ifdef USE_OPENSSL_GCM
+	extern "C"
+		{
+			#include <openssl/modes.h>
+		}
+#endif
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
+	#include <openssl/x509v3.h>
+	#include <openssl/pkcs12.h>
+	#include <openssl/dsa.h>
+#endif
 #ifndef ONLY_LOCAL_PROXY
 	#include <openssl/asn1.h>
-	#include <openssl/pkcs12.h>
-	#include <openssl/x509v3.h>
 	#include <openssl/ssl.h>
-	#include <openssl/dsa.h>
 	#include <openssl/sha.h>
 	#include <openssl/md5.h>
 #endif
+
+#include "errorcodes.hpp"
+#include "typedefs.hpp"
+
 
 //For DOM
 #ifdef MXML_DOM
@@ -551,7 +608,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <parsers/XercesDOMParser.hpp>
 
 #if (_XERCES_VERSION >= 20200)
-    XERCES_CPP_NAMESPACE_USE
+		XERCES_CPP_NAMESPACE_USE
 #endif
 
 #endif //wich DOM-Implementation to use?
@@ -582,48 +639,39 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 //For MySQL
 #if defined(COUNTRY_STATS)
-    #ifdef HAVE_CONFIG_H
+		#ifdef HAVE_CONFIG_H
 	#ifdef HAVE_MYSQL_MYSQL_H
-	    #include <mysql/mysql.h>
+			#include <mysql/mysql.h>
 	#else
-	    #include <mysql.h>
+			#include <mysql.h>
 	#endif
-    #else //HAVE_CONFIG_H
+		#else //HAVE_CONFIG_H
 	#include <mysql/mysql.h>
-    #endif
+		#endif
 #endif
 
 //For Payment
 #ifdef PAYMENT
 	#ifdef HAVE_CONFIG_H
 		#ifdef HAVE_POSTGRESQL_LIBPQ_FE_H
-	    #include <postgresql/libpq-fe.h>
+			#include <postgresql/libpq-fe.h>
 		#elif defined(HAVE_PGSQL_LIBPQ_FE_H)
-	    #include <pgsql/libpq-fe.h>
+			#include <pgsql/libpq-fe.h>
 		#else
-	    #include <libpq-fe.h>
+			#include <libpq-fe.h>
 		#endif
-  #elif defined(__FreeBSD__) ||defined (_WIN32)
+	#elif defined(__FreeBSD__) ||defined (_WIN32)
 		#include <libpq-fe.h>
 			#else
 		#include <postgresql/libpq-fe.h>
-  #endif
+	#endif
 #endif
 //Compressed Logs
 #ifdef COMPRESSED_LOGS
 #include <zlib.h>
 #endif
 
-//For CPPUnit Test
-#ifdef __UNIT_TEST__
-	#include <cppunit/ui/text/TestRunner.h>
-	#include <cppunit/extensions/HelperMacros.h>
-	#include <cppunit/TestFixture.h>
-	#include <cppunit/TestResult.h>
-	#include <cppunit/TestResultCollector.h>
-	#include <cppunit/BriefTestProgressListener.h>
-	#include <cppunit/CompilerOutputter.h>
-#endif
+
 
 //Mix Version Info as multiline String
 #ifdef XERCES_FULLVERSIONDOT
@@ -635,7 +683,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #endif
 
 #ifdef ENABLE_GPERFTOOLS_CPU_PROFILER
-	#include <google/profiler.h>
+	#include <gperftools/profiler.h>
 #endif
 
 #ifdef INTEL_IPP_CRYPTO
@@ -656,21 +704,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define DATA_RETENTION_LOG_INFO
 #endif
 
-#ifdef NEW_FLOW_CONTROL
-	#define NEW_FLOW_CONTROL_INFO " (with new flow control)"
-	#define NEW_FLOW_CONTROL_COMPATIBILITY "NewFlowControl"
-#else
-	#define NEW_FLOW_CONTROL_INFO
-	#define NEW_FLOW_CONTROL_COMPATIBILITY
-#endif
+#define NEW_FLOW_CONTROL_INFO " (with new flow control)"
+#define NEW_FLOW_CONTROL_COMPATIBILITY "NewFlowControl"
 
-#ifdef NEW_CHANNEL_ENCRYPTION
-	#define NEW_CHANNEL_ENCRYPTION_INFO " (with enhanced channel encryption)"
-	#define NEW_CHANNEL_ENCRYPTION_COMPATIBILITY "NewChannelEncryption"
-#else
-	#define NEW_CHANNEL_ENCRYPTION_INFO
-	#define NEW_CHANNEL_ENCRYPTION_COMPATIBILITY
-#endif
+#define NEW_CHANNEL_ENCRYPTION_INFO " (with enhanced channel encryption)"
+#define NEW_CHANNEL_ENCRYPTION_COMPATIBILITY "NewChannelEncryption"
 
 #ifdef WITH_INTEGRITY_CHECK
 	#define WITH_INTEGRITY_CHECK_INFO " (with integrity check for data channels)"
@@ -680,17 +718,32 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define WITH_INTEGRITY_CHECK_COMPATIBILITY
 #endif
 
-#ifdef NO_INFOSERVICE_TRHEADS
-	#define NO_INFOSERVICE_TRHEADS_INFO " (no infoservice threads)"
+#ifdef DELAY_CHANNELS
+	#define WITH_DELAY_CHANNELS_INFO " (with delay channels)"
 #else
-	#define NO_INFOSERVICE_TRHEADS_INFO
+	#define WITH_DELAY_CHANNELS_INFO
 #endif
 
-#define MIX_VERSION_INFO "Mix-Version: " MIX_VERSION PAYMENT_VERSION_INFO DATA_RETENTION_LOG_INFO NEW_FLOW_CONTROL_INFO NEW_CHANNEL_ENCRYPTION_INFO WITH_INTEGRITY_CHECK_INFO NO_INFOSERVICE_TRHEADS_INFO "\nUsing: " OPENSSL_VERSION_TEXT "\nUsing Xerces-C: " MY_XERCES_VERSION "\n"
+#ifdef DELAY_USERS
+	#define WITH_DELAY_USERS_INFO " (with delay users)"
+#else
+	#define WITH_DELAY_USERS_INFO
+#endif
+
+#ifndef MXML_DOM
+	#define XML_LIB_VERSION "\nUsing Xerces-C: " MY_XERCES_VERSION
+#else
+	#ifdef MXML_MAJOR_VERSION
+		#define MAKE_A_STRING(x) #x
+		#define TOSTRING(x) MAKE_A_STRING(x)
+		#define XML_LIB_VERSION "\nUsing Mini-XML: " TOSTRING(MXML_MAJOR_VERSION) "."	TOSTRING(MXML_MINOR_VERSION)	
+	#else
+		#define XML_LIB_VERSION "\nUsing Mini-XML: unknown"	
+	#endif
+#endif
+#define MIX_VERSION_INFO "Mix-Version: " MIX_VERSION PAYMENT_VERSION_INFO DATA_RETENTION_LOG_INFO NEW_FLOW_CONTROL_INFO NEW_CHANNEL_ENCRYPTION_INFO WITH_INTEGRITY_CHECK_INFO WITH_DELAY_CHANNELS_INFO WITH_DELAY_USERS_INFO "\nUsing: " OPENSSL_VERSION_TEXT XML_LIB_VERSION "\n"
 #define MIX_VERSION_COMPATIBILITY PAYMENT_COMPATIBILITY " " NEW_FLOW_CONTROL_COMPATIBILITY " " NEW_CHANNEL_ENCRYPTION_COMPATIBILITY " " WITH_INTEGRITY_CHECK_COMPATIBILITY
 
-#include "errorcodes.hpp"
-#include "typedefs.hpp"
 #include "controlchannelids.h"
 #include "gcm/gcm.h"
 #ifdef PAYMENT
@@ -699,4 +752,5 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define ACCOUNT_NUMBER_SIZE 12
 #endif
 
+//#include <vld.h>
 #endif // !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)

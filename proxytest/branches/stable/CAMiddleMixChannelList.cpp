@@ -1,5 +1,5 @@
 #include "StdAfx.h"
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 #include "CAMiddleMixChannelList.hpp"
 #include "CAUtil.hpp"
 

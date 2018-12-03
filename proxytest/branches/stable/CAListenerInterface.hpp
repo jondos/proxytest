@@ -30,7 +30,7 @@ class CAListenerInterface
 				}
 			CAListenerInterface& operator=(const CAListenerInterface&); //Zuweisungsoperator
 			~CAListenerInterface(void);
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 			static CAListenerInterface* getInstance(const DOMNode* node);
 			static CAListenerInterface** getInstance(DOMElement* a_elemListenerInterfaces, UINT32& r_length);
 #endif
@@ -58,7 +58,7 @@ class CAListenerInterface
 					return m_bVirtual;
 				}
 			char* getHostname() { return (char*)m_strHostname; }
-#ifndef ONLY_LOCAL_PROXY
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 			SINT32 toDOMElement(DOMElement* & elem,XERCES_CPP_NAMESPACE::DOMDocument* ownerDoc) const;
 			static const char* XML_ELEMENT_CONTAINER_NAME;
 			static const char* XML_ELEMENT_NAME;

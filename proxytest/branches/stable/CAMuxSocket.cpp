@@ -36,7 +36,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 t_hashkeylistEntry* CAMuxSocket::ms_phashkeylistAvailableHashKeys=NULL;
 SINT32 CAMuxSocket::ms_nMaxHashKeyValue=0;
-CAMutex* CAMuxSocket::ms_pcsHashKeyList=new CAMutex();
+CAMutex* CAMuxSocket::ms_pcsHashKeyList=NULL;
 
 CAMuxSocket::CAMuxSocket()
 	{
@@ -208,8 +208,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 		SINT32 retLock = m_csReceive.lock();
 		if (retLock != E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_CRIT,
-				"Could not lock MuxSocket receive method! Error code: %d\n", retLock);
+			CAMsg::printMsg(LOG_CRIT,	"Could not lock MuxSocket receive method! Error code: %d\n", retLock);
 			return E_UNKNOWN;
 		}
 		

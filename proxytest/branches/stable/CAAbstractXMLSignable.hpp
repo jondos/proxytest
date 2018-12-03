@@ -32,7 +32,7 @@ public:
 	}
 
 	/** TODO: implement */
-	SINT32 sign(CASignature &signer)
+	SINT32 sign(CASignature &)
 		{
 			return E_UNKNOWN;
 		}
@@ -60,7 +60,7 @@ public:
 	 */
 	SINT32 setSignature(DOMElement* elemSig)
 		{
-			ASSERT(!elemSig==NULL, "Signature element is NULL")
+			ASSERT(elemSig!=NULL, "Signature element is NULL")
 			m_pSignature = createDOMDocument();
 			m_pSignature->appendChild(m_pSignature->importNode(elemSig, true));
 			return E_SUCCESS;
