@@ -81,7 +81,7 @@ int squidloghelp_main()
 {
 	CASocket* psocketListener = new CASocket();
 	psocketListener->listen(6789);
-	int file = open("test.log", O_APPEND | O_CREAT | O_WRONLY);
+	int file = open("test.log", O_APPEND | O_CREAT | O_WRONLY, S_IRUSR| S_IWUSR);
 	const UINT32 BUFF_SIZE = 0xFFFF;
 	UINT8* in = new UINT8[BUFF_SIZE];
 	for (;;)
