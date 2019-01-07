@@ -74,7 +74,7 @@ class CASymChannelCipherFactory
 				}
 				if (strcmp((const char*)SYMCHANNELCIPHER_ALG_NAME_NULL, (const char*)strAlgID) == 0)
 				{
-					return CTR;
+					return NULL_CIPHER;
 				}
 				return UNDEFINED_CIPHER;
 
