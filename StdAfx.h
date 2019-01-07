@@ -295,6 +295,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#endif // _MSC_VER > 1000
 	#define _WIN32_WINDOWS 0x0410
 	#include <winsock2.h>
+	#include <Ws2tcpip.h>
 	//#if defined(_MSC_VER) &&defined (_DEBUG)
 	//	#include <crtdbg.h>
 	//	#define HAVE_CRTDBG
@@ -350,6 +351,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define BYTE_ORDER_LITTLE_ENDIAN
 	#define HAVE_EPOLL
 	#define EPOLL_HANDLE HANDLE
+	#define S_IRUSR _S_IREAD
+	#define S_IWUSR _S_IWRITE
 #else
 	//__linux is not defined on power pc so we define our own __linux if __linux__ is defined
 	#if defined(__linux__) && !defined(__linux)
