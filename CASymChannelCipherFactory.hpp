@@ -56,6 +56,8 @@ class CASymChannelCipherFactory
 									return new CASymCipherCTR();
 								case NULL_CIPHER:
 									return new CASymCipherNull();
+								case UNDEFINED_CIPHER:
+									return NULL;
 							}	
 						return NULL;
 					}
