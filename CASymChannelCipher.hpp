@@ -78,6 +78,8 @@ class CASymChannelCipher
 								return SYMCHANNELCIPHER_ALG_NAME_CTR;
 							case NULL_CIPHER:
 								return SYMCHANNELCIPHER_ALG_NAME_NULL;
+							case UNDEFINED_CIPHER:
+								return NULL;
 						}	
 					return NULL;
 				}
