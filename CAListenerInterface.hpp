@@ -35,7 +35,7 @@ class CAListenerInterface
 			static CAListenerInterface** getInstance(DOMElement* a_elemListenerInterfaces, UINT32& r_length);
 #endif
 			static CAListenerInterface* getInstance(NetworkType type,const UINT8* path); //constructs a Unix Domain ListenerInterface
-			static CAListenerInterface* getInstance(NetworkType type,const UINT8* hostnameOrIP,UINT16 port); //constructs a TCP/IP ListenerInterface
+			static CAListenerInterface* getInstance(NetworkType type,const UINT8* hostnameOrIP,UINT16 port); //constructs a TCP/IP or UDP/IP ListenerInterface
 
 		public:
 			NetworkType getType() const

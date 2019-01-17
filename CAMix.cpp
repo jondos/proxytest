@@ -357,11 +357,11 @@ SINT32 CAMix::initMixCascadeInfo(DOMElement* mixes)
 			{
 			//do nothing
 			}
-		else if(pListener->getType()==RAW_TCP)
-			{
-			DOMElement* elemTmpLI=NULL;
-			pListener->toDOMElement(elemTmpLI,m_docMixCascadeInfo);
-			elemListenerInterfaces->appendChild(elemTmpLI);
+		else if(pListener->getType()==RAW_TCP|| pListener->getType() == RAW_UDP)
+			{//Only TCP or UDP interfaces are meaningfull for external connections...
+				DOMElement* elemTmpLI=NULL;
+				pListener->toDOMElement(elemTmpLI,m_docMixCascadeInfo);
+				elemListenerInterfaces->appendChild(elemTmpLI);
 			}
 		delete pListener;
 		pListener = NULL;

@@ -303,6 +303,12 @@
     </ClInclude>
     <ClInclude Include="TermsAndConditions.hpp" />
     <ClInclude Include="CACryptoBenchmark.hpp" />
+    <ClInclude Include="readerwriterqueue.h">
+      <Filter>LockFreeQueue</Filter>
+    </ClInclude>
+    <ClInclude Include="atomicops.h">
+      <Filter>LockFreeQueue</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="documentation\XML\FirstMixToInfoService.xml" />
@@ -323,6 +329,9 @@
     </Filter>
     <Filter Include="wepoll">
       <UniqueIdentifier>{02405992-8bbf-434f-93d6-25be845f002d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LockFreeQueue">
+      <UniqueIdentifier>{4fe6ed78-44fc-401f-bf62-54fda550db7e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

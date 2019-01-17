@@ -704,7 +704,7 @@ SINT32 CALocalProxy::processKeyExchange(UINT8* buff,UINT32 len)
 						DOMNode* tmpNode = NULL;
 						UINT8 tmpBuff[255];
 						UINT32 tmpBuffLen = 255;
-						getDOMChildByName(child, "SymChannelCipher", tmpNode);
+						getDOMChildByName(child, "ChannelSymmetricChipher", tmpNode);
 						getDOMElementValue(tmpNode, tmpBuff, &tmpBuffLen);
 						m_arSymCipherAlgorithms[iMixIndex] = CASymChannelCipherFactory::getAlgIDFromString(tmpBuff);	
 						if (m_arSymCipherAlgorithms[iMixIndex] == UNDEFINED_CIPHER)
