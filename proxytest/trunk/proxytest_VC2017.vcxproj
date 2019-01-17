@@ -58,7 +58,7 @@
     <ProjectName>proxytest</ProjectName>
     <ProjectGUID>{83CD4B6C-FBFD-422A-91ED-FA6E515464F2}</ProjectGUID>
     <RootNamespace>proxytest</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

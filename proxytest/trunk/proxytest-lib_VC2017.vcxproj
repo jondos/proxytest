@@ -58,7 +58,7 @@
     <ProjectName>proxytest-lib</ProjectName>
     <ProjectGUID>{150377B0-CA8F-4031-A0B8-45A3001F4F81}</ProjectGUID>
     <RootNamespace>proxytest</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -3871,6 +3871,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="atomicops.h" />
     <ClInclude Include="basetypedefs.h" />
     <ClInclude Include="CAAbstractControlChannel.hpp" />
     <ClInclude Include="CAAbstractXMLEncodable.hpp" />
@@ -3962,6 +3963,7 @@
     <ClInclude Include="popt\popt.h" />
     <ClInclude Include="popt\poptint.h" />
     <ClInclude Include="popt\system.h" />
+    <ClInclude Include="readerwriterqueue.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="TermsAndConditions.hpp" />
     <ClInclude Include="tre\tre-ast.h" />

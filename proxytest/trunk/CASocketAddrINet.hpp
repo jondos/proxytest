@@ -102,18 +102,16 @@ class CASocketAddrINet:private sockaddr_in,public CASocketAddr
 			*/
 			static SINT32 getIPForString(UINT8* strIP, UINT8 ip[4])
 			{
-				UINT32 newAddr = inet_addr((const char*)strIP); //is it a doted string (a.b.c.d) ?
-				if (newAddr == INADDR_NONE) //no..
+				in_addr addr;
+				SINT32 ret = inet_pton(AF_INET,(const char*)strIP,&addr); //is it a doted string (a.b.c.d) ?
+				if (ret!=1) //no..
 				{
 					return E_UNKNOWN;
 				}
-				ip[3] = newAddr & 0x00FF;
-				newAddr >>= 8;
-				ip[2] = newAddr & 0x00FF;
-				newAddr >>= 8;
-				ip[1] = newAddr & 0x00FF;
-				newAddr >>= 8;
-				ip[0] = newAddr & 0x00FF;
+				ip[3] = addr.S_un.S_un_b.s_b4;
+				ip[2] = addr.S_un.S_un_b.s_b3;
+				ip[1] = addr.S_un.S_un_b.s_b2;
+				ip[0] = addr.S_un.S_un_b.s_b1;
 				return E_SUCCESS;
 			}
 //			operator LPSOCKADDR(){return (::LPSOCKADDR)m_pAddr;}

@@ -74,7 +74,7 @@ CAListenerInterface* CAListenerInterface::getInstance(NetworkType type,const UIN
 
 CAListenerInterface* CAListenerInterface::getInstance(NetworkType type,const UINT8* hostnameOrIP,UINT16 port)
 	{
-		if(	(type!=RAW_TCP&&type!=SSL_TCP))
+		if(	(type!=RAW_TCP&&type!=SSL_TCP&&type!=RAW_UDP))
 			return NULL;
 		CAListenerInterface* pListener=new CAListenerInterface();
 		pListener->m_Type=type;
@@ -93,7 +93,10 @@ SINT32	CAListenerInterface::toDOMElement(DOMElement* & elemListenerInterface,XER
 		elemListenerInterface=createDOMElement(ownerDoc,"ListenerInterface");
 		DOMElement* elem=createDOMElement(ownerDoc,"Type");
 		elemListenerInterface->appendChild(elem);
-		setDOMElementValue(elem,(UINT8*)"RAW/TCP");
+		if(m_Type==RAW_TCP)
+			setDOMElementValue(elem,(UINT8*)"RAW/TCP");
+		else if (m_Type == RAW_UDP)
+			setDOMElementValue(elem, (UINT8*)"RAW/UDP");
 		elem=createDOMElement(ownerDoc,"Port");
 		elemListenerInterface->appendChild(elem);
 		UINT32 port=((CASocketAddrINet*)m_pAddr)->getPort();
@@ -177,6 +180,8 @@ CAListenerInterface* CAListenerInterface::getInstance(const DOMNode* elemListene
 				pListener->m_Type=RAW_TCP;
 			else if(strcmp((char*)tmpBuff,"RAW/UNIX")==0)
 				pListener->m_Type=RAW_UNIX;
+			else if (strcmp((char*)tmpBuff, "RAW/UDP") == 0)
+				pListener->m_Type = RAW_UDP;
 			else if(strcmp((char*)tmpBuff,"SSL/TCP")==0)
 				pListener->m_Type=SSL_TCP;
 			else if(strcmp((char*)tmpBuff,"SSL/UNIX")==0)
@@ -193,7 +198,7 @@ CAListenerInterface* CAListenerInterface::getInstance(const DOMNode* elemListene
 			// infoservice old style <= config version 0.61
 			pListener->m_Type=HTTP_TCP;
 		}
-		if(pListener->m_Type==SSL_TCP||pListener->m_Type==RAW_TCP
+		if(pListener->m_Type==SSL_TCP||pListener->m_Type==RAW_TCP|| pListener->m_Type == RAW_UDP
 		   ||pListener->m_Type==HTTP_TCP)
 			{ 
 				DOMNode* elemIP=NULL;

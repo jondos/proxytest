@@ -30,7 +30,7 @@
     <ProjectGuid>{6A4CE475-E3C6-4862-9656-E1E0E531C119}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>AllTests</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
     <ProjectName>AllTests</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -49,7 +49,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -129,9 +129,9 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(LIB_GOOGLE_TEST_FRAMEWORK);C:\data\pthreads;C:\data\openssl-1.0.2\out32dll;C:\data\xerces-c-3.1.4\Build\Win32\VC14\Debug;$(SolutionDir)\build\proxytest-lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>gtestd.lib;proxytest-lib.lib;ws2_32.lib;ssleay32.lib;libeay32.lib;pthreadVC2.lib;xerces-c_3D.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(LIB_GOOGLE_TEST_FRAMEWORK);$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(SolutionDir)\build\proxytest-lib\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>gtestd.lib;proxytest-lib.lib;ws2_32.lib;pthreadVC2.lib;xerces-c_3D.lib;crypt32.lib;libcrypto.lib;libssl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug-with-Mini-XML|Win32'">
@@ -184,13 +184,17 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;;__GOOGLE_UNIT_TEST__;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(INCLUDE_GOOGLE_TEST_FRAMEWORK);$(INCLUDE_XERCES_C);$(INCLUDE_XERCES_C)\xercesc;$(INCLUDE_PTHREADS);$(INCLUDE_OPENSSL);</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(LIB_GOOGLE_TEST_FRAMEWORK);$(LIB_XERCES_C_DEBUG);$(LIB_OPENSSL);$(LIB_PTHREADS);$(SolutionDir)\build\proxytest-lib\Release;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>gtest.lib;proxytest-lib.lib;ws2_32.lib;pthreadVC2.lib;xerces-c_3D.lib;crypt32.lib;libcrypto.lib;libssl.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -214,6 +218,9 @@
     <ClCompile Include="..\test\TCACertificate.cpp" />
     <ClCompile Include="..\test\TCAUtil.cpp" />
     <ClCompile Include="AllTests.cpp" />
+    <ClCompile Include="TCALockfreeQueueBenchmark.cpp" />
+    <ClCompile Include="TCAQueueBenchmark.cpp" />
+    <ClCompile Include="TCASocketAddrINet.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\proxytest-lib_VC2017.vcxproj">
