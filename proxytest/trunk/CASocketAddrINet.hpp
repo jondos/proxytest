@@ -108,10 +108,11 @@ class CASocketAddrINet:private sockaddr_in,public CASocketAddr
 				{
 					return E_UNKNOWN;
 				}
-				ip[3] = addr.S_un.S_un_b.s_b4;
-				ip[2] = addr.S_un.S_un_b.s_b3;
-				ip[1] = addr.S_un.S_un_b.s_b2;
-				ip[0] = addr.S_un.S_un_b.s_b1;
+				UINT32 uAddr = ntohl(addr.s_addr);
+				ip[0] = (uAddr >> 24) & 0xFF;
+				ip[1] = (uAddr >> 16) & 0xFF;
+				ip[2] = (uAddr >> 8) & 0xFF;
+				ip[3] = (uAddr) & 0xFF;
 				return E_SUCCESS;
 			}
 //			operator LPSOCKADDR(){return (::LPSOCKADDR)m_pAddr;}
