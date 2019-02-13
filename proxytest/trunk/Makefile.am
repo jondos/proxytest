@@ -187,7 +187,7 @@ proxytest_sources = CAAbstractControlChannel.cpp\
 if ONLY_LIB
 lib_LTLIBRARIES = libmix.la
 libmix_la_CPPFLAGS = -DSOMEFLAG
-libmix_la_SOURCES = $(proxtest_sources)
+libmix_la_SOURCES = $(proxytest_sources)
 
 libmix_la_LIBADD = $(top_builddir)/xml/libxml.a \
 	    $(top_builddir)/popt/libpopt.a \
