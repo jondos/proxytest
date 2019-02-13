@@ -448,8 +448,10 @@ void CACmdLnOptions::clean()
 #endif
 		delete [] networkOptionSetters;
 		networkOptionSetters = NULL;
+#ifdef PAYMENT
 		delete [] m_arpTermsAndConditionsOptionSetters;
 		m_arpTermsAndConditionsOptionSetters=NULL;
+#endif
 }
 
 SINT32 CACmdLnOptions::parse(int argc,const char** argv)
