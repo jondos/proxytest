@@ -909,8 +909,9 @@ class CACmdLnOptions
 		optionSetter_pt *generalOptionSetters;
 		optionSetter_pt *certificateOptionSetters;
 		optionSetter_pt *networkOptionSetters;
+#ifdef PAYMENT
 		optionSetter_pt * m_arpTermsAndConditionsOptionSetters;
-
+#endif
 #ifdef SERVER_MONITORING
 	private:
 		char *m_strMonitoringListenerHost;
