@@ -215,18 +215,14 @@ else #BUILD_AS_SHADOW_PLUGIN
 
 noinst_LIBRARIES = libproxytest.a
 sbin_PROGRAMS = mix
-libproxytest_a_CPPFLAGS = -DSOMEFLAG
+libproxytest_a_CFLAGS = $(AM_CFLAGS) @USE_SGX_INSIDE@
+libproxytest_a_CPPFLAGS = $(AM_CPPFLAGS) @USE_SGX_INSIDE@
 libproxytest_a_SOURCES = $(proxytest_sources)
 
 
 mix_SOURCES = proxytest.cpp
-if USE_SGX
-mix_CFLAGS = $(AM_CFLAGS) -DUSE_SGX_INSIDE
-mix_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_SGX_INSIDE
-else
-mix_CFLAGS = $(AM_CFLAGS)
-mix_CPPFLAGS = $(AM_CPPFLAGS)
-endif #USE_SGX
+mix_CFLAGS = $(AM_CFLAGS) @USE_SGX_INSIDE@
+mix_CPPFLAGS = $(AM_CPPFLAGS) @USE_SGX_INSIDE@
 mix_LDADD += $(top_builddir)/libproxytest.a \
 	    $(top_builddir)/xml/libxml.a \
 	    $(top_builddir)/popt/libpopt.a \

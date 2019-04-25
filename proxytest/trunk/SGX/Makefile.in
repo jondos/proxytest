@@ -256,6 +256,7 @@ SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
+USE_SGX_INSIDE = @USE_SGX_INSIDE@
 VERSION = @VERSION@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
@@ -313,8 +314,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
 mixOutsideEnclave_SOURCES = CASGXMixOutsideEnclave.cpp
-mixOutsideEnclave_CFLAGS = $(AM_CFLAGS)
-mixOutsideEnclave_CPPFLAGS = $(AM_CPPFLAGS)
+mixOutsideEnclave_CFLAGS = $(AM_CFLAGS) -DUSE_SGX_OUTSIDE
+mixOutsideEnclave_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_SGX_OUTSIDE
 all: all-am
 
 .SUFFIXES:

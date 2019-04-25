@@ -1030,6 +1030,10 @@ else
     AM_CONDITIONAL([USE_SCONE],false)
 fi
 
+if test "x$use_sgx" == "xtrue" ; then
+ AC_SUBST(USE_SGX_INSIDE,"-DUSE_SGX_INSIDE")
+fi
+
 AM_CONDITIONAL([DOTESTS], [test x$DOTHETESTS = xyes])
 AM_CONDITIONAL([DOWIRESHARK], [test x$DOWITHWIRESHARK = xyes])
 AM_CONDITIONAL([ONLY_LIB], [test x$onlylib = xtrue])
