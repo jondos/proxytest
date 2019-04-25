@@ -231,7 +231,10 @@ mix_LDADD += $(top_builddir)/libproxytest.a \
 	    $(top_builddir)/TypeA/libmixa.a \
 	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
 
-
+if USE_SGX
+mix_CFLAGS = $(mix_CFLAGS) -DUSE_SGX_INSIDE
+mix_CPPFLAGS = $(mix_CPPFLAGS) -DUSE_SGX_INSIDE
+endif
 
 EXTRA_DIST = README proxytest.doxy proxytest.dsp proxytest.dsw
 
