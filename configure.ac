@@ -1022,10 +1022,9 @@ if test "x$onlymiddlemix" == "xtrue" ; then
 fi
 
 if test -n "$sconetoolchain"; then
-    CXX="$sconetoolchain/x86_64-linux-musl/bin/x86_64-linux-musl-g++"
-    CC="$sconetoolchain/x86_64-linux-musl/bin/x86_64-linux-musl-gcc"
     AC_SUBST(SCONE_TOOLCHAIN,"$sconetoolchain")
-    AC_SUBST(SCONE_GCC,"$CC")
+    AC_SUBST(SCONE_GCC,"$sconetoolchain/x86_64-linux-musl/bin/x86_64-linux-musl-gcc")
+    AC_SUBST(SCONE_CXX,"$sconetoolchain/x86_64-linux-musl/bin/x86_64-linux-musl-g++")
     AM_CONDITIONAL([USE_SCONE],true)
 	CXXFLAGS="$CXXFLAGS -DWITH_SGX"
 	CFLAGS="$CFLAGS -DWITH_SGX"
