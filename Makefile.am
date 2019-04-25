@@ -214,7 +214,11 @@ libmixshadow_la_LDFLAGS = -Wl,--no-as-needed
 else #BUILD_AS_SHADOW_PLUGIN
 
 noinst_LIBRARIES = libproxytest.a
+if USE_SGX
+sbin_PROGRAMS = mix mixOutsideEnclave
+else
 sbin_PROGRAMS = mix
+endif
 libproxytest_a_CPPFLAGS = -DSOMEFLAG
 libproxytest_a_SOURCES = $(proxytest_sources)
 
@@ -251,7 +255,6 @@ endif
 
 if USE_SGX
 	MAYBE_sgx=SGX
-	sbin_PROGRAMS="$(sbin_PROGRAMS) mixOutsideEnclave"
 endif
 
 if ALL_FROM_SOURCE
