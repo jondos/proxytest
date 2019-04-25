@@ -251,6 +251,7 @@ endif
 
 if USE_SGX
 	MAYBE_sgx=SGX
+	sbin_PROGRAMS="$(sbin_PROGRAMS) mixOutsideEnclave"
 endif
 
 if ALL_FROM_SOURCE
