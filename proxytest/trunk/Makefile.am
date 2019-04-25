@@ -249,6 +249,10 @@ if DOWIRESHARK
     MAYBE_wireshark=wireshark
 endif    
 
+if USE_SGX
+	MAYBE_sgx=SGX
+endif
+
 if ALL_FROM_SOURCE
 BUILT_SOURCES = external.h
 
@@ -280,4 +284,4 @@ endif
 endif #all from source
 
 
-SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark) SquidLogHelper
+SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark) SquidLogHelper $(MAYBE_sgx)

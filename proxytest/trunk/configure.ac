@@ -953,10 +953,23 @@ AC_ARG_ENABLE(only-middle-mix,
 
 sconetoolchain=""
 AC_ARG_WITH(SCONE,
-	AS_HELP_STRING([--with-SCONE=SCONE_TOOLCHAIN_PATH],[Build the Mix for the SCONE framework to let it run on Intel SGX. Give the path to the SCONE toolchain]),
+	AS_HELP_STRING([--with-SCONE=SCONE_TOOLCHAIN_PATH],[Build the Mix so it runs entirely within the SCONE framework to let it run on Intel SGX. Give the path to the SCONE toolchain]),
 	[
 		if test "x$withval" != "xno" ; then
 			sconetoolchain="$withval"
+		fi
+	]
+)
+
+use_sgx="false"
+USE_SGX_CFLAGS=""
+AC_ARG_WITH(SGX,
+	AS_HELP_STRING([--with-SGX=SCONE_TOOLCHAIN_PATH],[Build a Mix which uses Intel SGX but is splitted into a trusted (within enclave) and untrusted aprt (outsied enclave). Give the path to the SCONE toolchain]),
+	[
+		if test "x$withval" != "xno" ; then
+			sconetoolchain="$withval"
+			use_sgx="true"
+			USE_SGX_CFLAGS="-DUSE_SGX"
 		fi
 	]
 )
@@ -992,8 +1005,8 @@ AS_IF([test "x$DOWITHWIRESHARK" = "xyes"], [
    CFLAGS="$savedCFLAGS"
 ])
 
-CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT  $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS $BUILD_AS_SHADOW_PLUGIN_CFLAGS"
-CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS $BUILD_AS_SHADOW_PLUGIN_CFLAGS"
+CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT  $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS $BUILD_AS_SHADOW_PLUGIN_CFLAGS $USE_SGX_CFLAGS"
+CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS $BUILD_AS_SHADOW_PLUGIN_CFLAGS $USE_SGX_CFLAGS"
 LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB $GOOGLETEST_LIB"
 
 
@@ -1025,6 +1038,7 @@ AM_CONDITIONAL([DOWIRESHARK], [test x$DOWITHWIRESHARK = xyes])
 AM_CONDITIONAL([ONLY_LIB], [test x$onlylib = xtrue])
 AM_CONDITIONAL([ALL_FROM_SOURCE], [test x$allfromsource = xtrue])
 AM_CONDITIONAL([BUILD_AS_SHADOW_PLUGIN], [test x$build_as_shadow_plugin = xtrue])
+AM_CONDITIONAL([USE_SGX], [test x$use_sgx = xtrue])
 
-AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile SquidLogHelper/Makefile])
+AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile SquidLogHelper/Makefile SGX/Makefile])
 AC_OUTPUT
