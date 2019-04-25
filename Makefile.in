@@ -1032,6 +1032,7 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -1250,7 +1251,7 @@ proxytest_sources = CAAbstractControlChannel.cpp\
 @DOTESTS_TRUE@MAYBE_tests = test
 @DOWIRESHARK_TRUE@MAYBE_wireshark = wireshark
 @ALL_FROM_SOURCE_TRUE@BUILT_SOURCES = external.h
-SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark) SquidLogHelper
+SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark) SquidLogHelper $(MAYBE_sgx)
 all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -4370,6 +4371,8 @@ uninstall-am: uninstall-libLTLIBRARIES uninstall-sbinPROGRAMS
 
 
 export SGXTOOLCHAIN=@SCONE_TOOLCHAIN@
+
+@USE_SGX_TRUE@	MAYBE_sgx=SGX
 
 @ALL_FROM_SOURCE_TRUE@external.h:
 #Make MXML
