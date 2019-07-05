@@ -263,7 +263,7 @@ mix_LDADD += $(top_srcdir)/build/mxml/libmxml.a \
 external.h:
 #Make MXML
 	mkdir -p $(top_srcdir)/build/mxml
-	wget https://github.com/michaelrsweet/mxml/releases/download/release-2.12/mxml-2.12.tar.gz -O $(top_srcdir)/build/mxml.tgz
+	wget https://github.com/michaelrsweet/mxml/releases/download/v2.12/mxml-2.12.tar.gz -O $(top_srcdir)/build/mxml.tgz
 	tar -xzf $(top_srcdir)/build/mxml.tgz -C $(top_srcdir)/build/mxml --strip-components=1
 if USE_SCONE
 	cd $(top_srcdir)/build/mxml ; CC=@SCONE_GCC@ ./configure --enable-threads
