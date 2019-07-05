@@ -93,8 +93,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
 #define NEW_FLOW_CONTROL //enable for the new flow control mechanism --> now enabled by default (i.e. can not be disbaled anymore!)
 #define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses RSA-OAEP for key transport and two keys for upstream/downstream channel cryption (--> now enabled by default (i.e. can not be disbaled anymore!)
-//#define AES_NI // use the AES NI instructions 
-//#define SYM_CHANNEL_CIPHER_CTR //enable CTR mode instead of OFB for symmetric cipher used for channel encryption (this is especially helpfull to increase performance on mobile device clients)
+#define AES_NI // use the AES NI instructions 
+#define SYM_CHANNEL_CIPHER_CTR //enable CTR mode instead of OFB for symmetric cipher used for channel encryption (this is especially helpfull to increase performance on mobile device clients)
 //#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
 
 //define WITH_SGX //should the Intel SGX support be enabled
@@ -212,9 +212,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define USER_SEND_BUFFER_RESUME 10000
 #else
 	//EXPERIMENTAL: reduce user-buffers for free mixes by factor 10
-	#define MAX_USER_SEND_QUEUE 10000 //How many bytes could be in each User's send queue, before we suspend the belonging channels
-	#define MAX_DATA_PER_CHANNEL 10000
-	#define USER_SEND_BUFFER_RESUME 1000
+	#define MAX_USER_SEND_QUEUE 1000000 //How many bytes could be in each User's send queue, before we suspend the belonging channels
+	#define MAX_DATA_PER_CHANNEL 1000000
+	#define USER_SEND_BUFFER_RESUME 100000
 #endif
 
 #define PAYMENT_ACCOUNT_CERT_TIMEOUT 180 //Timeout for receiving the Payment certificate in seconds
@@ -223,8 +223,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #define MAX_SIGNATURE_ELEMENTS 10  // maximum of interpreted XML signature elements
 
-#define FLOW_CONTROL_SENDME_HARD_LIMIT 16000 //last mix stops sending after this unacked packets
-#define FLOW_CONTROL_SENDME_SOFT_LIMIT 8000 //last mix expect to get a 'SENDME' after this unacked packets
+#define FLOW_CONTROL_SENDME_HARD_LIMIT 1600000 //last mix stops sending after this unacked packets
+#define FLOW_CONTROL_SENDME_SOFT_LIMIT 800000 //last mix expect to get a 'SENDME' after this unacked packets
 
 #if defined(PAYMENT) || defined(MANIOQ)
 	#define MAX_READ_FROM_PREV_MIX_QUEUE_SIZE 10000000
@@ -233,10 +233,10 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#define MAX_NEXT_MIX_QUEUE_SIZE 10000000
 #else
 	//EXPERIMENTAL: reduce intermix-buffers for free mixes by factor 10
-	#define MAX_READ_FROM_PREV_MIX_QUEUE_SIZE 100000000
-	#define MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE 100000000 //How many bytes could be in the incoming queue ??
-	#define MAX_MIXIN_SEND_QUEUE_SIZE 100000000
-	#define MAX_NEXT_MIX_QUEUE_SIZE 100000000
+	#define MAX_READ_FROM_PREV_MIX_QUEUE_SIZE 10000000000
+	#define MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE 10000000000 //How many bytes could be in the incoming queue ??
+	#define MAX_MIXIN_SEND_QUEUE_SIZE 10000000000
+	#define MAX_NEXT_MIX_QUEUE_SIZE 10000000000
 #endif
 //#define FORCED_DELAY
 //#define MIN_LATENCY 250
