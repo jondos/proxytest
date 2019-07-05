@@ -263,7 +263,7 @@ mix_LDADD += $(top_srcdir)/build/mxml/libmxml.a \
 external.h:
 #Make MXML
 	mkdir -p $(top_srcdir)/build/mxml
-	wget https://github.com/michaelrsweet/mxml/releases/download/release-2.10/mxml-2.10.tar.gz -O $(top_srcdir)/build/mxml.tgz
+	wget https://github.com/michaelrsweet/mxml/releases/download/release-2.12/mxml-2.12.tar.gz -O $(top_srcdir)/build/mxml.tgz
 	tar -xzf $(top_srcdir)/build/mxml.tgz -C $(top_srcdir)/build/mxml --strip-components=1
 if USE_SCONE
 	cd $(top_srcdir)/build/mxml ; CC=@SCONE_GCC@ ./configure --enable-threads
@@ -273,7 +273,7 @@ endif
 	cd $(top_srcdir)/build/mxml ; make libmxml.a
 #Make OpenSSL
 	mkdir -p $(top_srcdir)/build/openssl
-	wget https://www.openssl.org/source/openssl-1.1.0e.tar.gz -O $(top_srcdir)/build/openssl.tgz
+	wget https://www.openssl.org/source/openssl-1.1.0k.tar.gz -O $(top_srcdir)/build/openssl.tgz
 	tar -xzf $(top_srcdir)/build/openssl.tgz -C $(top_srcdir)/build/openssl --strip-components=1
 if USE_SCONE
 	cd $(top_srcdir)/build/openssl ; CC=@SCONE_GCC@ ./config no-async no-capieng no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
