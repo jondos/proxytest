@@ -1240,7 +1240,7 @@ SGX MIX							unlocksem(pMix->upstreamSemPreId, SN_FULL);
 
 THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 	{
-	CAMiddleMix* pMix = static_cast<CAMiddleMix*>(param);
+		CAMiddleMix* pMix = static_cast<CAMiddleMix*>(param);
 		HCHANNEL channelIn;
 		CASymChannelCipher* pCipher=NULL;
 
@@ -1251,14 +1251,14 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 		CASingleSocketGroup oSocketGroup(false);
 		oSocketGroup.add(*(pMix->m_pMuxOut));
 
-		CAQueue* pQueue=pMix->m_pQueueSendToMixBefore;
+		CAQueue* pQueueSendtoMix=pMix->m_pQueueSendToMixBefore;
 
 #ifdef USE_POOL
 		CAPool* pPool=new CAPool(MIX_POOL_SIZE);
 #endif
 		while(pMix->m_bRun)
 			{
-				if(pQueue->getSize()>MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE)
+				if(pQueueSendtoMix->getSize()>MAX_READ_FROM_NEXT_MIX_QUEUE_SIZE)
 				{
 #ifdef DEBUG
 					CAMsg::printMsg(LOG_DEBUG,"CAMiddleMix::Queue next is full!\n");
@@ -1304,7 +1304,6 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 					}
 				else
 					{
-
 						ret=pMix->m_pMuxOut->receive(pMixPacket);
 						if ((ret!=SOCKET_ERROR)&&(pMixPacket->flags & ~CHANNEL_ALLOWED_FLAGS))
 							{
@@ -1379,7 +1378,7 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 									{//Channel close received -->remove channel form channellist
 										pMix->m_pMiddleMixChannelList->remove(channelIn);
 									}
-								pQueue->add(pPoolEntry,sizeof(tPoolEntry));
+								pMix->putMixPacketIntoQueueSendToMixBefore(pPoolEntry);
 							}
 					}
 			}
@@ -1406,7 +1405,14 @@ THREAD_RETURN mm_loopReadFromMixAfter(void* param)
 		THREAD_RETURN_SUCCESS;
 	}
 
-SINT32 CAMiddleMix::connectToNextMix(CASocketAddr* a_pAddrNext)
+SINT32 CAMiddleMix::putMixPacketIntoQueueSendToMixBefore(tPoolEntry* pPoolEntry)
+	{
+		m_pQueueSendToMixBefore->add(pPoolEntry, sizeof(tPoolEntry));
+		return E_SUCCESS;
+	}
+	
+	
+	SINT32 CAMiddleMix::connectToNextMix(CASocketAddr* a_pAddrNext)
 {
 #define RETRIES 100
 #define RETRYTIME 10
