@@ -74,8 +74,16 @@ class CASocketGroupEpoll
 
 					if (epoll_ctl(m_hEPFD, EPOLL_CTL_ADD, socket, m_pEpollEvent) != 0)
 						{
-							CAMsg::printMsg(LOG_DEBUG, "Failed to add socket %i to epoll group --- errno: %i\n", socket, GETERROR);
-							ret = E_UNKNOWN;
+							SINT32 err = GETERROR;
+							if (err == EEXIST)
+								{
+									ret=E_ALREADY_CONTAINED;
+								}
+							else
+								{
+									CAMsg::printMsg(LOG_DEBUG, "Failed to add socket %i to epoll group --- errno: %i\n", socket, err);
+									ret = E_UNKNOWN;
+								}
 						}
 					m_pcsFD_SET->unlock();
 					return ret;

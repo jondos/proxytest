@@ -23,3 +23,5 @@ const SINT32 E_SUCCESS=0;
 														// (like a TCP/IP connection or a database connection)
 #define E_NOT_FOUND -701 //Something was not found
 #define E_INVALID -800 // sth is invalid (e.g. signature verifying)
+
+#define E_ALREADY_CONTAINED -900 //sth is already cotained in a set, e.g. a file descriptor in an epoll set
