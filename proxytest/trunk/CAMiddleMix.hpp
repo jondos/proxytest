@@ -65,11 +65,12 @@ class CAMiddleMix:public
 				{
 					return CAMix::MIDDLE_MIX;
 				}
+
 		friend THREAD_RETURN mm_loopSendToMixBefore(void*);
 		friend THREAD_RETURN mm_loopSendToMixAfter(void*);
 		friend THREAD_RETURN mm_loopReadFromMixBefore(void*);
 		friend THREAD_RETURN mm_loopReadFromMixAfter(void*);
-		friend THREAD_RETURN mm_loopDownStream(void *);
+		//friend THREAD_RETURN mm_loopDownStream(void *);
 
 		private:
 			SINT32 loop();
@@ -77,6 +78,9 @@ class CAMiddleMix:public
 			SINT32 initOnce();
 			SINT32 clean();
 			SINT32 connectToNextMix(CASocketAddr* a_pAddrNext);
+
+			SINT32 putMixPacketIntoQueueSendToMixBefore(tPoolEntry* pPoolEntry);
+
 #ifdef DYNAMIC_MIX
 			bool m_bBreakNeeded;
 #endif
