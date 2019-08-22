@@ -1,6 +1,6 @@
 #include "CAMiddleMix.hpp"
 
-
+#ifdef USE_SGX_INSIDE
 class InnerMiddleMix{
 	public:
 		InnerMiddleMix(){
@@ -45,3 +45,4 @@ class InnerMiddleMix{
 
 
 };
+#endif //USE_SGX_INSIDE
