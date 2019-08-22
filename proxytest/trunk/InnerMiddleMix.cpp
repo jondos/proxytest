@@ -5,7 +5,7 @@
 #include "CABase64.hpp"
 #include "CAPool.hpp"
 
-#ifdef WITH_SGX
+#ifdef USE_SGX_INSIDE
 
 SINT32 InnerMiddleMix::start(){
 	if(init()==E_SUCCESS)
@@ -348,6 +348,6 @@ SINT32 InnerMiddleMix::clean(){
 	return E_SUCCESS;
 }
 
-#endif //WITH_SGX
+#endif //USE_SGX_INSIDE
 
 
