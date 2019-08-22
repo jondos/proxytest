@@ -37,7 +37,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAThreadList.hpp"
 #include "CAStatusManager.hpp"
 #include "CALibProxytest.hpp"
-#include "InnerMiddleMix.hpp"
 #include "CACryptoBenchmark.hpp"
 
 #include "SquidLogHelper/SquidLogHelper.hpp"
@@ -54,8 +53,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 #ifdef INCLUDE_MIDDLE_MIX
 #include "CAMiddleMix.hpp"
-InnerMiddleMix* pIMix =NULL;
-bool bIsInnerMiddleMix=false;
 #endif
 
 #ifdef INCLUDE_LAST_MIX
@@ -740,18 +737,6 @@ int main(int argc, const char* argv[])
 					MONITORING_FIRE_NET_EVENT(ev_net_lastMixInited);
 				}
 #endif
-#ifdef USE_SGX_INSIDE
-				else 
-				{
-					bIsInnerMiddleMix=true;
-					pIMix=new InnerMiddleMix();
-					CAMsg::printMsg(LOG_INFO, "Starting Inner Middle Mix");
-					pIMix->start();
-					if(pIMix!=NULL) delete pIMix;
-					pIMix=NULL;
-					goto EXIT;
-				}
-#endif // USE_SGX_INSIDE
 #else
 				CAMsg::printMsg(LOG_ERR,"this Mix is compiled to work only as local proxy!\n");
 				exit(EXIT_FAILURE);
