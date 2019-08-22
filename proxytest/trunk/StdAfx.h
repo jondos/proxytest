@@ -93,8 +93,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define WITH_CONTROL_CHANNELS_TEST //enable a Test control Channel
 #define NEW_FLOW_CONTROL //enable for the new flow control mechanism --> now enabled by default (i.e. can not be disbaled anymore!)
 #define NEW_CHANNEL_ENCRYPTION //enable the new protcol version which uses RSA-OAEP for key transport and two keys for upstream/downstream channel cryption (--> now enabled by default (i.e. can not be disbaled anymore!)
-#define AES_NI // use the AES NI instructions 
-#define SYM_CHANNEL_CIPHER_CTR //enable CTR mode instead of OFB for symmetric cipher used for channel encryption (this is especially helpfull to increase performance on mobile device clients)
+//#define AES_NI // use the AES NI instructions 
+//#define SYM_CHANNEL_CIPHER_CTR //enable CTR mode instead of OFB for symmetric cipher used for channel encryption (this is especially helpfull to increase performance on mobile device clients)
 //#define WITH_INTEGRITY_CHECK //enable AES-GCM encryption for data channels
 
 //define WITH_SGX //should the Intel SGX support be enabled
