@@ -256,31 +256,31 @@ endif
 if ALL_FROM_SOURCE
 BUILT_SOURCES = external.h
 
-mix_LDADD += $(top_srcdir)/build/mxml/libmxml.a \
+mix_LDADD += $(top_builddir)/build/mxml/libmxml.a \
 	$(top_builddir)/build/openssl/libssl.a \
 	$(top_builddir)/build/openssl/libcrypto.a 
 
 external.h:
 #Make MXML
-	mkdir -p $(top_srcdir)/build/mxml
-	wget https://github.com/michaelrsweet/mxml/releases/download/v2.12/mxml-2.12.tar.gz -O $(top_srcdir)/build/mxml.tgz
-	tar -xzf $(top_srcdir)/build/mxml.tgz -C $(top_srcdir)/build/mxml --strip-components=1
+	mkdir -p $(top_builddir)/build/mxml
+	wget https://github.com/michaelrsweet/mxml/releases/download/v2.12/mxml-2.12.tar.gz -O $(top_builddir)/build/mxml.tgz
+	tar -xzf $(top_builddir)/build/mxml.tgz -C $(top_builddir)/build/mxml --strip-components=1
 if USE_SCONE
-	cd $(top_srcdir)/build/mxml ; CC=@SCONE_GCC@ ./configure --enable-threads
+	cd $(top_builddir)/build/mxml ; CC=@SCONE_GCC@ ./configure --enable-threads
 else
-	cd $(top_srcdir)/build/mxml ; ./configure --enable-threads
+	cd $(top_builddir)/build/mxml ; ./configure --enable-threads
 endif
-	cd $(top_srcdir)/build/mxml ; make libmxml.a
+	cd $(top_builddir)/build/mxml ; make libmxml.a
 #Make OpenSSL
-	mkdir -p $(top_srcdir)/build/openssl
-	wget https://www.openssl.org/source/openssl-1.1.0k.tar.gz -O $(top_srcdir)/build/openssl.tgz
-	tar -xzf $(top_srcdir)/build/openssl.tgz -C $(top_srcdir)/build/openssl --strip-components=1
+	mkdir -p $(top_builddir)/build/openssl
+	wget https://www.openssl.org/source/openssl-1.1.0k.tar.gz -O $(top_builddir)/build/openssl.tgz
+	tar -xzf $(top_builddir)/build/openssl.tgz -C $(top_builddir)/build/openssl --strip-components=1
 if USE_SCONE
-	cd $(top_srcdir)/build/openssl ; CC=@SCONE_GCC@ ./config no-async no-capieng no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
+	cd $(top_buildcdir)/build/openssl ; CC=@SCONE_GCC@ ./config no-async no-capieng no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
 else
-	cd $(top_srcdir)/build/openssl ; ./config no-capieng no-async no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
+	cd $(top_builddir)/build/openssl ; ./config no-capieng no-async no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
 endif
-	cd $(top_srcdir)/build/openssl ; make
+	cd $(top_builddir)/build/openssl ; make
 endif #all from source
 
 
