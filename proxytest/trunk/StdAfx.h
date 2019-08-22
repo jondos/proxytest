@@ -459,7 +459,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <ctype.h>
 
 #ifdef WITH_SGX
-	#include "shm_header.h"
+//	#include "shm_header.h"
 #endif
 	typedef struct sockaddr SOCKADDR;
 	typedef SOCKADDR* LPSOCKADDR;
