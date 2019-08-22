@@ -93,7 +93,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-sbin_PROGRAMS = mixOutsideEnclave$(EXEEXT)
+@USE_SGX_TRUE@sbin_PROGRAMS = mixOutsideEnclave$(EXEEXT)
 subdir = SGX
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -106,8 +106,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(sbindir)"
 PROGRAMS = $(sbin_PROGRAMS)
-am_mixOutsideEnclave_OBJECTS =  \
-	mixOutsideEnclave-CASGXMixOutsideEnclave.$(OBJEXT)
+am__mixOutsideEnclave_SOURCES_DIST = CASGXMixOutsideEnclave.cpp
+@USE_SGX_TRUE@am_mixOutsideEnclave_OBJECTS = mixOutsideEnclave-CASGXMixOutsideEnclave.$(OBJEXT)
 mixOutsideEnclave_OBJECTS = $(am_mixOutsideEnclave_OBJECTS)
 mixOutsideEnclave_LDADD = $(LDADD)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -151,7 +151,7 @@ am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(mixOutsideEnclave_SOURCES)
-DIST_SOURCES = $(mixOutsideEnclave_SOURCES)
+DIST_SOURCES = $(am__mixOutsideEnclave_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -313,9 +313,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-mixOutsideEnclave_SOURCES = CASGXMixOutsideEnclave.cpp
-mixOutsideEnclave_CFLAGS = $(AM_CFLAGS) -DUSE_SGX_OUTSIDE
-mixOutsideEnclave_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_SGX_OUTSIDE
+@USE_SGX_TRUE@mixOutsideEnclave_SOURCES = CASGXMixOutsideEnclave.cpp
+@USE_SGX_TRUE@mixOutsideEnclave_CFLAGS = $(AM_CFLAGS) -DUSE_SGX_OUTSIDE
+@USE_SGX_TRUE@mixOutsideEnclave_CPPFLAGS = $(AM_CPPFLAGS) -DUSE_SGX_OUTSIDE
 all: all-am
 
 .SUFFIXES:
@@ -672,8 +672,6 @@ uninstall-am: uninstall-sbinPROGRAMS
 
 .PRECIOUS: Makefile
 
-
-#endif # USE_SGX
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
