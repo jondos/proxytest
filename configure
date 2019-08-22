@@ -19962,12 +19962,21 @@ if test "x$onlymiddlemix" == "xtrue" ; then
 fi
 
 if test -n "$sconetoolchain"; then
+		if test "x$sconetoolchain" == "xyes" ; then
+    SCONE_TOOLCHAIN=""
+
+    SCONE_GCC="$CC"
+
+    SCONE_CXX="$CXX"
+
+		else
     SCONE_TOOLCHAIN="$sconetoolchain"
 
     SCONE_GCC="$sconetoolchain/x86_64-linux-musl/bin/x86_64-linux-musl-gcc"
 
     SCONE_CXX="$sconetoolchain/x86_64-linux-musl/bin/x86_64-linux-musl-g++"
 
+    fi
      if true; then
   USE_SCONE_TRUE=
   USE_SCONE_FALSE='#'
