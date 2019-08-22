@@ -646,7 +646,7 @@ SINT32 CAMiddleMix::init()
 #ifdef DYNAMIC_MIX
 		m_bBreakNeeded = m_bReconfigured;
 #endif
-#ifdef WITH_SGX
+#ifdef WITH_SGX_IGNORED
 		if(m_bShMemConfigured==false){
 		
 			CAMsg::printMsg(LOG_INFO,"start sh mem conf");
@@ -1540,7 +1540,7 @@ SINT32 CAMiddleMix::clean()
 		m_pRSA=NULL;
 
 ///New SGX
-#ifdef WITH_SGX
+#ifdef WITH_SGX_IGNORED
 		if(m_bShutDown){
 		
 			delete m_pRSA;
