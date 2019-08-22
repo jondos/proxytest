@@ -458,9 +458,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 	#include <dirent.h>
 	#include <ctype.h>
 
-#ifdef WITH_SGX
-//	#include "shm_header.h"
-#endif
 	typedef struct sockaddr SOCKADDR;
 	typedef SOCKADDR* LPSOCKADDR;
 	#define SOCKET int
