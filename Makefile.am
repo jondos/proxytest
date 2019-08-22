@@ -276,7 +276,7 @@ endif
 	wget https://www.openssl.org/source/openssl-1.1.0k.tar.gz -O $(top_builddir)/build/openssl.tgz
 	tar -xzf $(top_builddir)/build/openssl.tgz -C $(top_builddir)/build/openssl --strip-components=1
 if USE_SCONE
-	cd $(top_buildcdir)/build/openssl ; CC=@SCONE_GCC@ ./config no-async no-capieng no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
+	cd $(top_builddir)/build/openssl ; CC=@SCONE_GCC@ ./config no-async no-capieng no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
 else
 	cd $(top_builddir)/build/openssl ; ./config no-capieng no-async no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
 endif

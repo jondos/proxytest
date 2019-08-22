@@ -4389,7 +4389,7 @@ export SGXTOOLCHAIN=@SCONE_TOOLCHAIN@
 @ALL_FROM_SOURCE_TRUE@	mkdir -p $(top_builddir)/build/openssl
 @ALL_FROM_SOURCE_TRUE@	wget https://www.openssl.org/source/openssl-1.1.0k.tar.gz -O $(top_builddir)/build/openssl.tgz
 @ALL_FROM_SOURCE_TRUE@	tar -xzf $(top_builddir)/build/openssl.tgz -C $(top_builddir)/build/openssl --strip-components=1
-@ALL_FROM_SOURCE_TRUE@@USE_SCONE_TRUE@	cd $(top_buildcdir)/build/openssl ; CC=@SCONE_GCC@ ./config no-async no-capieng no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
+@ALL_FROM_SOURCE_TRUE@@USE_SCONE_TRUE@	cd $(top_builddir)/build/openssl ; CC=@SCONE_GCC@ ./config no-async no-capieng no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
 @ALL_FROM_SOURCE_TRUE@@USE_SCONE_FALSE@	cd $(top_builddir)/build/openssl ; ./config no-capieng no-async no-cms no-comp no-ct no-deprecated no-dgram no-dso no-dtls no-gost no-ocsp no-stdio no-shared  no-tls no-ui no-ts   no-psk no-srp 
 @ALL_FROM_SOURCE_TRUE@	cd $(top_builddir)/build/openssl ; make
 
