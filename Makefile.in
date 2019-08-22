@@ -185,8 +185,7 @@ am__libproxytest_a_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CAThreadPool.cpp CAThreadList.cpp CAUtil.cpp CAXMLBI.cpp \
 	CAXMLCostConfirmation.cpp CAXMLErrorMessage.cpp \
 	CAXMLPriceCert.cpp Hashtable.cpp TermsAndConditions.cpp \
-	packetintro.cpp StdAfx.cpp InnerMiddleMix.cpp \
-	InnerMiddleMix.hpp CAAbstractControlChannel.hpp \
+	packetintro.cpp StdAfx.cpp CAAbstractControlChannel.hpp \
 	CAAbstractXMLEncodable.hpp CAAbstractXMLSignable.hpp \
 	CAAccountingBIInterface.hpp CAAccountingControlChannel.hpp \
 	CAAccountingDBInterface.hpp CAAccountingInstance.hpp \
@@ -299,7 +298,6 @@ am__objects_1 = libproxytest_a-CAAbstractControlChannel.$(OBJEXT) \
 	libproxytest_a-TermsAndConditions.$(OBJEXT) \
 	libproxytest_a-packetintro.$(OBJEXT) \
 	libproxytest_a-StdAfx.$(OBJEXT) \
-	libproxytest_a-InnerMiddleMix.$(OBJEXT) \
 	libproxytest_a-CACryptoBenchmark.$(OBJEXT)
 @BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@am_libproxytest_a_OBJECTS = $(am__objects_1)
 libproxytest_a_OBJECTS = $(am_libproxytest_a_OBJECTS)
@@ -337,8 +335,7 @@ am__libmix_la_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CAThreadPool.cpp CAThreadList.cpp CAUtil.cpp CAXMLBI.cpp \
 	CAXMLCostConfirmation.cpp CAXMLErrorMessage.cpp \
 	CAXMLPriceCert.cpp Hashtable.cpp TermsAndConditions.cpp \
-	packetintro.cpp StdAfx.cpp InnerMiddleMix.cpp \
-	InnerMiddleMix.hpp CAAbstractControlChannel.hpp \
+	packetintro.cpp StdAfx.cpp CAAbstractControlChannel.hpp \
 	CAAbstractXMLEncodable.hpp CAAbstractXMLSignable.hpp \
 	CAAccountingBIInterface.hpp CAAccountingControlChannel.hpp \
 	CAAccountingDBInterface.hpp CAAccountingInstance.hpp \
@@ -418,7 +415,7 @@ am__objects_2 = libmix_la-CAAbstractControlChannel.lo \
 	libmix_la-CAXMLErrorMessage.lo libmix_la-CAXMLPriceCert.lo \
 	libmix_la-Hashtable.lo libmix_la-TermsAndConditions.lo \
 	libmix_la-packetintro.lo libmix_la-StdAfx.lo \
-	libmix_la-InnerMiddleMix.lo libmix_la-CACryptoBenchmark.lo
+	libmix_la-CACryptoBenchmark.lo
 @ONLY_LIB_TRUE@am_libmix_la_OBJECTS = $(am__objects_2)
 libmix_la_OBJECTS = $(am_libmix_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
@@ -462,8 +459,7 @@ am__libmixshadow_la_SOURCES_DIST = CAAbstractControlChannel.cpp \
 	CAThreadPool.cpp CAThreadList.cpp CAUtil.cpp CAXMLBI.cpp \
 	CAXMLCostConfirmation.cpp CAXMLErrorMessage.cpp \
 	CAXMLPriceCert.cpp Hashtable.cpp TermsAndConditions.cpp \
-	packetintro.cpp StdAfx.cpp InnerMiddleMix.cpp \
-	InnerMiddleMix.hpp CAAbstractControlChannel.hpp \
+	packetintro.cpp StdAfx.cpp CAAbstractControlChannel.hpp \
 	CAAbstractXMLEncodable.hpp CAAbstractXMLSignable.hpp \
 	CAAccountingBIInterface.hpp CAAccountingControlChannel.hpp \
 	CAAccountingDBInterface.hpp CAAccountingInstance.hpp \
@@ -524,8 +520,7 @@ am__objects_3 = CAAbstractControlChannel.lo CAAbstractXMLEncodable.lo \
 	CAThreadPool.lo CAThreadList.lo CAUtil.lo CAXMLBI.lo \
 	CAXMLCostConfirmation.lo CAXMLErrorMessage.lo \
 	CAXMLPriceCert.lo Hashtable.lo TermsAndConditions.lo \
-	packetintro.lo StdAfx.lo InnerMiddleMix.lo \
-	CACryptoBenchmark.lo
+	packetintro.lo StdAfx.lo CACryptoBenchmark.lo
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@am_libmixshadow_la_OBJECTS =  \
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	$(am__objects_3) \
 @BUILD_AS_SHADOW_PLUGIN_TRUE@@ONLY_LIB_FALSE@	proxytest.lo
@@ -611,8 +606,7 @@ am__depfiles_remade = ./$(DEPDIR)/CAASymCipher.Plo \
 	./$(DEPDIR)/CAXMLCostConfirmation.Plo \
 	./$(DEPDIR)/CAXMLErrorMessage.Plo \
 	./$(DEPDIR)/CAXMLPriceCert.Plo ./$(DEPDIR)/Hashtable.Plo \
-	./$(DEPDIR)/InnerMiddleMix.Plo ./$(DEPDIR)/StdAfx.Plo \
-	./$(DEPDIR)/TermsAndConditions.Plo \
+	./$(DEPDIR)/StdAfx.Plo ./$(DEPDIR)/TermsAndConditions.Plo \
 	./$(DEPDIR)/libmix_la-CAASymCipher.Plo \
 	./$(DEPDIR)/libmix_la-CAAbstractControlChannel.Plo \
 	./$(DEPDIR)/libmix_la-CAAbstractXMLEncodable.Plo \
@@ -691,7 +685,6 @@ am__depfiles_remade = ./$(DEPDIR)/CAASymCipher.Plo \
 	./$(DEPDIR)/libmix_la-CAXMLErrorMessage.Plo \
 	./$(DEPDIR)/libmix_la-CAXMLPriceCert.Plo \
 	./$(DEPDIR)/libmix_la-Hashtable.Plo \
-	./$(DEPDIR)/libmix_la-InnerMiddleMix.Plo \
 	./$(DEPDIR)/libmix_la-StdAfx.Plo \
 	./$(DEPDIR)/libmix_la-TermsAndConditions.Plo \
 	./$(DEPDIR)/libmix_la-packetintro.Plo \
@@ -773,7 +766,6 @@ am__depfiles_remade = ./$(DEPDIR)/CAASymCipher.Plo \
 	./$(DEPDIR)/libproxytest_a-CAXMLErrorMessage.Po \
 	./$(DEPDIR)/libproxytest_a-CAXMLPriceCert.Po \
 	./$(DEPDIR)/libproxytest_a-Hashtable.Po \
-	./$(DEPDIR)/libproxytest_a-InnerMiddleMix.Po \
 	./$(DEPDIR)/libproxytest_a-StdAfx.Po \
 	./$(DEPDIR)/libproxytest_a-TermsAndConditions.Po \
 	./$(DEPDIR)/libproxytest_a-packetintro.Po \
@@ -1131,8 +1123,6 @@ proxytest_sources = CAAbstractControlChannel.cpp\
 		    TermsAndConditions.cpp \
 		    packetintro.cpp \
 		    StdAfx.cpp \
-		    InnerMiddleMix.cpp\
-		    InnerMiddleMix.hpp\
 		    CAAbstractControlChannel.hpp\
 		    CAAbstractXMLEncodable.hpp\
 		    CAAbstractXMLSignable.hpp\
@@ -1495,7 +1485,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAXMLErrorMessage.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAXMLPriceCert.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Hashtable.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/InnerMiddleMix.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/StdAfx.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TermsAndConditions.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAASymCipher.Plo@am__quote@ # am--include-marker
@@ -1576,7 +1565,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAXMLErrorMessage.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-CAXMLPriceCert.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-Hashtable.Plo@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-InnerMiddleMix.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-StdAfx.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-TermsAndConditions.Plo@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libmix_la-packetintro.Plo@am__quote@ # am--include-marker
@@ -1658,7 +1646,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAXMLErrorMessage.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-CAXMLPriceCert.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-Hashtable.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-InnerMiddleMix.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-StdAfx.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-TermsAndConditions.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libproxytest_a-packetintro.Po@am__quote@ # am--include-marker
@@ -2816,20 +2803,6 @@ libproxytest_a-StdAfx.obj: StdAfx.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-StdAfx.obj `if test -f 'StdAfx.cpp'; then $(CYGPATH_W) 'StdAfx.cpp'; else $(CYGPATH_W) '$(srcdir)/StdAfx.cpp'; fi`
 
-libproxytest_a-InnerMiddleMix.o: InnerMiddleMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-InnerMiddleMix.o -MD -MP -MF $(DEPDIR)/libproxytest_a-InnerMiddleMix.Tpo -c -o libproxytest_a-InnerMiddleMix.o `test -f 'InnerMiddleMix.cpp' || echo '$(srcdir)/'`InnerMiddleMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-InnerMiddleMix.Tpo $(DEPDIR)/libproxytest_a-InnerMiddleMix.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='InnerMiddleMix.cpp' object='libproxytest_a-InnerMiddleMix.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-InnerMiddleMix.o `test -f 'InnerMiddleMix.cpp' || echo '$(srcdir)/'`InnerMiddleMix.cpp
-
-libproxytest_a-InnerMiddleMix.obj: InnerMiddleMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-InnerMiddleMix.obj -MD -MP -MF $(DEPDIR)/libproxytest_a-InnerMiddleMix.Tpo -c -o libproxytest_a-InnerMiddleMix.obj `if test -f 'InnerMiddleMix.cpp'; then $(CYGPATH_W) 'InnerMiddleMix.cpp'; else $(CYGPATH_W) '$(srcdir)/InnerMiddleMix.cpp'; fi`
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-InnerMiddleMix.Tpo $(DEPDIR)/libproxytest_a-InnerMiddleMix.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='InnerMiddleMix.cpp' object='libproxytest_a-InnerMiddleMix.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libproxytest_a-InnerMiddleMix.obj `if test -f 'InnerMiddleMix.cpp'; then $(CYGPATH_W) 'InnerMiddleMix.cpp'; else $(CYGPATH_W) '$(srcdir)/InnerMiddleMix.cpp'; fi`
-
 libproxytest_a-CACryptoBenchmark.o: CACryptoBenchmark.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libproxytest_a_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libproxytest_a-CACryptoBenchmark.o -MD -MP -MF $(DEPDIR)/libproxytest_a-CACryptoBenchmark.Tpo -c -o libproxytest_a-CACryptoBenchmark.o `test -f 'CACryptoBenchmark.cpp' || echo '$(srcdir)/'`CACryptoBenchmark.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libproxytest_a-CACryptoBenchmark.Tpo $(DEPDIR)/libproxytest_a-CACryptoBenchmark.Po
@@ -3404,13 +3377,6 @@ libmix_la-StdAfx.lo: StdAfx.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-StdAfx.lo `test -f 'StdAfx.cpp' || echo '$(srcdir)/'`StdAfx.cpp
 
-libmix_la-InnerMiddleMix.lo: InnerMiddleMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-InnerMiddleMix.lo -MD -MP -MF $(DEPDIR)/libmix_la-InnerMiddleMix.Tpo -c -o libmix_la-InnerMiddleMix.lo `test -f 'InnerMiddleMix.cpp' || echo '$(srcdir)/'`InnerMiddleMix.cpp
-@am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-InnerMiddleMix.Tpo $(DEPDIR)/libmix_la-InnerMiddleMix.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(AM_V_CXX)source='InnerMiddleMix.cpp' object='libmix_la-InnerMiddleMix.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(AM_V_CXX@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libmix_la-InnerMiddleMix.lo `test -f 'InnerMiddleMix.cpp' || echo '$(srcdir)/'`InnerMiddleMix.cpp
-
 libmix_la-CACryptoBenchmark.lo: CACryptoBenchmark.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_CXX)$(LIBTOOL) $(AM_V_lt) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libmix_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libmix_la-CACryptoBenchmark.lo -MD -MP -MF $(DEPDIR)/libmix_la-CACryptoBenchmark.Tpo -c -o libmix_la-CACryptoBenchmark.lo `test -f 'CACryptoBenchmark.cpp' || echo '$(srcdir)/'`CACryptoBenchmark.cpp
 @am__fastdepCXX_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libmix_la-CACryptoBenchmark.Tpo $(DEPDIR)/libmix_la-CACryptoBenchmark.Plo
@@ -3864,7 +3830,6 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/CAXMLErrorMessage.Plo
 	-rm -f ./$(DEPDIR)/CAXMLPriceCert.Plo
 	-rm -f ./$(DEPDIR)/Hashtable.Plo
-	-rm -f ./$(DEPDIR)/InnerMiddleMix.Plo
 	-rm -f ./$(DEPDIR)/StdAfx.Plo
 	-rm -f ./$(DEPDIR)/TermsAndConditions.Plo
 	-rm -f ./$(DEPDIR)/libmix_la-CAASymCipher.Plo
@@ -3945,7 +3910,6 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/libmix_la-CAXMLErrorMessage.Plo
 	-rm -f ./$(DEPDIR)/libmix_la-CAXMLPriceCert.Plo
 	-rm -f ./$(DEPDIR)/libmix_la-Hashtable.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-InnerMiddleMix.Plo
 	-rm -f ./$(DEPDIR)/libmix_la-StdAfx.Plo
 	-rm -f ./$(DEPDIR)/libmix_la-TermsAndConditions.Plo
 	-rm -f ./$(DEPDIR)/libmix_la-packetintro.Plo
@@ -4027,7 +3991,6 @@ distclean: distclean-recursive
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAXMLErrorMessage.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAXMLPriceCert.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-Hashtable.Po
-	-rm -f ./$(DEPDIR)/libproxytest_a-InnerMiddleMix.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-StdAfx.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-TermsAndConditions.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-packetintro.Po
@@ -4159,7 +4122,6 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/CAXMLErrorMessage.Plo
 	-rm -f ./$(DEPDIR)/CAXMLPriceCert.Plo
 	-rm -f ./$(DEPDIR)/Hashtable.Plo
-	-rm -f ./$(DEPDIR)/InnerMiddleMix.Plo
 	-rm -f ./$(DEPDIR)/StdAfx.Plo
 	-rm -f ./$(DEPDIR)/TermsAndConditions.Plo
 	-rm -f ./$(DEPDIR)/libmix_la-CAASymCipher.Plo
@@ -4240,7 +4202,6 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/libmix_la-CAXMLErrorMessage.Plo
 	-rm -f ./$(DEPDIR)/libmix_la-CAXMLPriceCert.Plo
 	-rm -f ./$(DEPDIR)/libmix_la-Hashtable.Plo
-	-rm -f ./$(DEPDIR)/libmix_la-InnerMiddleMix.Plo
 	-rm -f ./$(DEPDIR)/libmix_la-StdAfx.Plo
 	-rm -f ./$(DEPDIR)/libmix_la-TermsAndConditions.Plo
 	-rm -f ./$(DEPDIR)/libmix_la-packetintro.Plo
@@ -4322,7 +4283,6 @@ maintainer-clean: maintainer-clean-recursive
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAXMLErrorMessage.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-CAXMLPriceCert.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-Hashtable.Po
-	-rm -f ./$(DEPDIR)/libproxytest_a-InnerMiddleMix.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-StdAfx.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-TermsAndConditions.Po
 	-rm -f ./$(DEPDIR)/libproxytest_a-packetintro.Po
