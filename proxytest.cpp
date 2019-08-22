@@ -740,7 +740,7 @@ int main(int argc, const char* argv[])
 					MONITORING_FIRE_NET_EVENT(ev_net_lastMixInited);
 				}
 #endif
-#ifdef WITH_SGX
+#ifdef USE_SGX_INSIDE
 				else 
 				{
 					bIsInnerMiddleMix=true;
@@ -751,7 +751,7 @@ int main(int argc, const char* argv[])
 					pIMix=NULL;
 					goto EXIT;
 				}
-#endif // WTIH_SGX
+#endif // USE_SGX_INSIDE
 #else
 				CAMsg::printMsg(LOG_ERR,"this Mix is compiled to work only as local proxy!\n");
 				exit(EXIT_FAILURE);
