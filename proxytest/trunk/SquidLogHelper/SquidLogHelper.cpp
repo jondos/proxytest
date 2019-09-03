@@ -1,6 +1,13 @@
 #include "../StdAfx.h"
+#include "SquidLogHelper.hpp"
 #include "../CASocket.hpp"
 #include "../CASocketAddrINet.hpp"
+
+
+CASquidLogHelper::CASquidLogHelper(UINT16 port)
+{
+	m_pThreadProcessingLoop = NULL;
+}
 
 /*** Receives log lines from syslog over TCP/IP.
 Format should be: 
@@ -14,7 +21,7 @@ Format should be:
 	Example:
 	10.10.0.1,34732,127.0.0.1,3128, extra info
 */
-int processLogLine(UINT8* strLine)
+SINT32 CASquidLogHelper::processLogLine(UINT8* strLine)
 {
 	UINT8* pEntry = strLine;
 	UINT8 lastMixToProxyConnectionSrcIP[4];
@@ -77,8 +84,9 @@ int processLogLine(UINT8* strLine)
 	return E_SUCCESS;
 }
 
-int squidloghelp_main()
+THREAD_RETURN squidloghelper_ProcessingLoop(void* param)
 {
+	CASquidLogHelper* m_pSquidLogHelper = (CASquidLogHelper*)param;
 	CASocket* psocketListener = new CASocket();
 	psocketListener->listen(6789);
 	int file = open("test.log", O_APPEND | O_CREAT | O_WRONLY, S_IRUSR| S_IWUSR);
@@ -103,7 +111,7 @@ next_read:
 					{//line end found --> write line
 						myfilewrite(file, in, i);
 						in[i] = 0;
-						processLogLine(in);
+						m_pSquidLogHelper->processLogLine(in);
 
 						len = 0;
 						pos = 0;
@@ -125,4 +133,18 @@ next_read:
 	delete[] in;
     return 0;
 }
+
+SINT32 CASquidLogHelper::start()
+{
+	m_pThreadProcessingLoop = new CAThread((UINT8*)"SquidHelperProcessingLoop");
+	m_pThreadProcessingLoop->setMainLoop(squidloghelper_ProcessingLoop);
+	m_pThreadProcessingLoop->start(this, true);
+	return E_SUCCESS;
+}
+
+SINT32 CASquidLogHelper::stop()
+{
+	return E_SUCCESS;
+}
+
 

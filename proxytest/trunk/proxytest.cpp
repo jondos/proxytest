@@ -39,7 +39,6 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CALibProxytest.hpp"
 #include "CACryptoBenchmark.hpp"
 
-#include "SquidLogHelper/SquidLogHelper.hpp"
 
 #ifdef _DEBUG //For FreeBSD memory checking functionality
 	const char* _malloc_options="AX";
@@ -719,14 +718,16 @@ int main(int argc, const char* argv[])
 				}
 				else
 #endif
+#ifdef INCLUDE_MIDDLE_MIX
 				if(CALibProxytest::getOptions()->isMiddleMix())
 				{
 					CAMsg::printMsg(LOG_INFO,"I am a Middle MIX...\n");
 					pMix=new CAMiddleMix();
 					MONITORING_FIRE_NET_EVENT(ev_net_middleMixInited);
 				}
+#endif
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX 
-				else
+				if (CALibProxytest::getOptions()->isLastMix())
 				{
 					CAMsg::printMsg(LOG_INFO,"I am the Last MIX...\n");
 					#if !defined(NEW_MIX_TYPE)

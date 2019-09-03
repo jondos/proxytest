@@ -39,6 +39,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAInfoService.hpp"
 #ifdef LOG_CRIME
 	#include "tre/tre.h"
+	#include "SquidLogHelper/SquidLogHelper.hpp"
 #endif
 #include "CALogPacketStats.hpp"
 #ifndef NEW_MIX_TYPE // not TypeB mixes
@@ -91,6 +92,7 @@ class CALastMix:public
 						const char* uri_regexp="[^:]+[:][/][/]([^:/]+)"; //
 						m_pregexpDomainOfURI=new tre_regex_t;
 						tre_regcomp(m_pregexpDomainOfURI,uri_regexp,REG_EXTENDED );
+						m_pSquidLogHelper = NULL;
 					#endif
 				}
 
@@ -168,9 +170,10 @@ class CALastMix:public
 			tre_regex_t*							m_pregexpRequestLine; //Regexp used to find the URI of a request line
 			tre_regex_t*							m_pregexpDomainOfURI; //Regexp to find Domain of URI
 			tre_regex_t*							m_pCrimeRegExpsURL;
-			UINT32								m_nCrimeRegExpsURL;
+			UINT32										m_nCrimeRegExpsURL;
 			tre_regex_t*							m_pCrimeRegExpsPayload;
-			UINT32								m_nCrimeRegExpsPayload;
+			UINT32										m_nCrimeRegExpsPayload;
+			CASquidLogHelper*					m_pSquidLogHelper;
 			void externalCrimeNotifier(UINT8 lastMixToProxyConnectionSrcIP[4],
 				UINT16 lastMixToProxyConnectionSrcPort,
 				UINT8 lastMixToProxyConnectionDstIP[4],
