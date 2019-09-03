@@ -169,6 +169,12 @@ SINT32 CALastMix::init()
 		m_pCrimeRegExpsURL=CALibProxytest::getOptions()->getCrimeRegExpsURL(&m_nCrimeRegExpsURL);
 		m_nCrimeRegExpsPayload = 0;
 		m_pCrimeRegExpsPayload = CALibProxytest::getOptions()->getCrimeRegExpsPayload(&m_nCrimeRegExpsPayload);
+		m_pSquidLogHelper = new CASquidLogHelper(1);
+		if (m_pSquidLogHelper->start()!=E_SUCCESS)
+		{
+			CAMsg::printMsg(LOG_ERR, "Could not satart SquidLogHelper!\n");
+			return E_UNKNOWN;
+		}
 #endif
 		ret=processKeyExchange();
 		if(ret!=E_SUCCESS)
@@ -1023,6 +1029,15 @@ SINT32 CALastMix::setTargets()
 
 SINT32 CALastMix::clean()
 {
+#ifdef LOG_CRIME
+	if (m_pSquidLogHelper != NULL)
+		{
+			m_pSquidLogHelper->stop();
+			delete m_pSquidLogHelper;
+			m_pSquidLogHelper = NULL;
+		}
+#endif
+
 		m_bRestart=true;
 		MONITORING_FIRE_NET_EVENT(ev_net_prevConnectionClosed);
 		m_bRunLog=false;
