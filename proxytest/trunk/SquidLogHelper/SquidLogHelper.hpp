@@ -1,5 +1,5 @@
 #pragma once
-
+#ifdef LOG_CRIME
 #include "../CAThread.hpp"
 
 extern class CALastMix;
@@ -18,4 +18,4 @@ class CASquidLogHelper
 		CALastMix* m_pLastMix;
 };
 
-//int squidloghelp_main();
+#endif //LOG_CRIME
