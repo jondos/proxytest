@@ -115,7 +115,7 @@ THREAD_RETURN squidloghelper_ProcessingLoop(void* param)
 	CASquidLogHelper* m_pSquidLogHelper = (CASquidLogHelper*)param;
 	CASocket* psocketListener = new CASocket();
 	CASocketAddrINet* pAddr = new CASocketAddrINet();
-	pAddr->setAddr((const UINT8*)"127.0.0.1", 6780);
+	pAddr->setAddr((const UINT8*)"127.0.0.1", 6789);
 	psocketListener->listen(*pAddr);
 	delete pAddr;
 	int file = open("/tmp/test.log", O_APPEND | O_CREAT | O_WRONLY, S_IRUSR| S_IWUSR);
