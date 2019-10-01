@@ -2,7 +2,7 @@
 #ifdef LOG_CRIME
 #include "../CAThread.hpp"
 
-extern class CALastMix;
+class CALastMix;
 
 class CASquidLogHelper
 {
