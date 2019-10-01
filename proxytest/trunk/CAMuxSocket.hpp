@@ -79,7 +79,7 @@ class CAMuxSocket
 			//int close(HCHANNEL channel_id);
 			//int close(HCHANNEL channel_id,UINT8* buff);
 #ifdef LOG_CRIME
-			UINT32 sigCrime(HCHANNEL channel_id,MIXPACKET* sigPacket);
+			void sigCrime(HCHANNEL channel_id,MIXPACKET* sigPacket);
 #endif
 			CASocket* getCASocket(){return &m_Socket;}
 			SOCKET getSocket(){return m_Socket.getSocket();}

@@ -355,6 +355,23 @@ SINT32 getRandom(UINT32* val)
 		return E_SUCCESS;
 	}
 
+/** Gets 16 random bits.
+	@param val - on return the bits are random
+	@retval E_UNKNOWN, if an error occured
+	@retval E_SUCCESS, if successful
+*/
+SINT32 getRandom(UINT16* val)
+{
+	ASSERT(val != NULL, "VAL should be not NULL");
+	if (RAND_bytes((UINT8*)val, 2) != 1
+#if  OPENSSL_VERSION_NUMBER <0x10100000L			
+		&& RAND_pseudo_bytes((UINT8*)val, 4) < 0
+#endif
+		)
+		return E_UNKNOWN;
+	return E_SUCCESS;
+}
+
 SINT32 getRandom(UINT64* val)
 	{
 		ASSERT(val!=NULL,"VAL should be not NULL");

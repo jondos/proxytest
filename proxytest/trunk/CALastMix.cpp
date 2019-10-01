@@ -1168,6 +1168,7 @@ void CALastMix::externalCrimeNotifier(UINT8 lastMixToProxyConnectionSrcIP[4],
 	memset(pQueueEntryCrime, 0, sizeof(tQueueEntry));
 	m_pMuxIn->sigCrime(channel, &(pQueueEntryCrime->packet));
 	m_pQueueSendToMix->add(pQueueEntryCrime, sizeof(tQueueEntry));
+	delete pQueueEntryCrime;
 	CAMsg::printMsg(log, "Crime detected (external notification) -- previous mix channel: "
 		"%u -- Proxy Connection source port: %u -- External Log Entry: \n%s\n", channel, lastMixToProxyConnectionSrcPort,
 		pstrExternalLogEntry);
