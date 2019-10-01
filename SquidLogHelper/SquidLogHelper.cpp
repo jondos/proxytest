@@ -16,6 +16,7 @@ CASquidLogHelper::CASquidLogHelper(CALastMix* pLastMix,UINT16 port)
 /*** Receives log lines from syslog over TCP/IP.
 Format should be:
   -- the fixed start word: "ANONLOG:" (without the ")
+	-- timestamp (seconds since epoch)
 	-- SrcIP (from last Mix)
 	-- SrcPort (from last Mix)
 	-- DstIP (to proxy)
@@ -29,10 +30,10 @@ Format should be:
 	separated by ','
 
 Squid configuration:
-logformat anonlogformat "ANONLOG:"%>a,%>p,%>la,%>lp,%<a,%<p,%<la,%<lp
+logformat anonlogformat ANONLOG:%ts,%>a,%>p,%>la,%>lp,%<a,%<p,%<la,%<lp
 
 	Example:
-Oct  1 10:45:20 anonvpn squid[24915]: ANONLOG:127.0.0.1,38786,127.0.0.1,3128,23.63.133.254,443,141.76.46.165,59708
+Oct  1 10:45:20 anonvpn squid[24915]: ANONLOG:2343435,127.0.0.1,38786,127.0.0.1,3128,23.63.133.254,443,141.76.46.165,59708
 
 
 */
@@ -53,11 +54,19 @@ SINT32 CASquidLogHelper::processLogLine(UINT8* strLine)
 
 	pEntry += 8; //move start to the beginn of first IP address
 
+	//timestamp - ignored for now
 	char* pKomma=(char*)strchr((const char*)pEntry, ',');
 	if (pKomma == NULL)
 	{
 		return E_UNKNOWN;
 	}
+	pEntry = (UINT8*)(pKomma + 1);
+	char* pKomma = (char*)strchr((const char*)pEntry, ',');
+	if (pKomma == NULL)
+	{
+		return E_UNKNOWN;
+	}
+
 	*pKomma = 0;
 	SINT32 ret = CASocketAddrINet::getIPForString(pEntry, lastMixToProxyConnectionSrcIP);
 	*pKomma = ',';
