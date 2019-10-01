@@ -1,4 +1,6 @@
 #include "../StdAfx.h"
+
+#ifdef LOG_CRIME
 #include "SquidLogHelper.hpp"
 #include "../CASocket.hpp"
 #include "../CASocketAddrINet.hpp"
@@ -112,7 +114,10 @@ THREAD_RETURN squidloghelper_ProcessingLoop(void* param)
 {
 	CASquidLogHelper* m_pSquidLogHelper = (CASquidLogHelper*)param;
 	CASocket* psocketListener = new CASocket();
-	psocketListener->listen(6789);
+	CASocketAddrINet* pAddr = new CASocketAddrINet();
+	pAddr->setAddr("127.0.0.1", 6780);
+	psocketListener->listen(pAddr);
+	delete pAddr;
 	int file = open("test.log", O_APPEND | O_CREAT | O_WRONLY, S_IRUSR| S_IWUSR);
 	const UINT32 BUFF_SIZE = 0xFFFF;
 	UINT8* in = new UINT8[BUFF_SIZE];
@@ -171,4 +176,4 @@ SINT32 CASquidLogHelper::stop()
 	return E_SUCCESS;
 }
 
-
+#endif //LOG_CRIME
