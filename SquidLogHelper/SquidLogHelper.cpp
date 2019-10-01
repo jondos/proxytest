@@ -2,24 +2,37 @@
 #include "SquidLogHelper.hpp"
 #include "../CASocket.hpp"
 #include "../CASocketAddrINet.hpp"
+#include "../CALastMix.hpp"
 
 
-CASquidLogHelper::CASquidLogHelper(UINT16 port)
+CASquidLogHelper::CASquidLogHelper(CALastMix* pLastMix,UINT16 port)
 {
 	m_pThreadProcessingLoop = NULL;
+	m_pLastMix = pLastMix;
 }
 
 /*** Receives log lines from syslog over TCP/IP.
-Format should be: 
+Format should be:
+  -- the fixed start word: "ANONLOG:" (without the ")
 	-- SrcIP (from last Mix)
 	-- SrcPort (from last Mix)
 	-- DstIP (to proxy)
 	-- DstPort (to proxy)
+	-- SrcIP (from Squid to Destination)
+	-- SrcPort (from Squid to Destination)
+	-- DstIP (from Squid to Destination)
+	-- DstPort (from Squid to Destination)
 	-- optional: extra infos
 
 	separated by ','
+
+Squid configuration:
+logformat anonlogformat "ANONLOG:"%>a,%>p,%>la,%>lp,%<a,%<p,%<la,%<lp
+
 	Example:
-	10.10.0.1,34732,127.0.0.1,3128, extra info
+Oct  1 10:45:20 anonvpn squid[24915]: ANONLOG:127.0.0.1,38786,127.0.0.1,3128,23.63.133.254,443,141.76.46.165,59708
+
+
 */
 SINT32 CASquidLogHelper::processLogLine(UINT8* strLine)
 {
@@ -28,6 +41,15 @@ SINT32 CASquidLogHelper::processLogLine(UINT8* strLine)
 	UINT16 lastMixToProxyConnectionSrcPort;
 	UINT8 lastMixToProxyConnectionDstIP[4];
 	UINT16 lastMixToProxyConnectionDstPort;
+
+	//find start
+	pEntry =(UINT8*)strstr((const char*)pEntry,"ANONLOG:");
+	if (pEntry == NULL)
+	{//start not found...
+		return E_UNKNOWN;
+	}
+
+	pEntry += 8; //move start to the beginn of first IP address
 
 	char* pKomma=(char*)strchr((const char*)pEntry, ',');
 	if (pKomma == NULL)
@@ -81,6 +103,8 @@ SINT32 CASquidLogHelper::processLogLine(UINT8* strLine)
 		return E_UNKNOWN;
 
 	//now we have everything....
+	m_pLastMix->externalCrimeNotifier(lastMixToProxyConnectionSrcIP,lastMixToProxyConnectionSrcPort,lastMixToProxyConnectionDstIP,lastMixToProxyConnectionDstPort,strLine);
+
 	return E_SUCCESS;
 }
 

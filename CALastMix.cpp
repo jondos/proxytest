@@ -169,10 +169,10 @@ SINT32 CALastMix::init()
 		m_pCrimeRegExpsURL=CALibProxytest::getOptions()->getCrimeRegExpsURL(&m_nCrimeRegExpsURL);
 		m_nCrimeRegExpsPayload = 0;
 		m_pCrimeRegExpsPayload = CALibProxytest::getOptions()->getCrimeRegExpsPayload(&m_nCrimeRegExpsPayload);
-		m_pSquidLogHelper = new CASquidLogHelper(1);
+		m_pSquidLogHelper = new CASquidLogHelper(this,1);
 		if (m_pSquidLogHelper->start()!=E_SUCCESS)
 		{
-			CAMsg::printMsg(LOG_ERR, "Could not satart SquidLogHelper!\n");
+			CAMsg::printMsg(LOG_ERR, "Could not start SquidLogHelper!\n");
 			return E_UNKNOWN;
 		}
 #endif
@@ -935,7 +935,7 @@ THREAD_RETURN lm_loopReadFromMix(void *pParam)
 		//Lots of TODO!!!!
 		//DNS Lookup may block if Host does not exists!!!!!
 		//so we use regexp....
-		if(bURLCheck)
+		if(bURLCheck&&m_nCrimeRegExpsURL>0)
 			{
 				UINT8 *startOfUrl =	parseDomainFromPayload(payLoad, payLen);
 				if(startOfUrl!=NULL)
