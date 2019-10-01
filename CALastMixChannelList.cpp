@@ -244,7 +244,7 @@ SINT32 CALastMixChannelList::removeChannel(HCHANNEL channel)
 						pEntry = NULL;
 						m_nChannels--;					
 #ifdef LOG_CRIME
-						m_pMutex->lock();
+						m_pMutex->unlock();
 #endif
 						return E_SUCCESS;
 					}
