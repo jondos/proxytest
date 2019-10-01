@@ -70,6 +70,8 @@ SINT32 compDate(struct tm *date1, struct tm *date2);
 SINT32 initRandom();
 SINT32 getRandom(UINT8* buff,UINT32 len);
 
+SINT32 getRandom(UINT16* val);
+
 SINT32 getRandom(UINT32* val);
 
 SINT32 getRandom(UINT64* val);
