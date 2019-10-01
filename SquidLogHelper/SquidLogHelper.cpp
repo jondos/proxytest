@@ -61,7 +61,7 @@ SINT32 CASquidLogHelper::processLogLine(UINT8* strLine)
 		return E_UNKNOWN;
 	}
 	pEntry = (UINT8*)(pKomma + 1);
-	char* pKomma = (char*)strchr((const char*)pEntry, ',');
+	pKomma = (char*)strchr((const char*)pEntry, ',');
 	if (pKomma == NULL)
 	{
 		return E_UNKNOWN;
