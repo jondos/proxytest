@@ -51,7 +51,7 @@ int main()
 					if (in[i] == '\n')
 					{//line end found --> write line
 						if (file >= 0)
-							myfilewrite(file, in, i);
+							myfilewrite(file, in, i+1);
 						in[i] = 0;
 						processAclLine(in);
 
