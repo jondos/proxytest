@@ -1,7 +1,7 @@
 #include "../StdAfx.h"
 #include "../CASocket.hpp"
 #include "../CASocketAddrINet.hpp"
-
+#include "../CALibProxytest.hpp"
 CASocket* pSocketSquidLogHelper=NULL;
 CASocketAddrINet* pAddrSquidLogHelper = NULL;
 
@@ -28,14 +28,15 @@ SINT32 processAclLine(UINT8* strLine)
 
 int main()
 {
+	CALibProxytest::init();
 	const UINT32 BUFF_SIZE = 0xFFFF;
 	UINT8* in = new UINT8[BUFF_SIZE];
 	int file = open("/tmp/acl.log", O_APPEND | O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
+	pAddrSquidLogHelper = new CASocketAddrINet();
+	pAddrSquidLogHelper->setAddr((UINT8*)"127.0.0.1", 6789);
 
 	for (;;)
 	{
-		pAddrSquidLogHelper = new CASocketAddrINet();
-		pAddrSquidLogHelper->setAddr((UINT8*)"127.0.0.1", 6789);
 		UINT32 pos = 0;
 		UINT32 len = 0;
 		for (;;)
