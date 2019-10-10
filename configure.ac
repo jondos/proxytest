@@ -1047,5 +1047,5 @@ AM_CONDITIONAL([ALL_FROM_SOURCE], [test x$allfromsource = xtrue])
 AM_CONDITIONAL([BUILD_AS_SHADOW_PLUGIN], [test x$build_as_shadow_plugin = xtrue])
 AM_CONDITIONAL([USE_SGX], [test x$use_sgx = xtrue])
 
-AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile SquidLogHelper/Makefile SGX/Makefile])
+AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile SquidLogHelper/Makefile AclLogHelper/Makefile SGX/Makefile])
 AC_OUTPUT
