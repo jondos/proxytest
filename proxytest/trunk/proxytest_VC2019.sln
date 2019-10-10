@@ -177,12 +177,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SGX", "SGX", "{2FA432F4-B31
 		SGX\Makefile.am = SGX\Makefile.am
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AclLogHelper", "SquidLogHelper\AclLogHelper_VC2019.vcxproj", "{9439F121-D979-46D5-A15D-D288E0620FD7}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SquidLogHelper", "SquidLogHelper", "{DF495918-178A-49F4-BCE7-AB723E0FFEB1}"
 	ProjectSection(SolutionItems) = preProject
 		SquidLogHelper\Makefile.am = SquidLogHelper\Makefile.am
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AclLogHelper", "AclLogHelper\AclLogHelper_VC2019.vcxproj", "{9439F121-D979-46D5-A15D-D288E0620FD7}"
 EndProject
 Global
 	GlobalSection(SubversionScc) = preSolution
