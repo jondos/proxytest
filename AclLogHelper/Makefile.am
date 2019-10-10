@@ -5,8 +5,6 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-noinst_LIBRARIES = libsquidloghelper.a
-libsquidloghelper_a_SOURCES = SquidLogHelper.cpp SquidLogHelper.hpp
 
 includes = @INCLUDES@
 
