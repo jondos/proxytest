@@ -169,6 +169,7 @@ class CALastMixChannelList
 							}
 						}
 					}
+					pEntry = pEntry->list_Sockets.next;
 				}
 				m_pMutex->unlock();
 				return E_UNKNOWN;
