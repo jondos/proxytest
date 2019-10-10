@@ -147,7 +147,8 @@ next_read:
 				{//search for line end
 					if (in[i] == '\n')
 					{//line end found --> write line
-						myfilewrite(file, in, i);
+						if(file>=0)
+							myfilewrite(file, in, i);
 						in[i] = 0;
 						m_pSquidLogHelper->processLogLine(in);
 
