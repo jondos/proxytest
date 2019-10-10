@@ -175,6 +175,7 @@ SINT32 CALastMix::init()
 			CAMsg::printMsg(LOG_ERR, "Could not start SquidLogHelper!\n");
 			return E_UNKNOWN;
 		}
+		
 #endif
 		ret=processKeyExchange();
 		if(ret!=E_SUCCESS)
