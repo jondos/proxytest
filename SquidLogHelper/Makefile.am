@@ -16,7 +16,7 @@ aclloghelper_SOURCES = AclLogHelper.cpp
 
 aclloghelper_CFLAGS = $(AM_CFLAGS)
 aclloghelper_CPPFLAGS = $(AM_CPPFLAGS)
-aclloghelper_LDADD += $(top_builddir)/libproxytest.a \
+aclloghelper_LDADD = $(top_builddir)/libproxytest.a \
 	    $(top_builddir)/xml/libxml.a \
 	    $(top_builddir)/popt/libpopt.a \
 	    $(top_builddir)/trio/libtrio.a \
