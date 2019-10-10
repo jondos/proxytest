@@ -282,4 +282,4 @@ endif
 endif #all from source
 
 
-SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark) SquidLogHelper AclLogHelper $(MAYBE_sgx)
+SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark) SquidLogHelper . AclLogHelper $(MAYBE_sgx)

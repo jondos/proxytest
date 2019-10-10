@@ -20050,7 +20050,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile SquidLogHelper/Makefile SGX/Makefile"
+ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile SquidLogHelper/Makefile AclLogHelper/Makefile SGX/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -21221,6 +21221,7 @@ do
     "gcm/Makefile") CONFIG_FILES="$CONFIG_FILES gcm/Makefile" ;;
     "wireshark/Makefile") CONFIG_FILES="$CONFIG_FILES wireshark/Makefile" ;;
     "SquidLogHelper/Makefile") CONFIG_FILES="$CONFIG_FILES SquidLogHelper/Makefile" ;;
+    "AclLogHelper/Makefile") CONFIG_FILES="$CONFIG_FILES AclLogHelper/Makefile" ;;
     "SGX/Makefile") CONFIG_FILES="$CONFIG_FILES SGX/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

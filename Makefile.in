@@ -856,7 +856,7 @@ ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
 DIST_SUBDIRS = popt xml trio tre TypeA gcm test wireshark \
-	SquidLogHelper
+	SquidLogHelper . AclLogHelper
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in INSTALL \
 	README ar-lib compile config.guess config.sub depcomp \
 	install-sh ltmain.sh missing mkinstalldirs
@@ -1244,7 +1244,7 @@ proxytest_sources = CAAbstractControlChannel.cpp\
 @DOTESTS_TRUE@MAYBE_tests = test
 @DOWIRESHARK_TRUE@MAYBE_wireshark = wireshark
 @ALL_FROM_SOURCE_TRUE@BUILT_SOURCES = external.h
-SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark) SquidLogHelper $(MAYBE_sgx)
+SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark) SquidLogHelper . AclLogHelper $(MAYBE_sgx)
 all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
