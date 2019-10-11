@@ -9,7 +9,7 @@ UINT8* pSquidLogHelperBuffer;
 const char* STR_LOG_LINE_TEMPLATE = "ANONLOG:";
 const UINT32 STR_LOG_LINE_TEMPLATE_LEN = strlen(STR_LOG_LINE_TEMPLATE);
 
-const char* STR_LOG_LINE_TEMPLATE_SUFFIX = ",0.0.0.0,0,0.0.0.0,0";
+const char* STR_LOG_LINE_TEMPLATE_SUFFIX = ",0.0.0.0,0,0.0.0.0,0\n";
 const UINT32 STR_LOG_LINE_TEMPLATE_SUFFIX_LEN = strlen(STR_LOG_LINE_TEMPLATE_SUFFIX)+1;
 
 const UINT32 BUFF_SIZE = 0xFFFF;
@@ -56,13 +56,18 @@ SINT32 processAclLine(UINT8* strLine)
 	{
 		if (strLine[i] == 0)
 			break;
-		else if (strLine[i] == ',')
-			pSquidLogHelperBuffer[k++] = ' ';
+		else if (strLine[i] == '-')
+		{
+			k --;
+			break;
+		}
+		else if (strLine[i] == ' ')
+			pSquidLogHelperBuffer[k++] = ',';
 		else
 			pSquidLogHelperBuffer[k++]=strLine[i];
 	}
 	//append default values for missing ones
-	memcpy(pSquidLogHelperBuffer, STR_LOG_LINE_TEMPLATE_SUFFIX, STR_LOG_LINE_TEMPLATE_SUFFIX_LEN);
+	memcpy(pSquidLogHelperBuffer+k, STR_LOG_LINE_TEMPLATE_SUFFIX, STR_LOG_LINE_TEMPLATE_SUFFIX_LEN);
 	k += STR_LOG_LINE_TEMPLATE_SUFFIX_LEN;
 	//send to SquidLogHelper
 	sendToSquidLogHelper(pSquidLogHelperBuffer,k);
