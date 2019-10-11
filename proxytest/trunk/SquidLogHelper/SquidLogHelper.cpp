@@ -13,7 +13,7 @@ CASquidLogHelper::CASquidLogHelper(CALastMix* pLastMix,UINT16 port)
 	m_pLastMix = pLastMix;
 }
 
-/*** Receives log lines from syslog over TCP/IP.
+/*** Receives log lines from syslog or AclLogHelper over TCP/IP.
 Format should be:
   -- the fixed start word: "ANONLOG:" (without the ")
 	-- timestamp (seconds since epoch)
