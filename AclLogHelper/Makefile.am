@@ -24,4 +24,4 @@ aclloghelper_LDADD = $(top_builddir)/libproxytest.a \
 	    $(top_builddir)/TypeA/libmixa.a \
 	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
 
-		#endif
+endif #BUILD_ACL_LOG_HELPER
