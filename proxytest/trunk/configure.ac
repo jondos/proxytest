@@ -879,11 +879,13 @@ AC_ARG_ENABLE(google-heapchecker,
 
 
 CRIME=""
+logcrime="false"
 AC_ARG_ENABLE(crime-detection,
 	AS_HELP_STRING([--enable-crime-detection],[Enable crime detection mode]),
 	[
 		if test "x$enableval" != "xno" ; then
 		CRIME="-DLOG_CRIME"
+		logcrime="true"
 		fi	
 	]
 )
@@ -1046,6 +1048,7 @@ AM_CONDITIONAL([ONLY_LIB], [test x$onlylib = xtrue])
 AM_CONDITIONAL([ALL_FROM_SOURCE], [test x$allfromsource = xtrue])
 AM_CONDITIONAL([BUILD_AS_SHADOW_PLUGIN], [test x$build_as_shadow_plugin = xtrue])
 AM_CONDITIONAL([USE_SGX], [test x$use_sgx = xtrue])
+AM_CONDITIONAL([BUILD_ACL_LOG_HELPER], [test x$logcrime = xtrue])
 
 AC_CONFIG_FILES([Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile SquidLogHelper/Makefile AclLogHelper/Makefile SGX/Makefile])
 AC_OUTPUT
