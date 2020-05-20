@@ -5,6 +5,7 @@
 
 AUTOMAKE_OPTIONS = foreign
 
+if  BUILD_ACL_LOG_HELPER # build Squid ACl log helepr programm?
 
 includes = @INCLUDES@
 
@@ -23,3 +24,4 @@ aclloghelper_LDADD = $(top_builddir)/libproxytest.a \
 	    $(top_builddir)/TypeA/libmixa.a \
 	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
 
+		#endif
