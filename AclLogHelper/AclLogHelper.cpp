@@ -1,4 +1,5 @@
 #include "../StdAfx.h"
+#ifdef LOG_CRIME
 #include "../CASocket.hpp"
 #include "../CASocketAddrINet.hpp"
 #include "../CALibProxytest.hpp"
@@ -127,4 +128,4 @@ int main()
 
 	return E_SUCCESS;
 }
-
+#endif //LOG_CRIME
