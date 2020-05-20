@@ -636,6 +636,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+BUILD_ACL_LOG_HELPER_FALSE
+BUILD_ACL_LOG_HELPER_TRUE
 USE_SGX_FALSE
 USE_SGX_TRUE
 BUILD_AS_SHADOW_PLUGIN_FALSE
@@ -19596,11 +19598,13 @@ fi
 
 
 CRIME=""
+logcrime="false"
 # Check whether --enable-crime-detection was given.
 if test "${enable_crime_detection+set}" = set; then :
   enableval=$enable_crime_detection;
 		if test "x$enableval" != "xno" ; then
 		CRIME="-DLOG_CRIME"
+		logcrime="true"
 		fi
 
 
@@ -20049,6 +20053,14 @@ else
   USE_SGX_FALSE=
 fi
 
+ if test x$logcrime = xtrue; then
+  BUILD_ACL_LOG_HELPER_TRUE=
+  BUILD_ACL_LOG_HELPER_FALSE='#'
+else
+  BUILD_ACL_LOG_HELPER_TRUE='#'
+  BUILD_ACL_LOG_HELPER_FALSE=
+fi
+
 
 ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile SquidLogHelper/Makefile AclLogHelper/Makefile SGX/Makefile"
 
@@ -20232,6 +20244,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_SGX_TRUE}" && test -z "${USE_SGX_FALSE}"; then
   as_fn_error $? "conditional \"USE_SGX\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_ACL_LOG_HELPER_TRUE}" && test -z "${BUILD_ACL_LOG_HELPER_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_ACL_LOG_HELPER\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
