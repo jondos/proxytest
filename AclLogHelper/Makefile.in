@@ -93,7 +93,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = aclloghelper$(EXEEXT)
+@BUILD_ACL_LOG_HELPER_TRUE@bin_PROGRAMS = aclloghelper$(EXEEXT)
 subdir = AclLogHelper
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -106,13 +106,18 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_aclloghelper_OBJECTS = aclloghelper-AclLogHelper.$(OBJEXT)
+am__aclloghelper_SOURCES_DIST = AclLogHelper.cpp
+@BUILD_ACL_LOG_HELPER_TRUE@am_aclloghelper_OBJECTS = aclloghelper-AclLogHelper.$(OBJEXT)
 aclloghelper_OBJECTS = $(am_aclloghelper_OBJECTS)
-aclloghelper_DEPENDENCIES = $(top_builddir)/libproxytest.a \
-	$(top_builddir)/xml/libxml.a $(top_builddir)/popt/libpopt.a \
-	$(top_builddir)/trio/libtrio.a $(top_builddir)/tre/libtre.a \
-	$(top_builddir)/gcm/libgcm.a $(top_builddir)/TypeA/libmixa.a \
-	$(top_builddir)/SquidLogHelper/libsquidloghelper.a
+@BUILD_ACL_LOG_HELPER_TRUE@aclloghelper_DEPENDENCIES =  \
+@BUILD_ACL_LOG_HELPER_TRUE@	$(top_builddir)/libproxytest.a \
+@BUILD_ACL_LOG_HELPER_TRUE@	$(top_builddir)/xml/libxml.a \
+@BUILD_ACL_LOG_HELPER_TRUE@	$(top_builddir)/popt/libpopt.a \
+@BUILD_ACL_LOG_HELPER_TRUE@	$(top_builddir)/trio/libtrio.a \
+@BUILD_ACL_LOG_HELPER_TRUE@	$(top_builddir)/tre/libtre.a \
+@BUILD_ACL_LOG_HELPER_TRUE@	$(top_builddir)/gcm/libgcm.a \
+@BUILD_ACL_LOG_HELPER_TRUE@	$(top_builddir)/TypeA/libmixa.a \
+@BUILD_ACL_LOG_HELPER_TRUE@	$(top_builddir)/SquidLogHelper/libsquidloghelper.a
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -153,7 +158,7 @@ am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
 SOURCES = $(aclloghelper_SOURCES)
-DIST_SOURCES = $(aclloghelper_SOURCES)
+DIST_SOURCES = $(am__aclloghelper_SOURCES_DIST)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -315,18 +320,18 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = foreign
-includes = @INCLUDES@
-aclloghelper_SOURCES = AclLogHelper.cpp
-aclloghelper_CFLAGS = $(AM_CFLAGS)
-aclloghelper_CPPFLAGS = $(AM_CPPFLAGS)
-aclloghelper_LDADD = $(top_builddir)/libproxytest.a \
-	    $(top_builddir)/xml/libxml.a \
-	    $(top_builddir)/popt/libpopt.a \
-	    $(top_builddir)/trio/libtrio.a \
-	    $(top_builddir)/tre/libtre.a \
-	    $(top_builddir)/gcm/libgcm.a \
-	    $(top_builddir)/TypeA/libmixa.a \
-	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
+@BUILD_ACL_LOG_HELPER_TRUE@includes = @INCLUDES@
+@BUILD_ACL_LOG_HELPER_TRUE@aclloghelper_SOURCES = AclLogHelper.cpp
+@BUILD_ACL_LOG_HELPER_TRUE@aclloghelper_CFLAGS = $(AM_CFLAGS)
+@BUILD_ACL_LOG_HELPER_TRUE@aclloghelper_CPPFLAGS = $(AM_CPPFLAGS)
+@BUILD_ACL_LOG_HELPER_TRUE@aclloghelper_LDADD = $(top_builddir)/libproxytest.a \
+@BUILD_ACL_LOG_HELPER_TRUE@	    $(top_builddir)/xml/libxml.a \
+@BUILD_ACL_LOG_HELPER_TRUE@	    $(top_builddir)/popt/libpopt.a \
+@BUILD_ACL_LOG_HELPER_TRUE@	    $(top_builddir)/trio/libtrio.a \
+@BUILD_ACL_LOG_HELPER_TRUE@	    $(top_builddir)/tre/libtre.a \
+@BUILD_ACL_LOG_HELPER_TRUE@	    $(top_builddir)/gcm/libgcm.a \
+@BUILD_ACL_LOG_HELPER_TRUE@	    $(top_builddir)/TypeA/libmixa.a \
+@BUILD_ACL_LOG_HELPER_TRUE@	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
 
 all: all-am
 
