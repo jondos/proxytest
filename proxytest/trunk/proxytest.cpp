@@ -38,7 +38,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAStatusManager.hpp"
 #include "CALibProxytest.hpp"
 #include "CACryptoBenchmark.hpp"
-
+#include "UDPMix/CAUDPMixMiddle.hpp"
 
 #ifdef _DEBUG //For FreeBSD memory checking functionality
 	const char* _malloc_options="AX";
@@ -253,8 +253,8 @@ void signal_hup(int)
 #endif
 
 
-///Check what the sizes of base types are as expected -- if not kill the programm
-void checkSizesOfBaseTypes()
+///Check what the sizes of (base) types are as expected -- if not kill the programm
+void checkSizesOfTypes()
 	{
 #ifdef _MSC_VER
 		#pragma warning( push )
@@ -297,9 +297,42 @@ void checkSizesOfBaseTypes()
 					exit(-1);
 				}
 		#endif
+
 #ifdef _MSC_VER
 		#pragma warning( pop )
 #endif
+
+			#ifndef NEW_MIX_TYPE
+			if (MIXPACKET_SIZE != sizeof(MIXPACKET))
+				{
+					CAMsg::printMsg(LOG_CRIT, "MIXPACKET_SIZE [%u] != sizeof(MUXPACKET) [%u] --> maybe a compiler (optimization) problem!\n", MIXPACKET_SIZE, sizeof(MIXPACKET));
+					CAMsg::printMsg(LOG_CRIT, "Offsets:\n");
+					MIXPACKET oPacket;
+					UINT8 *p = (UINT8 *)&oPacket;
+					UINT32 soffsets[7] = { 0, 4, 6, 6, 6, 8, 9 };
+					UINT32 hoffsets[7];
+					CAMsg::printMsg(LOG_CRIT, ".channel %u (should be 0)\n", hoffsets[0] = (UINT8 *)&(oPacket.channel) - p);
+					CAMsg::printMsg(LOG_CRIT, ".flags: %u (should be 4)\n", hoffsets[1] = (UINT8 *)&oPacket.flags - p);
+					CAMsg::printMsg(LOG_CRIT, ".data: %u (should be 6)\n", hoffsets[2] = (UINT8 *)&oPacket.data - p);
+					CAMsg::printMsg(LOG_CRIT, ".payload: %u (should be 6)\n", hoffsets[3] = (UINT8 *)&oPacket.payload - p);
+					CAMsg::printMsg(LOG_CRIT, ".payload.len: %u (should be 6)\n", hoffsets[4] = (UINT8 *)&oPacket.payload.len - p);
+					CAMsg::printMsg(LOG_CRIT, ".payload.type: %u (should be 8)\n", hoffsets[5] = (UINT8 *)&oPacket.payload.type - p);
+					CAMsg::printMsg(LOG_CRIT, ".payload.data: %u (should be 9)\n", hoffsets[6] = (UINT8 *)&oPacket.payload.data - p);
+					for (int i = 0; i < 7; i++)
+						if (soffsets[i] != hoffsets[i])
+							exit(EXIT_FAILURE);
+					CAMsg::printMsg(LOG_CRIT, "Hm, The Offsets seams to be ok - so we try to continue - hope that works...\n");
+				}
+#endif
+			if (UDPMIXPACKET_SIZE != sizeof(UDPMIXPACKET))
+				{
+					CAMsg::printMsg(LOG_CRIT, "UDPMIXPACKET_SIZE [%u] != sizeof(UDPMUXPACKET) [%u] --> maybe a compiler (optimization) problem!\n", UDPMIXPACKET_SIZE, sizeof(UDPMIXPACKET));
+				}
+			if (UDPMIXPACKET_LINKHEADER_TYPE_SIZE != sizeof(UDPMIXPACKET_LINKHEADER))
+				{
+					CAMsg::printMsg(LOG_CRIT, "UDPMIXPACKET_LINKHEADER_TYPE_SIZE [%u] != sizeof(UDPMIXPACKET_LINKHEADER) [%u] --> maybe a compiler (optimization) problem!\n", UDPMIXPACKET_LINKHEADER_TYPE_SIZE, sizeof(UDPMIXPACKET_LINKHEADER));
+				}
+
 	}
 
 
@@ -505,29 +538,7 @@ int main(int argc, const char* argv[])
 		Debug(dc::malloc.on());
 #endif
 		init();
-		checkSizesOfBaseTypes();
-#ifndef NEW_MIX_TYPE
-		if(MIXPACKET_SIZE!=sizeof(MIXPACKET))
-			{
-				CAMsg::printMsg(LOG_CRIT,"MIXPACKET_SIZE [%u] != sizeof(MUXPACKET) [%u] --> maybe a compiler (optimization) problem!\n",MIXPACKET_SIZE,sizeof(MIXPACKET));
-				CAMsg::printMsg(LOG_CRIT,"Offsets:\n");
-				MIXPACKET oPacket;
-				UINT8 *p=(UINT8 *)&oPacket;
-				UINT32 soffsets[7]={0,4,6,6,6,8,9};
-				UINT32 hoffsets[7];
-				CAMsg::printMsg(LOG_CRIT,".channel %u (should be 0)\n",hoffsets[0]=(UINT8*)&(oPacket.channel)-p);
-				CAMsg::printMsg(LOG_CRIT,".flags: %u (should be 4)\n",hoffsets[1]=(UINT8*)&oPacket.flags-p);
-				CAMsg::printMsg(LOG_CRIT,".data: %u (should be 6)\n",hoffsets[2]=(UINT8*)&oPacket.data-p);
-				CAMsg::printMsg(LOG_CRIT,".payload: %u (should be 6)\n",hoffsets[3]=(UINT8*)&oPacket.payload-p);
-				CAMsg::printMsg(LOG_CRIT,".payload.len: %u (should be 6)\n",hoffsets[4]=(UINT8*)&oPacket.payload.len-p);
-				CAMsg::printMsg(LOG_CRIT,".payload.type: %u (should be 8)\n",hoffsets[5]=(UINT8*)&oPacket.payload.type-p);
-				CAMsg::printMsg(LOG_CRIT,".payload.data: %u (should be 9)\n",hoffsets[6]=(UINT8*)&oPacket.payload.data-p);
-				for(int i=0;i<7;i++)
-				 if(soffsets[i]!=hoffsets[i])
-					exit(EXIT_FAILURE);
-				CAMsg::printMsg(LOG_CRIT,"Hm, The Offsets seams to be ok - so we try to continue - hope that works...\n");
-			}
-#endif
+		checkSizesOfTypes();
 #ifdef LOG_CRIME
 //			testTre();
 #endif
@@ -550,8 +561,9 @@ int main(int argc, const char* argv[])
 			UINT32 start;
 #endif
 
-	
-
+CAUDPMiddleMix *pM = new CAUDPMiddleMix();
+pM->start();
+exit(0);
 
 	if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{

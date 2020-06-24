@@ -903,7 +903,11 @@ SINT32 CAMiddleMix::init()
 		m_u64ReferenceTime=time(NULL);
 #endif
 		m_pMiddleMixChannelList=new CAMiddleMixChannelList();
-
+#ifdef LOG_PACKET_TIMES
+		m_pLogPacketStats = new CALogPacketStats();
+		m_pLogPacketStats->setLogIntervallInMinutes(FM_PACKET_STATS_LOG_INTERVALL);
+		m_pLogPacketStats->start();
+#endif
 		return E_SUCCESS;
 	}
 
@@ -955,7 +959,7 @@ THREAD_RETURN mm_loopSendToMixAfter(void* param)
 				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
 					{
 						getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
-						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,pMixPacket->flags,true);
+						pMiddleMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry, pMixPacket->flags, true);
 					}
 #endif
 			}
@@ -1015,7 +1019,7 @@ THREAD_RETURN mm_loopSendToMixBefore(void* param)
 				if(!isZero64(pPoolEntry->timestamp_proccessing_start))
 					{
 						getcurrentTimeMicros(pPoolEntry->timestamp_proccessing_end);
-						pFirstMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,pMixPacket->flags,true);
+						pMiddleMix->m_pLogPacketStats->addToTimeingStats(*pPoolEntry,pMixPacket->flags,true);
 					}
 #endif
 			}
@@ -1581,6 +1585,15 @@ SINT32 CAMiddleMix::clean()
 			}
 		}
 #endif //WITH_SGX
+#ifdef LOG_PACKET_TIMES
+		if (m_pLogPacketStats != NULL)
+		{
+			CAMsg::printMsg(LOG_CRIT, "Wait for LoopLogPacketStats to terminate!\n");
+			m_pLogPacketStats->stop();
+			delete m_pLogPacketStats;
+		}
+		m_pLogPacketStats = NULL;
+#endif
 		delete m_pMiddleMixChannelList;
 		m_pMiddleMixChannelList=NULL;
 		return E_SUCCESS;
