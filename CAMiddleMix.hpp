@@ -57,9 +57,12 @@ class CAMiddleMix:public
 					m_bShMemConfigured=false;
 #ifdef DYNAMIC_MIX
 					m_bBreakNeeded = false;
-
 #endif
+#ifdef LOG_PACKET_TIMES
+					m_pLogPacketStats = NULL;
+#endif 
 				}
+
 			virtual ~CAMiddleMix(){clean();};
 			tMixType getType() const
 				{
@@ -133,6 +136,9 @@ protected:
 
 			UINT32 m_u32KeepAliveRecvInterval2;
 			UINT32 m_u32KeepAliveSendInterval2;
+#ifdef LOG_PACKET_TIMES
+			CALogPacketStats *m_pLogPacketStats;
+#endif
 
 #ifdef DYNAMIC_MIX
 			void stopCascade()

@@ -220,6 +220,15 @@ MODIFIERS int gcm_decrypt_64k(gcm_ctx_64k *c, const UINT32 *nonce, const UINT8 *
 	return 1;
 }
 
+/**
+ * @brief Decrypts a given ciphertext into a plaintext without checking any tag (MAC).
+ * @param c a gcm_ctx_64k, stroing the key etc.
+ * @param nonce the counter value (IV) to use for decrpytion 
+ * @param ct a pointer to the ciphertext
+ * @param ctlen the len of the ciphertext in bytes
+ * @param pt a pointer to a byte buffer, where the plaintext will be stored
+ * @return always returns 1
+*/
 MODIFIERS int gcm_decrypt_64k(gcm_ctx_64k *c, const UINT32 *nonce, const UINT8 *ct,
 						size_t ctlen, UINT8 *pt) {
 	//UINT32 tmp[8] = {0, 0, 0, 0, 0, 0, htonl(ctlen >> 29), htonl(ctlen << 3)};

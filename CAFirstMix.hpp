@@ -448,7 +448,6 @@ protected:
 			CAQueue* m_pQueueSendToMix;
 			CAQueue* m_pQueueReadFromMix;
 #ifdef LOG_PACKET_TIMES
-
 				CALogPacketStats* m_pLogPacketStats;
 #endif
 
