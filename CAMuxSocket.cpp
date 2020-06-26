@@ -92,6 +92,7 @@ SINT32 CAMuxSocket::setCipher(SYMCHANNELCIPHER_ALGORITHM algCipher)
 	m_pCipherIn = CASymChannelCipherFactory::createCipher(algCipher);
 	m_pCipherOut = CASymChannelCipherFactory::createCipher(algCipher);
 #else
+	CAMsg::printMsg(LOG_WARN, "MuxSocket: Using NULL cipher (no encryption)!\n");
 	m_pCipherIn = CASymChannelCipherFactory::createCipher(NULL_CIPHER);
 	m_pCipherOut = CASymChannelCipherFactory::createCipher(NULL_CIPHER);
 #endif

@@ -55,6 +55,9 @@ class CASymChannelCipherFactory
 								case CTR:
 									return new CASymCipherCTR();
 								case NULL_CIPHER:
+#ifdef DEBUG
+									CAMsg::printMsg(LOG_DEBUG, "Creating NULL-cipher for channel encryption!\n");
+#endif
 									return new CASymCipherNull();
 								case UNDEFINED_CIPHER:
 									return NULL;
