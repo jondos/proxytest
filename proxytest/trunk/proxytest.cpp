@@ -560,11 +560,11 @@ int main(int argc, const char* argv[])
 #ifdef _DEBUG
 			UINT32 start;
 #endif
-
-CAUDPMiddleMix *pM = new CAUDPMiddleMix();
+			/*
+			CAUDPMiddleMix *pM = new CAUDPMiddleMix();
 pM->start();
 exit(0);
-
+*/
 	if(CALibProxytest::getOptions()->parse(argc,argv) != E_SUCCESS)
 		{
 			CAMsg::printMsg(LOG_CRIT,"An error occurred before we could finish parsing the configuration file. Exiting...\n");
