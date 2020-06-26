@@ -93,8 +93,8 @@ struct UDPMIXPACKET_t
 			UINT8 rawBytes[UDPMIXPACKET_SIZE];
 			struct
 			{
-				UDPMIXPACKET_LINKHEADER linkHeader;
-				UDPMIXPACKET_INIT_HEADER initHeader;
+				UDPMIXPACKET_LINKHEADER_t linkHeader;
+				UDPMIXPACKET_INIT_HEADER_t initHeader;
 			};
 		};
 	};
