@@ -78,6 +78,10 @@ struct UDPMIXPACKET_LINKHEADER_t
 	UINT8 MAC[UDPMIXPACKET_LINKHEADER_MAC_SIZE];
 } __attribute__((__packed__));
 
+struct UDPMIXPACKET_INIT_HEADER_t
+{
+	UINT8 eccPubElement[UDPMIXPACKET_INIT_ECC_PUB_ELEMENT_SIZE];
+};
 #endif //WIN32
 
 
@@ -93,8 +97,8 @@ struct UDPMIXPACKET_t
 			UINT8 rawBytes[UDPMIXPACKET_SIZE];
 			struct
 			{
-				UDPMIXPACKET_LINKHEADER_t linkHeader;
-				UDPMIXPACKET_INIT_HEADER_t initHeader;
+				UDPMIXPACKET_LINKHEADER linkHeader;
+				UDPMIXPACKET_INIT_HEADER initHeader;
 			};
 		};
 	};
