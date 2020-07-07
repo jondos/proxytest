@@ -730,7 +730,7 @@ exit(0);
 				}
 				else
 #endif
-#ifdef INCLUDE_MIDDLE_MIX
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 				if(CALibProxytest::getOptions()->isMiddleMix())
 				{
 					CAMsg::printMsg(LOG_INFO,"I am a Middle MIX...\n");
