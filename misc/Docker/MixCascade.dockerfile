@@ -6,7 +6,7 @@ RUN cd /tmp/build/proxytest; ./configure
 RUN cd /tmp/build/proxytest; make
 RUN mkdir /opt/anon/mix1;mkdir /opt/anon/mix2;mkdir /opt/anon/mix3
 RUN cp /tmp/build/proxytest/mix /opt/anon/mix1/;cp /tmp/build/proxytest/mix /opt/anon/mix2/;cp /tmp/build/proxytest/mix /opt/anon/mix3/;
-RUN cd /tmp; wget https://www.inet.no/dante/files/dante-1.4.2.tar.gz; tar -xf dante-1.4.2.tar.gz
+RUN cd /tmp; wget https://www.inet.no/dante/files/dante-1.4.2.tar.gz; tar -xf dante-1.4.2.tar.gz;cd dante-1.4.2; sed -E "sx#define HAVE_SCHED_SETSCHEDULER 1x//#define HAVE_SCHED_SETSCHEDULER 1x" -i include/autoconf.h;./configure;make install
 
 FROM alpine:3.12 as MixCascade
 RUN apk add --no-cache openssl xerces-c squid
