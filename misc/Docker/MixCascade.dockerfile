@@ -16,4 +16,4 @@ ADD mix2.conf /etc/
 ADD mix3.conf /etc/
 ADD startIt.sh /etc/init.d/
 
-CMD ["/bin/sh",""]
+ENTRYPOINT ["/bin/sh"]
