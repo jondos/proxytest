@@ -10,5 +10,6 @@ RUN cd /tmp; wget https://www.inet.no/dante/files/dante-1.4.2.tar.gz; tar -xf da
 
 FROM alpine:3.12 as MixCascade
 RUN apk add --no-cache openssl xerces-c squid
+COPY --from=dev /usr/local/sbin/sockd /usr/local/sbin/
 COPY --from=dev /opt/* /opt/
  
