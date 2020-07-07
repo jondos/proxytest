@@ -12,4 +12,4 @@ FROM alpine:3.12 as MixCascade
 RUN apk add --no-cache openssl xerces-c squid
 COPY --from=dev /usr/local/sbin/sockd /usr/local/sbin/
 COPY --from=dev /opt/* /opt/
- 
+ADD sockd.conf /etc/
