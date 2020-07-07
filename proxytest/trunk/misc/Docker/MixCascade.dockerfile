@@ -8,6 +8,6 @@ RUN mkdir /opt/anon/mix1;mkdir /opt/anon/mix2;mkdir /opt/anon/mix3
 RUN cp /tmp/build/proxytest/mix /opt/anon/mix1/;cp /tmp/build/proxytest/mix /opt/anon/mix2/;cp /tmp/build/proxytest/mix /opt/anon/mix3/;
 
 FROM alpine as MixCascade
-RUN apk add --no-cache openssl xerces-c
+RUN apk add --no-cache openssl xerces-c dante squid
 COPY --from=dev /opt/* /opt/
  
