@@ -16,4 +16,4 @@ ADD mix2.conf /etc/
 ADD mix3.conf /etc/
 ADD startIt.sh /etc/init.d/
 
-CMD sleep infinity
+CMD /etc/init.d/startIt.sh
