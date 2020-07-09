@@ -30,6 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #ifndef __CAMSG__
 #define __CAMSG__
 
+#define MSG_NOLOG							0x00
 #define MSG_STDOUT						0x01
 #define MSG_LOG								0x02
 #define MSG_FILE							0x04

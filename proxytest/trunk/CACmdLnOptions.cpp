@@ -1534,7 +1534,7 @@ SINT32 CACmdLnOptions::initLogging()
 	{
 	SINT32 ret = E_SUCCESS;
 	UINT8 buff[2000];
-	UINT32 iLogOptions = 0;
+	UINT32 iLogOptions = MSG_NOLOG;
 
 	CAMsg::init();
 
@@ -1554,7 +1554,7 @@ SINT32 CACmdLnOptions::initLogging()
 		}
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX
 
-	if (m_bLogConsole || iLogOptions == 0)
+	if (m_bLogConsole )
 		{
 		iLogOptions |= MSG_STDOUT;
 		}
