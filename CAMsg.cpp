@@ -250,6 +250,11 @@ SINT32 CAMsg::setLogOptions(UINT32 opt)
 */
 SINT32 CAMsg::printMsg(UINT32 type,const char* format,...)
 	{
+	if (pMsg->m_uLogType == MSG_NOLOG)
+		{
+			return E_SUCCESS;
+		}
+
 		if(pMsg != NULL)
 		{
 			pMsg->m_pcsPrint->lock();
