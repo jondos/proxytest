@@ -827,6 +827,12 @@ DOMText* createDOMText(XERCES_CPP_NAMESPACE::DOMDocument* pOwnerDoc,const char *
 		return ret;
 	}
 
+
+SINT32 setDOMElementAttribute(DOMNode *pElem, const char *attrName, const char *value)
+	{
+		return setDOMElementAttribute(pElem,attrName,(const UINT8*)value);
+	}
+
 SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName,const UINT8* value)
 {
 	if(pElem==NULL||pElem->getNodeType()!=DOMNode::ELEMENT_NODE||attrName==NULL||value==NULL)
@@ -1345,7 +1351,7 @@ UINT8* readFile(const UINT8* const name,UINT32* size)
 
 SINT32 saveFile(const UINT8* const name,const UINT8* const buff,UINT32 buffSize)
 {
-	int handle=open((char*)name,O_BINARY|O_WRONLY|O_CREAT,S_IWRITE|S_IREAD);
+	int handle = open((char *)name, O_BINARY | O_WRONLY | O_CREAT | O_TRUNC, S_IWRITE | S_IREAD);
 	if(handle<0)
 		return E_UNKNOWN;
 	if(myfilewrite(handle,buff,buffSize)!=buffSize)

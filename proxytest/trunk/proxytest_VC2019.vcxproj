@@ -1473,9 +1473,9 @@
       <Culture>0x0407</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>proxytest-lib.lib;MiniXML-2.10.lib;ws2_32.lib;libcrypto.lib;libssl.lib;pthreadVC2.lib;</AdditionalDependencies>
+      <AdditionalDependencies>proxytest-lib.lib;mxml1.lib;ws2_32.lib;libcrypto.lib;libssl.lib;pthreadVC2.lib;</AdditionalDependencies>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>.\Debug-with-Mini-XML;$(LIB_MXML);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_ZLIB);$(LIB_POSTGRES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\build\proxytest-lib\x64\Debug-with-XML;$(LIB_MXML);$(LIB_OPENSSL);$(LIB_PTHREADS);$(LIB_ZLIB);$(LIB_POSTGRES);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)proxytest.pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
