@@ -140,6 +140,7 @@ SINT32 getSignatureElements(DOMNode* parent, DOMNode** signatureNodes, UINT32* l
 SINT32 getDOMElementValue(const DOMNode * const pElem,UINT8* value,UINT32* len);
 
 SINT32 setDOMElementAttribute(DOMNode* pElem,const char* attrName,const UINT8* value);
+SINT32 setDOMElementAttribute(DOMNode *pElem, const char *attrName, const char *value);
 
 bool equals(const XMLCh* const e1,const char* const e2);
 
