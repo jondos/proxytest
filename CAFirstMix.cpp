@@ -658,7 +658,12 @@ SINT32 CAFirstMix::processKeyExchange()
 								arNonce[tmpLen]=0;
 						}
 						UINT8 key[64];
-						getRandom(key,64);
+#ifdef SET_STATIC_MUX_SOCKET_KEY
+						CAMsg::printMsg(LOG_CRIT, "Warning! Will use an all zero MuxSocket key - do not use this Mix in a productive environment -- only for testing!\n");
+						memset(key,0,64);
+#else
+						getRandom(key, 64);
+#endif
 						//UINT8 buff[400];
 						//UINT32 bufflen=400;
 						XERCES_CPP_NAMESPACE::DOMDocument* docSymKey=createDOMDocument();

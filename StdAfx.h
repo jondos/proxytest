@@ -33,7 +33,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #if !defined(AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_)
 #define AFX_STDAFX_H__9A5B051F_FF3A_11D3_9F5E_000001037024__INCLUDED_
 
-#define MIX_VERSION "00.12.06"
+#define MIX_VERSION "00.12.07"
 
 // set to "true" if this is a testing/development version which is not meant for prodictive use
 #define MIX_VERSION_TESTING true
@@ -83,7 +83,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define DATA_RETENTION_LOG //define if you need to store logs according to German data retention
 //#define INTEL_IPP_CRYPTO //define if you want to use the crypto routines of the Intel Performance Primitives
 //#define __UNIT_TEST__ //define if you want to compile the unit tests
-//#define EXPORT_ASYM_PRIVATE_KEY //define if you want to be able to export the private key of an assymetric key (only used for debugging purposes..)
+//#define EXPORT_ASYM_PRIVATE_KEY //define if you want to be able to export/import the private key of an asymmetric key (only used for debugging purposes..)
+//#define SET_STATIC_MUX_SOCKET_KEY //define if you want to set the MuxSocket keys to all zeros (only used for debugging/testing purposes..)
 //#define LOG_CRIME
 //#define PAYMENT //to enable payment support, now use configure --enable-payment..
 //#define NO_LOOPACCEPTUSER //to disable user accept thread for First Mix
