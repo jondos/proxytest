@@ -6,4 +6,4 @@ FROM alpine:3.12
 COPY --from=dev /usr/local/sbin/sockd /usr/local/sbin/
 ADD sockd.conf /etc/
 
-CMD /usr/local/sbin/sockd
+ENTRYPOINT ["/usr/local/sbin/sockd"]
