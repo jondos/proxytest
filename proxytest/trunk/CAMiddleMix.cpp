@@ -221,8 +221,13 @@ SINT32 CAMiddleMix::processKeyExchange()
 						CAASymCipher oRSA;
 						oRSA.setPublicKeyAsDOMNode(rsaKey);
 						UINT8 key[64];
-						getRandom(key,64);
-						XERCES_CPP_NAMESPACE::DOMDocument* docSymKey=::createDOMDocument();
+#ifdef SET_STATIC_MUX_SOCKET_KEY
+						CAMsg::printMsg(LOG_CRIT, "Warning! Will use an all zero MuxSocket key - do not use this Mix in a productive environment -- only for testing!\n");
+						memset(key, 0, 64);
+#else
+						getRandom(key, 64);
+#endif
+						XERCES_CPP_NAMESPACE::DOMDocument *docSymKey = ::createDOMDocument();
 						DOMElement* elemRoot=NULL;
 						::encodeXMLEncryptedKey(key,64,elemRoot,docSymKey,&oRSA);
 						docSymKey->appendChild(elemRoot);
