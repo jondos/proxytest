@@ -20,8 +20,13 @@ services:
       context: ./
       dockerfile: firstmix.dockerfile
     image: docker.securecloud.works:443/anon-mix-firstmix:latest  
-  mixcascade:
+  middlemix:
     build:
       context: ./
-      dockerfile: mixcascade.dockerfile
-    image: docker.securecloud.works:443/mixcascade:latest
+      dockerfile: middlemix.dockerfile
+    image: docker.securecloud.works:443/anon-mix-middlemix:latest  
+  lastmix:
+    build:
+      context: ./
+      dockerfile: lastmix.dockerfile
+    image: docker.securecloud.works:443/anon-mix-lastmix:latest  
