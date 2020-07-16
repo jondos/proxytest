@@ -10,12 +10,7 @@ services:
       context: ./
       dockerfile: ANONSocksProxy.dockerfile
     image: docker.securecloud.works:443/anon-socks-proxy:latest  
-  mix-docker-registry:  
-    build:
-      context: ./
-      dockerfile: mix.dockerfile
-    image: docker.securecloud.works:443/anon-mix:latest  
-  mix-local:  
+  mix:
     build:
       context: ./
       dockerfile: mix.dockerfile
