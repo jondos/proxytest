@@ -1,6 +1,12 @@
+version: '3'
 services:
-    anon-web-proxy:
-        build:
-            dockerfile: ANONWebProxy
-            image: anon-web-proxy:latest
-            
+  anon-web-proxy:
+    build:
+      context: ./
+      dockerfile: ANONWebProxy.dockerfile
+    image: docker.securecloud.works:443/anon-web-proxy:latest
+  mixcascade:
+    build:
+      context: ./
+      dockerfile: MixCascade.dockerfile
+    image: docker.securecloud.works:443/mixcascade:latest
