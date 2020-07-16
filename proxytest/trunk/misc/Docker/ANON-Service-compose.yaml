@@ -1,0 +1,6 @@
+services:
+    anon-web-proxy:
+        build:
+            dockerfile: ANONWebProxy
+            image: anon-web-proxy:latest
+            
