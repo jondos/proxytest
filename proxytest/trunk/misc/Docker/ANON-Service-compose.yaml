@@ -18,5 +18,5 @@ services:
   mixcascade:
     build:
       context: ./
-      dockerfile: MixCascade.dockerfile
+      dockerfile: mixcascade.dockerfile
     image: docker.securecloud.works:443/mixcascade:latest
