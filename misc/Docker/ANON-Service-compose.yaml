@@ -15,6 +15,11 @@ services:
       context: ./
       dockerfile: mix.dockerfile
     image: anon-mix:latest  
+  firstmix:
+    build:
+      context: ./
+      dockerfile: firstmix.dockerfile
+    image: docker.securecloud.works:443/anon-mix-firstmix:latest  
   mixcascade:
     build:
       context: ./
