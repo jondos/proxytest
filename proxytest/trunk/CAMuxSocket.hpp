@@ -185,7 +185,7 @@ class CAMuxSocket
 				CAMutex			m_csReceive;
 				t_hashkeylistEntry*			m_pHashKeyEntry;
 
-				static t_hashkeylistEntry* ms_phashkeylistAvailableHashKeys; //stores he avilalbe hashkeys -> if this list is empty new entires are create on the fly
+				static t_hashkeylistEntry* ms_phashkeylistAvailableHashKeys; //stores the available hashkeys -> if this list is empty new entires are created on the fly
 				static SINT32 ms_nMaxHashKeyValue; // the maximum value of a hash key
 				static CAMutex* ms_pcsHashKeyList;
 
