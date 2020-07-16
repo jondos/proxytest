@@ -1481,8 +1481,8 @@ SINT32 CAMiddleMix::putMixPacketIntoQueueSendToMixBefore(tPoolEntry* pPoolEntry)
 SINT32 CAMiddleMix::loop()
 	{
 
-		CASingleSocketGroup oSocketGroup(false);
-		oSocketGroup.add(*m_pMuxIn);
+//		CASingleSocketGroup oSocketGroup(false);
+//		oSocketGroup.add(*m_pMuxIn);
 		m_pMuxIn->setCrypt(true);
 		m_pMuxOut->setCrypt(true);
 
