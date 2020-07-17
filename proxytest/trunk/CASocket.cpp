@@ -51,6 +51,23 @@ CASocket::CASocket(bool bIsReservedSocket)
 		m_Socket=0;
 		m_bSocketIsClosed=true;
 		m_bIsReservedSocket=bIsReservedSocket;
+		m_pSingleSocketGroupRead = NULL;
+	}
+
+SINT32 CASocket::setSocket(SOCKET s)
+	{
+		delete m_pSingleSocketGroupRead;
+		m_Socket = s;
+		if (s != 0)
+			{
+				m_pSingleSocketGroupRead = new CASingleSocketGroup(false);
+				m_pSingleSocketGroupRead->add(m_Socket);
+			}
+		else
+			{
+				m_pSingleSocketGroupRead = NULL;
+			}
+		return E_SUCCESS;
 	}
 
 SINT32 CASocket::create()
@@ -71,11 +88,12 @@ SINT32 CASocket::create(bool a_bShowTypicalError)
 ///@todo Not thread safe!
 SINT32 CASocket::create(SINT32 type, bool a_bShowTypicalError)
 	{
+		SOCKET s = INVALID_SOCKET;
 		if(m_bSocketIsClosed)
 		{
 			if(m_bIsReservedSocket||m_u32NormalSocketsOpen<m_u32MaxNormalSockets)
 			{
-				m_Socket=::socket(type,SOCK_STREAM,0);
+				s=::socket(type,SOCK_STREAM,0);
 				//CAMsg::printMsg(LOG_DEBUG,"Opened socket: %d\n", m_Socket);
 			}
 			else
@@ -86,9 +104,9 @@ SINT32 CASocket::create(SINT32 type, bool a_bShowTypicalError)
 		}
 		else
 			return E_UNKNOWN;
-		if(m_Socket==INVALID_SOCKET)
+		if(s==INVALID_SOCKET)
 			{
-				m_Socket=0;
+				setSocket(0);
 				int er=GET_NET_ERROR;
 				if (a_bShowTypicalError)
 				{
@@ -111,6 +129,7 @@ SINT32 CASocket::create(SINT32 type, bool a_bShowTypicalError)
 			m_u32NormalSocketsOpen++;
 		}
 		m_pcsClose->unlock();
+		setSocket(s);
 		return E_SUCCESS;
 	}
 
@@ -181,14 +200,15 @@ SINT32 CASocket::accept(CASocket &s)
 				CAMsg::printMsg(LOG_CRIT,"CASocket::accept() -- Could not create a new normal Socket -- allowed number of normal sockets exeded!\n");
 				return E_SOCKET_LIMIT;
 			}
-		s.m_Socket=::accept(m_Socket,NULL,NULL);
-		if(s.m_Socket==SOCKET_ERROR)
+		SOCKET sock=::accept(m_Socket,NULL,NULL);
+		if (sock == SOCKET_ERROR)
 			{
-				s.m_Socket=0;
+				s.setSocket(0);
 				if(GET_NET_ERROR==ERR_INTERN_SOCKET_CLOSED)
 					return E_SOCKETCLOSED;
 				return E_UNKNOWN;
 			}
+		s.setSocket(sock);
 		m_pcsClose->lock();
 		m_u32NormalSocketsOpen++;
 		s.m_bSocketIsClosed=false;
@@ -356,7 +376,7 @@ SINT32 CASocket::close()
 			}
 			//CAMsg::printMsg(LOG_DEBUG,"Open Sockets: %d\n", m_u32NormalSocketsOpen);
 			//CAMsg::printMsg(LOG_DEBUG,"Closed socket: %d\n", m_Socket);
-			m_Socket=0;
+			setSocket(0);
 			m_bSocketIsClosed=true;
 		}
 
@@ -662,11 +682,11 @@ SINT32 CASocket::receiveFullyT(UINT8* buff,UINT32 len,UINT32 msTimeOut)
 		getcurrentTimeMillis(currentTime);
 		set64(endTime,currentTime);
 		add64(endTime,msTimeOut);
-		CASingleSocketGroup oSG(false);
-		oSG.add(*this);
+//		CASingleSocketGroup oSG(false);
+//		oSG.add(*this);
 		for(;;)
 			{
-				ret=oSG.select(msTimeOut);
+				ret = m_pSingleSocketGroupRead->select(msTimeOut);
 				if(ret==1)
 					{
 						ret=receive(buff+pos,len);
@@ -700,11 +720,11 @@ SINT32 CASocket::receiveLine(UINT8* line, UINT32 maxLen, UINT32 msTimeOut)
 	getcurrentTimeMillis(currentTime);
 	set64(endTime,currentTime);
 	add64(endTime,msTimeOut);
-	CASingleSocketGroup oSG(false);
-	oSG.add(*this);
+//	CASingleSocketGroup oSG(false);
+//	oSG.add(*this);
 	do
 	{
-		ret = oSG.select(msTimeOut);
+			ret = m_pSingleSocketGroupRead->select(msTimeOut);
 		if(ret == 1)
 		{
 			ret = receive(&byte, 1);

@@ -31,6 +31,9 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAClientSocket.hpp"
 #include "CAMutex.hpp"
 #include "CAMsg.hpp"
+
+class CASingleSocketGroup;
+
 class CASocket:public CAClientSocket
 	{
 		public:
@@ -145,10 +148,13 @@ class CASocket:public CAClientSocket
 													// (because it is used as a Key in lookups for instance as a HashValue etc.)
 
 			SOCKET m_Socket;
-
+			CASingleSocketGroup *m_pSingleSocketGroupRead; //A single socke group which contains this socket for helping in reading from this socket...
+		
 
 		private:			
-			SINT32 create(SINT32 type, bool a_bShowTypicalError);
+			
+			virtual SINT32 setSocket(SOCKET s);
+			virtual SINT32 create(SINT32 type, bool a_bShowTypicalError);
 		
 			static CAMutex* m_pcsClose;
 			///The following two variables are use to realise "reserved" sockets. The rational behind is to ensure
@@ -156,5 +162,5 @@ class CASocket:public CAClientSocket
 			volatile static UINT32 m_u32NormalSocketsOpen; //how many "normal" sockets are open
 			static UINT32 m_u32MaxNormalSockets; //how many "normal" sockets are allowed at max
 			bool m_bIsReservedSocket; ///Normal or reserved socket?
-	};
+	};	
 #endif
