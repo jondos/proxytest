@@ -178,9 +178,7 @@ class CASingleSocketGroup
 			
 			SINT32 add(CASocket&s)
 				{
-					if(epoll_ctl(m_hEPFD,EPOLL_CTL_ADD,s.getSocket(), m_pEvents)!=0)
-						return E_UNKNOWN;
-					return E_SUCCESS;
+					return add(s.getSocket());
 				}
 
 			SINT32 add(SOCKET s)
