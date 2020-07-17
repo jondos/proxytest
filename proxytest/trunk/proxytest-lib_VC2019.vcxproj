@@ -1345,8 +1345,13 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="benchmarking\CAMiddleMixBenchmarkDummy.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-with-Mini-XML|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="benchmarking\CASocketRecvFromMemory.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-with-Mini-XML|x64'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="CAAbstractControlChannel.cpp" />
     <ClCompile Include="CAAbstractXMLEncodable.cpp" />
@@ -7544,6 +7549,7 @@
   <ItemGroup>
     <ClInclude Include="atomicops.h" />
     <ClInclude Include="basetypedefs.h" />
+    <ClInclude Include="benchmarking\CAMiddleMixBenchmarkDummy.hpp" />
     <ClInclude Include="benchmarking\CASingleSocketGroupDummy.hpp" />
     <ClInclude Include="benchmarking\CASocketDummySend.hpp" />
     <ClInclude Include="benchmarking\CASocketRecvFromMemory.hpp" />

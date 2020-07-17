@@ -48,6 +48,11 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "CAReplayDatabase.hpp"
 #endif
 
+#ifdef DO_MIDDLE_MIX_BENCHMARK
+#include "benchmarking/CAMiddleMixBenchmarkDummy.hpp"
+#endif
+
+
 #if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INLUDE_LAST_MIX
 
 #ifdef INCLUDE_MIDDLE_MIX
@@ -750,12 +755,25 @@ exit(0);
 					MONITORING_FIRE_NET_EVENT(ev_net_lastMixInited);
 				}
 #endif
+#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_LAST_MIX 
+				if (CALibProxytest::getOptions()->isLastMix())
+				{
+					CAMsg::printMsg(LOG_INFO,"I am the Last MIX...\n");
+					#if !defined(NEW_MIX_TYPE)
+						pMix=new CALastMixA();
+					#else
+						pMix=new CALastMixB();
+					#endif
+					MONITORING_FIRE_NET_EVENT(ev_net_lastMixInited);
+				}
 #else
 				CAMsg::printMsg(LOG_ERR,"this Mix is compiled to work only as local proxy!\n");
 				exit(EXIT_FAILURE);
 #endif
 			}
-#if !defined ONLY_LOCAL_PROXY || defined INCLUDE_MIDDLE_MIX || defined INCLUDE_LAST_MIX || defined INCLUDE_FIRST_MIX 
+#ifdef DO_MIDDLE_MIX_BENCHMARK
+		pMix = new CAMiddleMixBenchmarkDummy();
+#endif
 #ifndef DYNAMIC_MIX
 	  CAMsg::printMsg(LOG_INFO,"Starting MIX...\n");
 		if(pMix->start()!=E_SUCCESS)

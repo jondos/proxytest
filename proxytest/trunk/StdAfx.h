@@ -111,6 +111,8 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 //#define MULTI_THREADED_PACKET_PROCESSING //utilise multiple threads for packet processing, which could lead to a performacne improvement on multi core machines
 //#define __BUILD_AS_SHADOW_PLUGIN__ //define if you want to compile the Mix as a plugin for the Shadow simulator
  
+//#define DO_MIDDLE_MIX_BENCHMARK //define if you want to build a Mix dummy which will only do some benchmarking of a middle Mix
+
 #if !defined(PRINT_THREAD_STACK_TRACE) && defined (DEBUG)&& ! defined(ONLY_LOCAL_PROXY)
 	#define PRINT_THREAD_STACK_TRACE
 #endif
