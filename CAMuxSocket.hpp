@@ -68,12 +68,12 @@ class CAMuxSocket
 			/** Receives some "plain" bytes from the underlying socket - just a convenient function...*/
 			SINT32 receiveFully(UINT8* buff,UINT32 len)
 			{
-				return m_Socket.receiveFully(buff,len);
+				return m_pSocket->receiveFully(buff,len);
 			}
 				
 			SINT32 receiveFully(UINT8* buff,UINT32 len, UINT32 msTimeOut)
 			{
-				return m_Socket.receiveFullyT(buff,len, msTimeOut);
+				return m_pSocket->receiveFullyT(buff,len, msTimeOut);
 			}
 				
 			//int close(HCHANNEL channel_id);
@@ -81,8 +81,16 @@ class CAMuxSocket
 #ifdef LOG_CRIME
 			void sigCrime(HCHANNEL channel_id,MIXPACKET* sigPacket);
 #endif
-			CASocket* getCASocket(){return &m_Socket;}
-			SOCKET getSocket(){return m_Socket.getSocket();}
+			CASocket* getCASocket(){return m_pSocket;}
+			/**
+			 * @brief This will set the underlying CASocket. Note: The object will be under full controll of CAMuxSocket. 
+			 * It will be destroyed by CAMuxSocket, if not longer needed. Therefore it must have be dynamically allocated.
+			 * @param pSocket the new CASocket to use, should not be NULL
+			 * @return E_SUCCESS, if successful, E_UNKNOWN otherwise
+			*/
+			SINT32 setCASocket(CASocket *pSocket);
+			SOCKET getSocket(){return m_pSocket->getSocket();}
+
 
 			SINT32 setCrypt(bool b);
 			bool getIsEncrypted()
@@ -175,12 +183,12 @@ class CAMuxSocket
 					}
 
 		private:
-				CASocket		m_Socket;
+				CASocket*		m_pSocket;
 				UINT32			m_aktBuffPos;
 				UINT8*			m_Buff;
 				CASymCipherMuxSocket*		m_pCipherIn;
 				CASymCipherMuxSocket*		m_pCipherOut;
-				bool			m_bIsCrypted;
+				bool				m_bIsCrypted;
 				CAMutex			m_csSend;
 				CAMutex			m_csReceive;
 				t_hashkeylistEntry*			m_pHashKeyEntry;

@@ -41,6 +41,7 @@ CAMutex* CAMuxSocket::ms_pcsHashKeyList=NULL;
 
 CAMuxSocket::CAMuxSocket(SYMCHANNELCIPHER_ALGORITHM algCipher)
 	{
+		m_pSocket = new CASocket();
 		m_Buff=new UINT8[MIXPACKET_SIZE];
 		m_aktBuffPos=0;
 		m_bIsCrypted=false;
@@ -74,7 +75,17 @@ CAMuxSocket::~CAMuxSocket()
 		ms_pcsHashKeyList->unlock();
 		delete m_pCipherIn;
 		delete m_pCipherOut;
+		delete m_pSocket;
 	}	
+
+SINT32 CAMuxSocket::setCASocket(CASocket *pSocket)
+	{
+		if (m_pSocket == NULL)
+			return E_UNKNOWN;
+		delete m_pSocket;
+		m_pSocket = pSocket;
+		return E_SUCCESS;
+	}
 
 SINT32 CAMuxSocket::setCipher(SYMCHANNELCIPHER_ALGORITHM algCipher)
 {
@@ -119,7 +130,7 @@ SINT32 CAMuxSocket::accept(UINT16 port)
 		oSocket.setReuseAddr(true);
 		if(oSocket.listen(port)!=E_SUCCESS)
 			return E_UNKNOWN;
-		if(oSocket.accept(m_Socket)!=E_SUCCESS)
+		if(oSocket.accept(*m_pSocket)!=E_SUCCESS)
 			return E_UNKNOWN;
 		oSocket.close();
 		//m_Socket.setRecvLowWat(MIXPACKET_SIZE);
@@ -140,7 +151,7 @@ SINT32 CAMuxSocket::accept(const CASocketAddr& oAddr)
 		SINT32 ret=oSocket.listen(oAddr);
 		if(ret!=E_SUCCESS)
 			return ret;
-		ret=oSocket.accept(m_Socket);
+		ret=oSocket.accept(*m_pSocket);
 		if(ret!=E_SUCCESS)
 			return E_UNKNOWN;
 		oSocket.close();
@@ -158,13 +169,13 @@ SINT32 CAMuxSocket::connect(CASocketAddr & psa,UINT retry,UINT32 time)
 	{
 		//m_Socket.setRecvLowWat(MIXPACKET_SIZE);
 		m_aktBuffPos=0;
-		return m_Socket.connect(psa,retry,time);
+		return m_pSocket->connect(psa,retry,time);
 	}
 /** Closes the underlying socket.*/			
 SINT32 CAMuxSocket::close()
 	{
 		m_aktBuffPos=0;
-		return m_Socket.close();
+		return m_pSocket->close();
 	}
 /** Sends a MixPacket over the Network. Will block until the whole packet is 
 	* send.
@@ -182,7 +193,7 @@ SINT32 CAMuxSocket::send(MIXPACKET *pPacket)
 		pPacket->flags=htons(pPacket->flags);
 		if(m_bIsCrypted)
     	m_pCipherOut->crypt1(((UINT8*)pPacket),((UINT8*)pPacket),16);
-		ret=m_Socket.sendFully(((UINT8*)pPacket),MIXPACKET_SIZE);
+		ret=m_pSocket->sendFully(((UINT8*)pPacket),MIXPACKET_SIZE);
 		if(ret!=E_SUCCESS)
 			{
 				#ifdef _DEBUG
@@ -244,7 +255,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 			return E_UNKNOWN;
 		}
 		
-		if(m_Socket.receiveFully((UINT8*)pPacket,MIXPACKET_SIZE)!=E_SUCCESS)
+		if(m_pSocket->receiveFully((UINT8*)pPacket,MIXPACKET_SIZE)!=E_SUCCESS)
 		{
 			m_csReceive.unlock();
 			return SOCKET_ERROR;
@@ -266,7 +277,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket)
 //TODO: Bug if socket is not in non_blocking mode!!
 SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 msTimeout)
 	{
-		if (m_Socket.isClosed())
+		if (m_pSocket->isClosed())
 		{
 			return E_NOT_CONNECTED;
 		}
@@ -279,7 +290,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 msTimeout)
 			return E_UNKNOWN;
 		}
 		SINT32 len=MIXPACKET_SIZE-m_aktBuffPos;
-		SINT32 ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
+		SINT32 ret=m_pSocket->receive(m_Buff+m_aktBuffPos,len);
 		if(ret<=0&&ret!=E_AGAIN) //if socket was set in non-blocking mode
 		{
 			m_csReceive.unlock();
@@ -312,7 +323,7 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 msTimeout)
 		oSocketGroup.add(*this);
 		for(;;)
 			{
-				if (m_Socket.isClosed())
+				if (m_pSocket->isClosed())
 				{
 					m_csReceive.unlock();
 					return E_NOT_CONNECTED;
@@ -324,15 +335,15 @@ SINT32 CAMuxSocket::receive(MIXPACKET* pPacket,UINT32 msTimeout)
 					return E_UNKNOWN;
 				}
 				len=MIXPACKET_SIZE-m_aktBuffPos;
-				if (m_Socket.isClosed())
+				if (m_pSocket->isClosed())
 				{
 					m_csReceive.unlock();
 					return E_NOT_CONNECTED;
 				}				
-				ret=m_Socket.receive(m_Buff+m_aktBuffPos,len);
+				ret=m_pSocket->receive(m_Buff+m_aktBuffPos,len);
 				if(ret<=0&&ret!=E_AGAIN)
 				{
-					if (m_Socket.isClosed())
+					if (m_pSocket->isClosed())
 					{
 						CAMsg::printMsg(LOG_ERR, "Error while receiving from socket. Socket is closed! Receive returned: %i Reason: %s (%i)\n", ret, GET_NET_ERROR_STR(GET_NET_ERROR), GET_NET_ERROR);
 					}
