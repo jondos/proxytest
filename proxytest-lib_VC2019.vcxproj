@@ -1345,6 +1345,9 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="benchmarking\CASocketRecvFromMemory.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-with-Mini-XML|x64'">NotUsing</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="CAAbstractControlChannel.cpp" />
     <ClCompile Include="CAAbstractXMLEncodable.cpp" />
     <ClCompile Include="CAAbstractXMLSignable.cpp" />
@@ -7541,6 +7544,9 @@
   <ItemGroup>
     <ClInclude Include="atomicops.h" />
     <ClInclude Include="basetypedefs.h" />
+    <ClInclude Include="benchmarking\CASingleSocketGroupDummy.hpp" />
+    <ClInclude Include="benchmarking\CASocketDummySend.hpp" />
+    <ClInclude Include="benchmarking\CASocketRecvFromMemory.hpp" />
     <ClInclude Include="CAAbstractControlChannel.hpp" />
     <ClInclude Include="CAAbstractXMLEncodable.hpp" />
     <ClInclude Include="CAAbstractXMLSignable.hpp" />
