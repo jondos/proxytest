@@ -100,9 +100,10 @@ class CAMiddleMix:public
 
     virtual SINT32 processKeyExchange();
 
+protected:
+		CAMuxSocket *m_pMuxIn;
+		CAMuxSocket *m_pMuxOut;
 private:
-			CAMuxSocket* m_pMuxIn;
-			CAMuxSocket* m_pMuxOut;
 			CAASymCipher* m_pRSA;
 
 			//CASignature* m_pSignature;
