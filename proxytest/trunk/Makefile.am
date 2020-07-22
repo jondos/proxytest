@@ -260,6 +260,7 @@ mix_LDADD += $(top_builddir)/build/mxml/libmxml.a \
 
 external.h:
 #Make MXML
+	rm -r -f $(top_builddir)/build/mxml
 	mkdir -p $(top_builddir)/build/mxml
 	wget https://github.com/michaelrsweet/mxml/releases/download/v3.1/mxml-3.1.tar.gz -O $(top_builddir)/build/mxml.tgz
 	tar -xzf $(top_builddir)/build/mxml.tgz -C $(top_builddir)/build/mxml --strip-components=1
@@ -270,7 +271,7 @@ else
 endif
 	cd $(top_builddir)/build/mxml ; $(MAKE) libmxml.a
 #Make OpenSSL
-	rm -r $(top_builddir)/build/openssl
+	rm -r -f $(top_builddir)/build/openssl
 	mkdir -p $(top_builddir)/build/openssl
 	wget https://www.openssl.org/source/openssl-1.1.1g.tar.gz -O $(top_builddir)/build/openssl.tgz
 	tar -xzf $(top_builddir)/build/openssl.tgz -C $(top_builddir)/build/openssl --strip-components=1
