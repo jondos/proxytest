@@ -112,7 +112,8 @@ am__v_AR_1 =
 libbenchmarking_a_AR = $(AR) $(ARFLAGS)
 libbenchmarking_a_LIBADD =
 am_libbenchmarking_a_OBJECTS = CAMiddleMixBenchmarkDummy.$(OBJEXT) \
-	CASocketRecvFromMemory.$(OBJEXT)
+	CASocketRecvFromMemory.$(OBJEXT) \
+	CAMixPacketGenerator.$(OBJEXT)
 libbenchmarking_a_OBJECTS = $(am_libbenchmarking_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -130,6 +131,7 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
 am__depfiles_remade = ./$(DEPDIR)/CAMiddleMixBenchmarkDummy.Po \
+	./$(DEPDIR)/CAMixPacketGenerator.Po \
 	./$(DEPDIR)/CASocketRecvFromMemory.Po
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -341,7 +343,9 @@ CAMiddleMixBenchmarkDummy.hpp \
 CASingleSocketGroupDummy.hpp \
 CASocketDummySend.hpp \
 CASocketRecvFromMemory.hpp \
-CASocketRecvFromMemory.cpp
+CASocketRecvFromMemory.cpp \
+CAMixPacketGenerator.cpp \
+CAMixPacketGenerator.hpp
 
 includes = @INCLUDES@
 all: all-am
@@ -393,6 +397,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMiddleMixBenchmarkDummy.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CAMixPacketGenerator.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CASocketRecvFromMemory.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -557,6 +562,7 @@ clean-am: clean-generic clean-libtool clean-noinstLIBRARIES \
 
 distclean: distclean-am
 		-rm -f ./$(DEPDIR)/CAMiddleMixBenchmarkDummy.Po
+	-rm -f ./$(DEPDIR)/CAMixPacketGenerator.Po
 	-rm -f ./$(DEPDIR)/CASocketRecvFromMemory.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
@@ -604,6 +610,7 @@ installcheck-am:
 
 maintainer-clean: maintainer-clean-am
 		-rm -f ./$(DEPDIR)/CAMiddleMixBenchmarkDummy.Po
+	-rm -f ./$(DEPDIR)/CAMixPacketGenerator.Po
 	-rm -f ./$(DEPDIR)/CASocketRecvFromMemory.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
