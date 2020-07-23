@@ -1,3 +1,4 @@
+#ifdef DO_MIDDLE_MIX_BENCHMARK
 #include "../StdAfx.h"
 #include "CAMiddleMixBenchmarkDummy.hpp"
 
@@ -17,3 +18,4 @@ SINT32 CAMiddleMixBenchmarkDummy::init()
 {
 	return E_SUCCESS;
 }
+#endif //DO_MIDDLE_MIX_BENCHMARK

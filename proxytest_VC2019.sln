@@ -189,6 +189,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AclLogHelper", "AclLogHelpe
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AllTests", "test\AllTests_VC2019.vcxproj", "{6A4CE475-E3C6-4862-9656-E1E0E531C119}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmarking", "benchmarking", "{72C9CED1-E340-4797-BDEF-062B672C6CD9}"
+	ProjectSection(SolutionItems) = preProject
+		benchmarking\Makefile.am = benchmarking\Makefile.am
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug with LLVM|Any CPU = Debug with LLVM|Any CPU
@@ -1098,6 +1103,7 @@ Global
 		{2FA432F4-B312-42BB-8154-D5460F7DA5AD} = {54C687C4-A40F-4654-8DA3-66D2D382DDC8}
 		{DF495918-178A-49F4-BCE7-AB723E0FFEB1} = {54C687C4-A40F-4654-8DA3-66D2D382DDC8}
 		{0E7C06A8-52AE-471D-A21E-4D2AEA97343C} = {54C687C4-A40F-4654-8DA3-66D2D382DDC8}
+		{72C9CED1-E340-4797-BDEF-062B672C6CD9} = {54C687C4-A40F-4654-8DA3-66D2D382DDC8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1AB417FC-AF4B-4308-B24D-48DD7683FE76}
