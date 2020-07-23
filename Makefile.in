@@ -99,6 +99,7 @@ host_triplet = @host@
 @BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@	    $(top_builddir)/tre/libtre.a \
 @BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@	    $(top_builddir)/gcm/libgcm.a \
 @BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@	    $(top_builddir)/TypeA/libmixa.a \
+@BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@		$(top_builddir)/benchmarking/libbenchmarking.a \
 @BUILD_AS_SHADOW_PLUGIN_FALSE@@ONLY_LIB_FALSE@	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
 
 @ALL_FROM_SOURCE_TRUE@am__append_2 = $(top_builddir)/build/mxml/libmxml.a \
@@ -856,7 +857,7 @@ ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
 DIST_SUBDIRS = popt xml trio tre TypeA gcm test wireshark \
-	SquidLogHelper . AclLogHelper
+	SquidLogHelper benchmarking AclLogHelper .
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in INSTALL \
 	README ar-lib compile config.guess config.sub depcomp \
 	install-sh ltmain.sh missing mkinstalldirs
@@ -1244,7 +1245,7 @@ proxytest_sources = CAAbstractControlChannel.cpp\
 @DOTESTS_TRUE@MAYBE_tests = test
 @DOWIRESHARK_TRUE@MAYBE_wireshark = wireshark
 @ALL_FROM_SOURCE_TRUE@BUILT_SOURCES = external.h
-SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark) SquidLogHelper . AclLogHelper $(MAYBE_sgx)
+SUBDIRS = popt xml trio tre TypeA gcm $(MAYBE_tests) $(MAYBE_wireshark) SquidLogHelper benchmarking AclLogHelper $(MAYBE_sgx) . 
 all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

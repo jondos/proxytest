@@ -640,6 +640,8 @@ BUILD_ACL_LOG_HELPER_FALSE
 BUILD_ACL_LOG_HELPER_TRUE
 USE_SGX_FALSE
 USE_SGX_TRUE
+BUILD_MIX_BENCHMARKING_FALSE
+BUILD_MIX_BENCHMARKING_TRUE
 BUILD_AS_SHADOW_PLUGIN_FALSE
 BUILD_AS_SHADOW_PLUGIN_TRUE
 ALL_FROM_SOURCE_FALSE
@@ -837,6 +839,7 @@ enable_only_middle_mix
 with_SCONE
 with_SGX
 enable_build_as_shadow_plugin
+enable_mix_benchmarking
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1544,6 +1547,9 @@ Optional Features:
                           mix
   --enable-build-as-shadow-plugin
                           Build as Shadow simulator plugin
+  --enable-mix-benchmarking
+                          Build special versions of the Mix used for
+                          benchmarking
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -19730,6 +19736,20 @@ if test "${enable_build_as_shadow_plugin+set}" = set; then :
 fi
 
 
+BUILD_BENCHMARKING_CFLAGS=""
+build_benchmarking="false"
+# Check whether --enable-mix-benchmarking was given.
+if test "${enable_mix_benchmarking+set}" = set; then :
+  enableval=$enable_mix_benchmarking;
+		if test "x$enableval" != "xno" ; then
+			build_benchmarking="true"
+			BUILD_BENCHMARKING_CFLAGS="-DDO_MIDDLE_MIX_BENCHMARK"
+		fi
+
+
+fi
+
+
 TEST_CFLAGS=""
 
 if test "x$DOTHETESTS" == "xyes" ; then
@@ -19949,8 +19969,8 @@ fi
 
 fi
 
-CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT  $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS $BUILD_AS_SHADOW_PLUGIN_CFLAGS $USE_SCONE_CFLAGS"
-CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS $BUILD_AS_SHADOW_PLUGIN_CFLAGS $USE_SCONE_CFLAGS"
+CFLAGS="$CFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT  $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS $BUILD_AS_SHADOW_PLUGIN_CFLAGS $USE_SCONE_CFLAGS $BUILD_BENCHMARKING_CFLAGS"
+CXXFLAGS="$CXXFLAGS $POOL $DYNAMIC $DIALOG $BANDWIDTH_LIMIT $BANDWIDTH_LIMIT_THROUGHPUT $PAYMENT $INFOSERVICESERIAL $SERVER_MONITORING $REPLAY_DETECTION $NEW_MIX_TYPE $CRIME $USE_MINIXML $OFLAGS $WIRESHARK_CFLAGS $TEST_CFLAGS $BUILD_AS_SHADOW_PLUGIN_CFLAGS $USE_SCONE_CFLAGS $BUILD_BENCHMARKING_CFLAGS"
 LIBS="$LIBS $PAYMENT_LIB $MYSQL_LIB $GOOGLETEST_LIB"
 
 
@@ -20045,6 +20065,14 @@ else
   BUILD_AS_SHADOW_PLUGIN_FALSE=
 fi
 
+ if test x$build_benchmarking = xtrue; then
+  BUILD_MIX_BENCHMARKING_TRUE=
+  BUILD_MIX_BENCHMARKING_FALSE='#'
+else
+  BUILD_MIX_BENCHMARKING_TRUE='#'
+  BUILD_MIX_BENCHMARKING_FALSE=
+fi
+
  if test x$use_sgx = xtrue; then
   USE_SGX_TRUE=
   USE_SGX_FALSE='#'
@@ -20062,7 +20090,7 @@ else
 fi
 
 
-ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile SquidLogHelper/Makefile AclLogHelper/Makefile SGX/Makefile"
+ac_config_files="$ac_config_files Makefile popt/Makefile xml/Makefile trio/Makefile tre/Makefile TypeA/Makefile TypeB/Makefile test/Makefile gcm/Makefile wireshark/Makefile SquidLogHelper/Makefile AclLogHelper/Makefile SGX/Makefile benchmarking/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -20240,6 +20268,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_AS_SHADOW_PLUGIN_TRUE}" && test -z "${BUILD_AS_SHADOW_PLUGIN_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_AS_SHADOW_PLUGIN\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_MIX_BENCHMARKING_TRUE}" && test -z "${BUILD_MIX_BENCHMARKING_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_MIX_BENCHMARKING\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_SGX_TRUE}" && test -z "${USE_SGX_FALSE}"; then
@@ -21239,6 +21271,7 @@ do
     "SquidLogHelper/Makefile") CONFIG_FILES="$CONFIG_FILES SquidLogHelper/Makefile" ;;
     "AclLogHelper/Makefile") CONFIG_FILES="$CONFIG_FILES AclLogHelper/Makefile" ;;
     "SGX/Makefile") CONFIG_FILES="$CONFIG_FILES SGX/Makefile" ;;
+    "benchmarking/Makefile") CONFIG_FILES="$CONFIG_FILES benchmarking/Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
