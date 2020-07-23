@@ -228,7 +228,7 @@ mix_LDADD += $(top_builddir)/libproxytest.a \
 	    $(top_builddir)/tre/libtre.a \
 	    $(top_builddir)/gcm/libgcm.a \
 	    $(top_builddir)/TypeA/libmixa.a \
-		$(top_builddir)/benchmarking/libbenchmark.a \
+		$(top_builddir)/benchmarking/libbenchmarking.a \
 	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
 
 
