@@ -14,4 +14,4 @@ class CAMiddleMixBenchmarkDummy : public CAMiddleMix
 				SINT32 initOnce();
 				SINT32 clean();
 };
-#endif DO_MIDDLE_MIX_BENCHMARK
+#endif //DO_MIDDLE_MIX_BENCHMARK
