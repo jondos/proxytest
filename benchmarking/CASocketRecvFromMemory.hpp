@@ -1,3 +1,4 @@
+#ifdef DO_MIDDLE_MIX_BENCHMARK
 #include "../CASocket.hpp"
 class CASocketRecvFromMemory:public CASocket
 {
@@ -8,3 +9,5 @@ class CASocketRecvFromMemory:public CASocket
 			SINT32 setSocket(SOCKET s);
 			SINT32 create(SINT32 type, bool a_bShowTypicalError);
 };
+#endif //DO_MIDDLE_MIX_BENCHMARK
+

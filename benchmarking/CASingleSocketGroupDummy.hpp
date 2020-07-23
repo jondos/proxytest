@@ -1,3 +1,4 @@
+#ifdef DO_MIDDLE_MIX_BENCHMARK
 #include "../CASingleSocketGroup.hpp"
 
 class CASingleSocketGroupDummy:public CASingleSocketGroup
@@ -28,3 +29,4 @@ class CASingleSocketGroupDummy:public CASingleSocketGroup
 					return E_SUCCESS;
 				}
 };
+#endif //DO_MIDDLE_MIX_BENCHMARK
