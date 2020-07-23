@@ -11,6 +11,8 @@ CAMiddleMixBenchmarkDummy.hpp \
 CASingleSocketGroupDummy.hpp \
 CASocketDummySend.hpp \
 CASocketRecvFromMemory.hpp \
-CASocketRecvFromMemory.cpp
+CASocketRecvFromMemory.cpp \
+CAMixPacketGenerator.cpp \
+CAMixPacketGenerator.hpp
 
 includes = @INCLUDES@
