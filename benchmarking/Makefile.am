@@ -10,6 +10,7 @@ libbenchmarking_a_SOURCES = CAMiddleMixBenchmarkDummy.cpp \
 CAMiddleMixBenchmarkDummy.hpp \
 CASingleSocketGroupDummy.hpp \
 CASocketDummySend.hpp \
-CASocketRecvFromMemory.hpp
+CASocketRecvFromMemory.hpp \
+CASocketRecvFromMemory.cpp
 
 includes = @INCLUDES@
