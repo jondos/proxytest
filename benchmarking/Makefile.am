@@ -6,7 +6,7 @@
 AUTOMAKE_OPTIONS = foreign
 
 noinst_LIBRARIES = libbenchmarking.a
-libsquidloghelper_a_SOURCES = CAMiddleMixBenchmarkDummy.cpp \
+libbenchmarking_a_SOURCES = CAMiddleMixBenchmarkDummy.cpp \
 CAMiddleMixBenchmarkDummy.hpp \
 CASingleSocketGroupDummy.hpp \
 CASocketDummySend.hpp \
