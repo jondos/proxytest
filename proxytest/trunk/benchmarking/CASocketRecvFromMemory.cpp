@@ -1,3 +1,4 @@
+#ifdef DO_MIDDLE_MIX_BENCHMARK
 #include "../StdAfx.h"
 #include "CASocketRecvFromMemory.hpp"
 #include "CASingleSocketGroupDummy.hpp"
@@ -29,3 +30,4 @@ SINT32 CASocketRecvFromMemory::create(SINT32 type, bool a_bShowTypicalError)
 	setSocket(1);
 	return E_SUCCESS;
 }
+#endif //DO_MIDDLE_MIX_BENCHMARK
