@@ -207,7 +207,6 @@ libmixshadow_la_LIBADD = $(top_builddir)/xml/libxml.a \
 	    $(top_builddir)/tre/libtre.a \
 	    $(top_builddir)/gcm/libgcm.a \
 	    $(top_builddir)/TypeA/libmixa.a \
-		$(top_builddir)/benchmarking/libbenchmark.a \
 	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
 libmixshadow_la_LDFLAGS = -Wl,--no-as-needed
 else #BUILD_AS_SHADOW_PLUGIN
@@ -229,6 +228,7 @@ mix_LDADD += $(top_builddir)/libproxytest.a \
 	    $(top_builddir)/tre/libtre.a \
 	    $(top_builddir)/gcm/libgcm.a \
 	    $(top_builddir)/TypeA/libmixa.a \
+		$(top_builddir)/benchmarking/libbenchmark.a \
 	    $(top_builddir)/SquidLogHelper/libsquidloghelper.a 
 
 
