@@ -1349,6 +1349,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-with-Mini-XML|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="benchmarking\CAMixPacketGenerator.cpp" />
     <ClCompile Include="benchmarking\CASocketRecvFromMemory.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug-with-Mini-XML|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -4075,6 +4076,7 @@
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug-IntelCrypto|Win32'">true</BrowseInformation>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug-IntelCrypto|x64'">true</BrowseInformation>
     </ClCompile>
+    <ClCompile Include="CAReadWriteLock.cpp" />
     <ClCompile Include="CAReplayControlChannel.cpp" />
     <ClCompile Include="CAReplayCtrlChannelMsgProc.cpp" />
     <ClCompile Include="CAReplayDatabase.cpp" />
@@ -5011,6 +5013,7 @@
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug-IntelCrypto|Win32'">true</BrowseInformation>
       <BrowseInformation Condition="'$(Configuration)|$(Platform)'=='Debug-IntelCrypto|x64'">true</BrowseInformation>
     </ClCompile>
+    <ClCompile Include="CAStatusManager.cpp" />
     <ClCompile Include="CASymCipher.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Disabled</Optimization>
@@ -7550,6 +7553,7 @@
     <ClInclude Include="atomicops.h" />
     <ClInclude Include="basetypedefs.h" />
     <ClInclude Include="benchmarking\CAMiddleMixBenchmarkDummy.hpp" />
+    <ClInclude Include="benchmarking\CAMixPacketGenerator.hpp" />
     <ClInclude Include="benchmarking\CASingleSocketGroupDummy.hpp" />
     <ClInclude Include="benchmarking\CASocketDummySend.hpp" />
     <ClInclude Include="benchmarking\CASocketRecvFromMemory.hpp" />
@@ -7577,16 +7581,19 @@
     <ClInclude Include="CADatagramSocket.hpp" />
     <ClInclude Include="CADataRetentionLog.hpp" />
     <ClInclude Include="CADataRetentionLogFile.hpp" />
+    <ClInclude Include="CADynamicCascadeConfigurator.hpp" />
     <ClInclude Include="CADynaNetworking.hpp" />
     <ClInclude Include="CAFileSystemDirectory.hpp" />
     <ClInclude Include="CAFirstMix.hpp" />
     <ClInclude Include="CAFirstMixChannelList.hpp" />
     <ClInclude Include="CAHttpClient.hpp" />
     <ClInclude Include="CAInfoService.hpp" />
+    <ClInclude Include="CAInfoServiceAware.hpp" />
     <ClInclude Include="CAIPAddrWithNetmask.hpp" />
     <ClInclude Include="CAIPList.hpp" />
     <ClInclude Include="CALastMix.hpp" />
     <ClInclude Include="CALastMixChannelList.hpp" />
+    <ClInclude Include="CALibProxytest.hpp" />
     <ClInclude Include="CAListenerInterface.hpp" />
     <ClInclude Include="CALocalProxy.hpp" />
     <ClInclude Include="CALockAble.hpp" />
@@ -7602,6 +7609,7 @@
     <ClInclude Include="CAPool.hpp" />
     <ClInclude Include="CAPriceInfo.hpp" />
     <ClInclude Include="CAQueue.hpp" />
+    <ClInclude Include="CAReadWriteLock.hpp" />
     <ClInclude Include="CAReplayControlChannel.hpp" />
     <ClInclude Include="CAReplayCtrlChannelMsgProc.hpp" />
     <ClInclude Include="CAReplayDatabase.hpp" />
@@ -7615,6 +7623,7 @@
     <ClInclude Include="CASocketGroup.hpp" />
     <ClInclude Include="CASocketGroupEpoll.hpp" />
     <ClInclude Include="CASocketList.hpp" />
+    <ClInclude Include="CAStatusManager.hpp" />
     <ClInclude Include="CASymChannelCipher.hpp" />
     <ClInclude Include="CASymChannelCipherFactory.hpp" />
     <ClInclude Include="CASymCipherNull.hpp" />
@@ -7633,6 +7642,7 @@
     <ClInclude Include="CAXMLBI.hpp" />
     <ClInclude Include="CAXMLCostConfirmation.hpp" />
     <ClInclude Include="CAXMLErrorMessage.hpp" />
+    <ClInclude Include="CAXMLPriceCert.hpp" />
     <ClInclude Include="controlchannelids.h" />
     <ClInclude Include="doxygen.h" />
     <ClInclude Include="errorcodes.hpp" />
