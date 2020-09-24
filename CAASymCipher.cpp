@@ -410,9 +410,26 @@ SINT32 CAASymCipher::getPrivateKeyAsDOMElement(
 {
 	if (m_pRSA == NULL)
 		return E_UNKNOWN;
+	
 	elemRoot = createDOMElement(docOwner, "RSAKeyPair");
 
-	addKeyPart(elemRoot, docOwner, "Modulus", m_pRSA->n);
+	const BIGNUM *n, *e, *p, *q, *dmp1, *dmq1, *iqmp, *d;
+	RSA_get0_key(m_pRSA, &n, &e, &d);
+	RSA_get0_factors(m_pRSA, &p, &q);
+	RSA_get0_crt_params(m_pRSA, &dmp1, &dmq1, &iqmp);
+
+	addKeyPart(elemRoot, docOwner, "Modulus", n);
+	addKeyPart(elemRoot, docOwner, "Exponent", e);
+	addKeyPart(elemRoot, docOwner, "P", p);
+	addKeyPart(elemRoot, docOwner, "Q", q);
+	addKeyPart(elemRoot, docOwner, "DP", dmp1);
+	addKeyPart(elemRoot, docOwner, "DQ", dmq1);
+	addKeyPart(elemRoot, docOwner, "InverseQ", iqmp);
+	addKeyPart(elemRoot, docOwner, "D", d);
+
+
+
+/*	addKeyPart(elemRoot, docOwner, "Modulus", m_pRSA->n);
 	addKeyPart(elemRoot, docOwner, "Exponent", m_pRSA->e);
 	addKeyPart(elemRoot, docOwner, "P", m_pRSA->p);
 	addKeyPart(elemRoot, docOwner, "Q", m_pRSA->q);
@@ -420,7 +437,7 @@ SINT32 CAASymCipher::getPrivateKeyAsDOMElement(
 	addKeyPart(elemRoot, docOwner, "DQ", m_pRSA->dmq1);
 	addKeyPart(elemRoot, docOwner, "InverseQ", m_pRSA->iqmp);
 	addKeyPart(elemRoot, docOwner, "D", m_pRSA->d);
-
+*/
 	return E_SUCCESS;
 }
 /** Sets the private key to the values stored in \c key.
@@ -452,6 +469,7 @@ SINT32 CAASymCipher::setPrivateKeyAsXML(const UINT8 *key, UINT32 len)
 	return setPrivateKeyAsDOMNode(root);
 }
 
+/*
 SINT32 CAASymCipher::setPrivateKeyAsDOMNode(DOMNode *node)
 {
 	DOMNode *root = node;
@@ -515,6 +533,80 @@ SINT32 CAASymCipher::setPrivateKeyAsDOMNode(DOMNode *node)
 		}
 	return E_UNKNOWN;
 }
+*/
+
+SINT32 CAASymCipher::setPrivateKeyAsDOMNode(DOMNode *node)
+{
+	DOMNode *root = node;
+	while (root != NULL)
+		{
+			if (equals(root->getNodeName(), "RSAKeyPair"))
+				{
+					RSA *tmpRSA = RSA_new();
+					BIGNUM *n, *e, *p, *q, *dmp1, *dmq1, *iqmp, *d;
+					n = e = p = q = dmp1 = dmq1 = iqmp = d = nullptr;
+					DOMNode *child = root->getFirstChild();
+					while (child != NULL)
+						{
+							if (equals(child->getNodeName(), "Modulus"))
+								{
+									getKeyPart(&n, child);
+								}
+							else if (equals(child->getNodeName(), "Exponent"))
+								{
+									getKeyPart(&e, child);
+								}
+							else if (equals(child->getNodeName(), "P"))
+								{
+									getKeyPart(&p, child);
+								}
+							else if (equals(child->getNodeName(), "Q"))
+								{
+									getKeyPart(&q, child);
+								}
+							else if (equals(child->getNodeName(), "DP"))
+								{
+									getKeyPart(&dmp1, child);
+								}
+							else if (equals(child->getNodeName(), "DQ"))
+								{
+									getKeyPart(&dmq1, child);
+								}
+							else if (equals(child->getNodeName(), "InverseQ"))
+								{
+									getKeyPart(&iqmp, child);
+								}
+							else if (equals(child->getNodeName(), "D"))
+								{
+									getKeyPart(&d, child);
+								}
+							child = child->getNextSibling();
+						}
+					if (n != NULL && e != NULL && e != NULL &&
+							p != NULL && q != NULL && d != NULL &&
+							iqmp != NULL && dmp1 != NULL &&
+							dmq1 != NULL)
+						{
+							if (m_pRSA != NULL)
+								RSA_free(m_pRSA);
+
+							RSA_set0_key(tmpRSA, n, e, d);
+							RSA_set0_factors(tmpRSA, p, q);
+							RSA_set0_crt_params(tmpRSA, dmp1, dmq1, iqmp);
+
+							m_pRSA = tmpRSA;
+							::setRSAFlags(m_pRSA);
+							return E_SUCCESS;
+						}
+					RSA_free(tmpRSA);
+					return E_UNKNOWN;
+				}
+			root = root->getNextSibling();
+		}
+	return E_UNKNOWN;
+}
+
+
 #endif // EXPORT_ASYM_PRIVATE_KEY
 
 /** Sets the public key to the values stored in \c key.
