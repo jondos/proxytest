@@ -59,6 +59,7 @@ proxytest_sources = CAAbstractControlChannel.cpp\
 		    CAQueue.cpp \
 		    CAReplayControlChannel.cpp\
 		    CAReplayCtrlChannelMsgProc.cpp\
+			CAReadWriteLock.cpp\
 		    CASemaphore.cpp\
 		    CASignature.cpp \
 		    CASingleSocketGroup.cpp\
@@ -141,6 +142,7 @@ proxytest_sources = CAAbstractControlChannel.cpp\
 		    CAQueue.hpp \
 		    CAReplayControlChannel.hpp\
 		    CAReplayCtrlChannelMsgProc.hpp\
+			CAReadWriteLock.hpp\
 		    CASemaphore.hpp\
 		    CASignature.hpp \
 		    CASingleSocketGroup.hpp\
