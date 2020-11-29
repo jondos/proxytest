@@ -46,20 +46,45 @@ class CASocketGroup
 				}
 			
 			inline SINT32 setPoolForWrite(bool bWrite);
+
+			SINT32 add(SOCKET &s)
+			{
+				m_csFD_SET.lock();
+#ifndef HAVE_POLL
+#ifndef _WIN32
+				if (m_max < (s) + 1)
+					m_max = (s) + 1;
+#endif
+#pragma warning(push)
+#pragma warning(disable : 4127) //Disable: Bedingter Ausdruck ist konstant
+				FD_SET(s, &m_fdset);
+#pragma warning(pop)
+#else
+				m_pollfd[s].fd = sock;
+				m_pollfd[s].revents = 0;
+				if (m_max < (s + 1))
+					m_max = s + 1;
+					//CAMsg::printMsg(LOG_DEBUG,"CASocketGroup::add() - socket: %d\n",sock);
+#endif
+				m_csFD_SET.unlock();
+				return E_SUCCESS;
+			}
+
+
 			SINT32 add(CASocket&s)
 				{
+					SINT sock = s.getSocket();
 					m_csFD_SET.lock();
 					#ifndef HAVE_POLL
 						#ifndef _WIN32
-								if(m_max<(s.getSocket())+1)
-							m_max=(s.getSocket())+1;
+						if (m_max < (sock) + 1)
+							m_max = (sock) + 1;
 						#endif
 						#pragma warning( push )
 						#pragma warning( disable : 4127 ) //Disable: Bedingter Ausdruck ist konstant
-						FD_SET(s.getSocket(),&m_fdset);
+						FD_SET(sock, &m_fdset);
 						#pragma warning( pop )
 					#else
-						SINT sock=s.getSocket();
 						m_pollfd[sock].fd=sock;
 						m_pollfd[sock].revents=0;
 						if(m_max<(sock+1))
