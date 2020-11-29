@@ -87,6 +87,12 @@ class CASingleSocketGroup
 				m_pollfd = NULL;
 			}
 			
+			SINT32 add(SOCKET s)
+				{
+					m_pollfd->fd = s;
+					return E_SUCCESS;
+				}
+
 			SINT32 add(CASocket&s)
 				{
 					m_pollfd->fd=s.getSocket();
