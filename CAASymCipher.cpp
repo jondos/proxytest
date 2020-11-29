@@ -101,14 +101,13 @@ SINT32 CAASymCipher::decrypt(const UINT8 *from, UINT8 *to)
         *@retval E_SUCCESS otherwise
         */
 SINT32 CAASymCipher::decryptOAEP(const UINT8 *from, UINT8 *to, UINT32 *len)
-{
-	SINT32 ret =
-	  RSA_private_decrypt(RSA_SIZE, from, to, m_pRSA, RSA_PKCS1_OAEP_PADDING);
-	if (ret < 0)
-		return E_UNKNOWN;
-	*len = ret;
-	return E_SUCCESS;
-}
+	{
+		SINT32 ret =RSA_private_decrypt(RSA_SIZE, from, to, m_pRSA, RSA_PKCS1_OAEP_PADDING);
+		if (ret < 0)
+			return E_UNKNOWN;
+		*len = ret;
+		return E_SUCCESS;
+	}
 
 /** Encrypts one block of plain text using OAEP padding.
         *@param from pointer to one block of plain text
