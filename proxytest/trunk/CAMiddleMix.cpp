@@ -1171,7 +1171,11 @@ SGX MIX							unlocksem(pMix->upstreamSemPreId, SN_FULL);
 									#ifdef _DEBUG
 										CAMsg::printMsg(LOG_DEBUG,"New Connection from previous Mix!\n");
 									#endif
-									pMix->m_pRSA->decryptOAEP(pMixPacket->data,tmpRSABuff,&rsaOutLen);
+									if (pMix->m_pRSA->decryptOAEP(pMixPacket->data, tmpRSABuff, &rsaOutLen) != E_SUCCESS)
+										{
+											CAMsg::printMsg(LOG_ERR, "Received wrongly decrypted Channel Open Packet!\n");
+											continue;
+										}
 									#ifdef REPLAY_DETECTION
 										// replace time(NULL) with the real timestamp ()
 										// packet-timestamp + m_u64ReferenceTime
