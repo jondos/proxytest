@@ -60,7 +60,7 @@ class CASocketGroup
 				FD_SET(s, &m_fdset);
 #pragma warning(pop)
 #else
-				m_pollfd[s].fd = sock;
+				m_pollfd[s].fd = s;
 				m_pollfd[s].revents = 0;
 				if (m_max < (s + 1))
 					m_max = s + 1;
