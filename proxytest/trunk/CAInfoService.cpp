@@ -153,7 +153,6 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 			currentTime = time(NULL);
 			if (currentTime >= (lastCascadeUpdate + CAInfoService::SEND_CASCADE_INFO_WAIT) || pInfoService->isConfiguring())
 				{
-#ifndef INCLUDE_MIDDLE_MIX
 					if (CALibProxytest::getOptions()->isFirstMix() || (CALibProxytest::getOptions()->isLastMix() && pInfoService->isConfiguring()))
 						{
 							if (pInfoService->m_pMix->isConnected() && pInfoService->m_pMix->getLastConnectionTime() < (currentTime - (SEND_LOOP_SLEEP / 2))
@@ -169,7 +168,6 @@ THREAD_RETURN CAInfoService::InfoLoop(void *p)
 										CAMsg::printMsg(LOG_WARNING, "InfoService: Could not send Cascade information.\n");
 									}
 						}
-#endif
 					currentTime = time(NULL);
 					if ((currentTime >= (lastMixInfoUpdate + CAInfoService::SEND_MIX_INFO_WAIT) &&
 					     pInfoService->m_pMix->getLastConnectionTime() < (currentTime - (SEND_LOOP_SLEEP / 2))) || pInfoService->isConfiguring())
