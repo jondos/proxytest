@@ -6,7 +6,7 @@ After=network-online.target
 [Service]
 EnvironmentFile=/etc/mix/%i.conf
 Type=forking
-ExecStart=/bin/sh -c "${MixExec} -c ${MixConfig}"
+ExecStart=/bin/sh -c "${MixExec} -c ${MixConfig} ${MixArgs}"
 
 [Install]
 WantedBy=multi-user.target
