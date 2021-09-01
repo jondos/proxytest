@@ -1,0 +1,3 @@
+#Put a copy of this file - renamed to a usefull name ending in .conf - into /etc/mix
+MixExec=EDIT: PATH TO MIX EXECUTABLE
+MixConfig=EDIT: PATH TO MIX CONFIG
