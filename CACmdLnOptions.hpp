@@ -831,6 +831,7 @@ class CACmdLnOptions
 		char*		m_strUser;
 		char*		m_strPidFile;
 		SINT32	m_nrOfOpenFiles; //How many open files (sockets) should we use
+		bool		m_bSkipProxyCheck; //Skip the proxy check (e.g. if proxies are intentionally started after last mix)
 
 		//char*		m_strMixXml;
 		char*		m_strMixID;

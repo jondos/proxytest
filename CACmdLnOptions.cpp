@@ -80,6 +80,7 @@ CACmdLnOptions::CACmdLnOptions()
 		m_pCascadeXML=NULL;
 		m_docOpTnCs=NULL; //Operator Terms and Conditions (if any)
 		m_maxNrOfUsers = 0;
+		m_bSkipProxyCheck = false;
 #ifdef PAYMENT		
 		m_PaymentReminderProbability= -1;
 #else
@@ -466,7 +467,8 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 	char* serverPort=NULL;
 	int iVersion=0;
 	int iCryptoBenchmark = 0;
-	char* configfile=NULL;
+	int iSkipProxyCheck = 0;
+	char *configfile = NULL;
 	int iAutoReconnect=0;
 	char* strPidFile=NULL;
 	char* strCreateConf=NULL;
@@ -494,6 +496,7 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 		{"createConf",0,POPT_ARG_STRING,&strCreateConf,0,"creates a generic configuration for MixOnCD","[<file>]"},
 		{"credential",0,POPT_ARG_STRING,&strCredential,0,"credential for connetion to cascade [only for local proxy]","<credential>"},
 		{"cryptobenchmark",0,POPT_ARG_NONE,&iCryptoBenchmark,0,"do a benchamrk of the cryptographic functions",NULL},
+		{ "skip-proxy-check", 0, POPT_ARG_NONE, &iSkipProxyCheck, 0, "skip the proxy check (e.g if the proxies are started intentionally after the last mix)", NULL },
 #ifdef EXPORT_ASYM_PRIVATE_KEY
 		{"exportKey",0,POPT_ARG_STRING,&strExportKey,0,"export private encryption key to file","<file>"},
 		{"importKey",0,POPT_ARG_STRING,&strImportKey,0,"import private encryption key from file","<file>"},
@@ -536,7 +539,8 @@ SINT32 CACmdLnOptions::parse(int argc,const char** argv)
 #endif
 	m_bLocalProxy=(iLocalProxy != 0);
 	m_bCryptoBenchmark = (iCryptoBenchmark != 0);
-	m_bAutoReconnect = (m_bLocalProxy&&iAutoReconnect != 0);
+	m_bSkipProxyCheck = (iSkipProxyCheck != 0);
+	m_bAutoReconnect = (m_bLocalProxy && iAutoReconnect != 0);
 
 		/* LERNGRUPPE: Also try to use default config file for Mix Category 1 */
 	if(configfile == NULL)
@@ -3860,10 +3864,17 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 
 
 				// check connection to proxy
-				tmpSocket = new CASocket();
-				tmpSocket->setRecvBuff(50000);
-				tmpSocket->setSendBuff(5000);
-				ret = tmpSocket->connect(*addr,LAST_MIX_TO_PROXY_CONNECT_TIMEOUT);
+				if (!m_bSkipProxyCheck)
+					{
+						tmpSocket = new CASocket();
+						tmpSocket->setRecvBuff(50000);
+						tmpSocket->setSendBuff(5000);
+						ret = tmpSocket->connect(*addr, LAST_MIX_TO_PROXY_CONNECT_TIMEOUT);
+					}
+				else
+					{//proxy check skipped --> succesful...
+						ret = E_SUCCESS;
+					}
 				if (ret != E_SUCCESS)
 				{
 					if (addr->toString(buff, buffLen) != E_SUCCESS)
@@ -3881,7 +3892,7 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 					}
 				}
 
-				else //if (ret == E_SUCCESS)
+			else //if (ret == E_SUCCESS)
 				{
 					if (proxy_type == TARGET_HTTP_PROXY)
 					{
@@ -3903,8 +3914,12 @@ SINT32 CACmdLnOptions::setTargetInterfaces(DOMElement *elemNetwork)
 						}
 				}
 
-				tmpSocket->close();
-				delete tmpSocket;
+				if (tmpSocket != NULL)
+				{
+					tmpSocket->close();
+					delete tmpSocket;
+					tmpSocket = NULL;
+				}
 
 
 				if (ret == E_SUCCESS)
